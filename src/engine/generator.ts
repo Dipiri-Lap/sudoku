@@ -1,13 +1,14 @@
 import type { Grid } from './validator';
 import { solve, countSolutions } from './solver';
 
-export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert';
+export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master';
 
 export const DifficultyLevels: Record<Difficulty, number> = {
-    Easy: 45,
-    Medium: 35,
-    Hard: 28,
-    Expert: 22,
+    Easy: 50,
+    Medium: 45,
+    Hard: 35,
+    Expert: 28,
+    Master: 22,
 };
 
 export function generatePuzzles(difficulty: Difficulty): { puzzle: Grid; solution: Grid } {

@@ -13,7 +13,7 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <div className="game-card" onClick={() => navigate('/sudoku')}>
+                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => navigate('/sudoku')}>
                     <div className="game-card-icon">
                         <LayoutGrid size={40} />
                     </div>
@@ -28,8 +28,7 @@ const LandingPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Coming Soon Cards */}
-                <div className="game-card coming-soon">
+                <div className="game-card coming-soon animate-fade-in" style={{ '--delay': '0.2s' } as any}>
                     <div className="game-card-icon">
                         <Trophy size={40} />
                     </div>

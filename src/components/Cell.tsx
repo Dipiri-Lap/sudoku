@@ -16,15 +16,30 @@ const Cell: React.FC<CellProps> = ({ row, col }) => {
     const isError = value !== null && !isInitial && !isCorrectSolution;
     const notes = state.notes[row][col];
 
+    const sectorIdx = Math.floor(row / 3) * 3 + Math.floor(col / 3);
+    const isAnimatingRow = state.animatingRows.includes(row);
+    const isAnimatingCol = state.animatingCols.includes(col);
+    const isAnimatingSector = state.animatingSectors.includes(sectorIdx);
+
     const handleClick = () => {
         dispatch({ type: 'SELECT_CELL', row, col });
     };
 
     return (
         <div
-            className={`sudoku-cell ${isInitial ? 'initial' : 'user'} ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlight' : ''
-                } ${isError ? 'error' : ''}`}
+            className={`sudoku-cell ${isInitial ? 'initial' : 'user'} animate-entrance ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlight' : ''
+                } ${isError ? 'error' : ''} ${state.mistakeCell?.row === row && state.mistakeCell?.col === col ? 'animate-mistake' : ''
+                } ${isAnimatingRow ? 'animate-sweep-row' : ''} ${isAnimatingCol ? 'animate-sweep-col' : ''
+                } ${isAnimatingSector ? 'animate-sweep-sector' : ''}`}
             onClick={handleClick}
+            style={{
+                '--row': row,
+                '--col': col,
+                '--row-idx': row,
+                '--col-idx': col,
+                '--inner-row': row % 3,
+                '--inner-col': col % 3,
+            } as React.CSSProperties}
         >
             {value !== null ? (
                 value

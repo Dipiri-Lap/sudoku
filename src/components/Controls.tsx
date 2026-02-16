@@ -28,7 +28,7 @@ const Controls: React.FC = () => {
     return (
         <div className="game-controls">
             {/* Action Icons Bar */}
-            <div className="action-bar">
+            <div className="action-bar animate-fade-in" style={{ '--delay': '0.1s' } as any}>
                 <button className="icon-btn" onClick={handleUndo} disabled={state.history.length === 0}>
                     <Undo2 size={32} strokeWidth={1.5} />
                 </button>
@@ -47,16 +47,26 @@ const Controls: React.FC = () => {
                         </span>
                     </div>
                 </button>
-                <button className="icon-btn" onClick={handleHint} disabled={state.isGameOver || state.isWinner}>
-                    <div style={{ position: 'relative' }}>
-                        <Lightbulb size={32} strokeWidth={1.5} />
-                        <span className="icon-badge">2</span>
-                    </div>
-                </button>
+                {state.gameMode === 'Stage' && (
+                    <button
+                        className="icon-btn"
+                        onClick={handleHint}
+                        disabled={state.isGameOver || state.isWinner || state.hintsRemaining <= 0}
+                    >
+                        <div style={{ position: 'relative' }}>
+                            <Lightbulb
+                                size={32}
+                                strokeWidth={1.5}
+                                color={state.hintsRemaining > 0 ? 'var(--brand-primary)' : '#bdc3c7'}
+                            />
+                            <span className="icon-badge">{state.hintsRemaining}</span>
+                        </div>
+                    </button>
+                )}
             </div>
 
             {/* Number Row */}
-            <div className="number-row">
+            <div className="number-row animate-fade-in" style={{ '--delay': '0.2s' } as any}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                     <button
                         key={num}
