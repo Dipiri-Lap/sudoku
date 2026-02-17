@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trophy, Play } from 'lucide-react';
+import { triggerAdByPopup } from '../utils/adTrigger';
 
 const LandingPage: React.FC = () => {
     return (
@@ -10,7 +11,7 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => window.location.href = '/sudoku'}>
+                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => triggerAdByPopup(() => window.location.href = '/sudoku')}>
                     <div className="game-card-icon">
                         <img src="/logo.png" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>

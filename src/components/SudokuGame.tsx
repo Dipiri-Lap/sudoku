@@ -7,6 +7,7 @@ import type { Difficulty } from '../engine/generator';
 import { Play, Pause, ChevronLeft, ArrowRight, Trophy } from 'lucide-react';
 import { auth } from '../firebase';
 import { getUserProfile, saveRecord, updateNickname } from '../services/rankingService';
+import { triggerAdByPopup } from '../utils/adTrigger';
 
 const SudokuGame: React.FC = () => {
     const { state, dispatch } = useGame();
@@ -254,13 +255,13 @@ const SudokuGame: React.FC = () => {
                                 if (state.currentLevel !== null) {
                                     const nextLevel = state.currentLevel + 1;
                                     localStorage.setItem('sudoku_stage_progress', nextLevel.toString());
-                                    window.location.reload();
+                                    triggerAdByPopup(() => window.location.reload());
                                 }
                             }}>
                                 다음 레벨로 <ArrowRight size={20} />
                             </button>
                         ) : (
-                            <button className="primary-btn" onClick={() => window.location.href = '/sudoku/time-attack'}>
+                            <button className="primary-btn" onClick={() => triggerAdByPopup(() => window.location.href = '/sudoku/time-attack')}>
                                 확인
                             </button>
                         )}
