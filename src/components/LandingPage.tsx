@@ -1,6 +1,5 @@
 import React from 'react';
 import { Trophy, Play } from 'lucide-react';
-import { triggerAdByPopup } from '../utils/adTrigger';
 
 const LandingPage: React.FC = () => {
     return (
@@ -11,7 +10,7 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => triggerAdByPopup(() => window.location.href = '/sudoku')}>
+                <a href="/sudoku" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit' } as any}>
                     <div className="game-card-icon">
                         <img src="/logo.png" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
@@ -24,7 +23,7 @@ const LandingPage: React.FC = () => {
                             </span>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <div className="game-card coming-soon animate-fade-in" style={{ '--delay': '0.2s' } as any}>
                     <div className="game-card-icon">
@@ -40,7 +39,7 @@ const LandingPage: React.FC = () => {
             <footer className="landing-footer">
                 <p>© 2026 퍼즐 가든. 모든 권리 보유.</p>
             </footer>
-        </div>
+        </div >
     );
 };
 

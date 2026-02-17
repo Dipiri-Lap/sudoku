@@ -7,7 +7,6 @@ import type { Difficulty } from '../engine/generator';
 import { Play, Pause, ChevronLeft, ArrowRight, Trophy } from 'lucide-react';
 import { auth } from '../firebase';
 import { getUserProfile, saveRecord, updateNickname } from '../services/rankingService';
-import { triggerAdByPopup } from '../utils/adTrigger';
 
 const SudokuGame: React.FC = () => {
     const { state, dispatch } = useGame();
@@ -94,7 +93,11 @@ const SudokuGame: React.FC = () => {
         navigate(`/sudoku/time-attack/play?difficulty=${newDifficulty}`);
     };
 
-
+    const handleNextLevel = () => {
+        if (state.currentLevel) {
+            navigate(`/sudoku/stage?mode=stage&level=${state.currentLevel + 1}`);
+        }
+    };
 
     const handleBack = () => {
         if (state.gameMode === 'TimeAttack') {
@@ -251,17 +254,11 @@ const SudokuGame: React.FC = () => {
                         )}
 
                         {state.gameMode === 'Stage' ? (
-                            <button className="primary-btn bonus-btn" onClick={() => {
-                                if (state.currentLevel !== null) {
-                                    const nextLevel = state.currentLevel + 1;
-                                    localStorage.setItem('sudoku_stage_progress', nextLevel.toString());
-                                    triggerAdByPopup(() => window.location.reload());
-                                }
-                            }}>
+                            <button className="primary-btn bonus-btn" onClick={handleNextLevel}>
                                 다음 레벨로 <ArrowRight size={20} />
                             </button>
                         ) : (
-                            <button className="primary-btn" onClick={() => triggerAdByPopup(() => window.location.href = '/sudoku/time-attack')}>
+                            <button className="primary-btn" onClick={() => navigate('/sudoku/time-attack')}>
                                 확인
                             </button>
                         )}
