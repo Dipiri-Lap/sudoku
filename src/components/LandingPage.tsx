@@ -1,21 +1,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Trophy, Play } from 'lucide-react';
+import { Trophy, Play } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
     return (
         <div className="landing-page">
             <header className="landing-header">
-                <LayoutGrid size={48} color="var(--brand-primary)" />
-                <h1>퍼즐 가든</h1>
+                <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} />
                 <p>두뇌를 깨우는 즐거운 퍼즐의 세계</p>
             </header>
 
             <div className="game-grid">
                 <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => navigate('/sudoku')}>
                     <div className="game-card-icon">
-                        <LayoutGrid size={40} />
+                        <img src="/logo.png" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <div className="game-card-content">
                         <h3>스도쿠</h3>
