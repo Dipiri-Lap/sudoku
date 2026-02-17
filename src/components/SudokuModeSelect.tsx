@@ -17,20 +17,7 @@ const SudokuModeSelect: React.FC = () => {
             </header>
 
             <div className="mode-grid">
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => navigate('/sudoku/time-attack')}>
-                    <div className="game-card-icon">
-                        <Timer size={40} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>타임어택 모드</h3>
-                        <p>최대한 빨리 퍼즐을 완성하고 다른 플레이어와 기록을 겨루세요.</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">플레이</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.2s' } as any} onClick={() => {
+                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => {
                     const savedLevel = localStorage.getItem('sudoku_stage_progress');
                     const level = savedLevel ? parseInt(savedLevel) : 1;
                     dispatch({ type: 'START_STAGE', level });
@@ -53,6 +40,19 @@ const SudokuModeSelect: React.FC = () => {
                                 </div>
                             );
                         })()}
+                    </div>
+                </div>
+
+                <div className="game-card animate-fade-in" style={{ '--delay': '0.2s' } as any} onClick={() => navigate('/sudoku/time-attack')}>
+                    <div className="game-card-icon">
+                        <Timer size={40} />
+                    </div>
+                    <div className="game-card-content">
+                        <h3>타임어택 모드</h3>
+                        <p>최대한 빨리 퍼즐을 완성하고 다른 플레이어와 기록을 경루세요.</p>
+                        <div className="game-card-footer">
+                            <span className="play-now">플레이</span>
+                        </div>
                     </div>
                 </div>
             </div>

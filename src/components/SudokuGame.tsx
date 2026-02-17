@@ -93,12 +93,6 @@ const SudokuGame: React.FC = () => {
         navigate(`/sudoku/time-attack/play?difficulty=${newDifficulty}`);
     };
 
-    const handleNextLevel = () => {
-        if (state.currentLevel) {
-            navigate(`/sudoku/stage?mode=stage&level=${state.currentLevel + 1}`);
-        }
-    };
-
     const handleBack = () => {
         if (state.gameMode === 'TimeAttack') {
             navigate('/sudoku/time-attack');
@@ -254,13 +248,21 @@ const SudokuGame: React.FC = () => {
                         )}
 
                         {state.gameMode === 'Stage' ? (
-                            <button className="primary-btn bonus-btn" onClick={handleNextLevel}>
+                            <a
+                                href={state.currentLevel ? `/sudoku/stage?mode=stage&level=${state.currentLevel + 1}` : '/sudoku'}
+                                className="primary-btn bonus-btn"
+                                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
                                 다음 레벨로 <ArrowRight size={20} />
-                            </button>
+                            </a>
                         ) : (
-                            <button className="primary-btn" onClick={() => navigate('/sudoku/time-attack')}>
+                            <a
+                                href="/sudoku/time-attack"
+                                className="primary-btn"
+                                style={{ textDecoration: 'none' }}
+                            >
                                 확인
-                            </button>
+                            </a>
                         )}
                     </div>
                 </div>
