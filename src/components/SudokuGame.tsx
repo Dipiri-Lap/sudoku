@@ -107,7 +107,7 @@ const SudokuGame: React.FC = () => {
         }
     };
 
-    const getBestTime = (diff: Difficulty) => {
+    const getBestTime = () => {
         if (bestTime === null) return null;
         return formatTime(bestTime);
     };
@@ -155,7 +155,7 @@ const SudokuGame: React.FC = () => {
                     </div>
                     {state.gameMode === 'TimeAttack' && (
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>
-                            최고: {getBestTime(state.difficulty) || '--:--'}
+                            최고: {getBestTime() || '--:--'}
                         </div>
                     )}
                 </div>
