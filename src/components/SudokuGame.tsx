@@ -93,11 +93,7 @@ const SudokuGame: React.FC = () => {
         navigate(`/sudoku/time-attack/play?difficulty=${newDifficulty}`);
     };
 
-    const handleNextLevel = () => {
-        if (state.currentLevel) {
-            navigate(`/sudoku/stage?mode=stage&level=${state.currentLevel + 1}`);
-        }
-    };
+
 
     const handleBack = () => {
         if (state.gameMode === 'TimeAttack') {
@@ -255,9 +251,11 @@ const SudokuGame: React.FC = () => {
 
                         {state.gameMode === 'Stage' ? (
                             <button className="primary-btn bonus-btn" onClick={() => {
-                                const nextLevel = state.currentLevel + 1;
-                                localStorage.setItem('sudoku_stage_progress', nextLevel.toString());
-                                window.location.reload();
+                                if (state.currentLevel !== null) {
+                                    const nextLevel = state.currentLevel + 1;
+                                    localStorage.setItem('sudoku_stage_progress', nextLevel.toString());
+                                    window.location.reload();
+                                }
                             }}>
                                 다음 레벨로 <ArrowRight size={20} />
                             </button>
