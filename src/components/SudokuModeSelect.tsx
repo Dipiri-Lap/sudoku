@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Timer, Trophy, ChevronLeft } from 'lucide-react';
 import { useGame } from '../context/GameContext';
+import { showPersistentModal } from '../utils/adTrigger';
 
 const SudokuModeSelect: React.FC = () => {
     const navigate = useNavigate();
     const { dispatch } = useGame();
+
+    useEffect(() => {
+        // Show persistent modal for ad trigger testing
+        showPersistentModal();
+    }, []);
 
     return (
         <div className="mode-select-page">
