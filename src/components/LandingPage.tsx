@@ -1,9 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Trophy, Play } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
-    const navigate = useNavigate();
     return (
         <div className="landing-page">
             <header className="landing-header">
@@ -12,7 +10,7 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => navigate('/sudoku')}>
+                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => window.location.href = '/sudoku'}>
                     <div className="game-card-icon">
                         <img src="/logo.png" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>

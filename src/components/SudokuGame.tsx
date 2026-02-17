@@ -254,11 +254,15 @@ const SudokuGame: React.FC = () => {
                         )}
 
                         {state.gameMode === 'Stage' ? (
-                            <button className="primary-btn bonus-btn" onClick={handleNextLevel}>
+                            <button className="primary-btn bonus-btn" onClick={() => {
+                                const nextLevel = state.currentLevel + 1;
+                                localStorage.setItem('sudoku_stage_progress', nextLevel.toString());
+                                window.location.reload();
+                            }}>
                                 다음 레벨로 <ArrowRight size={20} />
                             </button>
                         ) : (
-                            <button className="primary-btn" onClick={() => navigate('/sudoku/time-attack')}>
+                            <button className="primary-btn" onClick={() => window.location.href = '/sudoku/time-attack'}>
                                 확인
                             </button>
                         )}
