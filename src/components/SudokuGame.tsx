@@ -178,15 +178,24 @@ const SudokuGame: React.FC = () => {
                     <div className="modal-content animate-fade-in">
                         <h2 style={{ color: 'var(--error-color)' }}>게임 오버</h2>
                         <p>실수를 3번 하셨습니다.</p>
-                        <button className="primary-btn" onClick={() => {
-                            if (state.gameMode === 'Stage') {
-                                dispatch({ type: 'START_STAGE', level: state.currentLevel! });
-                            } else {
-                                dispatch({ type: 'START_GAME', difficulty: state.difficulty });
-                            }
-                        }}>
-                            다시 시도
-                        </button>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', width: '100%' }}>
+                            <a
+                                href={state.gameMode === 'Stage' ? '/sudoku' : '/sudoku/time-attack'}
+                                className="primary-btn"
+                                style={{ textDecoration: 'none', flex: 1, background: 'var(--bg-secondary)', color: 'var(--text-main)' }}
+                            >
+                                뒤로
+                            </a>
+                            <a
+                                href={state.gameMode === 'Stage'
+                                    ? `/sudoku/stage?mode=stage&level=${state.currentLevel}`
+                                    : `/sudoku/time-attack/play?difficulty=${state.difficulty}`}
+                                className="primary-btn"
+                                style={{ textDecoration: 'none', flex: 1 }}
+                            >
+                                다시 시도
+                            </a>
+                        </div>
                     </div>
                 </div>
             )}
