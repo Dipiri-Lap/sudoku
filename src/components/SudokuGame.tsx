@@ -45,6 +45,70 @@ const SudokuGame: React.FC = () => {
     }, [state.gameMode, state.difficulty]);
 
     useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ignore if active element is an input (like nickname field)
+            if (document.activeElement instanceof HTMLInputElement || 
+                document.activeElement instanceof HTMLTextAreaElement) {
+                return;
+            }
+
+            if (state.isPaused || state.isGameOver || state.isWinner) return;
+
+            const { selectedCell } = state;
+
+            // Number keys (1-9)
+            if (e.key >= '1' && e.key <= '9' && selectedCell) {
+                const num = parseInt(e.key);
+                if (state.isNoteMode) {
+                    dispatch({ type: 'TOGGLE_NOTE', row: selectedCell.row, col: selectedCell.col, value: num });
+                } else {
+                    dispatch({ type: 'SET_CELL', row: selectedCell.row, col: selectedCell.col, value: num });
+                }
+                return;
+            }
+
+            // Erasure (Backspace or Delete)
+            if ((e.key === 'Backspace' || e.key === 'Delete') && selectedCell) {
+                dispatch({ type: 'SET_CELL', row: selectedCell.row, col: selectedCell.col, value: null });
+                return;
+            }
+
+            // Navigation (Arrow Keys)
+            if (e.key.startsWith('Arrow')) {
+                e.preventDefault(); // Prevent scrolling
+                let { row, col } = selectedCell || { row: 0, col: 0 };
+                
+                if (!selectedCell) {
+                    dispatch({ type: 'SELECT_CELL', row: 0, col: 0 });
+                    return;
+                }
+
+                switch (e.key) {
+                    case 'ArrowUp': row = Math.max(0, row - 1); break;
+                    case 'ArrowDown': row = Math.min(8, row + 1); break;
+                    case 'ArrowLeft': col = Math.max(0, col - 1); break;
+                    case 'ArrowRight': col = Math.min(8, col + 1); break;
+                }
+                dispatch({ type: 'SELECT_CELL', row, col });
+                return;
+            }
+
+            // Specialized Shortcuts
+            const key = e.key.toLowerCase();
+            if (key === 'n') {
+                dispatch({ type: 'TOGGLE_NOTE_MODE' });
+            } else if (key === 'u') {
+                dispatch({ type: 'UNDO' });
+            } else if (key === 'h' && state.gameMode === 'Stage') {
+                dispatch({ type: 'HINT' });
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [state.selectedCell, state.isNoteMode, state.isPaused, state.isGameOver, state.isWinner, state.gameMode, dispatch]);
+
+    useEffect(() => {
         const handleWin = async () => {
             if (state.isWinner && state.gameMode === 'TimeAttack' && auth.currentUser && !hasSavedRecord.current) {
                 hasSavedRecord.current = true;
