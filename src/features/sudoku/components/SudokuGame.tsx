@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/SudokuContext';
 import Board from './Board';
 import Controls from './Controls';
-import type { Difficulty } from '../engine/generator';
+import type { Difficulty } from '../../../engine/generator';
 import { Play, Pause, ChevronLeft, ArrowRight, Trophy } from 'lucide-react';
-import { auth } from '../firebase';
-import { getUserProfile, saveRecord, updateNickname } from '../services/rankingService';
+import { auth } from '../../../firebase';
+import { getUserProfile, saveRecord, updateNickname } from '../../../services/rankingService';
 
 const SudokuGame: React.FC = () => {
     const { state, dispatch } = useGame();
@@ -47,7 +47,7 @@ const SudokuGame: React.FC = () => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ignore if active element is an input (like nickname field)
-            if (document.activeElement instanceof HTMLInputElement || 
+            if (document.activeElement instanceof HTMLInputElement ||
                 document.activeElement instanceof HTMLTextAreaElement) {
                 return;
             }
@@ -77,7 +77,7 @@ const SudokuGame: React.FC = () => {
             if (e.key.startsWith('Arrow')) {
                 e.preventDefault(); // Prevent scrolling
                 let { row, col } = selectedCell || { row: 0, col: 0 };
-                
+
                 if (!selectedCell) {
                     dispatch({ type: 'SELECT_CELL', row: 0, col: 0 });
                     return;

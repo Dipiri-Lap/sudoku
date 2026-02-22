@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Timer, Trophy, ChevronLeft } from 'lucide-react';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/SudokuContext';
 
 const SudokuModeSelect: React.FC = () => {
     const navigate = useNavigate();

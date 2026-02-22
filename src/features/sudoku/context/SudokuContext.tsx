@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { Grid } from '../engine/validator';
-import type { Difficulty } from '../engine/generator';
-import { generatePuzzles } from '../engine/generator';
-import stagesData from '../data/stages.json';
+import type { Grid } from '../../../engine/validator';
+import type { Difficulty } from '../../../engine/generator';
+import { generatePuzzles } from '../../../engine/generator';
+import stagesData from '../../../data/stages.json';
 
 interface GameState {
     board: Grid;

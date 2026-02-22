@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
     return (
@@ -25,15 +25,20 @@ const LandingPage: React.FC = () => {
                     </div>
                 </a>
 
-                <div className="game-card coming-soon animate-fade-in" style={{ '--delay': '0.2s' } as any}>
+                <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
                     <div className="game-card-icon">
-                        <Trophy size={40} />
+                        <img src="/logo.png" alt="Word Sort Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'hue-rotate(90deg)' }} />
                     </div>
                     <div className="game-card-content">
-                        <h3>준비 중...</h3>
-                        <p>더 많은 퍼즐이 곧 추가됩니다.</p>
+                        <h3>단어 분류 퍼즐</h3>
+                        <p>단어를 알맞은 카테고리로 정리하는 분류 게임</p>
+                        <div className="game-card-footer">
+                            <span className="play-now">
+                                <Play size={16} fill="currentColor" /> 플레이하기
+                            </span>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <footer className="landing-footer">

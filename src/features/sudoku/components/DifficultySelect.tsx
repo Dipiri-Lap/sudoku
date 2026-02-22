@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { auth } from '../firebase';
-import { getUserProfile, getGlobalBestTime } from '../services/rankingService';
+import { auth } from '../../../firebase';
+import { getUserProfile, getGlobalBestTime } from '../../../services/rankingService';
 import { useNavigate } from 'react-router-dom';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/SudokuContext';
 import { ChevronLeft, Trophy, Zap, Flame, Crown, Smile, Gauge } from 'lucide-react';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Expert', 'Master'] as const;

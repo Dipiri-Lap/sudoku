@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/SudokuContext';
 import { Undo2, Eraser, Pencil, Lightbulb } from 'lucide-react';
 
 const Controls: React.FC = () => {

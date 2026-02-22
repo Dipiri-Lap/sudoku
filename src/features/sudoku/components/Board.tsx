@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Cell from './Cell';
-import { useGame } from '../context/GameContext';
+import { useGame } from '../context/SudokuContext';
 
 const Board: React.FC = () => {
     const { state } = useGame();
