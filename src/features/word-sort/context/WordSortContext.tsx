@@ -6,6 +6,7 @@ export interface Card {
     type: CardType;
     value: string;
     cat: string;
+    isRevealed?: boolean;
 }
 
 export interface ActiveSlot {
@@ -22,6 +23,7 @@ export interface WordSolitaireState {
     deck: Card[];
     revealedDeck: Card[];
     activeSlots: Record<number, ActiveSlot | null>;
+    categories: any[];
     totalCategories: number;
     isGameOver: boolean;
     isWinner: boolean;
@@ -30,7 +32,7 @@ export interface WordSolitaireState {
 export type WordSolitaireAction =
     | { type: 'START_LEVEL'; levelData: any }
     | { type: 'DRAW_DECK' }
-    | { type: 'MOVE_CARD'; from: { type: 'stack' | 'deck'; index: number; cardIndex?: number }; to: { type: 'slot' | 'stack'; index: number } };
+    | { type: 'MOVE_CARD'; from: { type: 'stack' | 'deck'; index: number; cardIndex?: number; count?: number }; to: { type: 'slot' | 'stack'; index: number } };
 
 const initialState: WordSolitaireState = {
     level: 1,
@@ -39,6 +41,7 @@ const initialState: WordSolitaireState = {
     deck: [],
     revealedDeck: [],
     activeSlots: { 0: null, 1: null, 2: null, 3: null, 4: null, 5: null },
+    categories: [],
     totalCategories: 0,
     isGameOver: false,
     isWinner: false,
@@ -50,24 +53,74 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
     switch (action.type) {
         case 'START_LEVEL': {
             const level = action.levelData;
+            const categories = level.categories || [];
+
+            // 1. Generate all cards from category definitions
+            let allCards: Card[] = [];
+            categories.forEach((cat: any) => {
+                // Add the category opener card
+                allCards.push({ type: 'category', value: cat.name, cat: cat.id });
+                // Add the word cards
+                cat.words.forEach((word: string) => {
+                    allCards.push({ type: 'word', value: word, cat: cat.id });
+                });
+            });
+
+            // 2. Shuffle all cards
+            for (let i = allCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allCards[i], allCards[j]] = [allCards[j], allCards[i]];
+            }
+
+            // 3. Distribute to 3 stacks with specific counts (4, 4, 3)
+            const stackCounts = [4, 4, 3];
+            const newStacks: Card[][] = Array.from({ length: stackCounts.length }, () => []);
+
+            stackCounts.forEach((count, sIdx) => {
+                for (let i = 0; i < count; i++) {
+                    if (allCards.length === 0) break;
+                    const card = allCards.pop()!;
+                    newStacks[sIdx].push({
+                        ...card,
+                        isRevealed: i === count - 1 // Reveal only the top card visually (last in array)
+                    });
+                }
+            });
+
+            // 4. Remaining cards go to the deck
+            const newDeck = [...allCards];
+
             return {
                 ...initialState,
                 level: level.id,
                 stepsLeft: level.maxMoves,
-                stacks: level.stacks || [],
-                deck: level.deck || [],
-                totalCategories: level.categories?.length || 0,
-                activeSlots: { 0: null, 1: null, 2: null, 3: null, 4: null, 5: null },
+                stacks: newStacks,
+                deck: newDeck,
+                categories: categories,
+                totalCategories: categories.length,
+                activeSlots: { 0: null, 1: null, 2: null },
             };
         }
 
         case 'DRAW_DECK': {
-            if (state.deck.length === 0 || state.stepsLeft <= 0) return state;
+            if (state.stepsLeft <= 0) return state;
+
+            // Recycling logic: if deck is empty, move revealed cards back to deck
+            if (state.deck.length === 0) {
+                if (state.revealedDeck.length === 0) return state;
+                return {
+                    ...state,
+                    deck: [...state.revealedDeck],
+                    revealedDeck: [],
+                    stepsLeft: state.stepsLeft - 1,
+                };
+            }
+
             const [card, ...remainingDeck] = state.deck;
             return {
                 ...state,
                 deck: remainingDeck,
-                revealedDeck: [...state.revealedDeck, card],
+                revealedDeck: [...state.revealedDeck, { ...card, isRevealed: true }],
                 stepsLeft: state.stepsLeft - 1,
             };
         }
@@ -80,34 +133,58 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                 const stack = state.stacks[from.index];
                 if (!stack) return state;
                 if (from.cardIndex !== undefined) {
-                    movingCards = stack.slice(from.cardIndex);
+                    // count가 지정되지 않으면 기존처럼 끝까지 가져옴
+                    const count = from.count || (stack.length - from.cardIndex);
+                    const cardsToMove = stack.slice(from.cardIndex, from.cardIndex + count);
+                    if (cardsToMove.some(c => !c.isRevealed)) return state;
+                    movingCards = cardsToMove;
                 } else {
-                    movingCards = [stack[stack.length - 1]];
+                    const topCard = stack[stack.length - 1];
+                    if (!topCard.isRevealed) return state;
+                    movingCards = [topCard];
                 }
             } else {
                 if (state.revealedDeck.length === 0) return state;
-                movingCards = [state.revealedDeck[state.revealedDeck.length - 1]];
+                const topCard = state.revealedDeck[state.revealedDeck.length - 1];
+                if (!topCard.isRevealed) return state;
+                movingCards = [topCard];
             }
 
             if (movingCards.length === 0) return state;
 
             // Target is a SLOT
             if (to.type === 'slot') {
-                if (movingCards.length > 1) return state;
-                const card = movingCards[0];
                 const slot = state.activeSlots[to.index];
 
-                if (card.type === 'category') {
+                // Case 1: Category Opener (Base Setup)
+                if (movingCards[0].type === 'category') {
+                    if (movingCards.length > 1) return state;
                     if (slot !== null) return state;
+
+                    const card = movingCards[0];
+                    const catDef = state.categories.find(c => c.id === card.cat);
+                    // The target is words count ONLY (opener is the base, not counted)
+                    const targetCount = catDef ? catDef.words.length : 4;
+
                     const newSlots = { ...state.activeSlots };
-                    newSlots[to.index] = { catId: card.cat, name: card.value, target: 4, collected: [] };
+                    newSlots[to.index] = { catId: card.cat, name: card.value, target: targetCount, collected: [] };
                     return updateStateAfterMove(state, from, { slots: newSlots }, movingCards.length);
                 }
 
-                if (card.type === 'word') {
-                    if (!slot || slot.catId !== card.cat) return state;
+                // Case 2: Word Cards (Filling the Base)
+                if (movingCards[0].type === 'word') {
+                    if (!slot) return state;
+                    if (movingCards.some(c => c.cat !== slot.catId)) return state;
+
                     const newSlots = { ...state.activeSlots };
-                    newSlots[to.index] = { ...slot, collected: [...slot.collected, card.value] };
+                    const nextCollected = [...slot.collected, ...movingCards.map(c => c.value)];
+
+                    // Check if everything is collected (words total)
+                    if (nextCollected.length >= slot.target) {
+                        newSlots[to.index] = null; // Auto-clear
+                    } else {
+                        newSlots[to.index] = { ...slot, collected: nextCollected };
+                    }
                     return updateStateAfterMove(state, from, { slots: newSlots }, movingCards.length);
                 }
             }
@@ -119,7 +196,9 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
 
                 if (targetStack.length > 0) {
                     const topTarget = targetStack[targetStack.length - 1];
-                    if (topTarget.cat !== movingCards[0].cat) return state;
+                    // Standard solitaire rule: must match category
+                    // NEW: Cannot drop anything on top of a base (category) card in stacks
+                    if (topTarget.type === 'category' || topTarget.cat !== movingCards[0].cat) return state;
                 }
 
                 const newStacks = [...state.stacks];
@@ -137,7 +216,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
 
 function updateStateAfterMove(
     state: WordSolitaireState,
-    from: { type: 'stack' | 'deck'; index: number },
+    from: { type: 'stack' | 'deck'; index: number; cardIndex?: number; count?: number },
     changes: { slots?: Record<number, ActiveSlot | null>; stacks?: Card[][] },
     moveCount: number
 ): WordSolitaireState {
@@ -147,7 +226,18 @@ function updateStateAfterMove(
 
     if (from.type === 'stack') {
         const stackIndex = from.index;
-        newStacks[stackIndex] = (newStacks[stackIndex] || []).slice(0, -moveCount);
+        const stack = [...(newStacks[stackIndex] || [])];
+        const startIndex = from.cardIndex ?? (stack.length - moveCount);
+        const count = from.count ?? moveCount;
+
+        // Remove the specific slice from the stack
+        stack.splice(startIndex, count);
+
+        // SOLITAIRE RULE: If the stack top is now hidden, flip it
+        if (stack.length > 0 && !stack[stack.length - 1].isRevealed) {
+            stack[stack.length - 1] = { ...stack[stack.length - 1], isRevealed: true };
+        }
+        newStacks[stackIndex] = stack;
     } else {
         newRevealedDeck = newRevealedDeck.slice(0, -moveCount);
     }
