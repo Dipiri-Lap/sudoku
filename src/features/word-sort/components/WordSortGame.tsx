@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useWordSort, type Card } from '../context/WordSortContext';
 import levels from '../data/levels.json';
-import { useNavigate } from 'react-router-dom';
-import { RotateCcw, Undo2, Ban, Search, Settings, Layers as LayersIcon } from 'lucide-react';
+import { RotateCcw, Undo2, Ban, Search, Settings, Layers as LayersIcon, Crown } from 'lucide-react';
 
 const WordSortGame: React.FC = () => {
     const { state, dispatch } = useWordSort();
-    const navigate = useNavigate();
     const [draggingGroup, setDraggingGroup] = useState<{ type: 'stack' | 'deck'; index: number; cardIndex?: number } | null>(null);
 
     useEffect(() => {
@@ -27,7 +25,7 @@ const WordSortGame: React.FC = () => {
             // Find the bottom-most card that can be part of this group (all cards from it to the end share same cat)
             let movableStartIndex = cardIndex;
             for (let i = cardIndex - 1; i >= 0; i--) {
-                if (stack[i].cat === stack[cardIndex].cat) {
+                if (stack[i].cat === stack[cardIndex].cat && stack[i].isRevealed) {
                     movableStartIndex = i;
                 } else {
                     break;
@@ -49,11 +47,33 @@ const WordSortGame: React.FC = () => {
                 const siblings = Array.from(stackContainer.children);
                 const cardsToClone = siblings.slice(effectiveCardIndex);
 
-                cardsToClone.forEach((node) => {
+                cardsToClone.forEach((node, idx) => {
                     const clone = node.cloneNode(true) as HTMLElement;
                     clone.style.visibility = 'visible';
                     clone.style.opacity = '1';
                     clone.style.transform = 'none';
+
+                    // Add badge to the visually top-most card of the dragging group
+                    if (idx === 0 && cardsToClone.length > 1) {
+                        const badge = document.createElement('div');
+                        badge.innerText = `${cardsToClone.length}`;
+                        badge.style.position = 'absolute';
+                        badge.style.top = '-10px';
+                        badge.style.left = '-10px';
+                        badge.style.background = '#e74c3c';
+                        badge.style.color = 'white';
+                        badge.style.borderRadius = '50%';
+                        badge.style.width = '24px';
+                        badge.style.height = '24px';
+                        badge.style.fontSize = '0.75rem';
+                        badge.style.display = 'flex';
+                        badge.style.alignItems = 'center';
+                        badge.style.justifyContent = 'center';
+                        badge.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+                        badge.style.zIndex = '1000';
+                        badge.style.fontWeight = 'bold';
+                        clone.appendChild(badge);
+                    }
                     ghost.appendChild(clone);
                 });
 
@@ -97,7 +117,7 @@ const WordSortGame: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '0.85rem',
+        fontSize: '0.8rem',
         fontWeight: 'bold',
         textAlign: 'center',
         boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
@@ -109,6 +129,17 @@ const WordSortGame: React.FC = () => {
         color: '#333'
     };
 
+    const slotCardStyle: React.CSSProperties = {
+        ...cardBaseStyle,
+        boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+        fontSize: '0.9rem',
+    };
+
+    const stackCardStyle: React.CSSProperties = {
+        ...cardBaseStyle,
+        fontSize: '0.9rem',
+    };
+
     const faceDownPattern = `repeating-linear-gradient(
         45deg,
         #ff9f43 0px,
@@ -116,6 +147,15 @@ const WordSortGame: React.FC = () => {
         #ee5253 10px,
         #ee5253 20px
     )`;
+
+    // Dynamic card width calculation: starts at 95px for 3 stacks, 
+    // and decreases as stack count increases to maintain layout.
+    const stackCount = state.stacks.length;
+    const containerMaxWidth = 360; // Base container width
+    const gap = 12;
+    const cardWidth = Math.floor((containerMaxWidth - (stackCount - 1) * gap) / stackCount);
+    // Keep a reasonable minimum and maximum
+    const finalCardWidth = Math.max(60, Math.min(95, cardWidth));
 
     return (
         <div className="word-solitaire-game" style={{
@@ -145,48 +185,138 @@ const WordSortGame: React.FC = () => {
                     <Ban size={20} />
                 </div>
                 <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', marginLeft: 'auto' }}>
-                    <div style={{ ...cardBaseStyle, width: '70px' }}>음학</div>
+                    {state.revealedDeck.length > 0 ? (
+                        (() => {
+                            const topCard = state.revealedDeck[state.revealedDeck.length - 1];
+                            const isDragging = draggingGroup?.type === 'deck';
+                            return (
+                                <div
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, 'deck', 0)}
+                                    onDragEnd={() => setDraggingGroup(null)}
+                                    style={{
+                                        ...slotCardStyle,
+                                        width: `${finalCardWidth}px`,
+                                        background: topCard.type === 'category' ? '#fff9f2' : 'white',
+                                        border: topCard.type === 'category' ? '3px solid #ff9f43' : '1px solid #ddd',
+                                        boxShadow: topCard.type === 'category' ? '0 0 15px rgba(255,159,67,0.3)' : 'none',
+                                        visibility: isDragging ? 'hidden' : 'visible',
+                                        cursor: 'grab',
+                                        color: '#333'
+                                    }}
+                                >
+                                    {topCard.type === 'category' && (
+                                        <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43' }}>
+                                            <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                        </div>
+                                    )}
+                                    <span style={{ fontWeight: topCard.type === 'category' ? '900' : 'normal' }}>
+                                        {topCard.value}
+                                    </span>
+                                </div>
+                            );
+                        })()
+                    ) : (
+                        <div style={{ ...slotCardStyle, width: `${finalCardWidth}px`, background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                            <div style={{ opacity: 0.2, fontSize: '0.7rem' }}>카드 없음</div>
+                        </div>
+                    )}
                 </div>
                 <div onClick={drawDeck} style={{ position: 'relative', cursor: 'pointer', display: 'flex', justifyContent: 'flex-end' }}>
-                    <div style={{ ...cardBaseStyle, width: '75px', background: faceDownPattern, border: '2px solid white' }}>
-                        <span style={{ position: 'absolute', bottom: '5px', right: '5px', color: 'white' }}>{state.deck.length}</span>
+                    <div style={{
+                        ...slotCardStyle,
+                        width: `${finalCardWidth}px`,
+                        background: state.deck.length > 0 ? faceDownPattern : 'rgba(255,255,255,0.05)',
+                        border: state.deck.length > 0 ? '2px solid white' : '1px dashed rgba(255,255,255,0.1)'
+                    }}>
+                        {state.deck.length > 0 && <span style={{ position: 'absolute', bottom: '5px', right: '5px', color: 'white' }}>{state.deck.length}</span>}
                     </div>
                 </div>
             </div>
 
             {/* Slots */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '6px', marginBottom: '1.5rem' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(3, ${finalCardWidth}px)`,
+                gap: `${gap}px`,
+                marginBottom: '1.5rem',
+                maxWidth: 'fit-content',
+                marginInline: 'auto'
+            }}>
                 {Object.keys(state.activeSlots).map(key => {
                     const i = parseInt(key);
                     const slot = state.activeSlots[i];
                     return (
-                        <div
-                            key={i}
-                            onDragOver={e => e.preventDefault()}
-                            onDrop={e => handleDrop(e, { type: 'slot', index: i })}
-                            style={{
-                                ...cardBaseStyle,
-                                background: slot ? 'white' : 'rgba(255,255,255,0.05)',
-                                color: '#333',
-                                border: slot ? '2px solid #f39c12' : '1px solid rgba(255,255,255,0.1)',
-                                opacity: slot ? 1 : 0.5
-                            }}
-                        >
-                            {slot ? (
-                                <>
-                                    <div style={{ position: 'absolute', top: '2px', left: '5px', fontSize: '0.6rem', color: '#e67300', fontWeight: 'bold' }}>
-                                        {slot.collected.length}/{slot.target}
-                                    </div>
+                        <div key={i} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                            {/* Integrated Label Header */}
+                            {slot && (
+                                <div style={{
+                                    background: '#ff9f43',
+                                    padding: '2px 8px',
+                                    borderTopLeftRadius: '6px',
+                                    borderTopRightRadius: '6px',
+                                    fontSize: '0.65rem',
+                                    fontWeight: '900',
+                                    color: '#3e2723',
+                                    alignSelf: 'center',
+                                    marginBottom: '-4px',
+                                    zIndex: 1,
+                                    boxShadow: '0 -2px 5px rgba(0,0,0,0.1)',
+                                    minWidth: '55px',
+                                    textAlign: 'center'
+                                }}>
                                     {slot.name}
-                                </>
-                            ) : <Ban size={18} style={{ opacity: 0.1 }} />}
+                                </div>
+                            )}
+                            <div
+                                onDragOver={e => e.preventDefault()}
+                                onDrop={e => handleDrop(e, { type: 'slot', index: i })}
+                                style={{
+                                    ...slotCardStyle,
+                                    background: slot ? 'white' : 'rgba(255,255,255,0.05)',
+                                    color: '#333',
+                                    border: slot ? '3.5px solid #ff9f43' : '1px dashed rgba(255,255,255,0.1)',
+                                    opacity: slot ? 1 : 0.5,
+                                    width: `${finalCardWidth}px`,
+                                    boxShadow: slot ? '0 4px 15px rgba(0,0,0,0.2)' : 'none',
+                                    borderRadius: '12px',
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                {slot ? (
+                                    <>
+                                        <div style={{ position: 'absolute', top: '6px', left: '8px', fontSize: '0.75rem', color: '#a0522d', fontWeight: 'bold' }}>
+                                            {slot.collected.length}/{slot.target}
+                                        </div>
+                                        <div style={{ position: 'absolute', top: '6px', right: '8px', color: '#ff9f43' }}>
+                                            <Crown size={16} fill="#ff9f43" fillOpacity={0.3} strokeWidth={2.5} />
+                                        </div>
+                                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#2c3e50', marginTop: '10px' }}>
+                                            {slot.collected.length > 0 ? slot.collected[slot.collected.length - 1] : slot.name}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <Ban size={20} style={{ opacity: 0.1 }} />
+                                )}
+                            </div>
                         </div>
                     );
                 })}
             </div>
 
             {/* Play Stacks Area */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', flex: 1, alignItems: 'flex-start' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${state.stacks.length}, ${finalCardWidth}px)`,
+                gap: `${gap}px`,
+                flex: 1,
+                alignItems: 'flex-start',
+                maxWidth: 'fit-content',
+                marginInline: 'auto'
+            }}>
                 {state.stacks.map((stack, sIdx) => (
                     <div
                         key={sIdx}
@@ -195,32 +325,20 @@ const WordSortGame: React.FC = () => {
                         style={{ display: 'flex', flexDirection: 'column', position: 'relative', minHeight: '150px' }}
                     >
                         {stack.length === 0 && (
-                            <div style={{ ...cardBaseStyle, background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)' }} />
+                            <div style={{ ...stackCardStyle, background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)' }} />
                         )}
                         {stack.map((card, cIdx) => {
-                            const isRevealed = cIdx === stack.length - 1 || card.type === 'word';
+                            const isRevealed = !!card.isRevealed;
 
                             // Drag evaluation: can drag if all cards ABOVE it match the target category
-                            let canDrag = true;
-                            if (cIdx < stack.length - 1) {
+                            let canDrag = isRevealed;
+                            if (canDrag && cIdx < stack.length - 1) {
                                 for (let k = cIdx; k < stack.length - 1; k++) {
-                                    if (stack[k].cat !== stack[k + 1].cat) {
+                                    if (stack[k].cat !== stack[k + 1].cat || !stack[k + 1].isRevealed) {
                                         canDrag = false;
                                         break;
                                     }
                                 }
-                            }
-
-                            // Visual count if it's a group
-                            let groupDisplayCount = 0;
-                            if (canDrag) {
-                                // Find how many same-category cards are BELOW this one to form the whole unit
-                                let unitStart = cIdx;
-                                for (let i = cIdx - 1; i >= 0; i--) {
-                                    if (stack[i].cat === card.cat) unitStart = i;
-                                    else break;
-                                }
-                                groupDisplayCount = stack.length - unitStart;
                             }
 
                             const isDragging = draggingGroup?.type === 'stack' &&
@@ -235,30 +353,32 @@ const WordSortGame: React.FC = () => {
                                     onDragStart={e => canDrag && handleDragStart(e, 'stack', sIdx, cIdx)}
                                     onDragEnd={() => setDraggingGroup(null)}
                                     style={{
-                                        ...cardBaseStyle,
-                                        background: isRevealed ? 'white' : faceDownPattern,
+                                        ...stackCardStyle,
+                                        background: isRevealed
+                                            ? (card.type === 'category' ? '#fff9f2' : 'white')
+                                            : faceDownPattern,
                                         color: isRevealed ? '#333' : 'transparent',
                                         marginBottom: cIdx === stack.length - 1 ? '0' : '-85%',
                                         zIndex: cIdx,
                                         cursor: canDrag ? 'grab' : 'default',
-                                        border: isRevealed ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.2)',
+                                        border: isRevealed
+                                            ? (card.type === 'category' ? '3px solid #ff9f43' : '1px solid #ddd')
+                                            : '1px solid rgba(0,0,0,0.2)',
+                                        boxShadow: (isRevealed && card.type === 'category') ? '0 0 10px rgba(255,159,67,0.2)' : 'none',
                                         visibility: isDragging ? 'hidden' : 'visible'
                                     }}
                                 >
-                                    {isRevealed && <span>{card.value}</span>}
-
-                                    {/* Show count badge on EVERY card in the group if it's being hovered/grabbed, 
-                                        but for simplicity we just show it if it is a valid unit. */}
-                                    {canDrag && groupDisplayCount > 1 && !isDragging && (
-                                        <div style={{
-                                            position: 'absolute', top: '-10px', left: '-10px',
-                                            background: '#e74c3c', color: 'white', borderRadius: '50%',
-                                            width: '20px', height: '20px', fontSize: '0.7rem',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.3)', zIndex: 100
-                                        }}>
-                                            {groupDisplayCount}
-                                        </div>
+                                    {isRevealed && (
+                                        <>
+                                            {card.type === 'category' && (
+                                                <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43' }}>
+                                                    <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                                </div>
+                                            )}
+                                            <span style={{ fontWeight: card.type === 'category' ? '900' : 'normal' }}>
+                                                {card.value}
+                                            </span>
+                                        </>
                                     )}
                                 </div>
                             );
