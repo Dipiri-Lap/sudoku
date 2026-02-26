@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useWordSort } from '../context/WordSortContext';
 import levels from '../data/levels.json';
-import { RotateCcw, Undo2, Search, Settings, Layers as LayersIcon, Crown, Sparkles } from 'lucide-react';
+import { RotateCcw, Undo2, Search, Layers as LayersIcon, Crown, Sparkles } from 'lucide-react';
 
 // This function is assumed to be moved from WordSortContext.tsx based on the instruction.
 // The instruction mentions "WordSortContext의 updateStateAfterMove 함수 인자 타입을 수정하여 린트 오류를 해결합니다."
@@ -17,7 +17,43 @@ const WordSortGame: React.FC = () => {
 
     const { state, dispatch } = useWordSort();
 
+    // Dynamic card width calculation: starts at 95px for 3 stacks, 
+    // and decreases as stack count increases to maintain layout.
+    const stackCount = state.stacks.length;
+    const containerMaxWidth = 288; // Base container width (Reduced from 360)
+    const gap = 10; // Reduced from 12
+    const cardWidth = Math.floor((containerMaxWidth - (stackCount - 1) * gap) / stackCount);
+    // Keep a reasonable minimum and maximum (Reduced by 20%)
+    const finalCardWidth = Math.max(48, Math.min(76, cardWidth));
+    const cardHeight = finalCardWidth * 1.4;
+    const visibleHeight = 22; // Height of the visible strip for overlapped cards
+    const overlapMargin = -(cardHeight - visibleHeight);
+
     const [draggingGroup, setDraggingGroup] = useState<{ type: 'stack' | 'deck'; index: number; cardIndex?: number; count?: number } | null>(null);
+    const [landingGroup, setLandingGroup] = useState<{ targetIds: string[]; offsetX: number; offsetY: number; animating?: boolean } | null>(null);
+    const [lastDrawnId, setLastDrawnId] = useState<string | null>(null);
+    const [prevRevealedCount, setPrevRevealedCount] = useState(0);
+
+    const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const stackRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+    // Trigger animation shortly after landing state is set
+    useEffect(() => {
+        if (landingGroup && !landingGroup.animating) {
+            const timer = setTimeout(() => {
+                setLandingGroup(prev => prev ? { ...prev, animating: true } : null);
+            }, 20);
+            return () => clearTimeout(timer);
+        }
+    }, [landingGroup?.targetIds, landingGroup?.animating]);
+
+    // Synchronous calibration check to prevent "target location" flash
+    if (state.revealedDeck.length > prevRevealedCount) {
+        setLastDrawnId(state.revealedDeck[state.revealedDeck.length - 1].id);
+        setPrevRevealedCount(state.revealedDeck.length);
+    } else if (state.revealedDeck.length < prevRevealedCount) {
+        setPrevRevealedCount(state.revealedDeck.length);
+    }
 
     useEffect(() => {
         if (levels && levels.length > 0) {
@@ -93,7 +129,7 @@ const WordSortGame: React.FC = () => {
 
                     // 실제 보드와 유사하게 중첩(Overlap) 효과 재현 (스택일 때만)
                     if (type === 'stack') {
-                        clone.style.marginBottom = idx === cardsToClone.length - 1 ? '0' : '-85%';
+                        clone.style.marginBottom = idx === cardsToClone.length - 1 ? '0' : `${overlapMargin}px`;
                     }
                     clone.style.zIndex = `${idx}`;
 
@@ -130,8 +166,7 @@ const WordSortGame: React.FC = () => {
 
                 // 마우스 포인트 위치 계산
                 if (type === 'stack') {
-                    const cardHeight = target.offsetHeight;
-                    const overlapShift = cardHeight * 0.15;
+                    const overlapShift = visibleHeight;
                     const yOffsetInGhost = ((cardIndex || 0) - (effectiveCardIndex || 0)) * overlapShift + e.nativeEvent.offsetY;
                     e.dataTransfer.setDragImage(ghost, target.offsetWidth / 2, yOffsetInGhost);
                 } else {
@@ -152,6 +187,74 @@ const WordSortGame: React.FC = () => {
     const handleDrop = (e: React.DragEvent, target: { type: 'slot' | 'stack'; index: number }) => {
         e.preventDefault();
         if (draggingGroup) {
+            // Get the card(s) being moved for compatibility and position calculation
+            const movingCards = draggingGroup.type === 'deck'
+                ? [state.revealedDeck[state.revealedDeck.length - 1]]
+                : state.stacks[draggingGroup.index].slice(draggingGroup.cardIndex);
+
+            if (!movingCards.length) return;
+            const topMovingCard = movingCards[0];
+
+            // COMPATIBILITY CHECK: Only animate if the move will succeed AND it's a different location
+            const isSameSource = draggingGroup.type === target.type && draggingGroup.index === target.index;
+
+            let isCompatible = false;
+            if (!isSameSource) {
+                if (target.type === 'slot') {
+                    const slot = state.activeSlots[target.index];
+                    if (topMovingCard.type === 'category') {
+                        isCompatible = movingCards.length === 1 && slot === null;
+                    } else if (topMovingCard.type === 'word') {
+                        isCompatible = slot !== null && movingCards.every(c => c.cat === slot.catId);
+                    }
+                } else if (target.type === 'stack') {
+                    const targetStack = state.stacks[target.index];
+                    if (targetStack.length === 0) {
+                        isCompatible = true;
+                    } else {
+                        const topTarget = targetStack[targetStack.length - 1];
+                        isCompatible = topTarget.type !== 'category' && topTarget.cat === topMovingCard.cat;
+                    }
+                }
+            }
+
+            if (isCompatible) {
+                // Calculate PRECISE target container position for relative offset
+                const containerRef = target.type === 'slot' ? slotRefs.current[target.index] : stackRefs.current[target.index];
+                if (containerRef) {
+                    const rect = containerRef.getBoundingClientRect();
+                    let targetCenterX = rect.left + finalCardWidth / 2;
+                    let targetCenterY = 0;
+
+                    if (target.type === 'slot') {
+                        // Slot cards are vertically centered in their 22px tab + card area
+                        // The actual card div is below the 22px tab
+                        targetCenterY = rect.top + 22 + cardHeight / 2;
+                    } else {
+                        // Stack cards are at top: (sum of previous visibleHeights)
+                        const targetStack = state.stacks[target.index];
+                        const nextIndex = targetStack.length;
+                        const numToCompress = Math.max(0, (nextIndex + movingCards.length) - 8);
+
+                        let topOffset = 0;
+                        for (let i = 0; i < nextIndex; i++) {
+                            const isFaceDown = !targetStack[i].isRevealed;
+                            topOffset += (i < numToCompress && isFaceDown) ? 11 : 22;
+                        }
+                        targetCenterY = rect.top + topOffset + cardHeight / 2;
+                    }
+
+                    setLandingGroup({
+                        targetIds: movingCards.map(c => c.id),
+                        offsetX: e.clientX - targetCenterX,
+                        offsetY: e.clientY - targetCenterY
+                    });
+                }
+
+                // Reset landing animation after it finishes
+                setTimeout(() => setLandingGroup(null), 400);
+            }
+
             dispatch({
                 type: 'MOVE_CARD',
                 from: {
@@ -197,7 +300,7 @@ const WordSortGame: React.FC = () => {
 
     const stackCardStyle: React.CSSProperties = {
         ...cardBaseStyle,
-        fontSize: '0.9rem',
+        fontSize: '0.85rem',
     };
 
     const faceDownPattern = `repeating-linear-gradient(
@@ -208,18 +311,10 @@ const WordSortGame: React.FC = () => {
         #ee5253 20px
     )`;
 
-    // Dynamic card width calculation: starts at 95px for 3 stacks, 
-    // and decreases as stack count increases to maintain layout.
-    const stackCount = state.stacks.length;
-    const containerMaxWidth = 360; // Base container width
-    const gap = 12;
-    const cardWidth = Math.floor((containerMaxWidth - (stackCount - 1) * gap) / stackCount);
-    // Keep a reasonable minimum and maximum
-    const finalCardWidth = Math.max(60, Math.min(95, cardWidth));
 
     return (
         <div className="word-solitaire-game" style={{
-            padding: '1rem',
+            padding: '0.5rem 1rem 1rem',
             color: 'white',
             background: '#5c5e7e',
             minHeight: '100vh',
@@ -229,11 +324,6 @@ const WordSortGame: React.FC = () => {
             userSelect: 'none',
             overflow: 'hidden'
         }}>
-            {/* Top Bar */}
-            <header style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', marginBottom: '1.5rem', marginTop: '1rem' }}>
-                <h2 style={{ fontSize: '1.3rem', margin: 0, fontWeight: 'bold' }}>레벨 {state.level}</h2>
-                <Settings size={24} style={{ position: 'absolute', right: 0, opacity: 0.7 }} />
-            </header>
 
             {/* Stats area (Steps & Deck) */}
             <div style={{ display: 'grid', gridTemplateColumns: '85px 1fr auto', gap: '12px', marginBottom: '1.5rem', alignItems: 'center' }}>
@@ -244,7 +334,7 @@ const WordSortGame: React.FC = () => {
                 <div /> {/* Spacer */}
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                     <style>{`
-                    @keyframes flipAndMove {
+                     @keyframes flipAndMove {
                         0% { 
                             transform: translateX(var(--startX, 150px)) rotateY(180deg); 
                             opacity: 1; 
@@ -271,8 +361,8 @@ const WordSortGame: React.FC = () => {
                         gap: '12px',
                         justifyContent: 'flex-end',
                         position: 'relative',
-                        width: `${finalCardWidth + 110}px`,
-                        minHeight: '100px',
+                        width: `${finalCardWidth + 130}px`,
+                        minHeight: '80px',
                         perspective: '1200px',
                         zIndex: 10
                     }}>
@@ -281,7 +371,7 @@ const WordSortGame: React.FC = () => {
                                 const isTop = idx === arr.length - 1;
                                 const isDragging = isTop && draggingGroup?.type === 'deck';
                                 // 우측 기준: 가장 오래된 것(idx=0)이 right: 0, 최신 것(idx=arr.length-1)이 가장 왼쪽
-                                const offsetGap = 20;
+                                const offsetGap = 25;
                                 const offset = idx * offsetGap;
                                 const category = state.categories.find(c => c.id === card.cat);
 
@@ -292,11 +382,11 @@ const WordSortGame: React.FC = () => {
 
                                 return (
                                     <div
-                                        key={`${state.revealedDeck.length}-${idx}`}
+                                        key={card.id}
                                         draggable={isTop}
                                         onDragStart={(e) => isTop && handleDragStart(e, 'deck', 0)}
                                         onDragEnd={() => setDraggingGroup(null)}
-                                        className={isTop ? 'animate-card-draw' : ''}
+                                        className={card.id === lastDrawnId ? 'animate-card-draw' : ''}
                                         style={{
                                             ...slotCardStyle,
                                             position: 'absolute',
@@ -354,7 +444,7 @@ const WordSortGame: React.FC = () => {
                                                 fontWeight: card.type === 'category' ? '900' : 'normal',
                                                 writingMode: isTop ? 'horizontal-tb' : 'vertical-rl',
                                                 textOrientation: 'upright',
-                                                letterSpacing: isTop ? 'normal' : '-3px',
+                                                letterSpacing: isTop ? 'normal' : '2px',
                                                 fontSize: isTop ? '0.9rem' : '0.8rem',
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -378,9 +468,16 @@ const WordSortGame: React.FC = () => {
                             ...slotCardStyle,
                             width: `${finalCardWidth}px`,
                             background: state.deck.length > 0 ? faceDownPattern : 'rgba(255,255,255,0.05)',
-                            border: state.deck.length > 0 ? '2px solid white' : '1px dashed rgba(255,255,255,0.1)'
+                            border: state.deck.length > 0 ? '2px solid white' : '1px dashed rgba(255,255,255,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
                         }}>
-                            {state.deck.length > 0 && <span style={{ position: 'absolute', bottom: '5px', right: '5px', color: 'white' }}>{state.deck.length}</span>}
+                            {state.deck.length > 0 ? (
+                                <span style={{ position: 'absolute', bottom: '5px', right: '5px', color: 'white' }}>{state.deck.length}</span>
+                            ) : state.revealedDeck.length > 0 ? (
+                                <RotateCcw size={20} color="white" style={{ opacity: 0.6 }} />
+                            ) : null}
                         </div>
                     </div>
                 </div>
@@ -397,8 +494,10 @@ const WordSortGame: React.FC = () => {
             }}>
                 {[0, 1, 2].map(i => {
                     const slot = state.activeSlots[i];
+                    const isLanded = landingGroup && slot && landingGroup.targetIds.includes(slot.catId);
+
                     return (
-                        <div key={i} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                        <div key={i} ref={el => { slotRefs.current[i] = el; }} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
                             {/* Tab Area - Only spacer for alignment (No tab as per request) */}
                             <div style={{ height: '22px' }} />
                             <div
@@ -418,7 +517,13 @@ const WordSortGame: React.FC = () => {
                                     position: 'relative',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    transform: (isLanded && landingGroup)
+                                        ? (landingGroup.animating ? 'none' : `translate(${landingGroup.offsetX}px, ${landingGroup.offsetY}px)`)
+                                        : 'none',
+                                    transition: (isLanded && landingGroup && !landingGroup.animating)
+                                        ? 'none'
+                                        : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.4, 1)'
                                 }}
                             >
                                 {slot ? (
@@ -460,15 +565,19 @@ const WordSortGame: React.FC = () => {
                 {state.stacks.map((stack, sIdx) => (
                     <div
                         key={sIdx}
+                        ref={el => { stackRefs.current[sIdx] = el; }}
                         onDragOver={e => e.preventDefault()}
                         onDrop={e => handleDrop(e, { type: 'stack', index: sIdx })}
-                        style={{ display: 'flex', flexDirection: 'column', position: 'relative', minHeight: '150px' }}
+                        style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}
                     >
                         {stack.length === 0 && (
                             <div style={{ ...stackCardStyle, background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)' }} />
                         )}
                         {stack.map((card, cIdx) => {
                             const isRevealed = !!card.isRevealed;
+                            const numToCompress = Math.max(0, stack.length - 8);
+                            const currentVisibleHeight = (cIdx < numToCompress && !isRevealed) ? 11 : visibleHeight;
+                            const currentOverlapMargin = -(cardHeight - currentVisibleHeight);
 
                             // Drag evaluation: can drag if all cards ABOVE it match the target category
                             let canDrag = isRevealed;
@@ -487,6 +596,8 @@ const WordSortGame: React.FC = () => {
                                 cIdx >= draggingGroup.cardIndex &&
                                 cIdx < draggingGroup.cardIndex + (draggingGroup.count || 1);
 
+                            const isLanded = landingGroup?.targetIds.includes(card.id) ?? false;
+
                             return (
                                 <div
                                     key={cIdx}
@@ -499,14 +610,20 @@ const WordSortGame: React.FC = () => {
                                             ? (card.type === 'category' ? '#fff9f2' : 'white')
                                             : faceDownPattern,
                                         color: isRevealed ? '#333' : 'transparent',
-                                        marginBottom: cIdx === stack.length - 1 ? '0' : '-85%',
+                                        marginBottom: cIdx === stack.length - 1 ? '0' : `${currentOverlapMargin}px`,
                                         zIndex: cIdx,
                                         cursor: canDrag ? 'grab' : 'default',
                                         border: isRevealed
                                             ? (card.type === 'category' ? '3px solid #ff9f43' : '1px solid #ddd')
                                             : '1px solid rgba(0,0,0,0.2)',
                                         boxShadow: (isRevealed && card.type === 'category') ? '0 0 10px rgba(255,159,67,0.2)' : 'none',
-                                        visibility: isDragging ? 'hidden' : 'visible'
+                                        visibility: isDragging ? 'hidden' : 'visible',
+                                        transform: (isLanded && landingGroup)
+                                            ? (landingGroup.animating ? 'none' : `translate(${landingGroup.offsetX}px, ${landingGroup.offsetY}px)`)
+                                            : 'none',
+                                        transition: (isLanded && landingGroup && !landingGroup.animating)
+                                            ? 'none'
+                                            : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.4, 1)'
                                     }}
                                 >
                                     {isRevealed && (
@@ -517,7 +634,7 @@ const WordSortGame: React.FC = () => {
                                             flexDirection: 'column',
                                             justifyContent: cIdx === stack.length - 1 ? 'center' : 'flex-start',
                                             alignItems: 'center',
-                                            paddingTop: cIdx === stack.length - 1 ? '0' : '15px'
+                                            paddingTop: cIdx === stack.length - 1 ? '0' : '0px'
                                         }}>
                                             {card.type === 'category' && (
                                                 <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43' }}>

@@ -3,6 +3,7 @@ import React, { createContext, useContext, useReducer, type ReactNode } from 're
 export type CardType = 'word' | 'category';
 
 export interface Card {
+    id: string;
     type: CardType;
     value: string;
     cat: string;
@@ -57,12 +58,13 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
 
             // 1. Generate all cards from category definitions
             let allCards: Card[] = [];
+            let idCounter = 0;
             categories.forEach((cat: any) => {
                 // Add the category opener card
-                allCards.push({ type: 'category', value: cat.name, cat: cat.id });
+                allCards.push({ id: `c-${idCounter++}`, type: 'category', value: cat.name, cat: cat.id });
                 // Add the word cards
                 cat.words.forEach((word: string) => {
-                    allCards.push({ type: 'word', value: word, cat: cat.id });
+                    allCards.push({ id: `w-${idCounter++}`, type: 'word', value: word, cat: cat.id });
                 });
             });
 
@@ -108,9 +110,14 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             // Recycling logic: if deck is empty, move revealed cards back to deck
             if (state.deck.length === 0) {
                 if (state.revealedDeck.length === 0) return state;
+                const recycledDeck = [...state.revealedDeck];
+                for (let i = recycledDeck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [recycledDeck[i], recycledDeck[j]] = [recycledDeck[j], recycledDeck[i]];
+                }
                 return {
                     ...state,
-                    deck: [...state.revealedDeck],
+                    deck: recycledDeck,
                     revealedDeck: [],
                     stepsLeft: state.stepsLeft - 1,
                 };
