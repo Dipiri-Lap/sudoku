@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useWordSort } from '../context/WordSortContext';
 import levels from '../data/levels.json';
 import { RotateCcw, Undo2, Search, Layers as LayersIcon, Crown, Sparkles } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const WordSortGame: React.FC = () => {
 
@@ -45,6 +46,7 @@ const WordSortGame: React.FC = () => {
 
     const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
     const stackRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const [completingSlot, setCompletingSlot] = useState<number | null>(null);
 
     // Trigger animation shortly after landing state is set
     useEffect(() => {
@@ -69,6 +71,54 @@ const WordSortGame: React.FC = () => {
             dispatch({ type: 'START_LEVEL', levelData: levels[0] });
         }
     }, [dispatch]);
+
+    // Fire confetti + glow animation when a slot completes
+    useEffect(() => {
+        if (state.lastCompletedSlot === null) return;
+        const slotIndex = state.lastCompletedSlot;
+        setCompletingSlot(slotIndex);
+
+        const slotEl = slotRefs.current[slotIndex];
+        if (slotEl) {
+            const rect = slotEl.getBoundingClientRect();
+            const x = (rect.left + rect.width / 2) / window.innerWidth;
+            const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+            // Phase 1: Burst at slot center
+            confetti({
+                particleCount: 60,
+                spread: 55,
+                startVelocity: 28,
+                origin: { x, y },
+                colors: ['#FFD700', '#FFA500', '#FF6B6B', '#48DBFB', '#1DD1A1'],
+                scalar: 0.9,
+                gravity: 0.9,
+                ticks: 200,
+            });
+
+            // Phase 2: Small sparkle burst slightly later
+            setTimeout(() => {
+                confetti({
+                    particleCount: 25,
+                    spread: 80,
+                    startVelocity: 12,
+                    origin: { x, y },
+                    colors: ['#FFD700', '#FFFFFF'],
+                    scalar: 0.6,
+                    gravity: 0.5,
+                    ticks: 150,
+                });
+            }, 180);
+        }
+
+        // Clear glow after animation
+        const timer = setTimeout(() => {
+            setCompletingSlot(null);
+            dispatch({ type: 'CLEAR_COMPLETED_SLOT' });
+        }, 900);
+
+        return () => clearTimeout(timer);
+    }, [state.lastCompletedSlot, dispatch]);
 
     const handleDragStart = (e: React.DragEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => {
         const target = e.currentTarget as HTMLElement;
@@ -200,6 +250,16 @@ const WordSortGame: React.FC = () => {
         }, 0);
     };
 
+    // 두 rect의 겹치는 면적 계산
+    const getOverlapArea = (
+        r1: { left: number; top: number; right: number; bottom: number },
+        r2: { left: number; top: number; right: number; bottom: number }
+    ): number => {
+        const overlapX = Math.max(0, Math.min(r1.right, r2.right) - Math.max(r1.left, r2.left));
+        const overlapY = Math.max(0, Math.min(r1.bottom, r2.bottom) - Math.max(r1.top, r2.top));
+        return overlapX * overlapY;
+    };
+
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         if (!draggingGroup) return;
@@ -211,35 +271,74 @@ const WordSortGame: React.FC = () => {
         const dragLeft = x - grabOffsetX;
         const dragTop = y - grabOffsetY;
 
-        let bestTarget: { type: 'slot' | 'stack', index: number } | null = null;
+        // 드래그 카드 그룹의 rect
+        const count = draggingGroup.count || 1;
+        const groupHeight = cardHeight + (count - 1) * visibleHeight;
+        const dragRect = {
+            left: dragLeft,
+            top: dragTop,
+            right: dragLeft + finalCardWidth,
+            bottom: dragTop + groupHeight,
+        };
 
-        // Check Slots
+        let bestTarget: { type: 'slot' | 'stack', index: number } | null = null;
+        let bestOverlap = 0;
+
+        // 슬롯과의 겹침 검사 (22px 탭 spacer 제외, 실제 카드 영역만)
         for (let i = 0; i < slotRefs.current.length; i++) {
             const ref = slotRefs.current[i];
             if (ref) {
-                const rect = ref.getBoundingClientRect();
-                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                const r = ref.getBoundingClientRect();
+                const slotCardRect = { left: r.left, top: r.top + 22, right: r.right, bottom: r.bottom };
+                const overlap = getOverlapArea(dragRect, slotCardRect);
+                if (overlap > bestOverlap) {
+                    bestOverlap = overlap;
                     bestTarget = { type: 'slot', index: i };
-                    break;
                 }
             }
         }
 
-        // Check Stacks (if no slot found)
-        if (!bestTarget) {
-            for (let i = 0; i < stackRefs.current.length; i++) {
-                const ref = stackRefs.current[i];
-                if (ref) {
-                    const rect = ref.getBoundingClientRect();
-                    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        // 스택의 각 개별 카드 rect와 겹침 검사
+        for (let i = 0; i < stackRefs.current.length; i++) {
+            const ref = stackRefs.current[i];
+            if (!ref) continue;
+            const stackRect = ref.getBoundingClientRect();
+            const stack = state.stacks[i];
+
+            if (stack.length === 0) {
+                // 빈 스택: 컨테이너 rect 전체로 검사
+                const overlap = getOverlapArea(dragRect, {
+                    left: stackRect.left, top: stackRect.top,
+                    right: stackRect.right, bottom: stackRect.bottom
+                });
+                if (overlap > bestOverlap) {
+                    bestOverlap = overlap;
+                    bestTarget = { type: 'stack', index: i };
+                }
+            } else {
+                // 각 카드의 rect를 수학적으로 계산
+                const numToCompress = Math.max(0, stack.length - 8);
+                let topOffset = 0;
+                for (let j = 0; j < stack.length; j++) {
+                    const isFaceDown = !stack[j].isRevealed;
+                    const cardRect = {
+                        left: stackRect.left,
+                        top: stackRect.top + topOffset,
+                        right: stackRect.left + finalCardWidth,
+                        bottom: stackRect.top + topOffset + cardHeight,
+                    };
+                    const overlap = getOverlapArea(dragRect, cardRect);
+                    if (overlap > bestOverlap) {
+                        bestOverlap = overlap;
                         bestTarget = { type: 'stack', index: i };
-                        break;
                     }
+                    topOffset += (j < numToCompress && isFaceDown) ? 11 : visibleHeight;
                 }
             }
         }
 
-        if (!bestTarget) {
+        // 겹치는 영역이 전혀 없으면 원위치
+        if (!bestTarget || bestOverlap === 0) {
             setDraggingGroup(null);
             return;
         }
@@ -389,7 +488,11 @@ const WordSortGame: React.FC = () => {
 
 
     return (
-        <div className="word-solitaire-game" style={{
+        <div
+            className="word-solitaire-game"
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => handleDrop(e)}
+            style={{
             padding: '0.5rem 1rem 1rem',
             color: 'white',
             background: '#5c5e7e',
@@ -430,6 +533,17 @@ const WordSortGame: React.FC = () => {
                         animation: flipAndMove 0.6s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
                         transform-style: preserve-3d;
                         backface-visibility: hidden;
+                    }
+                    @keyframes slotComplete {
+                        0%   { transform: scale(1);     box-shadow: 0 0 0px rgba(255,215,0,0); }
+                        20%  { transform: scale(1.12);  box-shadow: 0 0 28px rgba(255,215,0,0.9); }
+                        45%  { transform: scale(0.96);  box-shadow: 0 0 16px rgba(255,215,0,0.6); }
+                        65%  { transform: scale(1.06);  box-shadow: 0 0 22px rgba(255,215,0,0.8); }
+                        80%  { transform: scale(0.99);  box-shadow: 0 0 10px rgba(255,215,0,0.4); }
+                        100% { transform: scale(1);     box-shadow: 0 0 0px rgba(255,215,0,0); }
+                    }
+                    .animate-slot-complete {
+                        animation: slotComplete 0.9s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
                     }
                 `}</style>
                     <div style={{
@@ -562,13 +676,14 @@ const WordSortGame: React.FC = () => {
             {/* Slots */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: `repeat(3, ${finalCardWidth}px)`,
+                gridTemplateColumns: `repeat(${Object.keys(state.activeSlots).length}, ${finalCardWidth}px)`,
                 gap: `${gap}px`,
                 marginBottom: '1.5rem',
                 maxWidth: 'fit-content',
                 marginInline: 'auto'
             }}>
-                {[0, 1, 2].map(i => {
+                {Object.keys(state.activeSlots).map(key => {
+                    const i = Number(key);
                     const slot = state.activeSlots[i];
 
                     return (
@@ -577,7 +692,8 @@ const WordSortGame: React.FC = () => {
                             <div style={{ height: '22px' }} />
                             <div
                                 onDragOver={e => e.preventDefault()}
-                                onDrop={(e) => handleDrop(e)}
+                                onDrop={(e) => { handleDrop(e); e.stopPropagation(); }}
+                                className={completingSlot === i ? 'animate-slot-complete' : ''}
                                 style={{
                                     ...slotCardStyle,
                                     background: slot ? '#fff9f2' : 'rgba(255,255,255,0.03)',
@@ -640,7 +756,7 @@ const WordSortGame: React.FC = () => {
                         key={sIdx}
                         ref={el => { stackRefs.current[sIdx] = el; }}
                         onDragOver={e => e.preventDefault()}
-                        onDrop={(e) => handleDrop(e)}
+                        onDrop={(e) => { handleDrop(e); e.stopPropagation(); }}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -682,6 +798,7 @@ const WordSortGame: React.FC = () => {
                                     draggable={canDrag}
                                     onDragStart={e => canDrag && handleDragStart(e, 'stack', sIdx, cIdx)}
                                     onDragEnd={() => !landingGroup && setDraggingGroup(null)}
+                                    onDragOver={e => e.preventDefault()}
                                     style={{
                                         ...stackCardStyle,
                                         background: isRevealed

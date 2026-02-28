@@ -2,162 +2,105 @@
     {
         "id": 1,
         "maxMoves": 100,
+        "slots": 4,
         "categories": [
             {
-                "id": "music",
-                "name": "음악",
-                "target": 3,
+                "id": "space",
+                "name": "우주",
+                "target": 7,
                 "words": [
-                    "오카리나",
-                    "오르간",
-                    "피아노"
+                    "별",
+                    "행성",
+                    "은하",
+                    "로켓",
+                    "우주인",
+                    "블랙홀",
+                    "궤도"
                 ]
             },
             {
                 "id": "kitchen",
                 "name": "주방",
-                "target": 4,
+                "target": 6,
                 "words": [
+                    "냄비",
+                    "도마",
                     "그릇",
                     "간장",
-                    "냄비",
-                    "도마"
+                    "식탁",
+                    "조미료"
                 ]
             },
             {
-                "id": "accommodation",
-                "name": "숙박",
+                "id": "emotion",
+                "name": "감정",
+                "target": 5,
+                "words": [
+                    "기쁨",
+                    "슬픔",
+                    "분노",
+                    "설렘",
+                    "공포"
+                ]
+            },
+            {
+                "id": "school",
+                "name": "학교",
                 "target": 4,
                 "words": [
-                    "시골민박",
-                    "게스트하우스",
-                    "호텔",
-                    "펜션"
+                    "교실",
+                    "칠판",
+                    "시험",
+                    "교복"
                 ]
             },
             {
-                "id": "appliance",
-                "name": "가전",
+                "id": "sports",
+                "name": "스포츠",
+                "target": 6,
+                "words": [
+                    "축구",
+                    "수영",
+                    "농구",
+                    "경기",
+                    "기록",
+                    "선수"
+                ]
+            },
+            {
+                "id": "travel",
+                "name": "여행",
+                "target": 7,
+                "words": [
+                    "버스",
+                    "기차",
+                    "공항",
+                    "지도",
+                    "여권",
+                    "호텔",
+                    "관광"
+                ]
+            },
+            {
+                "id": "music",
+                "name": "음악",
+                "target": 4,
+                "words": [
+                    "리듬",
+                    "멜로디",
+                    "박자",
+                    "화음"
+                ]
+            },
+            {
+                "id": "nature",
+                "name": "자연",
                 "target": 3,
                 "words": [
-                    "진흙",
-                    "로봇",
-                    "청소기"
+                    "숲",
+                    "바다",
+                    "산"
                 ]
-            }
-        ],
-        "stacks": [
-            [
-                {
-                    "type": "word",
-                    "value": "오카리나",
-                    "cat": "music"
-                },
-                {
-                    "type": "category",
-                    "value": "주방",
-                    "cat": "kitchen"
-                },
-                {
-                    "type": "word",
-                    "value": "시골민박",
-                    "cat": "accommodation"
-                }
-            ],
-            [
-                {
-                    "type": "word",
-                    "value": "간장",
-                    "cat": "kitchen"
-                },
-                {
-                    "type": "category",
-                    "value": "음악",
-                    "cat": "music"
-                },
-                {
-                    "type": "word",
-                    "value": "냄비",
-                    "cat": "kitchen"
-                }
-            ],
-            [
-                {
-                    "type": "word",
-                    "value": "게스트하우스",
-                    "cat": "accommodation"
-                },
-                {
-                    "type": "word",
-                    "value": "도마",
-                    "cat": "kitchen"
-                },
-                {
-                    "type": "category",
-                    "value": "숙박",
-                    "cat": "accommodation"
-                }
-            ],
-            [
-                {
-                    "type": "category",
-                    "value": "가전",
-                    "cat": "appliance"
-                },
-                {
-                    "type": "word",
-                    "value": "진흙",
-                    "cat": "appliance"
-                },
-                {
-                    "type": "word",
-                    "value": "그릇",
-                    "cat": "kitchen"
-                }
-            ],
-            [
-                {
-                    "type": "word",
-                    "value": "호텔",
-                    "cat": "accommodation"
-                },
-                {
-                    "type": "word",
-                    "value": "피아노",
-                    "cat": "music"
-                }
-            ]
-        ],
-        "deck": [
-            {
-                "type": "word",
-                "value": "피아노",
-                "cat": "music"
-            },
-            {
-                "type": "word",
-                "value": "오르간",
-                "cat": "music"
-            },
-            {
-                "type": "word",
-                "value": "로봇",
-                "cat": "appliance"
-            },
-            {
-                "type": "word",
-                "value": "청소기",
-                "cat": "appliance"
-            },
-            {
-                "type": "word",
-                "value": "호텔",
-                "cat": "accommodation"
-            },
-            {
-                "type": "word",
-                "value": "펜션",
-                "cat": "accommodation"
             }
         ]
     }

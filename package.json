@@ -12,6 +12,8 @@
     "generate-stages": "tsx scripts/generate-stages.ts"
   },
   "dependencies": {
+    "@types/canvas-confetti": "^1.9.0",
+    "canvas-confetti": "^1.9.4",
     "firebase": "^12.9.0",
     "lucide-react": "^0.564.0",
     "react": "^19.2.0",

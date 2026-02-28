@@ -28,12 +28,14 @@ export interface WordSolitaireState {
     totalCategories: number;
     isGameOver: boolean;
     isWinner: boolean;
+    lastCompletedSlot: number | null; // slot index that just completed, for animation trigger
 }
 
 export type WordSolitaireAction =
     | { type: 'START_LEVEL'; levelData: any }
     | { type: 'DRAW_DECK' }
-    | { type: 'MOVE_CARD'; from: { type: 'stack' | 'deck'; index: number; cardIndex?: number; count?: number }; to: { type: 'slot' | 'stack'; index: number } };
+    | { type: 'MOVE_CARD'; from: { type: 'stack' | 'deck'; index: number; cardIndex?: number; count?: number }; to: { type: 'slot' | 'stack'; index: number } }
+    | { type: 'CLEAR_COMPLETED_SLOT' };
 
 const initialState: WordSolitaireState = {
     level: 1,
@@ -46,6 +48,7 @@ const initialState: WordSolitaireState = {
     totalCategories: 0,
     isGameOver: false,
     isWinner: false,
+    lastCompletedSlot: null,
 };
 
 function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAction): WordSolitaireState {
@@ -55,52 +58,84 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
         case 'START_LEVEL': {
             const level = action.levelData;
             const categories = level.categories || [];
+            const slotCount = level.slots || 4; // Use level.slots or default 4
 
-            // 1. Generate all cards from category definitions
-            let allCards: Card[] = [];
+            // 1. Generate all cards
+            let categoryCards: Card[] = [];
+            let wordCards: Card[] = [];
             let idCounter = 0;
+
             categories.forEach((cat: any) => {
-                // Add the category opener card
-                allCards.push({ id: `c-${idCounter++}`, type: 'category', value: cat.name, cat: cat.id });
-                // Add the word cards
+                categoryCards.push({ id: `c-${idCounter++}`, type: 'category', value: cat.name, cat: cat.id });
                 cat.words.forEach((word: string) => {
-                    allCards.push({ id: `w-${idCounter++}`, type: 'word', value: word, cat: cat.id });
+                    wordCards.push({ id: `w-${idCounter++}`, type: 'word', value: word, cat: cat.id });
                 });
             });
 
-            // 2. Shuffle all cards
-            for (let i = allCards.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [allCards[i], allCards[j]] = [allCards[j], allCards[i]];
-            }
+            // 2. Shuffle helper
+            const shuffle = (array: any[]) => {
+                let currentIndex = array.length, randomIndex;
+                while (currentIndex > 0) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex--;
+                    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+                }
+                return array;
+            };
 
-            // 3. Distribute to 3 stacks with specific counts (4, 4, 3)
-            const stackCounts = [4, 4, 3];
+            shuffle(categoryCards);
+            shuffle(wordCards);
+
+            // Determine stack counts
+            const stackCounts = slotCount === 3 ? [4, 5, 6] : [4, 5, 6, 7];
+            const totalStackCards = stackCounts.reduce((a, b) => a + b, 0);
+
+            // Constraint: strictly less than half → floor((n-1)/2) gives correct max.
+            // e.g. 8장 → max 3,  9장 → max 4.  Then randomize between 2 and max (inclusive).
+            const totalCatCards = categoryCards.length;
+            const maxCatInStack = Math.floor((totalCatCards - 1) / 2); // strictly < half
+            const minCatInStack = 2;
+            const catInStackCount = minCatInStack + Math.floor(Math.random() * (maxCatInStack - minCatInStack + 1));
+
+            // Pick cards for stacks vs deck
+            const stackCatCards = categoryCards.splice(0, catInStackCount);
+            // We need to fill the rest of the stacks with word cards
+            const neededWordCards = totalStackCards - catInStackCount;
+            const stackWordCards = wordCards.splice(0, neededWordCards);
+
+            let stackCards = [...stackCatCards, ...stackWordCards];
+            shuffle(stackCards);
+
+            // Remaining cards go to deck
+            let newDeck = [...categoryCards, ...wordCards];
+            shuffle(newDeck);
+
+            // 3. Distribute to stacks
             const newStacks: Card[][] = Array.from({ length: stackCounts.length }, () => []);
 
             stackCounts.forEach((count, sIdx) => {
                 for (let i = 0; i < count; i++) {
-                    if (allCards.length === 0) break;
-                    const card = allCards.pop()!;
+                    if (stackCards.length === 0) break;
+                    const card = stackCards.pop()!;
                     newStacks[sIdx].push({
                         ...card,
-                        isRevealed: i === count - 1 // Reveal only the top card visually (last in array)
+                        isRevealed: i === count - 1 // Reveal only the top card visually
                     });
                 }
             });
 
-            // 4. Remaining cards go to the deck
-            const newDeck = [...allCards];
+            const activeSlots: Record<number, ActiveSlot | null> = {};
+            for (let i = 0; i < slotCount; i++) activeSlots[i] = null;
 
             return {
                 ...initialState,
                 level: level.id,
-                stepsLeft: level.maxMoves,
+                stepsLeft: level.maxMoves || 100,
                 stacks: newStacks,
                 deck: newDeck,
                 categories: categories,
                 totalCategories: categories.length,
-                activeSlots: { 0: null, 1: null, 2: null },
+                activeSlots: activeSlots,
             };
         }
 
@@ -187,12 +222,14 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     const nextCollected = [...slot.collected, ...movingCards.map(c => c.value)];
 
                     // Check if everything is collected (words total)
-                    if (nextCollected.length >= slot.target) {
+                    const isComplete = nextCollected.length >= slot.target;
+                    if (isComplete) {
                         newSlots[to.index] = null; // Auto-clear
                     } else {
                         newSlots[to.index] = { ...slot, collected: nextCollected };
                     }
-                    return updateStateAfterMove(state, from, { slots: newSlots }, movingCards.length);
+                    const afterMove = updateStateAfterMove(state, from, { slots: newSlots }, movingCards.length);
+                    return { ...afterMove, lastCompletedSlot: isComplete ? to.index : null };
                 }
             }
 
@@ -215,6 +252,9 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
 
             return state;
         }
+
+        case 'CLEAR_COMPLETED_SLOT':
+            return { ...state, lastCompletedSlot: null };
 
         default:
             return state;
