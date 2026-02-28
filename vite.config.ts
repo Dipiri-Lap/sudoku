@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.png', 'puzzle_garden_logo.png'],
+      includeAssets: ['logo.png', 'puzzle_garden_logo.png', 'app_icon.png'],
       manifest: {
         name: '퍼즐 가든',
         short_name: '퍼즐가든',
@@ -18,13 +18,13 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'logo.png',
+            src: 'app_icon.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: 'logo.png',
+            src: 'app_icon.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
