@@ -25,6 +25,7 @@ const LandingPage: React.FC = () => {
                     </div>
                 </a>
 
+                {/* 워드 소트 임시 숨김 처리
                 <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
                     <div className="game-card-icon">
                         <img src="/logo.png" alt="Word Sort Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'hue-rotate(90deg)' }} />
@@ -39,6 +40,7 @@ const LandingPage: React.FC = () => {
                         </div>
                     </div>
                 </a>
+                */}
             </div>
 
             <footer className="landing-footer">

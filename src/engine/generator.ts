@@ -1,9 +1,10 @@
 import type { Grid } from './validator';
 import { solve, countSolutions } from './solver';
 
-export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master';
+export type Difficulty = 'Very Easy' | 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master';
 
 export const DifficultyLevels: Record<Difficulty, number> = {
+    'Very Easy': 60,
     Easy: 50,
     Medium: 45,
     Hard: 35,
