@@ -1,12 +1,39 @@
 import React from 'react';
-import { Play } from 'lucide-react';
+import { Play, Download } from 'lucide-react';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 const LandingPage: React.FC = () => {
+    const { isInstallable, promptToInstall } = usePWAInstall();
+
     return (
         <div className="landing-page">
             <header className="landing-header">
                 <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} />
                 <p>두뇌를 깨우는 즐거운 퍼즐의 세계</p>
+                {isInstallable && (
+                    <button
+                        onClick={promptToInstall}
+                        className="install-button animate-fade-in"
+                        style={{
+                            marginTop: '1rem',
+                            padding: '0.75rem 1.5rem',
+                            borderRadius: '2rem',
+                            border: 'none',
+                            backgroundColor: '#4a90e2',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            margin: '1rem auto 0 auto',
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }}
+                    >
+                        <Download size={18} />
+                        앱 설치하기
+                    </button>
+                )}
             </header>
 
             <div className="game-grid">
