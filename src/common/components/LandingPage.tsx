@@ -39,7 +39,7 @@ const LandingPage: React.FC = () => {
             <div className="game-grid">
                 <a href="/sudoku" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit' } as any}>
                     <div className="game-card-icon">
-                        <img src="/logo.png" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        <img src="/logo.jpg" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <div className="game-card-content">
                         <h3>스도쿠</h3>
