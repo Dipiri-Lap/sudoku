@@ -115,6 +115,8 @@ body {
   cursor: pointer;
   user-select: none;
   position: relative;
+  width: 100%;
+  aspect-ratio: 1;
 }
 
 .sudoku-cell.highlight {

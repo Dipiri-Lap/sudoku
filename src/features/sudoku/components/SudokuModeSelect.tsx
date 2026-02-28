@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Timer, Trophy, ChevronLeft } from 'lucide-react';
 import { useGame } from '../context/SudokuContext';
@@ -6,6 +6,15 @@ import { useGame } from '../context/SudokuContext';
 const SudokuModeSelect: React.FC = () => {
     const navigate = useNavigate();
     const { dispatch } = useGame();
+    const [testLevel, setTestLevel] = useState<string>('40');
+
+    const handleTestPlay = () => {
+        const level = parseInt(testLevel, 10);
+        if (!isNaN(level) && level > 0) {
+            dispatch({ type: 'START_STAGE', level });
+            navigate(`/sudoku/stage?mode=stage&level=${level}`);
+        }
+    };
 
     return (
         <div className="mode-select-page">
@@ -56,6 +65,27 @@ const SudokuModeSelect: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {window.location.hostname === 'localhost' && (
+                <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '12px' }}>
+                    <h4 style={{ margin: 0 }}>테스트용 레벨 바로가기</h4>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                            type="number"
+                            value={testLevel}
+                            onChange={(e) => setTestLevel(e.target.value)}
+                            style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', width: '80px', textAlign: 'center' }}
+                            placeholder="레벨 번호"
+                        />
+                        <button
+                            onClick={handleTestPlay}
+                            style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: 'var(--primary-color)', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                            플레이
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
