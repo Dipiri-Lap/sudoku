@@ -19,6 +19,7 @@ export interface ActiveSlot {
 
 export interface WordSolitaireState {
     level: number;
+    isTutorial: boolean;
     stepsLeft: number;
     stacks: Card[][];
     deck: Card[];
@@ -39,6 +40,7 @@ export type WordSolitaireAction =
 
 const initialState: WordSolitaireState = {
     level: 1,
+    isTutorial: false,
     stepsLeft: 0,
     stacks: [],
     deck: [],
@@ -52,13 +54,28 @@ const initialState: WordSolitaireState = {
 };
 
 function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAction): WordSolitaireState {
-    if (state.isGameOver || state.isWinner) return state;
-
     switch (action.type) {
         case 'START_LEVEL': {
             const level = action.levelData;
             const categories = level.categories || [];
-            const slotCount = level.slots || 4; // Use level.slots or default 4
+            const slotCount = level.slots || 4;
+
+            // Fixed layout for tutorial
+            if (level.fixedStacks && level.fixedDeck) {
+                const activeSlots: Record<number, ActiveSlot | null> = {};
+                for (let i = 0; i < slotCount; i++) activeSlots[i] = null;
+                return {
+                    ...initialState,
+                    level: level.id,
+                    isTutorial: true,
+                    stepsLeft: level.maxMoves || 30,
+                    stacks: level.fixedStacks as Card[][],
+                    deck: level.fixedDeck as Card[],
+                    categories,
+                    totalCategories: categories.length,
+                    activeSlots,
+                };
+            }
 
             // 1. Generate all cards
             let categoryCards: Card[] = [];
@@ -140,6 +157,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
         }
 
         case 'DRAW_DECK': {
+            if (state.isGameOver || state.isWinner) return state;
             if (state.stepsLeft <= 0) return state;
 
             // Recycling logic: if deck is empty, move revealed cards back to deck
@@ -168,6 +186,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
         }
 
         case 'MOVE_CARD': {
+            if (state.isGameOver || state.isWinner) return state;
             const { from, to } = action;
             let movingCards: Card[] = [];
 

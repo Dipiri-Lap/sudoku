@@ -1,13 +1,123 @@
-import React from 'react';
-import { Play, Download } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Download, LogIn, LogOut, User } from 'lucide-react';
+import { onAuthStateChanged } from 'firebase/auth';
+import type { User as FirebaseUser } from 'firebase/auth';
 import { usePWAInstall } from '../hooks/usePWAInstall';
+import { auth } from '../../firebase';
+import { signOut } from '../../services/authService';
+import LoginModal from './LoginModal';
 
 const LandingPage: React.FC = () => {
     const { isInstallable, promptToInstall } = usePWAInstall();
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+    const [toast, setToast] = useState<string | null>(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setCurrentUser(user);
+        });
+        return unsubscribe;
+    }, []);
+
+    const showToast = (message: string) => {
+        setToast(message);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const handleLoginSuccess = (user: FirebaseUser) => {
+        setShowLoginModal(false);
+        const name = user.displayName?.split(' ')[0] ?? '회원';
+        showToast(`${name}님, 환영합니다!`);
+    };
+
+    const handleSignOut = async () => {
+        await signOut();
+        showToast('로그아웃 되었습니다.');
+    };
+
+    const isLoggedIn = currentUser && !currentUser.isAnonymous;
 
     return (
         <div className="landing-page">
+            {/* Toast */}
+            {toast && (
+                <div style={{
+                    position: 'fixed',
+                    top: '1.25rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: '#222',
+                    color: '#fff',
+                    padding: '0.6rem 1.25rem',
+                    borderRadius: '2rem',
+                    fontSize: '0.9rem',
+                    zIndex: 2000,
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                }}>
+                    {toast}
+                </div>
+            )}
+
             <header className="landing-header">
+                {/* 로그인/로그아웃 영역 */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '0.5rem' }}>
+                    {isLoggedIn ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {currentUser.photoURL && (
+                                <img
+                                    src={currentUser.photoURL}
+                                    alt="프로필"
+                                    style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                                />
+                            )}
+                            {!currentUser.photoURL && <User size={18} color="#555" />}
+                            <span style={{ fontSize: '0.85rem', color: '#555' }}>
+                                {currentUser.displayName?.split(' ')[0] ?? ''}
+                            </span>
+                            <button
+                                onClick={handleSignOut}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.3rem',
+                                    padding: '0.35rem 0.75rem',
+                                    borderRadius: '2rem',
+                                    border: '1px solid #ddd',
+                                    backgroundColor: 'transparent',
+                                    color: '#666',
+                                    fontSize: '0.8rem',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                <LogOut size={14} />
+                                로그아웃
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setShowLoginModal(true)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                padding: '0.4rem 1rem',
+                                borderRadius: '2rem',
+                                border: '1.5px solid #4a90e2',
+                                backgroundColor: 'transparent',
+                                color: '#4a90e2',
+                                fontWeight: 600,
+                                fontSize: '0.85rem',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            <LogIn size={15} />
+                            로그인
+                        </button>
+                    )}
+                </div>
+
                 <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} />
                 <p>두뇌를 깨우는 즐거운 퍼즐의 세계</p>
                 {isInstallable && (
@@ -73,7 +183,14 @@ const LandingPage: React.FC = () => {
             <footer className="landing-footer">
                 <p>© 2026 퍼즐 가든. 모든 권리 보유.</p>
             </footer>
-        </div >
+
+            {showLoginModal && (
+                <LoginModal
+                    onClose={() => setShowLoginModal(false)}
+                    onSuccess={handleLoginSuccess}
+                />
+            )}
+        </div>
     );
 };
 

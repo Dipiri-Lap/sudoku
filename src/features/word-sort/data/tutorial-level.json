@@ -1,0 +1,36 @@
+{
+    "id": 0,
+    "isTutorial": true,
+    "maxMoves": 30,
+    "slots": 2,
+    "categories": [
+        {
+            "id": "fruit",
+            "name": "과일",
+            "words": ["사과", "바나나", "딸기"]
+        },
+        {
+            "id": "animal",
+            "name": "동물",
+            "words": ["고양이", "강아지", "토끼"]
+        }
+    ],
+    "fixedStacks": [
+        [
+            { "id": "t0", "type": "word",     "value": "강아지", "cat": "animal", "isRevealed": false },
+            { "id": "t1", "type": "category", "value": "과일",   "cat": "fruit",  "isRevealed": true  }
+        ],
+        [
+            { "id": "t2", "type": "word", "value": "토끼",   "cat": "animal", "isRevealed": false },
+            { "id": "t3", "type": "word", "value": "딸기",   "cat": "fruit",  "isRevealed": false },
+            { "id": "t4", "type": "word", "value": "바나나", "cat": "fruit",  "isRevealed": true  }
+        ],
+        [
+            { "id": "t5", "type": "word", "value": "고양이", "cat": "animal", "isRevealed": false },
+            { "id": "t6", "type": "word", "value": "사과",   "cat": "fruit",  "isRevealed": true  }
+        ]
+    ],
+    "fixedDeck": [
+        { "id": "t7", "type": "category", "value": "동물", "cat": "animal", "isRevealed": false }
+    ]
+}

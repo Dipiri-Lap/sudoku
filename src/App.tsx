@@ -9,21 +9,20 @@ import WordSortGame from './features/word-sort/components/WordSortGame';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import './index.css';
 
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth, signInAnonymously } from './firebase';
 
 const App: React.FC = () => {
   useEffect(() => {
-    signInAnonymously(auth)
-      .then((userCredential) => {
-        // Signed in..
-        const user = userCredential.user;
-        console.log('Firebase User ID:', user.uid);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error('Firebase Auth Error:', errorCode, errorMessage);
-      });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // 로그인 상태가 없을 때만 익명 로그인
+        signInAnonymously(auth).catch((error) => {
+          console.error('Firebase Auth Error:', error.code, error.message);
+        });
+      }
+    });
+    return unsubscribe;
   }, []);
 
   return (
