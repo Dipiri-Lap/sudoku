@@ -36,7 +36,9 @@ export type WordSolitaireAction =
     | { type: 'START_LEVEL'; levelData: any }
     | { type: 'DRAW_DECK' }
     | { type: 'MOVE_CARD'; from: { type: 'stack' | 'deck'; index: number; cardIndex?: number; count?: number }; to: { type: 'slot' | 'stack'; index: number } }
-    | { type: 'CLEAR_COMPLETED_SLOT' };
+    | { type: 'CLEAR_COMPLETED_SLOT' }
+    | { type: 'UNLOCK_STACK' }
+    | { type: 'UNLOCK_SLOT' };
 
 const initialState: WordSolitaireState = {
     level: 1,
@@ -274,6 +276,15 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
 
         case 'CLEAR_COMPLETED_SLOT':
             return { ...state, lastCompletedSlot: null };
+
+        case 'UNLOCK_STACK':
+            return { ...state, stacks: [...state.stacks, []] };
+
+        case 'UNLOCK_SLOT': {
+            const existingKeys = Object.keys(state.activeSlots).map(Number);
+            const nextIndex = existingKeys.length > 0 ? Math.max(...existingKeys) + 1 : 0;
+            return { ...state, activeSlots: { ...state.activeSlots, [nextIndex]: null } };
+        }
 
         default:
             return state;

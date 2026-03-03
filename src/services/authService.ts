@@ -9,6 +9,7 @@ const MIGRATION_KEYS = [
     'sudoku_best_time_Hard',
     'sudoku_best_time_Expert',
     'wordSort_tutorialDone',
+    'puzzle_coins',
 ] as const;
 
 export function hasGuestData(): boolean {
@@ -18,12 +19,15 @@ export function hasGuestData(): boolean {
 async function migrateLocalStorage(uid: string): Promise<void> {
     const guestProgress: Record<string, string | number | boolean> = {};
     let hasData = false;
+    let localCoins = 0;
 
     for (const key of MIGRATION_KEYS) {
         const value = localStorage.getItem(key);
         if (value !== null) {
             hasData = true;
-            if (key === 'wordSort_tutorialDone') {
+            if (key === 'puzzle_coins') {
+                localCoins = parseInt(value, 10) || 0;
+            } else if (key === 'wordSort_tutorialDone') {
                 guestProgress[key] = value === 'true';
             } else {
                 const num = parseInt(value, 10);
@@ -35,7 +39,13 @@ async function migrateLocalStorage(uid: string): Promise<void> {
     if (!hasData) return;
 
     const userRef = doc(db, 'users', uid);
-    await setDoc(userRef, { guestProgress }, { merge: true });
+    const payload: Record<string, any> = { guestProgress };
+    if (localCoins > 0) {
+        // CoinContext will handle Math.max merge on next auth change;
+        // here we just ensure the field exists with at least the local value.
+        payload.coins = localCoins;
+    }
+    await setDoc(userRef, payload, { merge: true });
 }
 
 export async function signInWithGoogle(): Promise<User> {

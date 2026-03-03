@@ -7,11 +7,15 @@ import type { Difficulty } from '../../../engine/generator';
 import { Play, Pause, ChevronLeft, ArrowRight, Trophy } from 'lucide-react';
 import { auth } from '../../../firebase';
 import { getUserProfile, saveRecord, updateNickname } from '../../../services/rankingService';
+import { useCoins } from '../../../context/CoinContext';
+import CoinDisplay from '../../../common/components/CoinDisplay';
 
 const SudokuGame: React.FC = () => {
     const { state, dispatch } = useGame();
     const navigate = useNavigate();
     const location = useLocation();
+    const { addCoins } = useCoins();
+    const hasAwardedCoins = useRef(false);
 
     // Ranking State
     const [inputNickname, setInputNickname] = useState('');
@@ -23,9 +27,17 @@ const SudokuGame: React.FC = () => {
         // Reset saved record flag when game starts/restarts
         if (!state.isWinner) {
             hasSavedRecord.current = false;
+            hasAwardedCoins.current = false;
             setIsNewRecord(false);
         }
     }, [state.isWinner]);
+
+    useEffect(() => {
+        if (state.isWinner && !hasAwardedCoins.current) {
+            hasAwardedCoins.current = true;
+            addCoins(10);
+        }
+    }, [state.isWinner, addCoins]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -216,6 +228,7 @@ const SudokuGame: React.FC = () => {
                             최고: {getBestTime() || '--:--'}
                         </div>
                     )}
+                    <CoinDisplay style={{ marginTop: '4px' }} />
                 </div>
             </header>
 

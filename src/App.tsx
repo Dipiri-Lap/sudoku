@@ -7,6 +7,7 @@ import DifficultySelect from './features/sudoku/components/DifficultySelect';
 import { GameProvider as SudokuProvider } from './features/sudoku/context/SudokuContext';
 import WordSortGame from './features/word-sort/components/WordSortGame';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
+import { CoinProvider } from './context/CoinContext';
 import './index.css';
 
 import { onAuthStateChanged } from 'firebase/auth';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
+      <CoinProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route
@@ -51,6 +53,7 @@ const App: React.FC = () => {
           }
         />
       </Routes>
+      </CoinProvider>
     </div>
   );
 };

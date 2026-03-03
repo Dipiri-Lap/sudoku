@@ -5,21 +5,47 @@ import tutorialLevel from '../data/tutorial-level.json';
 import TutorialOverlay from './TutorialOverlay';
 import { RotateCcw, Undo2, Search, Layers as LayersIcon, Crown, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useCoins } from '../../../context/CoinContext';
+import CoinDisplay from '../../../common/components/CoinDisplay';
 
 const WordSortGame: React.FC = () => {
 
     const { state, dispatch } = useWordSort();
+    const { addCoins, spendCoins, coins } = useCoins();
+    const hasAwardedCoins = useRef(false);
 
-    // Dynamic card width calculation: starts at 95px for 3 stacks, 
-    // and decreases as stack count increases to maintain layout.
-    const stackCount = state.stacks.length;
-    const containerMaxWidth = 288; // Base container width (Reduced from 360)
-    const gap = 10; // Reduced from 12
-    const cardWidth = Math.floor((containerMaxWidth - (stackCount - 1) * gap) / stackCount);
-    // Keep a reasonable minimum and maximum (Reduced by 20%)
-    const finalCardWidth = Math.max(48, Math.min(76, cardWidth));
+    const [lockedStacks, setLockedStacks] = useState(1);
+    const [lockedSlots, setLockedSlots] = useState(1);
+    const [unlockConfirm, setUnlockConfirm] = useState<'stack' | 'slot' | null>(null);
+
+    // Dynamic card width: measure the actual container width via ref (most reliable)
+    const gameContainerRef = useRef<HTMLDivElement>(null);
+    const [containerMaxWidth, setContainerMaxWidth] = useState(
+        Math.min(500, document.documentElement.clientWidth) - 64
+    );
+    useLayoutEffect(() => {
+        const update = () => {
+            if (gameContainerRef.current) {
+                // clientWidth = element's own width (excluding own padding)
+                // subtract own L+R padding (1rem each = 32px total)
+                setContainerMaxWidth(gameContainerRef.current.clientWidth - 32);
+            }
+        };
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, []);
+    const gap = 12;
+    const activeSlotCount = Object.keys(state.activeSlots).length;
+    const displayColumns = Math.min(7, Math.max(
+        state.stacks.length + lockedStacks,
+        activeSlotCount + lockedSlots
+    ));
+    const cardWidth = Math.floor((containerMaxWidth - (displayColumns - 1) * gap) / displayColumns);
+    // Lower minimum to 36 so 7 columns can fit on small screens
+    const finalCardWidth = Math.min(110, Math.max(36, cardWidth));
     const cardHeight = finalCardWidth * 1.4;
-    const visibleHeight = 22; // Height of the visible strip for overlapped cards
+    const visibleHeight = 25; // Height of the visible strip for overlapped cards
     const overlapMargin = -(cardHeight - visibleHeight);
 
     const [draggingGroup, setDraggingGroup] = useState<{
@@ -67,6 +93,19 @@ const WordSortGame: React.FC = () => {
         return () => { if (dealingTimerRef.current) clearInterval(dealingTimerRef.current); };
     }, []);
 
+    // Reset coin award flag on new game
+    useEffect(() => {
+        if (!state.isWinner) hasAwardedCoins.current = false;
+    }, [state.isWinner]);
+
+    // Award coins on win (not tutorial)
+    useEffect(() => {
+        if (state.isWinner && tutorialStep === null && !hasAwardedCoins.current) {
+            hasAwardedCoins.current = true;
+            addCoins(10);
+        }
+    }, [state.isWinner, tutorialStep, addCoins]);
+
     const triggerDealing = (totalCards: number) => {
         if (dealingTimerRef.current) clearInterval(dealingTimerRef.current);
         setIsDealingAnimation(true);
@@ -106,7 +145,7 @@ const WordSortGame: React.FC = () => {
         const stack = state.stacks[sIdx];
         const numToCompress = Math.max(0, stack.length - 8);
         for (let i = 0; i < cIdx; i++) {
-            topOffset += (i < numToCompress && !stack[i].isRevealed) ? 11 : visibleHeight;
+            topOffset += (i < numToCompress && !stack[i].isRevealed) ? 13 : visibleHeight;
         }
 
         const cardCenterX = stackRect.left + finalCardWidth / 2;
@@ -163,11 +202,31 @@ const WordSortGame: React.FC = () => {
         }
     }, [dispatch]);
 
+    const resetUnlocks = () => {
+        setLockedStacks(1);
+        setLockedSlots(1);
+    };
+
     const completeTutorial = () => {
         localStorage.setItem('wordSort_tutorialDone', 'true');
         setTutorialStep(null);
+        resetUnlocks();
         dispatch({ type: 'START_LEVEL', levelData: levels[0] });
         triggerDealing(levelStackTotal(levels[0]));
+    };
+
+    const handleUnlockConfirm = async () => {
+        if (!unlockConfirm) return;
+        const success = await spendCoins(20);
+        if (!success) { setUnlockConfirm(null); return; }
+        if (unlockConfirm === 'stack') {
+            dispatch({ type: 'UNLOCK_STACK' });
+            setLockedStacks(prev => prev - 1);
+        } else {
+            dispatch({ type: 'UNLOCK_SLOT' });
+            setLockedSlots(prev => prev - 1);
+        }
+        setUnlockConfirm(null);
     };
 
     // Advance tutorial based on game state changes
@@ -191,8 +250,8 @@ const WordSortGame: React.FC = () => {
                 const top = stack[stack.length - 1];
                 const below = stack[stack.length - 2];
                 return top?.isRevealed && below?.isRevealed &&
-                       top.type === 'word' && below.type === 'word' &&
-                       top.cat === below.cat;
+                    top.type === 'word' && below.type === 'word' &&
+                    top.cat === below.cat;
             });
             if (hasSameCatPair) setTutorialStep(6);
         } else if (tutorialStep === 6 && state.lastCompletedSlot !== null) {
@@ -291,7 +350,7 @@ const WordSortGame: React.FC = () => {
                 const card = stack[cardIndex];
                 const below = cardIndex >= 1 ? stack[cardIndex - 1] : null;
                 if (!(card.isRevealed && card.type === 'word' && cardIndex === stack.length - 1 &&
-                      below?.isRevealed && below.cat === card.cat)) return;
+                    below?.isRevealed && below.cat === card.cat)) return;
             }
         }
 
@@ -463,7 +522,7 @@ const WordSortGame: React.FC = () => {
             const ref = slotRefs.current[i];
             if (ref) {
                 const r = ref.getBoundingClientRect();
-                const slotCardRect = { left: r.left, top: r.top + 22, right: r.right, bottom: r.bottom };
+                const slotCardRect = { left: r.left, top: r.top + 25, right: r.right, bottom: r.bottom };
                 const overlap = getOverlapArea(dragRect, slotCardRect);
                 if (overlap > bestOverlap) {
                     bestOverlap = overlap;
@@ -506,7 +565,7 @@ const WordSortGame: React.FC = () => {
                         bestOverlap = overlap;
                         bestTarget = { type: 'stack', index: i };
                     }
-                    topOffset += (j < numToCompress && isFaceDown) ? 11 : visibleHeight;
+                    topOffset += (j < numToCompress && isFaceDown) ? 13 : visibleHeight;
                 }
             }
         }
@@ -572,7 +631,7 @@ const WordSortGame: React.FC = () => {
                 let targetCenterY = 0;
 
                 if (dropTarget.type === 'slot') {
-                    targetCenterY = rect.top + 22 + cardHeight / 2;
+                    targetCenterY = rect.top + 25 + cardHeight / 2;
                 } else {
                     const targetStack = state.stacks[dropTarget.index];
                     const nextIndex = targetStack.length;
@@ -580,7 +639,7 @@ const WordSortGame: React.FC = () => {
                     let topOffset = 0;
                     for (let i = 0; i < nextIndex; i++) {
                         const isFaceDown = !targetStack[i].isRevealed;
-                        topOffset += (i < numToCompress && isFaceDown) ? 11 : 22;
+                        topOffset += (i < numToCompress && isFaceDown) ? 13 : 25;
                     }
                     targetCenterY = rect.top + topOffset + cardHeight / 2;
                 }
@@ -732,30 +791,40 @@ const WordSortGame: React.FC = () => {
 
     return (
         <div
+            ref={gameContainerRef}
             className="word-solitaire-game"
             onDragOver={e => e.preventDefault()}
             onDrop={e => handleDrop(e)}
             style={{
-            padding: '0.5rem 1rem 1rem',
-            color: 'white',
-            background: '#5c5e7e',
-            minHeight: '100vh',
-            fontFamily: "'Inter', sans-serif",
-            display: 'flex',
-            flexDirection: 'column',
-            userSelect: 'none',
-            overflow: 'hidden',
-            paddingBottom: tutorialStep !== null ? '200px' : undefined,
-        }}>
+                padding: '0.5rem 1rem 1rem',
+                color: 'white',
+                background: '#5c5e7e',
+                minHeight: '100vh',
+                fontFamily: "'Inter', sans-serif",
+                display: 'flex',
+                flexDirection: 'column',
+                userSelect: 'none',
+                overflow: 'hidden',
+                paddingBottom: tutorialStep !== null ? '200px' : undefined,
+            }}>
+
+            {/* Level label + Coin display */}
+            {tutorialStep === null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '0.7rem', opacity: 0.55, fontWeight: '700', letterSpacing: '0.08em' }}>
+                        LEVEL {state.level}
+                    </div>
+                    <CoinDisplay />
+                </div>
+            )}
 
             {/* Stats area (Steps & Deck) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '85px 1fr auto', gap: '12px', marginBottom: '1.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `${Math.max(95, finalCardWidth)}px auto`, gap: '12px', marginBottom: '1.5rem', alignItems: 'center' }}>
                 <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', padding: '10px 5px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>걸음 수</div>
+                    <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>남은 횟수</div>
                     <div style={{ fontSize: '1.4rem', fontWeight: '900' }}>{state.stepsLeft}</div>
                 </div>
-                <div /> {/* Spacer */}
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', position: 'relative' }}>
                     <style>{`
                      @keyframes flipAndMove {
                         0% { 
@@ -824,8 +893,10 @@ const WordSortGame: React.FC = () => {
                         display: 'flex',
                         gap: '12px',
                         justifyContent: 'flex-end',
-                        position: 'relative',
-                        width: `${finalCardWidth + 130}px`,
+                        position: 'absolute',
+                        right: `${finalCardWidth + 12}px`,
+                        top: 0,
+                        width: `${finalCardWidth + 84}px`,
                         minHeight: '80px',
                         perspective: '1200px',
                         zIndex: 10
@@ -835,113 +906,113 @@ const WordSortGame: React.FC = () => {
                                 <div style={{ opacity: 0.2, fontSize: '0.7rem' }}>카드 없음</div>
                             </div>
                         )}
-                        {state.revealedDeck.length > 0 && state.revealedDeck.slice(-6).map((card, idx, arr) => {
-                                const isTop = idx === arr.length - 1;
-                                const isDragging = isTop && draggingGroup?.type === 'deck';
-                                // 우측 기준: 가장 오래된 것(idx=0)이 right: 0, 최신 것(idx=arr.length-1)이 가장 왼쪽
-                                const offsetGap = 25;
-                                const offset = idx * offsetGap;
-                                const category = state.categories.find(c => c.id === card.cat);
+                        {state.revealedDeck.length > 0 && state.revealedDeck.slice(-4).map((card, idx, arr) => {
+                            const isTop = idx === arr.length - 1;
+                            const isDragging = isTop && draggingGroup?.type === 'deck';
+                            // 우측 기준: 가장 오래된 것(idx=0)이 right: 0, 최신 것(idx=arr.length-1)이 가장 왼쪽
+                            const offsetGap = 28;
+                            const offset = idx * offsetGap;
+                            const category = state.categories.find(c => c.id === card.cat);
 
-                                // 덱 위치 (슬롯 영역 우측 밖)까지의 거리 계산
-                                // 슬롯 위치(offset) + 슬롯 컨테이너 여백(12px) + 덱 카드 폭(finalCardWidth)
-                                // 덱 더미의 오른쪽 끝 지점으로 출발점을 잡아야 자연스러움
-                                const startX = offset + finalCardWidth + 12;
+                            // 덱 위치 (슬롯 영역 우측 밖)까지의 거리 계산
+                            // 슬롯 위치(offset) + 슬롯 컨테이너 여백(12px) + 덱 카드 폭(finalCardWidth)
+                            // 덱 더미의 오른쪽 끝 지점으로 출발점을 잡아야 자연스러움
+                            const startX = offset + finalCardWidth + 12;
 
-                                return (
+                            return (
+                                <div
+                                    key={card.id}
+                                    draggable={isTop && tutorialStep !== 2 && tutorialStep !== 4 && tutorialStep !== 5 && tutorialStep !== 6}
+                                    onDragStart={(e) => isTop && handleDragStart(e, 'deck', 0)}
+                                    onDragEnd={() => !landingGroup && setDraggingGroup(null)}
+                                    className={[
+                                        card.id === lastDrawnId ? 'animate-card-draw' : '',
+                                        isTop && tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : ''
+                                    ].filter(Boolean).join(' ')}
+                                    style={{
+                                        ...slotCardStyle,
+                                        position: 'absolute',
+                                        right: `${offset}px`,
+                                        zIndex: isTop ? 50 : idx,
+                                        width: `${finalCardWidth}px`,
+                                        background: card.type === 'category' ? '#fff9f2' : 'white',
+                                        border: card.type === 'category' ? '3px solid #ff9f43' : '1px solid #ddd',
+                                        boxShadow: card.type === 'category' ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
+                                        visibility: (isDragging || (landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id))) ? 'hidden' : 'visible',
+                                        cursor: isTop ? 'grab' : 'default',
+                                        color: '#333',
+                                        padding: isTop ? '5px' : '0',
+                                        transformOrigin: 'center',
+                                        /* @ts-ignore - CSS custom property */
+                                        '--startX': `${startX}px`
+                                    } as React.CSSProperties}
+                                >
+                                    {/* 뒷면 효과 (포물선 이동 중 뒷면이 보이도록) */}
                                     <div
-                                        key={card.id}
-                                        draggable={isTop && tutorialStep !== 2 && tutorialStep !== 4 && tutorialStep !== 5 && tutorialStep !== 6}
-                                        onDragStart={(e) => isTop && handleDragStart(e, 'deck', 0)}
-                                        onDragEnd={() => !landingGroup && setDraggingGroup(null)}
-                                        className={[
-                                            card.id === lastDrawnId ? 'animate-card-draw' : '',
-                                            isTop && tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : ''
-                                        ].filter(Boolean).join(' ')}
+                                        className="drag-back-layer"
                                         style={{
-                                            ...slotCardStyle,
                                             position: 'absolute',
-                                            right: `${offset}px`,
-                                            zIndex: isTop ? 50 : idx,
-                                            width: `${finalCardWidth}px`,
-                                            background: card.type === 'category' ? '#fff9f2' : 'white',
-                                            border: card.type === 'category' ? '3px solid #ff9f43' : '1px solid #ddd',
-                                            boxShadow: card.type === 'category' ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
-                                            visibility: (isDragging || (landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id))) ? 'hidden' : 'visible',
-                                            cursor: isTop ? 'grab' : 'default',
-                                            color: '#333',
-                                            padding: isTop ? '5px' : '0',
-                                            transformOrigin: 'center',
-                                            /* @ts-ignore - CSS custom property */
-                                            '--startX': `${startX}px`
-                                        } as React.CSSProperties}
-                                    >
-                                        {/* 뒷면 효과 (포물선 이동 중 뒷면이 보이도록) */}
-                                        <div
-                                            className="drag-back-layer"
-                                            style={{
-                                                position: 'absolute',
-                                                inset: 0,
-                                                background: faceDownPattern,
-                                                transform: 'rotateY(180deg)',
-                                                backfaceVisibility: 'hidden',
-                                                borderRadius: '11px',
-                                                zIndex: -1
-                                            }}
-                                        />
+                                            inset: 0,
+                                            background: faceDownPattern,
+                                            transform: 'rotateY(180deg)',
+                                            backfaceVisibility: 'hidden',
+                                            borderRadius: '11px',
+                                            zIndex: -1
+                                        }}
+                                    />
 
-                                        {isTop && card.type === 'category' && (
-                                            <>
-                                                <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900' }}>
-                                                    0/{category?.words?.length ?? 5}
-                                                </div>
-                                                <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43' }}>
-                                                    <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
-                                                </div>
-                                            </>
-                                        )}
-                                        <div style={{
-                                            height: '100%',
-                                            width: '100%',
+                                    {isTop && card.type === 'category' && (
+                                        <>
+                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900' }}>
+                                                0/{category?.words?.length ?? 5}
+                                            </div>
+                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43' }}>
+                                                <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                            </div>
+                                        </>
+                                    )}
+                                    <div style={{
+                                        height: '100%',
+                                        width: '100%',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        position: 'relative'
+                                    }}>
+                                        <span style={{
+                                            position: isTop ? 'static' : 'absolute',
+                                            right: isTop ? 'auto' : '2px', // Stay in visible stripe
+                                            width: isTop ? 'auto' : `${offsetGap}px`,
+                                            fontWeight: card.type === 'category' ? '900' : 'normal',
+                                            writingMode: isTop ? 'horizontal-tb' : 'vertical-rl',
+                                            textOrientation: 'upright',
+                                            letterSpacing: isTop ? 'normal' : '2px',
+                                            fontSize: isTop ? '0.9rem' : '0.8rem',
                                             display: 'flex',
-                                            justifyContent: 'center',
                                             alignItems: 'center',
-                                            position: 'relative'
+                                            justifyContent: 'center',
+                                            whiteSpace: 'nowrap'
                                         }}>
-                                            <span style={{
-                                                position: isTop ? 'static' : 'absolute',
-                                                right: isTop ? 'auto' : '2px', // Stay in visible stripe
-                                                width: isTop ? 'auto' : `${offsetGap}px`,
-                                                fontWeight: card.type === 'category' ? '900' : 'normal',
-                                                writingMode: isTop ? 'horizontal-tb' : 'vertical-rl',
-                                                textOrientation: 'upright',
-                                                letterSpacing: isTop ? 'normal' : '2px',
-                                                fontSize: isTop ? '0.9rem' : '0.8rem',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                whiteSpace: 'nowrap'
-                                            }}>
-                                                {card.value}
-                                            </span>
-                                        </div>
+                                            {card.value}
+                                        </span>
                                     </div>
-                                );
-                            })}
+                                </div>
+                            );
+                        })}
                     </div>
                     <div onClick={drawDeck} style={{ position: 'relative', cursor: 'pointer' }}>
                         <div
                             ref={deckCardRef}
                             className={tutorialHighlightDeck ? 'tutorial-highlight' : ''}
                             style={{
-                            ...slotCardStyle,
-                            width: `${finalCardWidth}px`,
-                            background: state.deck.length > 0 ? faceDownPattern : 'rgba(255,255,255,0.05)',
-                            border: state.deck.length > 0 ? '1px solid #ddd' : '1px dashed rgba(255,255,255,0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
+                                ...slotCardStyle,
+                                width: `${finalCardWidth}px`,
+                                background: state.deck.length > 0 ? faceDownPattern : 'rgba(255,255,255,0.05)',
+                                border: state.deck.length > 0 ? '1px solid #ddd' : '1px dashed rgba(255,255,255,0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
                             {state.deck.length > 0 ? (
                                 <span style={{ position: 'absolute', bottom: '5px', right: '5px', color: 'white' }}>{state.deck.length}</span>
                             ) : state.revealedDeck.length > 0 ? (
@@ -955,12 +1026,37 @@ const WordSortGame: React.FC = () => {
             {/* Slots */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: `repeat(${Object.keys(state.activeSlots).length}, ${finalCardWidth}px)`,
+                gridTemplateColumns: `repeat(${Object.keys(state.activeSlots).length + (tutorialStep === null ? lockedSlots : 0)}, ${finalCardWidth}px)`,
                 gap: `${gap}px`,
                 marginBottom: '1.5rem',
                 maxWidth: 'fit-content',
                 marginInline: 'auto'
             }}>
+                {tutorialStep === null && Array.from({ length: lockedSlots }).map((_, i) => (
+                    <div key={`locked-slot-${i}`} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                        <div style={{ height: '25px' }} />
+                        <div
+                            onClick={() => setUnlockConfirm('slot')}
+                            style={{
+                                ...slotCardStyle,
+                                width: `${finalCardWidth}px`,
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1.5px dashed rgba(255,255,255,0.25)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '3px',
+                                color: 'rgba(255,255,255,0.5)',
+                            }}
+                        >
+                            <span style={{ fontSize: '1.1rem' }}>🔒</span>
+                            <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
+                            <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 20</span>
+                        </div>
+                    </div>
+                ))}
                 {Object.keys(state.activeSlots).map(key => {
                     const i = Number(key);
                     const slot = state.activeSlots[i];
@@ -968,7 +1064,7 @@ const WordSortGame: React.FC = () => {
                     return (
                         <div key={i} ref={el => { slotRefs.current[i] = el; }} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
                             {/* Tab Area - Only spacer for alignment (No tab as per request) */}
-                            <div style={{ height: '22px' }} />
+                            <div style={{ height: '25px' }} />
                             <div
                                 onDragOver={e => e.preventDefault()}
                                 onDrop={(e) => { handleDrop(e); e.stopPropagation(); }}
@@ -1026,13 +1122,46 @@ const WordSortGame: React.FC = () => {
             {/* Play Stacks Area */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: `repeat(${state.stacks.length}, ${finalCardWidth}px)`,
+                gridTemplateColumns: `repeat(${state.stacks.length + (tutorialStep === null ? lockedStacks : 0)}, ${finalCardWidth}px)`,
                 gap: `${gap}px`,
                 flex: 1,
                 alignItems: 'flex-start',
                 maxWidth: 'fit-content',
                 marginInline: 'auto'
             }}>
+                {tutorialStep === null && Array.from({ length: lockedStacks }).map((_, i) => (
+                    <div
+                        key={`locked-stack-${i}`}
+                        onClick={() => setUnlockConfirm('stack')}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            minHeight: `${cardHeight}px`,
+                            cursor: 'pointer',
+                        }}
+                    >
+                        <div style={{
+                            ...stackCardStyle,
+                            width: `${finalCardWidth}px`,
+                            height: `${cardHeight}px`,
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1.5px dashed rgba(255,255,255,0.25)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '3px',
+                            color: 'rgba(255,255,255,0.5)',
+                            cursor: 'pointer',
+                        }}>
+                            <span style={{ fontSize: '1.1rem' }}>🔒</span>
+                            <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
+                            <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 20</span>
+                        </div>
+                    </div>
+                ))}
                 {state.stacks.map((stack, sIdx) => (
                     <div
                         key={sIdx}
@@ -1050,12 +1179,12 @@ const WordSortGame: React.FC = () => {
                             draggingGroup?.type === 'stack' && draggingGroup.index === sIdx &&
                             (draggingGroup.cardIndex ?? 0) === 0 && (draggingGroup.count ?? 1) >= stack.length
                         )) && (
-                            <div style={{ ...stackCardStyle, borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.2)' }} />
-                        )}
+                                <div style={{ ...stackCardStyle, borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.2)' }} />
+                            )}
                         {stack.map((card, cIdx) => {
                             const isRevealed = !!card.isRevealed;
                             const numToCompress = Math.max(0, stack.length - 8);
-                            const currentVisibleHeight = (cIdx < numToCompress && !isRevealed) ? 11 : visibleHeight;
+                            const currentVisibleHeight = (cIdx < numToCompress && !isRevealed) ? 13 : visibleHeight;
                             const currentOverlapMargin = -(cardHeight - currentVisibleHeight);
 
                             // Drag evaluation: can drag if all cards ABOVE it match the target category
@@ -1167,6 +1296,7 @@ const WordSortGame: React.FC = () => {
                 <div style={{ textAlign: 'center' }}><Search size={24} /><div style={{ fontSize: '0.7rem' }}>힌트</div></div>
                 <div style={{ textAlign: 'center' }}><Undo2 size={24} /><div style={{ fontSize: '0.7rem' }}>철회</div></div>
                 <div style={{ textAlign: 'center' }}><RotateCcw size={24} onClick={() => {
+                    resetUnlocks();
                     if (tutorialStep !== null) {
                         dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
                         setTutorialStep(1);
@@ -1179,6 +1309,42 @@ const WordSortGame: React.FC = () => {
                 <div style={{ textAlign: 'center' }}><LayersIcon size={24} /><div style={{ fontSize: '0.7rem' }}>제거</div></div>
             </div>
 
+            {/* Unlock Confirm Dialog */}
+            {unlockConfirm && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+                }}>
+                    <div style={{
+                        background: '#3a3c5a', borderRadius: '16px', padding: '1.5rem',
+                        textAlign: 'center', width: '240px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ fontSize: '1.8rem', marginBottom: '0.4rem' }}>🔓</div>
+                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.4rem' }}>잠금 해제</div>
+                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                            🪙 20 코인을 사용하여<br />
+                            {unlockConfirm === 'stack' ? '스택' : '슬롯'} 공간을 여시겠습니까?
+                        </div>
+                        {coins < 20 && (
+                            <div style={{ fontSize: '0.78rem', color: '#ff6b6b', marginBottom: '0.6rem' }}>
+                                코인 부족 (현재 {coins}개)
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => setUnlockConfirm(null)}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
+                            >취소</button>
+                            <button
+                                onClick={handleUnlockConfirm}
+                                disabled={coins < 20}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= 20 ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= 20 ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
+                            >확인</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Win Overlay */}
             {state.isWinner && tutorialStep === null && (
                 <div style={{
@@ -1186,7 +1352,7 @@ const WordSortGame: React.FC = () => {
                     flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                 }}>
                     <h2 style={{ fontSize: '2.5rem', color: '#f1c40f', marginBottom: '1.5rem' }}>🎉 VICTORY!</h2>
-                    <button onClick={() => { dispatch({ type: 'START_LEVEL', levelData: levels[0] }); triggerDealing(levelStackTotal(levels[0])); }} style={{ padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', border: 'none', background: '#f39c12', color: 'white', fontWeight: 'bold' }}>재시작</button>
+                    <button onClick={() => { resetUnlocks(); dispatch({ type: 'START_LEVEL', levelData: levels[0] }); triggerDealing(levelStackTotal(levels[0])); }} style={{ padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', border: 'none', background: '#f39c12', color: 'white', fontWeight: 'bold' }}>재시작</button>
                 </div>
             )}
 

@@ -6,6 +6,7 @@ import { usePWAInstall } from '../hooks/usePWAInstall';
 import { auth } from '../../firebase';
 import { signOut } from '../../services/authService';
 import LoginModal from './LoginModal';
+import CoinDisplay from './CoinDisplay';
 
 const LandingPage: React.FC = () => {
     const { isInstallable, promptToInstall } = usePWAInstall();
@@ -62,7 +63,8 @@ const LandingPage: React.FC = () => {
 
             <header className="landing-header">
                 {/* 로그인/로그아웃 영역 */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', width: '100%', marginBottom: '0.5rem' }}>
+                    <CoinDisplay />
                     {isLoggedIn ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             {currentUser.photoURL && (
