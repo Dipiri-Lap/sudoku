@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from 'react';
+import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 import type { Grid } from '../../../engine/validator';
 import type { Difficulty } from '../../../engine/generator';
 import { generatePuzzles } from '../../../engine/generator';
@@ -145,11 +146,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
             // Check win condition
             const isWinner = !isGameOver && newBoard.every((r, ri) => r.every((c, ci) => c === state.solution[ri][ci]));
-
-            if (isWinner && state.gameMode === 'Stage' && state.currentLevel !== null) {
-                const nextLevel = state.currentLevel + 1;
-                localStorage.setItem('sudoku_stage_progress', nextLevel.toString());
-            }
 
             if (isWinner && state.gameMode === 'TimeAttack') {
                 const bestTimeKey = `sudoku_best_time_${state.difficulty}`;
@@ -329,6 +325,8 @@ const GameContext = createContext<{
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [state, dispatch] = useReducer(gameReducer, initialState);
+    const { saveStageProgress } = useSudokuProgress();
+    const savedLevelRef = useRef<number | null>(null);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -336,6 +334,16 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        if (state.isWinner && state.gameMode === 'Stage' && state.currentLevel !== null) {
+            const nextLevel = state.currentLevel + 1;
+            if (savedLevelRef.current !== nextLevel) {
+                savedLevelRef.current = nextLevel;
+                saveStageProgress(nextLevel);
+            }
+        }
+    }, [state.isWinner, state.gameMode, state.currentLevel, saveStageProgress]);
 
     useEffect(() => {
         if (state.animatingRows.length > 0 || state.animatingCols.length > 0 || state.animatingSectors.length > 0) {

@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Timer, Trophy, ChevronLeft } from 'lucide-react';
 import { useGame } from '../context/SudokuContext';
+import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 
 const SudokuModeSelect: React.FC = () => {
     const navigate = useNavigate();
     const { dispatch } = useGame();
+    const { stageProgress } = useSudokuProgress();
     const [testLevel, setTestLevel] = useState<string>('40');
 
     const handleTestPlay = () => {
@@ -27,10 +29,8 @@ const SudokuModeSelect: React.FC = () => {
 
             <div className="mode-grid">
                 <div className="game-card animate-fade-in" style={{ '--delay': '0.1s' } as any} onClick={() => {
-                    const savedLevel = localStorage.getItem('sudoku_stage_progress');
-                    const level = savedLevel ? parseInt(savedLevel) : 1;
-                    dispatch({ type: 'START_STAGE', level });
-                    navigate(`/sudoku/stage?mode=stage&level=${level}`);
+                    dispatch({ type: 'START_STAGE', level: stageProgress });
+                    navigate(`/sudoku/stage?mode=stage&level=${stageProgress}`);
                 }}>
                     <div className="game-card-icon">
                         <Trophy size={40} />
@@ -38,17 +38,11 @@ const SudokuModeSelect: React.FC = () => {
                     <div className="game-card-content">
                         <h3>스테이지 모드</h3>
                         <p>점점 어려워지는 스테이지를 클리어하며 실력을 쌓으세요.</p>
-                        {(() => {
-                            const savedLevel = localStorage.getItem('sudoku_stage_progress');
-                            const level = savedLevel ? parseInt(savedLevel) : 1;
-                            return (
-                                <div className="game-card-footer">
-                                    <span className="play-now">
-                                        {savedLevel ? `Level ${level} 이어하기` : `Level 1 시작하기`}
-                                    </span>
-                                </div>
-                            );
-                        })()}
+                        <div className="game-card-footer">
+                            <span className="play-now">
+                                {stageProgress > 1 ? `Level ${stageProgress} 이어하기` : `Level 1 시작하기`}
+                            </span>
+                        </div>
                     </div>
                 </div>
 

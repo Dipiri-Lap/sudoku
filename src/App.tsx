@@ -8,6 +8,7 @@ import { GameProvider as SudokuProvider } from './features/sudoku/context/Sudoku
 import WordSortGame from './features/word-sort/components/WordSortGame';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CoinProvider } from './context/CoinContext';
+import { SudokuProgressProvider } from './context/SudokuProgressContext';
 import './index.css';
 
 import { onAuthStateChanged } from 'firebase/auth';
@@ -29,6 +30,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <CoinProvider>
+      <SudokuProgressProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route
@@ -53,6 +55,7 @@ const App: React.FC = () => {
           }
         />
       </Routes>
+      </SudokuProgressProvider>
       </CoinProvider>
     </div>
   );
