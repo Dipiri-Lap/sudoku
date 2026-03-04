@@ -44,7 +44,7 @@ const WordSortGame: React.FC = () => {
     const cardWidth = Math.floor((containerMaxWidth - (displayColumns - 1) * gap) / displayColumns);
     // Lower minimum to 36 so 7 columns can fit on small screens
     const finalCardWidth = Math.min(110, Math.max(36, cardWidth));
-    const cardHeight = finalCardWidth * 1.4;
+    const cardHeight = Math.round(finalCardWidth * 1.4);
     const visibleHeight = 25; // Height of the visible strip for overlapped cards
     const overlapMargin = -(cardHeight - visibleHeight);
 
@@ -696,9 +696,10 @@ const WordSortGame: React.FC = () => {
     };
 
     const cardBaseStyle: React.CSSProperties = {
-        width: '100%',
-        aspectRatio: '2 / 2.8',
-        borderRadius: '12px',
+        width: `${finalCardWidth}px`,
+        height: `${cardHeight}px`,
+        flexShrink: 0,
+        borderRadius: '6px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -708,10 +709,12 @@ const WordSortGame: React.FC = () => {
         boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
         position: 'relative',
         transition: 'transform 0.1s ease',
-        border: '1px solid #ddd',
         padding: '5px',
-        background: 'white',
-        color: '#333'
+        color: '#333',
+        overflow: 'hidden',
+        backgroundSize: '100% 100%',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
     };
 
     const slotCardStyle: React.CSSProperties = {
@@ -725,13 +728,7 @@ const WordSortGame: React.FC = () => {
         fontSize: '0.85rem',
     };
 
-    const faceDownPattern = `repeating-linear-gradient(
-        45deg,
-        #ff9f43 0px,
-        #ff9f43 10px,
-        #ee5253 10px,
-        #ee5253 20px
-    )`;
+    const faceDownPattern = `url('/assets/word-sort/card-back.png')`;
 
     // Tutorial highlight sets
     const tutorialHighlightCards = new Set<string>();
@@ -935,8 +932,9 @@ const WordSortGame: React.FC = () => {
                                         right: `${offset}px`,
                                         zIndex: isTop ? 50 : idx,
                                         width: `${finalCardWidth}px`,
-                                        background: card.type === 'category' ? '#fff9f2' : 'white',
-                                        border: card.type === 'category' ? '3px solid #ff9f43' : '1px solid #ddd',
+                                        backgroundColor: card.type === 'category' ? '#fff9f2' : '#ffffff',
+                                        backgroundImage: 'none',
+                                        border: card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999',
                                         boxShadow: card.type === 'category' ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
                                         visibility: (isDragging || (landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id))) ? 'hidden' : 'visible',
                                         cursor: isTop ? 'grab' : 'default',
@@ -947,26 +945,37 @@ const WordSortGame: React.FC = () => {
                                         '--startX': `${startX}px`
                                     } as React.CSSProperties}
                                 >
-                                    {/* 뒷면 효과 (포물선 이동 중 뒷면이 보이도록) */}
                                     <div
                                         className="drag-back-layer"
                                         style={{
                                             position: 'absolute',
                                             inset: 0,
-                                            background: faceDownPattern,
+                                            backgroundImage: faceDownPattern,
+                                            backgroundSize: '100% 100%',
+                                            backgroundPosition: 'center',
+                                            backgroundRepeat: 'no-repeat',
                                             transform: 'rotateY(180deg)',
                                             backfaceVisibility: 'hidden',
-                                            borderRadius: '11px',
+                                            borderRadius: '5px',
                                             zIndex: -1
                                         }}
                                     />
 
+                                    <div style={{
+                                        position: 'absolute',
+                                        inset: '2px',
+                                        border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
+                                        borderRadius: '3px',
+                                        pointerEvents: 'none',
+                                        zIndex: 1
+                                    }} />
+
                                     {isTop && card.type === 'category' && (
                                         <>
-                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900' }}>
+                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
                                                 0/{category?.words?.length ?? 5}
                                             </div>
-                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43' }}>
+                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
                                                 <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
                                             </div>
                                         </>
@@ -983,7 +992,7 @@ const WordSortGame: React.FC = () => {
                                             position: isTop ? 'static' : 'absolute',
                                             right: isTop ? 'auto' : '2px', // Stay in visible stripe
                                             width: isTop ? 'auto' : `${offsetGap}px`,
-                                            fontWeight: card.type === 'category' ? '900' : 'normal',
+                                            fontWeight: '900',
                                             writingMode: isTop ? 'horizontal-tb' : 'vertical-rl',
                                             textOrientation: 'upright',
                                             letterSpacing: isTop ? 'normal' : '2px',
@@ -1007,14 +1016,25 @@ const WordSortGame: React.FC = () => {
                             style={{
                                 ...slotCardStyle,
                                 width: `${finalCardWidth}px`,
-                                background: state.deck.length > 0 ? faceDownPattern : 'rgba(255,255,255,0.05)',
-                                border: state.deck.length > 0 ? '1px solid #ddd' : '1px dashed rgba(255,255,255,0.2)',
+                                backgroundColor: state.deck.length > 0 ? 'transparent' : 'rgba(255,255,255,0.05)',
+                                backgroundImage: state.deck.length > 0 ? faceDownPattern : 'none',
+                                backgroundSize: state.deck.length > 0 ? '100% 100%' : 'auto',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                                border: state.deck.length > 0 ? 'none' : '1px dashed rgba(255,255,255,0.2)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center'
                             }}>
                             {state.deck.length > 0 ? (
-                                <span style={{ position: 'absolute', bottom: '5px', right: '5px', color: 'white' }}>{state.deck.length}</span>
+                                <span style={{
+                                    position: 'absolute',
+                                    bottom: '5px',
+                                    right: '5px',
+                                    color: 'white',
+                                    zIndex: 2,
+                                    textShadow: '1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000'
+                                }}>{state.deck.length}</span>
                             ) : state.revealedDeck.length > 0 ? (
                                 <RotateCcw size={20} color="white" style={{ opacity: 0.6 }} />
                             ) : null}
@@ -1074,7 +1094,8 @@ const WordSortGame: React.FC = () => {
                                 ].filter(Boolean).join(' ')}
                                 style={{
                                     ...slotCardStyle,
-                                    background: slot ? '#fff9f2' : 'rgba(255,255,255,0.03)',
+                                    backgroundColor: slot ? '#ffffff' : 'rgba(255,255,255,0.03)',
+                                    backgroundImage: 'none',
                                     color: '#333',
                                     border: slot
                                         ? '3px solid #ff9f43'
@@ -1082,7 +1103,7 @@ const WordSortGame: React.FC = () => {
                                     opacity: 1,
                                     width: `${finalCardWidth}px`,
                                     boxShadow: slot ? '0 0 15px rgba(255,159,67,0.3)' : 'none',
-                                    borderRadius: '12px',
+                                    borderRadius: '6px',
                                     position: 'relative',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1091,10 +1112,19 @@ const WordSortGame: React.FC = () => {
                             >
                                 {slot ? (
                                     <>
+                                        <div style={{
+                                            position: 'absolute',
+                                            inset: '2px',
+                                            border: '1px solid #ffba75',
+                                            borderRadius: '3px',
+                                            pointerEvents: 'none',
+                                            zIndex: 1
+                                        }} />
                                         {/* 내부 상단: '0/4 주방' 형식 및 왕관 아이콘 */}
                                         <div style={{
                                             position: 'absolute', top: '6px', left: '8px', right: '8px',
-                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            zIndex: 2
                                         }}>
                                             <span style={{
                                                 fontSize: (slot.collected.length + slot.target + 1 + (slot.name?.length || 0)) > 8 ? '0.65rem' : '0.75rem',
@@ -1106,7 +1136,7 @@ const WordSortGame: React.FC = () => {
                                             </span>
                                         </div>
                                         {/* 중앙: 마지막 단어 */}
-                                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#2c3e50', marginTop: '12px' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#2c3e50', marginTop: '12px', zIndex: 2 }}>
                                             {slot.collected.length > 0 ? slot.collected[slot.collected.length - 1] : slot.name}
                                         </div>
                                     </>
@@ -1179,7 +1209,7 @@ const WordSortGame: React.FC = () => {
                             draggingGroup?.type === 'stack' && draggingGroup.index === sIdx &&
                             (draggingGroup.cardIndex ?? 0) === 0 && (draggingGroup.count ?? 1) >= stack.length
                         )) && (
-                                <div style={{ ...stackCardStyle, borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.2)' }} />
+                                <div style={{ ...stackCardStyle, borderRadius: '6px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.2)' }} />
                             )}
                         {stack.map((card, cIdx) => {
                             const isRevealed = !!card.isRevealed;
@@ -1234,16 +1264,20 @@ const WordSortGame: React.FC = () => {
                                     ].filter(Boolean).join(' ')}
                                     style={{
                                         ...stackCardStyle,
-                                        background: isRevealed
-                                            ? (card.type === 'category' ? '#fff9f2' : 'white')
+                                        backgroundColor: (isRevealed && card.type === 'category') ? '#fff9f2' : (isRevealed ? '#ffffff' : 'transparent'),
+                                        backgroundImage: isRevealed
+                                            ? 'none'
                                             : faceDownPattern,
+                                        backgroundSize: isRevealed ? 'auto' : '100% 100%',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
                                         color: isRevealed ? '#333' : 'transparent',
                                         marginBottom: cIdx === stack.length - 1 ? '0' : `${currentOverlapMargin}px`,
                                         zIndex: cIdx,
                                         cursor: canDrag ? 'grab' : 'default',
                                         border: isRevealed
-                                            ? (card.type === 'category' ? '3px solid #ff9f43' : '1px solid #ddd')
-                                            : '1px solid #ddd',
+                                            ? (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999')
+                                            : 'none',
                                         boxShadow: (isRevealed && card.type === 'category') ? '0 0 10px rgba(255,159,67,0.2)' : 'none',
                                         visibility: (isDragging || isProxyMoving || !isDealtYet) ? 'hidden' : 'visible',
                                         transform: 'none',
@@ -1251,35 +1285,47 @@ const WordSortGame: React.FC = () => {
                                     }}
                                 >
                                     {isRevealed && (
-                                        <div style={{
-                                            height: '100%',
-                                            width: '100%',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: cIdx === stack.length - 1 ? 'center' : 'flex-start',
-                                            alignItems: 'center',
-                                            paddingTop: cIdx === stack.length - 1 ? '0' : '0px'
-                                        }}>
-                                            {card.type === 'category' && (() => {
-                                                const category = state.categories.find(c => c.id === card.cat);
-                                                return (
-                                                    <>
-                                                        <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900' }}>
-                                                            0/{category?.words?.length ?? 5}
-                                                        </div>
-                                                        <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43' }}>
-                                                            <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
-                                                        </div>
-                                                    </>
-                                                );
-                                            })()}
-                                            <span style={{
-                                                fontWeight: card.type === 'category' ? '900' : 'normal',
-                                                lineHeight: '1.2'
+                                        <>
+                                            <div style={{
+                                                position: 'absolute',
+                                                inset: '2px',
+                                                border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
+                                                borderRadius: '3px',
+                                                pointerEvents: 'none',
+                                                zIndex: 1
+                                            }} />
+                                            <div style={{
+                                                height: '100%',
+                                                width: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: cIdx === stack.length - 1 ? 'center' : 'flex-start',
+                                                alignItems: 'center',
+                                                paddingTop: '0',
+                                                position: 'relative'
                                             }}>
-                                                {card.value}
-                                            </span>
-                                        </div>
+                                                {card.type === 'category' && (() => {
+                                                    const category = state.categories.find(c => c.id === card.cat);
+                                                    return (
+                                                        <>
+                                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
+                                                                0/{category?.words?.length ?? 5}
+                                                            </div>
+                                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
+                                                                <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()}
+                                                <span style={{
+                                                    fontWeight: '900',
+                                                    lineHeight: '1.2',
+                                                    zIndex: 2
+                                                }}>
+                                                    {card.value}
+                                                </span>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             );
@@ -1400,11 +1446,13 @@ const WordSortGame: React.FC = () => {
                                     position: 'absolute',
                                     width: `${finalCardWidth}px`,
                                     height: `${cardHeight}px`,
+                                    flexShrink: 0,
                                     left: `${(landingGroup.targetX ?? 0) - finalCardWidth / 2}px`,
                                     top: `${(landingGroup.targetY ?? 0) - cardHeight / 2}px`,
-                                    background: card.type === 'category' ? '#fff9f2' : 'white',
+                                    backgroundColor: card.type === 'category' ? '#fff9f2' : '#ffffff',
+                                    backgroundImage: 'none',
                                     color: '#333',
-                                    border: card.type === 'category' ? '3px solid #ff9f43' : '1px solid #ddd',
+                                    border: card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999',
                                     boxShadow: card.type === 'category' ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
                                     zIndex: 1000 + idx,
                                     transform: landingGroup.animating
@@ -1422,22 +1470,31 @@ const WordSortGame: React.FC = () => {
                                     padding: '5px'
                                 }}
                             >
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: '2px',
+                                    border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
+                                    borderRadius: '3px',
+                                    pointerEvents: 'none',
+                                    zIndex: 1
+                                }} />
                                 {card.type === 'category' && (() => {
                                     const category = state.categories.find(c => c.id === card.cat);
                                     return (
                                         <>
-                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900' }}>
+                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
                                                 0/{category?.words?.length ?? 5}
                                             </div>
-                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43' }}>
+                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
                                                 <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
                                             </div>
                                         </>
                                     );
                                 })()}
                                 <span style={{
-                                    fontWeight: card.type === 'category' ? '900' : 'normal',
-                                    fontSize: card.type === 'category' ? '0.9rem' : '0.85rem'
+                                    fontWeight: '900',
+                                    fontSize: card.type === 'category' ? '0.9rem' : '0.85rem',
+                                    zIndex: 2
                                 }}>
                                     {card.value}
                                 </span>
