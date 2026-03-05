@@ -12,11 +12,26 @@ const LandingPage: React.FC = () => {
     const { isInstallable, promptToInstall } = usePWAInstall();
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+    const [nickname, setNickname] = useState<string>('');
     const [toast, setToast] = useState<string | null>(null);
+    const [userPhoto, setUserPhoto] = useState<string | null>(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
+            if (user) {
+                const { getUserProfile } = await import('../../services/rankingService');
+                try {
+                    const profile = await getUserProfile(user.uid);
+                    setNickname(profile.nickname);
+                } catch (e) {
+                    console.error('Failed to fetch nickname:', e);
+                }
+                setUserPhoto(user.photoURL);
+            } else {
+                setNickname('');
+                setUserPhoto(null);
+            }
         });
         return unsubscribe;
     }, []);
@@ -26,10 +41,10 @@ const LandingPage: React.FC = () => {
         setTimeout(() => setToast(null), 3000);
     };
 
-    const handleLoginSuccess = (user: FirebaseUser) => {
+    const handleLoginSuccess = () => {
         setShowLoginModal(false);
-        const name = user.displayName?.split(' ')[0] ?? '회원';
-        showToast(`${name}님, 환영합니다!`);
+        // Nickname will be updated by onAuthStateChanged
+        showToast('환영합니다!');
     };
 
     const handleSignOut = async () => {
@@ -37,7 +52,7 @@ const LandingPage: React.FC = () => {
         showToast('로그아웃 되었습니다.');
     };
 
-    const isLoggedIn = currentUser && !currentUser.isAnonymous;
+    const isGuest = currentUser?.isAnonymous;
 
     return (
         <div className="landing-page">
@@ -62,35 +77,69 @@ const LandingPage: React.FC = () => {
             )}
 
             <header className="landing-header">
-                {/* 로그인/로그아웃 영역 */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', width: '100%', marginBottom: '0.5rem' }}>
+                {/* 상단 프로필/코인 영역 */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    gap: '0.6rem',
+                    width: '100%',
+                    marginBottom: '0.75rem',
+                    padding: '0 0.5rem'
+                }}>
+                    {nickname && (
+                        <span style={{
+                            fontSize: '0.85rem',
+                            fontWeight: '600',
+                            color: '#555',
+                            backgroundColor: '#f0f0f0',
+                            padding: '0.3rem 0.8rem',
+                            borderRadius: '1rem'
+                        }}>
+                            {nickname}
+                        </span>
+                    )}
+
                     <CoinDisplay />
-                    {isLoggedIn ? (
+
+                    <div style={{ marginLeft: '0.4rem', height: '24px', width: '1px', backgroundColor: '#e0e0e0' }} />
+
+                    {currentUser && !isGuest ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {currentUser.photoURL && (
+                            {userPhoto ? (
                                 <img
-                                    src={currentUser.photoURL}
+                                    src={userPhoto}
                                     alt="프로필"
-                                    style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                                    style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #eee' }}
                                 />
+                            ) : (
+                                <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#eee',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <User size={18} color="#999" />
+                                </div>
                             )}
-                            {!currentUser.photoURL && <User size={18} color="#555" />}
-                            <span style={{ fontSize: '0.85rem', color: '#555' }}>
-                                {currentUser.displayName?.split(' ')[0] ?? ''}
-                            </span>
                             <button
                                 onClick={handleSignOut}
                                 style={{
+                                    padding: '0.4rem 0.8rem',
+                                    borderRadius: '2rem',
+                                    border: '1px solid #ddd',
+                                    backgroundColor: 'white',
+                                    color: '#666',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '500',
+                                    cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.3rem',
-                                    padding: '0.35rem 0.75rem',
-                                    borderRadius: '2rem',
-                                    border: '1px solid #ddd',
-                                    backgroundColor: 'transparent',
-                                    color: '#666',
-                                    fontSize: '0.8rem',
-                                    cursor: 'pointer',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                                 }}
                             >
                                 <LogOut size={14} />
@@ -104,14 +153,16 @@ const LandingPage: React.FC = () => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.4rem',
-                                padding: '0.4rem 1rem',
+                                padding: '0.45rem 1.1rem',
                                 borderRadius: '2rem',
-                                border: '1.5px solid #4a90e2',
-                                backgroundColor: 'transparent',
-                                color: '#4a90e2',
-                                fontWeight: 600,
+                                border: 'none',
+                                backgroundColor: '#4a90e2',
+                                color: 'white',
+                                fontWeight: 700,
                                 fontSize: '0.85rem',
                                 cursor: 'pointer',
+                                boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
+                                transition: 'all 0.2s'
                             }}
                         >
                             <LogIn size={15} />
