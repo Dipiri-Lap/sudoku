@@ -33,7 +33,8 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
             try {
                 const userRef = doc(db, 'users', user.uid);
                 const snap = await getDoc(userRef);
-                const cloudProgress: number = snap.exists() ? (snap.data().sudokuStageProgress ?? 1) : 1;
+                const cloudData = snap.data();
+                const cloudProgress: number = cloudData?.sudokuStageProgress ?? 1;
                 const localProgress = parseInt(localStorage.getItem(LS_KEY) ?? '1', 10) || 1;
                 const merged = Math.max(localProgress, cloudProgress);
 
@@ -41,7 +42,8 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
                     localStorage.setItem(LS_KEY, String(merged));
                     setStageProgress(merged);
                 }
-                if (merged !== cloudProgress) {
+                // Always ensure field exists
+                if (merged !== cloudProgress || !snap.exists() || cloudData?.sudokuStageProgress === undefined) {
                     await setDoc(userRef, { sudokuStageProgress: merged }, { merge: true });
                 }
             } catch (e) {

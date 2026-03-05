@@ -40,11 +40,15 @@ async function migrateLocalStorage(uid: string): Promise<void> {
 
     const userRef = doc(db, 'users', uid);
     const payload: Record<string, any> = { guestProgress };
+
+    // Always ensure a nickname exists
+    payload.nickname = uid.slice(0, 8);
+
     if (localCoins > 0) {
-        // CoinContext will handle Math.max merge on next auth change;
-        // here we just ensure the field exists with at least the local value.
         payload.coins = localCoins;
     }
+
+    // Use merge: true to avoid overwriting existing cloud data like different coins or progress
     await setDoc(userRef, payload, { merge: true });
 }
 

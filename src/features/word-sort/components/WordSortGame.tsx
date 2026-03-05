@@ -7,6 +7,9 @@ import { RotateCcw, Undo2, Search, Layers as LayersIcon, Crown, Sparkles } from 
 import confetti from 'canvas-confetti';
 import { useCoins } from '../../../context/CoinContext';
 import CoinDisplay from '../../../common/components/CoinDisplay';
+import { useCardBack, AVAILABLE_CARD_BACKS } from '../context/CardBackContext';
+import CardBackShopModal from './CardBackShopModal';
+
 
 const WordSortGame: React.FC = () => {
 
@@ -17,6 +20,11 @@ const WordSortGame: React.FC = () => {
     const [lockedStacks, setLockedStacks] = useState(1);
     const [lockedSlots, setLockedSlots] = useState(1);
     const [unlockConfirm, setUnlockConfirm] = useState<'stack' | 'slot' | null>(null);
+    const [isShopOpen, setIsShopOpen] = useState(false);
+
+    const { selectedId } = useCardBack();
+    const currentCardBack = AVAILABLE_CARD_BACKS.find(cb => cb.id === selectedId) || AVAILABLE_CARD_BACKS[0];
+
 
     // Dynamic card width: measure the actual container width via ref (most reliable)
     const gameContainerRef = useRef<HTMLDivElement>(null);
@@ -728,7 +736,8 @@ const WordSortGame: React.FC = () => {
         fontSize: '0.85rem',
     };
 
-    const faceDownPattern = `url('/assets/word-sort/card-back.png')`;
+    const faceDownPattern = currentCardBack.pattern;
+
 
     // Tutorial highlight sets
     const tutorialHighlightCards = new Set<string>();
@@ -811,8 +820,29 @@ const WordSortGame: React.FC = () => {
                     <div style={{ fontSize: '0.7rem', opacity: 0.55, fontWeight: '700', letterSpacing: '0.08em' }}>
                         LEVEL {state.level}
                     </div>
-                    <CoinDisplay />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                            onClick={() => setIsShopOpen(true)}
+                            style={{
+                                background: 'rgba(255,255,255,0.15)',
+                                border: 'none',
+                                borderRadius: '20px',
+                                color: 'white',
+                                padding: '4px 12px',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}
+                        >
+                            <Sparkles size={14} className="text-yellow-400" /> SHOP
+                        </button>
+                        <CoinDisplay />
+                    </div>
                 </div>
+
             )}
 
             {/* Stats area (Steps & Deck) */}
@@ -1426,7 +1456,11 @@ const WordSortGame: React.FC = () => {
                 />
             )}
 
+            {/* Shop Modal */}
+            {isShopOpen && <CardBackShopModal onClose={() => setIsShopOpen(false)} />}
+
             {/* Proxy Animation Layer */}
+
             {landingGroup?.isProxy && landingGroup.movingCards && (
                 <div style={{
                     position: 'fixed',

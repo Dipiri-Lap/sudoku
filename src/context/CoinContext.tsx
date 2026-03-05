@@ -24,6 +24,7 @@ export const useCoins = (): CoinContextValue => {
 
 export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [coins, setCoins] = useState<number>(() => {
+        if (import.meta.env.DEV) return 99999;
         const stored = localStorage.getItem(LS_KEY);
         return stored ? parseInt(stored, 10) || 0 : 0;
     });
@@ -39,7 +40,8 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 const userRef = doc(db, 'users', user.uid);
                 const snap = await getDoc(userRef);
-                const cloudCoins: number = snap.exists() ? (snap.data().coins ?? 0) : 0;
+                const cloudData = snap.data();
+                const cloudCoins: number = cloudData?.coins ?? 0;
                 const localCoins = parseInt(localStorage.getItem(LS_KEY) ?? '0', 10) || 0;
                 const merged = Math.max(localCoins, cloudCoins);
 
@@ -47,7 +49,8 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     localStorage.setItem(LS_KEY, String(merged));
                     setCoins(merged);
                 }
-                if (merged !== cloudCoins) {
+                // Always ensure coins field exists if document exists, or create if missing
+                if (merged !== cloudCoins || !snap.exists() || cloudData?.coins === undefined) {
                     await setDoc(userRef, { coins: merged }, { merge: true });
                 }
             } catch (e) {
