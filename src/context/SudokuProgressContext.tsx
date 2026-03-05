@@ -27,7 +27,7 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user || user.isAnonymous || syncedRef.current) return;
+            if (!user || syncedRef.current) return;
             syncedRef.current = true;
 
             try {
@@ -58,7 +58,7 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
         setStageProgress(nextLevel);
 
         const user = auth.currentUser;
-        if (user && !user.isAnonymous) {
+        if (user) {
             await setDoc(doc(db, 'users', user.uid), { sudokuStageProgress: nextLevel }, { merge: true });
         }
     }, []);

@@ -34,7 +34,7 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Sync with Firestore on auth state change
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user || user.isAnonymous || syncedRef.current) return;
+            if (!user || syncedRef.current) return;
             syncedRef.current = true;
 
             try {
@@ -67,7 +67,7 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setPendingReward(amount);
 
         const user = auth.currentUser;
-        if (user && !user.isAnonymous) {
+        if (user) {
             try {
                 await updateDoc(doc(db, 'users', user.uid), { coins: increment(amount) });
             } catch {
@@ -84,7 +84,7 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCoins(next);
 
         const user = auth.currentUser;
-        if (user && !user.isAnonymous) {
+        if (user) {
             try {
                 await updateDoc(doc(db, 'users', user.uid), { coins: increment(-amount) });
             } catch {

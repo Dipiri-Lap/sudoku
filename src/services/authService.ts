@@ -18,13 +18,11 @@ export function hasGuestData(): boolean {
 
 async function migrateLocalStorage(uid: string): Promise<void> {
     const guestProgress: Record<string, string | number | boolean> = {};
-    let hasData = false;
     let localCoins = 0;
 
     for (const key of MIGRATION_KEYS) {
         const value = localStorage.getItem(key);
         if (value !== null) {
-            hasData = true;
             if (key === 'puzzle_coins') {
                 localCoins = parseInt(value, 10) || 0;
             } else if (key === 'wordSort_tutorialDone') {
@@ -36,7 +34,7 @@ async function migrateLocalStorage(uid: string): Promise<void> {
         }
     }
 
-    if (!hasData) return;
+    // Proceed to sync regardless of hasData to always ensure a document exists with a nickname
 
     const userRef = doc(db, 'users', uid);
     const payload: Record<string, any> = { guestProgress };
