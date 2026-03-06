@@ -42,10 +42,6 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
                     localStorage.setItem(LS_KEY, String(merged));
                     setStageProgress(merged);
                 }
-                // Always ensure field exists
-                if (merged !== cloudProgress || !snap.exists() || cloudData?.sudokuStageProgress === undefined) {
-                    await setDoc(userRef, { sudokuStageProgress: merged }, { merge: true });
-                }
             } catch (e) {
                 console.error('SudokuProgressContext sync error:', e);
             }

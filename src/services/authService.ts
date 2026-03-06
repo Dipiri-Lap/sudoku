@@ -37,10 +37,24 @@ async function migrateLocalStorage(uid: string): Promise<void> {
     // Proceed to sync regardless of hasData to always ensure a document exists with a nickname
 
     const userRef = doc(db, 'users', uid);
-    const payload: Record<string, any> = { guestProgress };
+    const payload: Record<string, any> = { guestProgress, bestTimes: {} as Record<string, number> };
+
+    // Consolidate legacy best times into bestTimes object
+    for (const key of MIGRATION_KEYS) {
+        if (key.startsWith('sudoku_best_time_')) {
+            const diff = key.replace('sudoku_best_time_', '');
+            const value = localStorage.getItem(key);
+            if (value !== null) {
+                payload.bestTimes[diff] = parseInt(value, 10);
+                // Also keep in guestProgress for backward compatibility if needed, 
+                // but primarily use bestTimes now.
+            }
+        }
+    }
 
     // Always ensure a nickname exists
     payload.nickname = uid.slice(0, 8);
+    payload.uid = uid;
 
     if (localCoins > 0) {
         payload.coins = localCoins;

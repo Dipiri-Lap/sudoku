@@ -10,6 +10,7 @@ import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
 import { SudokuProgressProvider } from './context/SudokuProgressContext';
+import { UserInitProvider } from './context/UserInitContext';
 
 import './index.css';
 
@@ -31,37 +32,39 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      <CoinProvider>
-        <SudokuProgressProvider>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route
-              path="/sudoku/*"
-              element={
-                <SudokuProvider>
-                  <Routes>
-                    <Route index element={<SudokuModeSelect />} />
-                    <Route path="time-attack" element={<DifficultySelect />} />
-                    <Route path="time-attack/play" element={<SudokuGame />} />
-                    <Route path="stage" element={<SudokuGame />} />
-                  </Routes>
-                </SudokuProvider>
-              }
-            />
-            <Route
-              path="/word-sort"
-              element={
-                <WordSortProvider>
-                  <CardBackProvider>
-                    <WordSortGame />
-                  </CardBackProvider>
-                </WordSortProvider>
-              }
-            />
-
-          </Routes>
-        </SudokuProgressProvider>
-      </CoinProvider>
+      <UserInitProvider>
+        <CoinProvider>
+          <SudokuProgressProvider>
+            <Routes>
+              {/* ... routes ... */}
+              <Route path="/" element={<LandingPage />} />
+              <Route
+                path="/sudoku/*"
+                element={
+                  <SudokuProvider>
+                    <Routes>
+                      <Route index element={<SudokuModeSelect />} />
+                      <Route path="time-attack" element={<DifficultySelect />} />
+                      <Route path="time-attack/play" element={<SudokuGame />} />
+                      <Route path="stage" element={<SudokuGame />} />
+                    </Routes>
+                  </SudokuProvider>
+                }
+              />
+              <Route
+                path="/word-sort"
+                element={
+                  <WordSortProvider>
+                    <CardBackProvider>
+                      <WordSortGame />
+                    </CardBackProvider>
+                  </WordSortProvider>
+                }
+              />
+            </Routes>
+          </SudokuProgressProvider>
+        </CoinProvider>
+      </UserInitProvider>
     </div>
   );
 };

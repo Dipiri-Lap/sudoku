@@ -49,10 +49,6 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     localStorage.setItem(LS_KEY, String(merged));
                     setCoins(merged);
                 }
-                // Always ensure coins field exists if document exists, or create if missing
-                if (merged !== cloudCoins || !snap.exists() || cloudData?.coins === undefined) {
-                    await setDoc(userRef, { coins: merged }, { merge: true });
-                }
             } catch (e) {
                 console.error('CoinContext sync error:', e);
             }
