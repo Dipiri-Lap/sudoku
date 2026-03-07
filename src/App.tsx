@@ -10,12 +10,77 @@ import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
 import { SudokuProgressProvider } from './context/SudokuProgressContext';
-import { UserInitProvider } from './context/UserInitContext';
-
-import './index.css';
-
+import { UserInitProvider, useUserInit } from './context/UserInitContext';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, signInAnonymously } from './firebase';
+import './index.css';
+
+const AppContent: React.FC = () => {
+  const { isInitialized } = useUserInit();
+
+  if (!isInitialized) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        gap: '1.5rem',
+        color: '#666'
+      }}>
+        <div className="loading-spinner" style={{
+          width: '40px',
+          height: '40px',
+          border: '3px solid #f3f3f3',
+          borderTop: '3px solid #4a90e2',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }} />
+        <p style={{ fontWeight: 600 }}>데이터 초기화 중...</p>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  return (
+    <CoinProvider>
+      <SudokuProgressProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route
+            path="/sudoku/*"
+            element={
+              <SudokuProvider>
+                <Routes>
+                  <Route index element={<SudokuModeSelect />} />
+                  <Route path="time-attack" element={<DifficultySelect />} />
+                  <Route path="time-attack/play" element={<SudokuGame />} />
+                  <Route path="stage" element={<SudokuGame />} />
+                </Routes>
+              </SudokuProvider>
+            }
+          />
+          <Route
+            path="/word-sort"
+            element={
+              <WordSortProvider>
+                <CardBackProvider>
+                  <WordSortGame />
+                </CardBackProvider>
+              </WordSortProvider>
+            }
+          />
+        </Routes>
+      </SudokuProgressProvider>
+    </CoinProvider>
+  );
+};
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -33,37 +98,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <UserInitProvider>
-        <CoinProvider>
-          <SudokuProgressProvider>
-            <Routes>
-              {/* ... routes ... */}
-              <Route path="/" element={<LandingPage />} />
-              <Route
-                path="/sudoku/*"
-                element={
-                  <SudokuProvider>
-                    <Routes>
-                      <Route index element={<SudokuModeSelect />} />
-                      <Route path="time-attack" element={<DifficultySelect />} />
-                      <Route path="time-attack/play" element={<SudokuGame />} />
-                      <Route path="stage" element={<SudokuGame />} />
-                    </Routes>
-                  </SudokuProvider>
-                }
-              />
-              <Route
-                path="/word-sort"
-                element={
-                  <WordSortProvider>
-                    <CardBackProvider>
-                      <WordSortGame />
-                    </CardBackProvider>
-                  </WordSortProvider>
-                }
-              />
-            </Routes>
-          </SudokuProgressProvider>
-        </CoinProvider>
+        <AppContent />
       </UserInitProvider>
     </div>
   );

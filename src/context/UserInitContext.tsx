@@ -39,7 +39,7 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                         coins: parseInt(localStorage.getItem('puzzle_coins') ?? '0', 10) || 0,
                         sudokuStageProgress: parseInt(localStorage.getItem('sudoku_stage_progress') ?? '1', 10) || 1,
                         bestTimes: {},
-                        guestProgress: {}, // Initialize as empty object
+                        guestProgress: {},
                         createdAt: new Date().toISOString(),
                     };
 
@@ -54,11 +54,21 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
                     await setDoc(userRef, initialData);
                 } else {
-                    // If document exists but missing uid/nickname, ensure they are set
+                    // Document exists, but might be missing fields (partial creation/race condition)
                     const data = snap.data();
                     const updates: any = {};
-                    if (!data.uid) updates.uid = user.uid;
-                    if (!data.nickname) updates.nickname = user.uid.slice(0, 8);
+
+                    if (data.uid === undefined) updates.uid = user.uid;
+                    if (data.nickname === undefined) updates.nickname = user.uid.slice(0, 8);
+                    if (data.coins === undefined) {
+                        updates.coins = parseInt(localStorage.getItem('puzzle_coins') ?? '0', 10) || 0;
+                    }
+                    if (data.sudokuStageProgress === undefined) {
+                        updates.sudokuStageProgress = parseInt(localStorage.getItem('sudoku_stage_progress') ?? '1', 10) || 1;
+                    }
+                    if (data.bestTimes === undefined) updates.bestTimes = {};
+                    if (data.guestProgress === undefined) updates.guestProgress = {};
+                    if (data.createdAt === undefined) updates.createdAt = new Date().toISOString();
 
                     if (Object.keys(updates).length > 0) {
                         await setDoc(userRef, updates, { merge: true });
