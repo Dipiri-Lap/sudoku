@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 import { auth, db } from '../../../firebase';
 
@@ -49,20 +49,27 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
             }
 
             try {
-                const userRef = doc(db, 'users', user.uid);
-                const snap = await getDoc(userRef);
+                const progressRef = doc(db, 'users', user.uid, 'wordSortProgress', 'data');
+                const progressSnap = await getDoc(progressRef);
 
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.cardBacks) {
-                        setUnlockedIds(data.cardBacks.unlocked || ['default']);
-                        setSelectedId(data.cardBacks.selected || 'default');
-                    } else {
-                        // Initial setup for existing users without cardBacks data
-                        await updateDoc(userRef, {
-                            cardBacks: { unlocked: ['default'], selected: 'default' }
-                        });
+                let cardBacksData = null;
+
+                if (progressSnap.exists() && progressSnap.data().cardBacks) {
+                    cardBacksData = progressSnap.data().cardBacks;
+                } else {
+                    const userRef = doc(db, 'users', user.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists() && userSnap.data().cardBacks) {
+                        cardBacksData = userSnap.data().cardBacks;
                     }
+                }
+
+                if (cardBacksData) {
+                    setUnlockedIds(cardBacksData.unlocked || ['default']);
+                    setSelectedId(cardBacksData.selected || 'default');
+                } else {
+                    setUnlockedIds(['default']);
+                    setSelectedId('default');
                 }
             } catch (e) {
                 console.error('Error fetching card backs:', e);
@@ -79,10 +86,11 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
 
         const newUnlocked = [...unlockedIds, id];
         try {
-            const userRef = doc(db, 'users', user.uid);
-            await updateDoc(userRef, {
-                'cardBacks.unlocked': newUnlocked
-            });
+            const progressRef = doc(db, 'users', user.uid, 'wordSortProgress', 'data');
+            // We need setDoc with merge to ensure we don't overwrite other wordSort progress
+            await setDoc(progressRef, {
+                cardBacks: { unlocked: newUnlocked, selected: selectedId }
+            }, { merge: true });
             setUnlockedIds(newUnlocked);
             return true;
         } catch (e) {
@@ -97,10 +105,10 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
         if (!user || user.isAnonymous) return;
 
         try {
-            const userRef = doc(db, 'users', user.uid);
-            await updateDoc(userRef, {
-                'cardBacks.selected': id
-            });
+            const progressRef = doc(db, 'users', user.uid, 'wordSortProgress', 'data');
+            await setDoc(progressRef, {
+                cardBacks: { unlocked: unlockedIds, selected: id }
+            }, { merge: true });
         } catch (e) {
             console.error('Selection save error:', e);
         }
