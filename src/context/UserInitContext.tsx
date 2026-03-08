@@ -37,20 +37,8 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                         uid: user.uid,
                         nickname: user.uid.slice(0, 8),
                         coins: parseInt(localStorage.getItem('puzzle_coins') ?? '0', 10) || 0,
-                        sudokuStageProgress: parseInt(localStorage.getItem('sudoku_stage_progress') ?? '1', 10) || 1,
-                        bestTimes: {},
-                        guestProgress: {},
                         createdAt: new Date().toISOString(),
                     };
-
-                    // Sync legacy best times from localStorage if they exist
-                    const difficulties = ['Easy', 'Medium', 'Hard', 'Expert', 'Master'];
-                    difficulties.forEach(diff => {
-                        const saved = localStorage.getItem(`sudoku_best_time_${diff}`);
-                        if (saved) {
-                            (initialData.bestTimes as any)[diff] = parseInt(saved, 10);
-                        }
-                    });
 
                     await setDoc(userRef, initialData);
                 } else {
@@ -63,11 +51,6 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     if (data.coins === undefined) {
                         updates.coins = parseInt(localStorage.getItem('puzzle_coins') ?? '0', 10) || 0;
                     }
-                    if (data.sudokuStageProgress === undefined) {
-                        updates.sudokuStageProgress = parseInt(localStorage.getItem('sudoku_stage_progress') ?? '1', 10) || 1;
-                    }
-                    if (data.bestTimes === undefined) updates.bestTimes = {};
-                    if (data.guestProgress === undefined) updates.guestProgress = {};
                     if (data.createdAt === undefined) updates.createdAt = new Date().toISOString();
 
                     if (Object.keys(updates).length > 0) {

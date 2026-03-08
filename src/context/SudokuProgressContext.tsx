@@ -31,10 +31,19 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
             syncedRef.current = true;
 
             try {
-                const userRef = doc(db, 'users', user.uid);
-                const snap = await getDoc(userRef);
-                const cloudData = snap.data();
-                const cloudProgress: number = cloudData?.sudokuStageProgress ?? 1;
+                const progressRef = doc(db, 'users', user.uid, 'sudokuProgress', 'data');
+                const progressSnap = await getDoc(progressRef);
+                let cloudProgress: number = 1;
+
+                if (progressSnap.exists()) {
+                    cloudProgress = progressSnap.data()?.sudokuStageProgress ?? 1;
+                } else {
+                    // Fallback to legacy structure
+                    const userRef = doc(db, 'users', user.uid);
+                    const userSnap = await getDoc(userRef);
+                    cloudProgress = userSnap.data()?.sudokuStageProgress ?? 1;
+                }
+
                 const localProgress = parseInt(localStorage.getItem(LS_KEY) ?? '1', 10) || 1;
                 const merged = Math.max(localProgress, cloudProgress);
 
@@ -45,6 +54,7 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
             } catch (e) {
                 console.error('SudokuProgressContext sync error:', e);
             }
+
         });
         return unsubscribe;
     }, []);
@@ -55,7 +65,7 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
 
         const user = auth.currentUser;
         if (user) {
-            await setDoc(doc(db, 'users', user.uid), { sudokuStageProgress: nextLevel }, { merge: true });
+            await setDoc(doc(db, 'users', user.uid, 'sudokuProgress', 'data'), { sudokuStageProgress: nextLevel }, { merge: true });
         }
     }, []);
 

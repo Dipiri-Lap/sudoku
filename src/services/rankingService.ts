@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, query, orderBy, limit, getDocs, collectionGroup } from 'firebase/firestore';
 
 export interface UserProfile {
     uid: string;
@@ -13,58 +13,77 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
 
+    let nickname = uid.slice(0, 8);
+    let bestTimes: { [key: string]: number } = {};
+
     if (userSnap.exists()) {
-        return userSnap.data() as UserProfile;
+        const userData = userSnap.data();
+        nickname = userData.nickname || nickname;
+        bestTimes = userData.bestTimes || {};
     } else {
         // Create new profile if not exists
-        const newProfile: UserProfile = {
-            uid,
-            nickname: uid.slice(0, 8),
-            bestTimes: {}
-        };
-        await setDoc(userRef, newProfile);
-        return newProfile;
+        await setDoc(userRef, { uid, nickname, coins: 0, createdAt: new Date().toISOString() });
     }
+
+    const progressRef = doc(db, 'users', uid, 'sudokuProgress', 'data');
+    const progressSnap = await getDoc(progressRef);
+
+    if (progressSnap.exists()) {
+        const progressData = progressSnap.data();
+        if (progressData.bestTimes) {
+            bestTimes = progressData.bestTimes;
+        }
+    }
+
+    return { uid, nickname, bestTimes };
 };
 
 export const updateNickname = async (uid: string, newNickname: string): Promise<void> => {
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, { nickname: newNickname });
+
+    const progressRef = doc(db, 'users', uid, 'sudokuProgress', 'data');
+    const progressSnap = await getDoc(progressRef);
+    if (progressSnap.exists()) {
+        await updateDoc(progressRef, { nickname: newNickname });
+    }
 };
 
 export const saveRecord = async (uid: string, difficulty: string, time: number): Promise<{ isNewRecord: boolean }> => {
-    const userRef = doc(db, 'users', uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-        // Should have been created by getUserProfile, but just in case
-        await getUserProfile(uid);
-    }
-
-    const userData = (await getDoc(userRef)).data() as UserProfile;
-    const currentBest = userData.bestTimes[difficulty];
+    const profile = await getUserProfile(uid);
+    const currentBest = profile.bestTimes[difficulty];
 
     if (currentBest === undefined || time < currentBest) {
-        await updateDoc(userRef, {
-            [`bestTimes.${difficulty}`]: time
-        });
+        profile.bestTimes[difficulty] = time;
+
+        const progressRef = doc(db, 'users', uid, 'sudokuProgress', 'data');
+        await setDoc(progressRef, {
+            bestTimes: profile.bestTimes,
+            nickname: profile.nickname
+        }, { merge: true });
+
         return { isNewRecord: true };
     }
 
     return { isNewRecord: false };
 };
 
-export const getGlobalBestTime = async (difficulty: string): Promise<{ time: number, nickname: string } | null> => {
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, orderBy(`bestTimes.${difficulty}`, 'asc'), limit(1));
-    const querySnapshot = await getDocs(q);
 
-    if (!querySnapshot.empty) {
-        const userData = querySnapshot.docs[0].data() as UserProfile;
-        const time = userData.bestTimes[difficulty];
-        if (time !== undefined) {
-            return { time, nickname: userData.nickname };
+export const getGlobalBestTime = async (difficulty: string): Promise<{ time: number, nickname: string } | null> => {
+    try {
+        const progressGroupRef = collectionGroup(db, 'sudokuProgress');
+        const q = query(progressGroupRef, orderBy(`bestTimes.${difficulty}`, 'asc'), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const data = querySnapshot.docs[0].data();
+            const time = data.bestTimes?.[difficulty];
+            if (time !== undefined) {
+                return { time, nickname: data.nickname || 'Unknown' };
+            }
         }
+    } catch (e) {
+        console.error('Failed to get global best time (You might need to create a Firestore Index):', e);
     }
     return null;
 };
