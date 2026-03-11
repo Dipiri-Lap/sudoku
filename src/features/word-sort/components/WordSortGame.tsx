@@ -7,7 +7,7 @@ import { RotateCcw, Undo2, Layers as LayersIcon, Crown, Sparkles } from 'lucide-
 import confetti from 'canvas-confetti';
 import { useCoins } from '../../../context/CoinContext';
 import CoinDisplay from '../../../common/components/CoinDisplay';
-import { useCardBack, AVAILABLE_CARD_BACKS } from '../context/CardBackContext';
+import { useCardBacks, cardBackDesigns } from '../context/CardBackContext';
 import CardBackShopModal from './CardBackShopModal';
 import GlobalOverlay from './board/GlobalOverlay';
 
@@ -26,8 +26,8 @@ const WordSortGame: React.FC = () => {
     const [gatheringCat, setGatheringCat] = useState<string | null>(null);
     const [gatherPhase, setGatherPhase] = useState(0);
 
-    const { selectedId } = useCardBack();
-    const currentCardBack = AVAILABLE_CARD_BACKS.find(cb => cb.id === selectedId) || AVAILABLE_CARD_BACKS[0];
+    const { selectedBackId } = useCardBacks();
+    const currentCardBack = cardBackDesigns.find((cb: any) => cb.id === selectedBackId) || cardBackDesigns[0];
 
 
     // Dynamic card width: measure the actual container width via ref (most reliable)

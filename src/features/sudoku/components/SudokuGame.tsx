@@ -35,12 +35,14 @@ const SudokuGame: React.FC = () => {
     useEffect(() => {
         if (state.isWinner && !hasAwardedCoins.current) {
             hasAwardedCoins.current = true;
-            addCoins(10);
+            if (state.gameMode !== 'TimeAttack') {
+                addCoins(10);
+            }
             if (auth.currentUser) {
                 import('../../../services/rankingService').then(m => m.incrementPuzzlePower(auth.currentUser!.uid)).catch(console.error);
             }
         }
-    }, [state.isWinner, addCoins]);
+    }, [state.isWinner, addCoins, state.gameMode]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
