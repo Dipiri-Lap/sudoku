@@ -6,7 +6,7 @@ import Controls from './Controls';
 import type { Difficulty } from '../../../engine/generator';
 import { Play, Pause, ChevronLeft, ArrowRight, Trophy } from 'lucide-react';
 import { auth } from '../../../firebase';
-import { getUserProfile, saveRecord, updateNickname } from '../../../services/rankingService';
+import { getUserProfile, saveRecord, updateProfileInfo } from '../../../services/rankingService';
 import { useCoins } from '../../../context/CoinContext';
 import CoinDisplay from '../../../common/components/CoinDisplay';
 
@@ -36,6 +36,9 @@ const SudokuGame: React.FC = () => {
         if (state.isWinner && !hasAwardedCoins.current) {
             hasAwardedCoins.current = true;
             addCoins(10);
+            if (auth.currentUser) {
+                import('../../../services/rankingService').then(m => m.incrementPuzzlePower(auth.currentUser!.uid)).catch(console.error);
+            }
         }
     }, [state.isWinner, addCoins]);
 
@@ -184,7 +187,7 @@ const SudokuGame: React.FC = () => {
 
     const handleNicknameUpdate = async () => {
         if (auth.currentUser && inputNickname.trim()) {
-            await updateNickname(auth.currentUser.uid, inputNickname);
+            await updateProfileInfo(auth.currentUser.uid, { nickname: inputNickname });
             alert('닉네임이 변경되었습니다.');
         }
     };

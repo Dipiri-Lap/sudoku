@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Download, LogIn, LogOut, User } from 'lucide-react';
+import { Play, Download, LogIn, LogOut } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { usePWAInstall } from '../hooks/usePWAInstall';
@@ -7,12 +7,15 @@ import { auth } from '../../firebase';
 import { signOut } from '../../services/authService';
 import LoginModal from './LoginModal';
 import CoinDisplay from './CoinDisplay';
+import ProfileModal from './ProfileModal';
 
 const LandingPage: React.FC = () => {
     const { isInstallable, promptToInstall } = usePWAInstall();
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const [showProfileModal, setShowProfileModal] = useState(false);
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
     const [nickname, setNickname] = useState<string>('');
+    const [puzzlePower, setPuzzlePower] = useState<number>(0);
     const [toast, setToast] = useState<string | null>(null);
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
 
@@ -24,10 +27,11 @@ const LandingPage: React.FC = () => {
                 try {
                     const profile = await getUserProfile(user.uid);
                     setNickname(profile.nickname);
+                    setUserPhoto(profile.photoURL || null);
+                    setPuzzlePower(profile.puzzlePower || 0);
                 } catch (e) {
-                    console.error('Failed to fetch nickname:', e);
+                    console.error('Failed to fetch profile:', e);
                 }
-                setUserPhoto(user.photoURL);
             } else {
                 setNickname('');
                 setUserPhoto(null);
@@ -53,6 +57,7 @@ const LandingPage: React.FC = () => {
     };
 
     const isGuest = currentUser?.isAnonymous;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     return (
         <div className="landing-page">
@@ -76,99 +81,113 @@ const LandingPage: React.FC = () => {
                 </div>
             )}
 
-            <header className="landing-header">
-                {/* 상단 프로필/코인 영역 */}
+            <header className="landing-header" style={{ width: '100%' }}>
+                {/* 상단 프로필/코인 다크 바 영역 */}
                 <div style={{
                     display: 'flex',
-                    justifyContent: 'flex-end',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: '0.6rem',
                     width: '100%',
-                    marginBottom: '0.75rem',
-                    padding: '0 0.5rem'
+                    marginBottom: '1rem',
+                    padding: '0.5rem 0.75rem',
+                    backgroundColor: '#334155', // slightly lighter dark bar
+                    borderRadius: '16px', // Rounded square shape instead of pill
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                 }}>
-                    {nickname && (
-                        <span style={{
-                            fontSize: '0.85rem',
-                            fontWeight: '600',
-                            color: '#555',
-                            backgroundColor: '#f0f0f0',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '1rem'
-                        }}>
-                            {nickname}
-                        </span>
-                    )}
-
-                    <CoinDisplay />
-
-                    <div style={{ marginLeft: '0.4rem', height: '24px', width: '1px', backgroundColor: '#e0e0e0' }} />
-
-                    {currentUser && !isGuest ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {userPhoto ? (
-                                <img
-                                    src={userPhoto}
-                                    alt="프로필"
-                                    style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #eee' }}
-                                />
-                            ) : (
-                                <div style={{
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#eee',
+                    {/* Left: Avatar & Info */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        {currentUser && !isGuest && (
+                            <div
+                                onClick={() => setShowProfileModal(true)}
+                                style={{
+                                    width: '48px',
+                                    height: '48px',
+                                    borderRadius: '14px',
+                                    border: '3px solid #fde047', // bright yellow border
+                                    backgroundColor: '#0f172a', // very dark inner background to contrast with bar
+                                    overflow: 'hidden',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                    cursor: 'pointer',
+                                    transition: 'transform 0.1s'
                                 }}>
-                                    <User size={18} color="#999" />
+                                <img
+                                    src={userPhoto || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${nickname || 'guest'}&backgroundColor=transparent`}
+                                    alt="프로필"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            </div>
+                        )}
+
+                        {/* 닉네임 + 퍼즐력 영역 */}
+                        {currentUser && !isGuest && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                                    {nickname}
+                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
+                                        퍼즐력
+                                    </span>
+                                    <span style={{ color: '#ef4444', fontSize: '1rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
+                                        {puzzlePower}
+                                    </span>
                                 </div>
-                            )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right: Coins and Logout/Login */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <CoinDisplay />
+
+                        <div style={{ marginLeft: '0.2rem', height: '24px', width: '1px', backgroundColor: 'rgba(255,255,255,0.2)' }} />
+
+                        {currentUser && !isGuest ? (
                             <button
                                 onClick={handleSignOut}
+                                title="로그아웃"
                                 style={{
-                                    padding: '0.4rem 0.8rem',
-                                    borderRadius: '2rem',
-                                    border: '1px solid #ddd',
-                                    backgroundColor: 'white',
-                                    color: '#666',
-                                    fontSize: '0.8rem',
-                                    fontWeight: '500',
+                                    padding: '0.5rem',
+                                    borderRadius: '50%',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    backgroundColor: 'rgba(255,255,255,0.1)',
+                                    color: '#fff',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '0.3rem',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                                    justifyContent: 'center',
+                                    transition: 'all 0.2s',
                                 }}
                             >
-                                <LogOut size={14} />
-                                로그아웃
+                                <LogOut size={16} />
                             </button>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={() => setShowLoginModal(true)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.4rem',
-                                padding: '0.45rem 1.1rem',
-                                borderRadius: '2rem',
-                                border: 'none',
-                                backgroundColor: '#4a90e2',
-                                color: 'white',
-                                fontWeight: 700,
-                                fontSize: '0.85rem',
-                                cursor: 'pointer',
-                                boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            <LogIn size={15} />
-                            로그인
-                        </button>
-                    )}
+                        ) : (
+                            <button
+                                onClick={() => setShowLoginModal(true)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.4rem',
+                                    padding: '0.45rem 1.1rem',
+                                    borderRadius: '2rem',
+                                    border: 'none',
+                                    backgroundColor: '#4a90e2',
+                                    color: 'white',
+                                    fontWeight: 700,
+                                    fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <LogIn size={15} />
+                                로그인
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} />
@@ -194,7 +213,7 @@ const LandingPage: React.FC = () => {
                         }}
                     >
                         <Download size={18} />
-                        앱 설치하기
+                        {isMobile ? '홈화면에 바로가기 만들기' : '바탕화면에 바로가기 만들기'}
                     </button>
                 )}
             </header>
@@ -241,6 +260,20 @@ const LandingPage: React.FC = () => {
                 <LoginModal
                     onClose={() => setShowLoginModal(false)}
                     onSuccess={handleLoginSuccess}
+                />
+            )}
+
+            {showProfileModal && currentUser && (
+                <ProfileModal
+                    uid={currentUser.uid}
+                    currentNickname={nickname}
+                    currentPhotoURL={userPhoto}
+                    onClose={() => setShowProfileModal(false)}
+                    onSaveSuccess={(newNickname, newPhotoURL) => {
+                        setNickname(newNickname);
+                        setUserPhoto(newPhotoURL);
+                        showToast('프로필이 업데이트되었습니다.');
+                    }}
                 />
             )}
         </div>

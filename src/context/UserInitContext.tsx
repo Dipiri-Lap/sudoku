@@ -37,6 +37,7 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                         uid: user.uid,
                         nickname: user.uid.slice(0, 8),
                         coins: parseInt(localStorage.getItem('puzzle_coins') ?? '0', 10) || 0,
+                        puzzlePower: 0,
                         createdAt: new Date().toISOString(),
                     };
 
@@ -51,6 +52,7 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     if (data.coins === undefined) {
                         updates.coins = parseInt(localStorage.getItem('puzzle_coins') ?? '0', 10) || 0;
                     }
+                    if (data.puzzlePower === undefined) updates.puzzlePower = 0;
                     if (data.createdAt === undefined) updates.createdAt = new Date().toISOString();
 
                     if (Object.keys(updates).length > 0) {

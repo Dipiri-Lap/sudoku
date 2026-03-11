@@ -30,6 +30,7 @@ export interface WordSolitaireState {
     isGameOver: boolean;
     isWinner: boolean;
     lastCompletedSlot: number | null; // slot index that just completed, for animation trigger
+    history: Omit<WordSolitaireState, 'history'>[]; // state snapshots for Undo
 }
 
 export type WordSolitaireAction =
@@ -38,7 +39,9 @@ export type WordSolitaireAction =
     | { type: 'MOVE_CARD'; from: { type: 'stack' | 'deck'; index: number; cardIndex?: number; count?: number }; to: { type: 'slot' | 'stack'; index: number } }
     | { type: 'CLEAR_COMPLETED_SLOT' }
     | { type: 'UNLOCK_STACK' }
-    | { type: 'UNLOCK_SLOT' };
+    | { type: 'UNLOCK_SLOT' }
+    | { type: 'REMOVE_CATEGORY'; catId: string }
+    | { type: 'UNDO_ACTION' };
 
 const initialState: WordSolitaireState = {
     level: 1,
@@ -53,6 +56,7 @@ const initialState: WordSolitaireState = {
     isGameOver: false,
     isWinner: false,
     lastCompletedSlot: null,
+    history: [],
 };
 
 function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAction): WordSolitaireState {
@@ -162,6 +166,11 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             if (state.isGameOver || state.isWinner) return state;
             if (state.stepsLeft <= 0) return state;
 
+            const snapshot = { ...state };
+            // @ts-ignore
+            delete snapshot.history;
+            const newHistory = [...state.history, snapshot];
+
             // Recycling logic: if deck is empty, move revealed cards back to deck
             if (state.deck.length === 0) {
                 if (state.revealedDeck.length === 0) return state;
@@ -175,6 +184,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     deck: recycledDeck,
                     revealedDeck: [],
                     stepsLeft: state.stepsLeft - 1,
+                    history: newHistory,
                 };
             }
 
@@ -184,6 +194,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                 deck: remainingDeck,
                 revealedDeck: [...state.revealedDeck, { ...card, isRevealed: true }],
                 stepsLeft: state.stepsLeft - 1,
+                history: newHistory,
             };
         }
 
@@ -286,6 +297,77 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             return { ...state, activeSlots: { ...state.activeSlots, [nextIndex]: null } };
         }
 
+        case 'REMOVE_CATEGORY': {
+            const { catId } = action;
+            const catDef = state.categories.find(c => c.id === catId);
+            if (!catDef) return state;
+
+            // 1. Remove all cards of this category from stacks, deck, and revealedDeck
+            let newStacks = state.stacks.map(stack => {
+                const filtered = stack.filter(card => card.cat !== catId);
+                // Reveal top card if it was hidden
+                if (filtered.length > 0 && !filtered[filtered.length - 1].isRevealed) {
+                    filtered[filtered.length - 1] = { ...filtered[filtered.length - 1], isRevealed: true };
+                }
+                return filtered;
+            });
+
+            const newDeck = state.deck.filter(card => card.cat !== catId);
+            const newRevealedDeck = state.revealedDeck.filter(card => card.cat !== catId);
+
+            // 2. Find or update slot
+            let newSlots = { ...state.activeSlots };
+            let targetSlotIndex = -1;
+            
+            // Look for existing slot
+            for (const [key, slot] of Object.entries(newSlots)) {
+                if (slot?.catId === catId) {
+                    targetSlotIndex = Number(key);
+                    break;
+                }
+            }
+
+            // If no existing slot, find an empty one
+            if (targetSlotIndex === -1) {
+                for (const [key, slot] of Object.entries(newSlots)) {
+                    if (slot === null) {
+                        targetSlotIndex = Number(key);
+                        break;
+                    }
+                }
+            }
+
+            // If still no slot, the category cards are just removed (edge case)
+            if (targetSlotIndex !== -1) {
+                newSlots[targetSlotIndex] = null; // Mark as "completed" by auto-clearing
+            }
+
+            const isWinner = newStacks.every(s => s.length === 0) &&
+                newDeck.length === 0 &&
+                newRevealedDeck.length === 0 &&
+                Object.values(newSlots).every(s => !s || s.collected.length >= s.target);
+
+            return {
+                ...state,
+                stacks: newStacks,
+                deck: newDeck,
+                revealedDeck: newRevealedDeck,
+                activeSlots: newSlots,
+                lastCompletedSlot: targetSlotIndex !== -1 ? targetSlotIndex : null,
+                isWinner,
+                isGameOver: state.stepsLeft <= 0 && !isWinner
+            };
+        }
+
+        case 'UNDO_ACTION': {
+            if (state.history.length === 0) return state;
+            const previousState = state.history[state.history.length - 1];
+            return {
+                ...previousState,
+                history: state.history.slice(0, -1)
+            };
+        }
+
         default:
             return state;
     }
@@ -324,6 +406,11 @@ function updateStateAfterMove(
         newRevealedDeck.length === 0 &&
         Object.values(newSlots).every(s => !s || s.collected.length >= s.target);
 
+    const snapshot = { ...state };
+    // @ts-ignore
+    delete snapshot.history;
+    const newHistory = [...state.history, snapshot];
+
     return {
         ...state,
         stacks: newStacks,
@@ -331,7 +418,8 @@ function updateStateAfterMove(
         activeSlots: newSlots,
         stepsLeft: state.stepsLeft - 1,
         isWinner,
-        isGameOver: state.stepsLeft - 1 <= 0 && !isWinner
+        isGameOver: state.stepsLeft - 1 <= 0 && !isWinner,
+        history: newHistory
     };
 }
 

@@ -1,14 +1,15 @@
-import React, { useEffect, useLayoutEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWordSort } from '../context/WordSortContext';
 import levels from '../data/levels.json';
 import tutorialLevel from '../data/tutorial-level.json';
 import TutorialOverlay from './TutorialOverlay';
-import { RotateCcw, Undo2, Search, Layers as LayersIcon, Crown, Sparkles } from 'lucide-react';
+import { RotateCcw, Undo2, Layers as LayersIcon, Crown, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCoins } from '../../../context/CoinContext';
 import CoinDisplay from '../../../common/components/CoinDisplay';
 import { useCardBack, AVAILABLE_CARD_BACKS } from '../context/CardBackContext';
 import CardBackShopModal from './CardBackShopModal';
+import GlobalOverlay from './board/GlobalOverlay';
 
 
 const WordSortGame: React.FC = () => {
@@ -21,6 +22,9 @@ const WordSortGame: React.FC = () => {
     const [lockedSlots, setLockedSlots] = useState(1);
     const [unlockConfirm, setUnlockConfirm] = useState<'stack' | 'slot' | null>(null);
     const [isShopOpen, setIsShopOpen] = useState(false);
+    const [isRemoveMode, setIsRemoveMode] = useState(false);
+    const [gatheringCat, setGatheringCat] = useState<string | null>(null);
+    const [gatherPhase, setGatherPhase] = useState(0);
 
     const { selectedId } = useCardBack();
     const currentCardBack = AVAILABLE_CARD_BACKS.find(cb => cb.id === selectedId) || AVAILABLE_CARD_BACKS[0];
@@ -31,6 +35,8 @@ const WordSortGame: React.FC = () => {
     const [containerMaxWidth, setContainerMaxWidth] = useState(
         Math.min(500, document.documentElement.clientWidth) - 64
     );
+    const [isRemovingAction, setIsRemovingAction] = useState(false);
+    const [removeTargetLocation, setRemoveTargetLocation] = useState<{x: number, y: number} | null>(null);
     useLayoutEffect(() => {
         const update = () => {
             if (gameContainerRef.current) {
@@ -96,6 +102,8 @@ const WordSortGame: React.FC = () => {
     const [dealingProgress, setDealingProgress] = useState(0);
     const dealingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const deckCardRef = useRef<HTMLDivElement | null>(null);
+    const gatherOffsets = useRef<Map<string, { x: number, y: number, startX: number, startY: number, seq: number, card: any }>>(new Map());
+
 
     useEffect(() => {
         return () => { if (dealingTimerRef.current) clearInterval(dealingTimerRef.current); };
@@ -111,6 +119,11 @@ const WordSortGame: React.FC = () => {
         if (state.isWinner && tutorialStep === null && !hasAwardedCoins.current) {
             hasAwardedCoins.current = true;
             addCoins(10);
+            import('../../../firebase').then(({ auth }) => {
+                if (auth.currentUser) {
+                    import('../../../services/rankingService').then(m => m.incrementPuzzlePower(auth.currentUser!.uid)).catch(console.error);
+                }
+            });
         }
     }, [state.isWinner, tutorialStep, addCoins]);
 
@@ -225,7 +238,7 @@ const WordSortGame: React.FC = () => {
 
     const handleUnlockConfirm = async () => {
         if (!unlockConfirm) return;
-        const success = await spendCoins(20);
+        const success = await spendCoins(50);
         if (!success) { setUnlockConfirm(null); return; }
         if (unlockConfirm === 'stack') {
             dispatch({ type: 'UNLOCK_STACK' });
@@ -282,9 +295,18 @@ const WordSortGame: React.FC = () => {
 
         const slotEl = slotRefs.current[slotIndex];
         if (slotEl) {
-            const rect = slotEl.getBoundingClientRect();
-            const x = (rect.left + rect.width / 2) / window.innerWidth;
-            const y = (rect.top + rect.height / 2) / window.innerHeight;
+            let x = 0.5, y = 0.5;
+            
+            if (isRemovingAction && removeTargetLocation) {
+                // If cards gathered somewhere specific (like a slot), explode there
+                x = removeTargetLocation.x;
+                y = removeTargetLocation.y;
+            } else if (!isRemovingAction) {
+                // Standard slot complete (not removal)
+                const rect = slotEl.getBoundingClientRect();
+                x = (rect.left + rect.width / 2) / window.innerWidth;
+                y = (rect.top + rect.height / 2) / window.innerHeight;
+            }
 
             // Phase 1: Burst at slot center
             confetti({
@@ -316,11 +338,154 @@ const WordSortGame: React.FC = () => {
         // Clear glow after animation
         const timer = setTimeout(() => {
             setCompletingSlot(null);
+            setIsRemovingAction(false);
+            setRemoveTargetLocation(null);
             dispatch({ type: 'CLEAR_COMPLETED_SLOT' });
         }, 900);
 
         return () => clearTimeout(timer);
     }, [state.lastCompletedSlot, dispatch]);
+
+
+
+    // Obsolete useLayoutEffect removed to allow coordinate-based gathering in handleRemoveClick
+
+
+    const handleRemoveClick = async (catId: string) => {
+        if (!isRemoveMode || gatheringCat) return;
+
+        const success = await spendCoins(50);
+        if (!success) return;
+
+        // 1. Find the target slot for this category to determine destination
+        let targetX = window.innerWidth / 2 - finalCardWidth / 2;
+        let targetY = window.innerHeight / 2 - cardHeight / 2;
+        
+        const slotEntry = Object.entries(state.activeSlots).find(([_, s]) => s?.catId === catId);
+        if (slotEntry) {
+            const slotIdx = Number(slotEntry[0]);
+            const slotEl = slotRefs.current[slotIdx];
+            if (slotEl) {
+                const rect = slotEl.getBoundingClientRect();
+                // We use fixed top-left of the slot as target
+                targetX = rect.left;
+                targetY = rect.top;
+            }
+        }
+
+        setRemoveTargetLocation({ 
+            x: (targetX + finalCardWidth / 2) / window.innerWidth, 
+            y: (targetY + cardHeight / 2) / window.innerHeight 
+        });
+
+        const newGatherOffsets = new Map<string, { x: number, y: number, startX: number, startY: number, seq: number, card: any }>();
+        let seq = 0;
+
+        const addTarget = (card: any, startXOverride?: number, startYOverride?: number) => {
+            if (newGatherOffsets.has(card.id)) return;
+            const el = document.querySelector(`[data-card-id="${card.id}"]`);
+            let sX = 0, sY = 0;
+            if (startXOverride !== undefined && startYOverride !== undefined) {
+                sX = startXOverride;
+                sY = startYOverride;
+            } else if (el) {
+                const r = el.getBoundingClientRect();
+                sX = r.left;
+                sY = r.top;
+            } else {
+                // Fallback to deck position
+                if (deckCardRef.current) {
+                    const r = deckCardRef.current.getBoundingClientRect();
+                    sX = r.left;
+                    sY = r.top;
+                } else {
+                    // Universal fallback: screen center
+                    sX = window.innerWidth / 2 - finalCardWidth / 2;
+                    sY = window.innerHeight / 2 - cardHeight / 2;
+                }
+            }
+            newGatherOffsets.set(card.id, {
+                startX: sX,
+                startY: sY,
+                x: targetX,
+                y: targetY,
+                seq: seq++,
+                card
+            });
+        };
+
+        // Find and add cards in order: Category first, then words
+        // 1. Target Slot (The main category card in its destination)
+        const targetSlot = Object.entries(state.activeSlots).find(([_, s]) => s?.catId === catId);
+        if (targetSlot) {
+            const [sIdxString, slot] = targetSlot;
+            const slotIdx = Number(sIdxString);
+            const slotEl = slotRefs.current[slotIdx];
+            if (slotEl && slot) {
+                const rect = slotEl.getBoundingClientRect();
+                addTarget({ id: `slot-${slotIdx}`, value: slot.name, type: 'category', cat: catId }, rect.left, rect.top);
+            }
+        }
+
+        // 2. Category in Revealed Deck / Stacks / Draw Pile (if not handled by slot)
+        state.revealedDeck.forEach(card => {
+            if (card.cat === catId && card.type === 'category' && !newGatherOffsets.has(card.id)) addTarget(card);
+        });
+        state.stacks.forEach(stack => {
+            stack.forEach(card => {
+                if (card.cat === catId && card.type === 'category' && !newGatherOffsets.has(card.id)) addTarget(card);
+            });
+        });
+        state.deck.forEach(card => {
+            if (card.cat === catId && card.type === 'category' && !newGatherOffsets.has(card.id)) addTarget(card);
+        });
+
+        // 3. Words in Stacks (Priority to stacks for gameplay feel)
+        state.stacks.forEach(stack => {
+            stack.forEach(card => {
+                if (card.cat === catId && card.type === 'word') addTarget(card);
+            });
+        });
+
+        // 4. Words in Revealed Deck
+        state.revealedDeck.forEach(card => {
+            if (card.cat === catId && card.type === 'word') addTarget(card);
+        });
+
+        // 5. Words in Draw Pile
+        state.deck.forEach(card => {
+            if (card.cat === catId && card.type === 'word') addTarget(card);
+        });
+
+        gatherOffsets.current = newGatherOffsets;
+        setGatheringCat(catId);
+        setGatherPhase(-1); // Start at -1 to ensure mount before movement
+        setIsRemovingAction(true);
+
+        // Phase transitions
+        // Iterate through all collected cards and trigger their movement phase
+        let accumulatedDelay = 0;
+        let currentInterval = 400; // Start quite slow
+        
+        newGatherOffsets.forEach((info) => {
+            const seqNum = info.seq;
+            accumulatedDelay += currentInterval;
+            
+            // Delay each phase
+            setTimeout(() => setGatherPhase(seqNum), accumulatedDelay);
+            
+            // Speed up the next interval by 20%, but never faster than 40ms
+            currentInterval = Math.max(40, currentInterval * 0.8);
+        });
+
+        // After all animations complete, actually remove them from the game state
+        setTimeout(() => {
+            dispatch({ type: 'REMOVE_CATEGORY', catId: catId });
+            setGatheringCat(null);
+            setGatherPhase(0);
+            setIsRemoveMode(false);
+        }, accumulatedDelay + 500); // 500ms buffer to allow the last 0.3s transition to finish
+    };
 
     const handleDragStart = (e: React.DragEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => {
         // Step 2: only top-of-stack category cards are allowed
@@ -390,8 +555,8 @@ const WordSortGame: React.FC = () => {
                 }
             }
 
-            // Adjustment for grabOffsetY: If we clicked a card in a stack, 
-            // the drag group might start at baseIndex. 
+            // Adjustment for grabOffsetY: If we clicked a card in a stack,
+            // the drag group might start at baseIndex.
             // We need the offset relative to the baseIndex card.
             if (cardIndex > baseIndex) {
                 grabOffsetY += (cardIndex - baseIndex) * visibleHeight;
@@ -699,6 +864,7 @@ const WordSortGame: React.FC = () => {
     };
 
     const drawDeck = () => {
+        if (isRemoveMode) return;
         if (tutorialStep === 2 || tutorialStep === 4 || tutorialStep === 5 || tutorialStep === 6) return;
         dispatch({ type: 'DRAW_DECK' });
     };
@@ -804,7 +970,7 @@ const WordSortGame: React.FC = () => {
             style={{
                 padding: '0.5rem 1rem 1rem',
                 color: 'white',
-                background: '#5c5e7e',
+                background: 'radial-gradient(circle at center, #7a7da1 0%, #2c2e49 100%)',
                 minHeight: '100vh',
                 fontFamily: "'Inter', sans-serif",
                 display: 'flex',
@@ -854,17 +1020,17 @@ const WordSortGame: React.FC = () => {
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', position: 'relative' }}>
                     <style>{`
                      @keyframes flipAndMove {
-                        0% { 
-                            transform: translateX(var(--startX, 150px)) rotateY(180deg); 
-                            opacity: 1; 
+                        0% {
+                            transform: translateX(var(--startX, 150px)) rotateY(180deg);
+                            opacity: 1;
                             z-index: 100;
                         }
                         15% {
                             transform: translateX(var(--startX, 150px)) rotateY(0deg);
                             opacity: 1;
                         }
-                        100% { 
-                            transform: translateX(0) rotateY(0deg); 
+                        100% {
+                            transform: translateX(0) rotateY(0deg);
                             opacity: 1;
                             z-index: 5;
                         }
@@ -915,6 +1081,51 @@ const WordSortGame: React.FC = () => {
                         position: relative;
                         z-index: 200 !important;
                     }
+                    @keyframes gatherToCenter {
+                        0% { transform: translate(0, 0) scale(1); opacity: 1; }
+                        0.1% { z-index: 5000; }
+                        100% {
+                            transform: translate(var(--gather-x, 0px), var(--gather-y, 0px)) scale(1);
+                            opacity: 1;
+                            z-index: 5000;
+                        }
+                    }
+                    .gathering-animation {
+                        animation: gatherToCenter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+                        animation-delay: var(--gather-delay, 0s) !important;
+                        pointer-events: none;
+                        transition: none !important;
+                    }
+                    @keyframes revealCard {
+                        0% { opacity: 1; }
+                        100% { opacity: 0; }
+                    }
+                    .reveal-overlay {
+                        position: absolute;
+                        inset: 0;
+                        z-index: 10;
+                        border-radius: 3px;
+                        animation: revealCard 0.1s forwards !important;
+                        pointer-events: none;
+                    }
+                    .central-glow {
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 150px;
+                        height: 200px;
+                        border-radius: 12px;
+                        background: rgba(255, 215, 0, 0.3);
+                        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5);
+                        z-index: 4500;
+                        animation: centralGlowPulse 0.8s ease-out forwards;
+                    }
+                    @keyframes centralGlowPulse {
+                        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                        50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                        100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0; }
+                    }
                 `}</style>
                     <div style={{
                         display: 'flex',
@@ -925,119 +1136,103 @@ const WordSortGame: React.FC = () => {
                         top: 0,
                         width: `${finalCardWidth + 84}px`,
                         minHeight: '80px',
-                        perspective: '1200px',
-                        zIndex: 10
+                        perspective: gatheringCat ? 'none' : '1200px',
+                        zIndex: gatheringCat ? 6000 : 10
                     }}>
                         {(state.revealedDeck.length === 0 || (state.revealedDeck.length === 1 && draggingGroup?.type === 'deck')) && (
                             <div style={{ ...slotCardStyle, width: `${finalCardWidth}px`, background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', position: 'absolute', right: 0 }}>
                                 <div style={{ opacity: 0.2, fontSize: '0.7rem' }}>카드 없음</div>
                             </div>
                         )}
-                        {state.revealedDeck.length > 0 && state.revealedDeck.slice(-4).map((card, idx, arr) => {
-                            const isTop = idx === arr.length - 1;
-                            const isDragging = isTop && draggingGroup?.type === 'deck';
-                            // 우측 기준: 가장 오래된 것(idx=0)이 right: 0, 최신 것(idx=arr.length-1)이 가장 왼쪽
-                            const offsetGap = 28;
-                            const offset = idx * offsetGap;
-                            const category = state.categories.find(c => c.id === card.cat);
+                        {(() => {
+                            const last4 = state.revealedDeck.slice(-4);
+                            const renderCards = last4.map((c, i) => ({ card: c, idx: i, isTop: i === last4.length - 1 }));
 
-                            // 덱 위치 (슬롯 영역 우측 밖)까지의 거리 계산
-                            // 슬롯 위치(offset) + 슬롯 컨테이너 여백(12px) + 덱 카드 폭(finalCardWidth)
-                            // 덱 더미의 오른쪽 끝 지점으로 출발점을 잡아야 자연스러움
-                            const startX = offset + finalCardWidth + 12;
+                            return renderCards.map(({ card, idx, isTop }) => {
+                                const isGathering = gatherOffsets.current.has(card.id);
+                                const category = state.categories.find(c => c.id === card.cat);
+                                const offsetGap = 28;
+                                const offset = idx * offsetGap;
 
-                            return (
-                                <div
-                                    key={card.id}
-                                    draggable={isTop && tutorialStep !== 2 && tutorialStep !== 4 && tutorialStep !== 5 && tutorialStep !== 6}
-                                    onDragStart={(e) => isTop && handleDragStart(e, 'deck', 0)}
-                                    onDragEnd={() => !landingGroup && setDraggingGroup(null)}
-                                    className={[
-                                        card.id === lastDrawnId ? 'animate-card-draw' : '',
-                                        isTop && tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : ''
-                                    ].filter(Boolean).join(' ')}
-                                    style={{
-                                        ...slotCardStyle,
-                                        position: 'absolute',
-                                        right: `${offset}px`,
-                                        zIndex: isTop ? 50 : idx,
-                                        width: `${finalCardWidth}px`,
-                                        backgroundColor: card.type === 'category' ? '#fff9f2' : '#ffffff',
-                                        backgroundImage: 'none',
-                                        border: card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999',
-                                        boxShadow: card.type === 'category' ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
-                                        visibility: (isDragging || (landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id))) ? 'hidden' : 'visible',
-                                        cursor: isTop ? 'grab' : 'default',
-                                        color: '#333',
-                                        padding: isTop ? '5px' : '0',
-                                        transformOrigin: 'center',
-                                        /* @ts-ignore - CSS custom property */
-                                        '--startX': `${startX}px`
-                                    } as React.CSSProperties}
-                                >
+                                return (
                                     <div
-                                        className="drag-back-layer"
+                                        key={card.id}
+                                        data-card-id={card.id}
+                                        draggable={isTop && tutorialStep !== 2 && tutorialStep !== 4 && tutorialStep !== 5 && tutorialStep !== 6}
+                                        onDragStart={(e) => isTop && handleDragStart(e, 'deck', 0)}
+                                        onDragEnd={() => !landingGroup && setDraggingGroup(null)}
+                                        className={[
+                                            card.id === lastDrawnId ? 'animate-card-draw' : '',
+                                            isTop && tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : ''
+                                        ].filter(Boolean).join(' ')}
                                         style={{
+                                            ...slotCardStyle,
                                             position: 'absolute',
-                                            inset: 0,
-                                            backgroundImage: faceDownPattern,
-                                            backgroundSize: '100% 100%',
-                                            backgroundPosition: 'center',
-                                            backgroundRepeat: 'no-repeat',
-                                            transform: 'rotateY(180deg)',
-                                            backfaceVisibility: 'hidden',
-                                            borderRadius: '5px',
-                                            zIndex: -1
-                                        }}
-                                    />
+                                            right: `${offset}px`,
+                                            zIndex: isTop ? 50 : idx,
+                                            width: `${finalCardWidth}px`,
+                                            backgroundColor: card.isRevealed ? (card.type === 'category' ? '#fff9f2' : '#ffffff') : 'transparent',
+                                            backgroundImage: card.isRevealed ? 'none' : faceDownPattern,
+                                            backgroundSize: card.isRevealed ? 'auto' : '100% 100%',
+                                            border: card.isRevealed ? (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999') : 'none',
+                                            boxShadow: (card.isRevealed && card.type === 'category') ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
+                                            visibility: ((isGathering && (gatherOffsets.current.get(card.id)?.seq ?? 0) <= gatherPhase) || (isTop && draggingGroup?.type === 'deck') || (landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id))) ? 'hidden' : 'visible',
+                                            cursor: isRemoveMode ? 'pointer' : (isTop ? 'grab' : 'default'),
+                                            color: card.isRevealed ? '#333' : 'transparent',
+                                            padding: isTop ? '5px' : '0',
+                                            transformOrigin: 'center',
+                                            '--startX': `${finalCardWidth + 12 + offset}px`,
+                                        } as any}
+                                        onClick={() => isRemoveMode && (card.isRevealed || (gatheringCat === card.cat)) && handleRemoveClick(card.cat)}
+                                    >
+                                        <div style={{
+                                            position: 'absolute',
+                                            inset: '2px',
+                                            border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
+                                            borderRadius: '3px',
+                                            pointerEvents: 'none',
+                                            zIndex: 1
+                                        }} />
 
-                                    <div style={{
-                                        position: 'absolute',
-                                        inset: '2px',
-                                        border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
-                                        borderRadius: '3px',
-                                        pointerEvents: 'none',
-                                        zIndex: 1
-                                    }} />
-
-                                    {isTop && card.type === 'category' && (
-                                        <>
-                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
-                                                0/{category?.words?.length ?? 5}
-                                            </div>
-                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                                <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
-                                            </div>
-                                        </>
-                                    )}
-                                    <div style={{
-                                        height: '100%',
-                                        width: '100%',
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        position: 'relative'
-                                    }}>
-                                        <span style={{
-                                            position: isTop ? 'static' : 'absolute',
-                                            right: isTop ? 'auto' : '2px', // Stay in visible stripe
-                                            width: isTop ? 'auto' : `${offsetGap}px`,
-                                            fontWeight: '900',
-                                            writingMode: isTop ? 'horizontal-tb' : 'vertical-rl',
-                                            textOrientation: 'upright',
-                                            letterSpacing: isTop ? 'normal' : '2px',
-                                            fontSize: isTop ? '0.9rem' : '0.8rem',
+                                        {isTop && card.type === 'category' && (
+                                            <>
+                                                <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
+                                                    0/{category?.words?.length ?? 5}
+                                                </div>
+                                                <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
+                                                    <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                                </div>
+                                            </>
+                                        )}
+                                        <div style={{
+                                            height: '100%',
+                                            width: '100%',
                                             display: 'flex',
-                                            alignItems: 'center',
                                             justifyContent: 'center',
-                                            whiteSpace: 'nowrap'
+                                            alignItems: 'center',
+                                            position: 'relative'
                                         }}>
-                                            {card.value}
-                                        </span>
+                                            <span style={{
+                                                fontWeight: '900',
+                                                fontSize: finalCardWidth < 60 ? '0.75rem' : '0.9rem',
+                                                lineHeight: '1.2',
+                                                zIndex: 2,
+                                                ...( !isTop ? {
+                                                    writingMode: 'vertical-rl',
+                                                    textOrientation: 'upright',
+                                                    position: 'absolute',
+                                                    right: '4px',
+                                                    letterSpacing: '-2px',
+                                                    color: '#666'
+                                                } : { textAlign: 'center' })
+                                            }}>
+                                                {card.value}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            });
+                        })()}
                     </div>
                     <div onClick={drawDeck} style={{ position: 'relative', cursor: 'pointer' }}>
                         <div
@@ -1070,6 +1265,7 @@ const WordSortGame: React.FC = () => {
                             ) : null}
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -1080,7 +1276,9 @@ const WordSortGame: React.FC = () => {
                 gap: `${gap}px`,
                 marginBottom: '1.5rem',
                 maxWidth: 'fit-content',
-                marginInline: 'auto'
+                marginInline: 'auto',
+                position: 'relative',
+                zIndex: gatheringCat ? 6000 : 1
             }}>
                 {tutorialStep === null && Array.from({ length: lockedSlots }).map((_, i) => (
                     <div key={`locked-slot-${i}`} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
@@ -1103,7 +1301,7 @@ const WordSortGame: React.FC = () => {
                         >
                             <span style={{ fontSize: '1.1rem' }}>🔒</span>
                             <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
-                            <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 20</span>
+                            <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>
                         </div>
                     </div>
                 ))}
@@ -1119,7 +1317,7 @@ const WordSortGame: React.FC = () => {
                                 onDragOver={e => e.preventDefault()}
                                 onDrop={(e) => { handleDrop(e); e.stopPropagation(); }}
                                 className={[
-                                    completingSlot === i ? 'animate-slot-complete' : '',
+                                    !isRemovingAction && completingSlot === i ? 'animate-slot-complete' : '',
                                     tutorialHighlightSlots.has(i) ? 'tutorial-highlight' : ''
                                 ].filter(Boolean).join(' ')}
                                 style={{
@@ -1138,7 +1336,8 @@ const WordSortGame: React.FC = () => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                }}
+                                    visibility: (gatheringCat === slot?.catId && gatherOffsets.current.has(`slot-${i}`) && (gatherOffsets.current.get(`slot-${i}`)?.seq ?? 0) <= gatherPhase) ? 'hidden' : 'visible',
+                                } as any}
                             >
                                 {slot ? (
                                     <>
@@ -1187,7 +1386,9 @@ const WordSortGame: React.FC = () => {
                 flex: 1,
                 alignItems: 'flex-start',
                 maxWidth: 'fit-content',
-                marginInline: 'auto'
+                marginInline: 'auto',
+                position: 'relative',
+                zIndex: gatheringCat ? 6000 : 1
             }}>
                 {tutorialStep === null && Array.from({ length: lockedStacks }).map((_, i) => (
                     <div
@@ -1218,7 +1419,7 @@ const WordSortGame: React.FC = () => {
                         }}>
                             <span style={{ fontSize: '1.1rem' }}>🔒</span>
                             <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
-                            <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 20</span>
+                            <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>
                         </div>
                     </div>
                 ))}
@@ -1242,7 +1443,11 @@ const WordSortGame: React.FC = () => {
                                 <div style={{ ...stackCardStyle, borderRadius: '6px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.2)' }} />
                             )}
                         {stack.map((card, cIdx) => {
-                            const isRevealed = !!card.isRevealed;
+                            const cardSeq = gatherOffsets.current.get(card.id)?.seq ?? 0;
+                            const isGatheringTarget = gatheringCat === card.cat && gatherOffsets.current.has(card.id) && cardSeq <= gatherPhase;
+                            const isMoving = gatheringCat === card.cat && gatherOffsets.current.has(card.id);
+                            // Only reveal if it's actually their turn to move (cardSeq <= gatherPhase)
+                            const isRevealed = !!card.isRevealed || (isMoving && cardSeq <= gatherPhase);
                             const numToCompress = Math.max(0, stack.length - 8);
                             const currentVisibleHeight = (cIdx < numToCompress && !isRevealed) ? 13 : visibleHeight;
                             const currentOverlapMargin = -(cardHeight - currentVisibleHeight);
@@ -1269,51 +1474,49 @@ const WordSortGame: React.FC = () => {
                             // Step 6: only group-top cards are draggable
                             if (tutorialStep === 6 && !tutorialHighlightCards.has(card.id)) canDrag = false;
 
-                            const isDragging = draggingGroup?.type === 'stack' &&
-                                draggingGroup.index === sIdx &&
-                                draggingGroup.cardIndex !== undefined &&
-                                cIdx >= draggingGroup.cardIndex &&
-                                cIdx < draggingGroup.cardIndex + (draggingGroup.count || 1);
-
-                            const isProxyMoving = landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id);
-
                             const globalCardIndex = stackStartIndices[sIdx] + cIdx;
                             const isDealtYet = !isDealingAnimation || globalCardIndex < dealingProgress;
                             const isCurrentlyDealing = isDealingAnimation && globalCardIndex < dealingProgress;
 
+
+
                             return (
                                 <div
-                                    key={cIdx}
-                                    draggable={canDrag}
-                                    onDragStart={e => canDrag && handleDragStart(e, 'stack', sIdx, cIdx)}
+                                    key={card.id}
+                                    data-card-id={card.id}
+                                    draggable={canDrag && !isRemoveMode}
+                                    onDragStart={e => canDrag && !isRemoveMode && handleDragStart(e, 'stack', sIdx, cIdx)}
                                     onDragEnd={() => !landingGroup && setDraggingGroup(null)}
                                     onDragOver={e => e.preventDefault()}
+                                    onClick={() => isRemoveMode && (card.isRevealed || (gatheringCat === card.cat)) && handleRemoveClick(card.cat)}
                                     className={[
                                         tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : '',
                                         isCurrentlyDealing ? 'deal-animation' : ''
                                     ].filter(Boolean).join(' ')}
                                     style={{
                                         ...stackCardStyle,
-                                        backgroundColor: (isRevealed && card.type === 'category') ? '#fff9f2' : (isRevealed ? '#ffffff' : 'transparent'),
-                                        backgroundImage: isRevealed
-                                            ? 'none'
-                                            : faceDownPattern,
+                                        width: `${finalCardWidth}px`,
+                                        height: `${cardHeight}px`,
+                                        backgroundColor: isRevealed ? (card.type === 'category' ? '#fff9f2' : '#ffffff') : 'transparent',
+                                        backgroundImage: isRevealed ? 'none' : faceDownPattern,
                                         backgroundSize: isRevealed ? 'auto' : '100% 100%',
                                         backgroundPosition: 'center',
                                         backgroundRepeat: 'no-repeat',
                                         color: isRevealed ? '#333' : 'transparent',
                                         marginBottom: cIdx === stack.length - 1 ? '0' : `${currentOverlapMargin}px`,
                                         zIndex: cIdx,
-                                        cursor: canDrag ? 'grab' : 'default',
+                                        padding: '5px',
+                                        cursor: isRemoveMode && (card.isRevealed || gatheringCat === card.cat) ? 'pointer' : (canDrag ? 'grab' : 'default'),
                                         border: isRevealed
                                             ? (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999')
                                             : 'none',
                                         boxShadow: (isRevealed && card.type === 'category') ? '0 0 10px rgba(255,159,67,0.2)' : 'none',
-                                        visibility: (isDragging || isProxyMoving || !isDealtYet) ? 'hidden' : 'visible',
-                                        transform: 'none',
-                                        transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.4, 1)'
-                                    }}
+                                        visibility: (isGatheringTarget || (draggingGroup?.type === 'stack' && draggingGroup.index === sIdx && draggingGroup.cardIndex !== undefined && cIdx >= draggingGroup.cardIndex && cIdx < draggingGroup.cardIndex + (draggingGroup.count || 1)) || (landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id)) || !isDealtYet) ? 'hidden' : 'visible',
+                                    } as any}
                                 >
+                                    {!card.isRevealed && gatheringCat === card.cat && (
+                                        <div className="reveal-overlay" style={{ backgroundImage: faceDownPattern, backgroundSize: '100% 100%' } as any} />
+                                    )}
                                     {isRevealed && (
                                         <>
                                             <div style={{
@@ -1329,7 +1532,7 @@ const WordSortGame: React.FC = () => {
                                                 width: '100%',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                justifyContent: cIdx === stack.length - 1 ? 'center' : 'flex-start',
+                                                justifyContent: (cIdx === stack.length - 1 || isGatheringTarget) ? 'center' : 'flex-start',
                                                 alignItems: 'center',
                                                 paddingTop: '0',
                                                 position: 'relative'
@@ -1366,11 +1569,9 @@ const WordSortGame: React.FC = () => {
 
             {/* Bottom Menu */}
             <div style={{
-                display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', padding: '1.5rem 0.5rem',
+                display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', padding: '1.5rem 0.5rem',
                 borderTop: '1px solid rgba(255,255,255,0.1)'
             }}>
-                <div style={{ textAlign: 'center' }}><Search size={24} /><div style={{ fontSize: '0.7rem' }}>힌트</div></div>
-                <div style={{ textAlign: 'center' }}><Undo2 size={24} /><div style={{ fontSize: '0.7rem' }}>철회</div></div>
                 <div style={{ textAlign: 'center' }}><RotateCcw size={24} onClick={() => {
                     resetUnlocks();
                     if (tutorialStep !== null) {
@@ -1382,7 +1583,41 @@ const WordSortGame: React.FC = () => {
                         triggerDealing(levelStackTotal(levels[0]));
                     }
                 }} /><div style={{ fontSize: '0.7rem' }}>재시작</div></div>
-                <div style={{ textAlign: 'center' }}><LayersIcon size={24} /><div style={{ fontSize: '0.7rem' }}>제거</div></div>
+                <div 
+                    style={{ 
+                        textAlign: 'center', 
+                        cursor: (state.history.length > 0 && coins >= 10) ? 'pointer' : 'not-allowed', 
+                        color: (state.history.length > 0 && coins >= 10) ? 'white' : 'rgba(255,255,255,0.3)',
+                        opacity: (state.history.length > 0 && coins >= 10) ? 1 : 0.5
+                    }}
+                    onClick={async () => {
+                        if (state.history.length === 0 || coins < 10) return;
+                        const success = await spendCoins(10);
+                        if (success) {
+                            dispatch({ type: 'UNDO_ACTION' });
+                        }
+                    }}
+                >
+                    <Undo2 size={24} style={{ margin: '0 auto' }} />
+                    <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>철회</div>
+                    <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 10</div>
+                </div>
+                <div 
+                    style={{ 
+                        textAlign: 'center', 
+                        cursor: (coins >= 50 || isRemoveMode) ? 'pointer' : 'not-allowed', 
+                        color: isRemoveMode ? '#ff6b6b' : (coins >= 50 ? 'white' : 'rgba(255,255,255,0.3)'),
+                        opacity: isRemoveMode ? 1 : (coins >= 50 ? 1 : 0.5)
+                    }}
+                    onClick={() => {
+                        if (!isRemoveMode && coins < 50) return;
+                        setIsRemoveMode(!isRemoveMode);
+                    }}
+                >
+                    <LayersIcon size={24} style={{ margin: '0 auto' }} />
+                    <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>{isRemoveMode ? '취소' : '제거'}</div>
+                    {!isRemoveMode && <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 50</div>}
+                </div>
             </div>
 
             {/* Unlock Confirm Dialog */}
@@ -1398,10 +1633,10 @@ const WordSortGame: React.FC = () => {
                         <div style={{ fontSize: '1.8rem', marginBottom: '0.4rem' }}>🔓</div>
                         <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.4rem' }}>잠금 해제</div>
                         <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
-                            🪙 20 코인을 사용하여<br />
+                            🪙 50 코인을 사용하여<br />
                             {unlockConfirm === 'stack' ? '스택' : '슬롯'} 공간을 여시겠습니까?
                         </div>
-                        {coins < 20 && (
+                        {coins < 50 && (
                             <div style={{ fontSize: '0.78rem', color: '#ff6b6b', marginBottom: '0.6rem' }}>
                                 코인 부족 (현재 {coins}개)
                             </div>
@@ -1413,8 +1648,8 @@ const WordSortGame: React.FC = () => {
                             >취소</button>
                             <button
                                 onClick={handleUnlockConfirm}
-                                disabled={coins < 20}
-                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= 20 ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= 20 ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
+                                disabled={coins < 50}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= 50 ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= 50 ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
                             >확인</button>
                         </div>
                     </div>
@@ -1438,6 +1673,25 @@ const WordSortGame: React.FC = () => {
             )}
 
             {/* Interaction blocker for step 1 (welcome screen — must press 다음 first) */}
+            {isRemoveMode && !gatheringCat && (
+                <div style={{
+                    position: 'fixed',
+                    top: '20%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(0,0,0,0.8)',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '20px',
+                    zIndex: 10000,
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.2)'
+                }}>
+                    제거할 카테고리 카드를 선택하세요
+                </div>
+            )}
+
             {tutorialStep === 1 && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 9500 }} />
             )}
@@ -1459,8 +1713,16 @@ const WordSortGame: React.FC = () => {
             {/* Shop Modal */}
             {isShopOpen && <CardBackShopModal onClose={() => setIsShopOpen(false)} />}
 
-            {/* Proxy Animation Layer */}
-
+            {/* Global Gathering Animation Overlay */}
+            <GlobalOverlay
+                gatheringCat={gatheringCat}
+                gatherOffsets={gatherOffsets}
+                gatherPhase={gatherPhase}
+                categories={state.categories}
+                finalCardWidth={finalCardWidth}
+                cardHeight={cardHeight}
+            />
+            
             {landingGroup?.isProxy && landingGroup.movingCards && (
                 <div style={{
                     position: 'fixed',

@@ -1,9 +1,11 @@
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc, query, orderBy, limit, getDocs, collectionGroup } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, query, orderBy, limit, getDocs, collectionGroup, increment } from 'firebase/firestore';
 
 export interface UserProfile {
     uid: string;
     nickname: string;
+    photoURL?: string;
+    puzzlePower: number;
     bestTimes: {
         [key: string]: number; // difficulty -> seconds
     };
@@ -14,11 +16,15 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
     const userSnap = await getDoc(userRef);
 
     let nickname = uid.slice(0, 8);
+    let photoURL = undefined;
+    let puzzlePower = 0;
     let bestTimes: { [key: string]: number } = {};
 
     if (userSnap.exists()) {
         const userData = userSnap.data();
         nickname = userData.nickname || nickname;
+        photoURL = userData.photoURL;
+        puzzlePower = userData.puzzlePower || 0;
         bestTimes = userData.bestTimes || {};
     } else {
         // Create new profile if not exists
@@ -35,18 +41,23 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
         }
     }
 
-    return { uid, nickname, bestTimes };
+    return { uid, nickname, photoURL, puzzlePower, bestTimes };
 };
 
-export const updateNickname = async (uid: string, newNickname: string): Promise<void> => {
+export const updateProfileInfo = async (uid: string, data: { nickname: string; photoURL?: string }): Promise<void> => {
     const userRef = doc(db, 'users', uid);
-    await updateDoc(userRef, { nickname: newNickname });
+    await updateDoc(userRef, { nickname: data.nickname, photoURL: data.photoURL || null });
 
     const progressRef = doc(db, 'users', uid, 'sudokuProgress', 'data');
     const progressSnap = await getDoc(progressRef);
     if (progressSnap.exists()) {
-        await updateDoc(progressRef, { nickname: newNickname });
+        await updateDoc(progressRef, { nickname: data.nickname });
     }
+};
+
+export const incrementPuzzlePower = async (uid: string): Promise<void> => {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { puzzlePower: increment(1) });
 };
 
 export const saveRecord = async (uid: string, difficulty: string, time: number): Promise<{ isNewRecord: boolean }> => {
