@@ -37,9 +37,9 @@ const SudokuGame: React.FC = () => {
             hasAwardedCoins.current = true;
             if (state.gameMode !== 'TimeAttack') {
                 addCoins(10);
-            }
-            if (auth.currentUser) {
-                import('../../../services/rankingService').then(m => m.incrementPuzzlePower(auth.currentUser!.uid)).catch(console.error);
+                if (auth.currentUser) {
+                    import('../../../services/rankingService').then(m => m.incrementPuzzlePower(auth.currentUser!.uid)).catch(console.error);
+                }
             }
         }
     }, [state.isWinner, addCoins, state.gameMode]);
