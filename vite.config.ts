@@ -8,6 +8,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+      },
       includeAssets: ['logo.png', 'puzzle_garden_logo.png', 'app_icon.png'],
       manifest: {
         name: '퍼즐 가든',
