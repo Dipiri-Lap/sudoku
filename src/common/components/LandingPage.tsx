@@ -7,7 +7,9 @@ import { auth } from '../../firebase';
 import { signOut } from '../../services/authService';
 import LoginModal from './LoginModal';
 import CoinDisplay from './CoinDisplay';
-import ProfileModal from './ProfileModal';
+import ProfileModal, { getAvatarUrl } from './ProfileModal';
+import { db } from '../../firebase';
+import { doc, writeBatch, collection, getDocs, query, where, limit } from 'firebase/firestore';
 
 const LandingPage: React.FC = () => {
     const { isInstallable, promptToInstall } = usePWAInstall();
@@ -16,6 +18,7 @@ const LandingPage: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
     const [nickname, setNickname] = useState<string>('');
     const [puzzlePower, setPuzzlePower] = useState<number>(0);
+    const [userRank, setUserRank] = useState<string>('');
     const [toast, setToast] = useState<string | null>(null);
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
 
@@ -29,6 +32,10 @@ const LandingPage: React.FC = () => {
                     setNickname(profile.nickname);
                     setUserPhoto(profile.photoURL || null);
                     setPuzzlePower(profile.puzzlePower || 0);
+
+                    const { getUserRank } = await import('../../services/rankingService');
+                    const rank = await getUserRank(profile.puzzlePower || 0);
+                    setUserRank(rank);
                 } catch (e) {
                     console.error('Failed to fetch profile:', e);
                 }
@@ -58,6 +65,82 @@ const LandingPage: React.FC = () => {
 
     const isGuest = currentUser?.isAnonymous;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    const seedFakeUsers = async () => {
+        if (!confirm('500명의 가짜 유저 데이터를 생성하시겠습니까?')) return;
+        
+        console.log("Starting to seed 500 fake users...");
+        showToast("데이터 생성 중... (콘솔 확인)");
+        
+        const generateRandomNickname = () => {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            return Array.from({ length: 8 }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+        };
+        
+        try {
+            const batch = writeBatch(db);
+            const count = 500;
+            
+            for (let j = 0; j < count; j++) {
+                const fakeUid = `fake_user_${j + 1}`;
+                const userRef = doc(db, 'users', fakeUid);
+                const puzzlePower = Math.floor(Math.random() * 500) + 1;
+                
+                batch.set(userRef, {
+                    uid: fakeUid,
+                    nickname: generateRandomNickname(),
+                    photoURL: String(Math.floor(Math.random() * 40) + 1),
+                    puzzlePower: puzzlePower,
+                    unlockedAvatars: ['1', '2', '3', '4', '5', '6', '7', '8'],
+                    coins: 0,
+                    createdAt: new Date().toISOString()
+                });
+            }
+            
+            await batch.commit();
+            alert("500명의 가짜 유저 데이터 생성이 완료되었습니다!");
+            window.location.reload();
+        } catch (e) {
+            console.error("Seeding failed:", e);
+            alert("데이터 생성 중 오류가 발생했습니다. 권한을 확인하세요.");
+        }
+    };
+
+    const deleteFakeUsers = async () => {
+        if (!confirm('생성된 모든 가짜 유저 데이터를 삭제하시겠습니까?')) return;
+        
+        console.log("Starting to delete fake users...");
+        showToast("데이터 삭제 중... (콘솔 확인)");
+        
+        try {
+            let deletedCount = 0;
+            const usersRef = collection(db, 'users');
+            
+            // Delete in chunks because firestore doesn't have a broad delete-by-pattern
+            // We'll search for 'fake_user_' prefix
+            const q = query(usersRef, where('uid', '>=', 'fake_user_'), where('uid', '<=', 'fake_user_\uf8ff'), limit(500));
+            
+            while (true) {
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) break;
+                
+                const batch = writeBatch(db);
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                deletedCount += snapshot.size;
+                console.log(`Deleted ${deletedCount} users...`);
+            }
+            
+            alert(`${deletedCount}명의 가짜 유저 데이터가 삭제되었습니다!`);
+            window.location.reload();
+        } catch (e) {
+            console.error("Deletion failed:", e);
+            alert("데이터 삭제 중 오류가 발생했습니다. 권한을 확인하세요.");
+        }
+    };
 
     return (
         <div className="landing-page">
@@ -104,7 +187,7 @@ const LandingPage: React.FC = () => {
                                     height: '48px',
                                     borderRadius: '14px',
                                     border: '3px solid #fde047', // bright yellow border
-                                    backgroundColor: '#0f172a', // very dark inner background to contrast with bar
+                                    backgroundColor: '#cbd5e1', // Slightly darker slate for better character contrast
                                     overflow: 'hidden',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -114,7 +197,7 @@ const LandingPage: React.FC = () => {
                                     transition: 'transform 0.1s'
                                 }}>
                                 <img
-                                    src={userPhoto || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${nickname || 'guest'}&backgroundColor=transparent`}
+                                    src={getAvatarUrl(userPhoto || nickname || '1')}
                                     alt="프로필"
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
@@ -123,17 +206,27 @@ const LandingPage: React.FC = () => {
 
                         {/* 닉네임 + 퍼즐력 영역 */}
                         {currentUser && !isGuest && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
                                 <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
                                     {nickname}
                                 </span>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                    <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
-                                        퍼즐력
-                                    </span>
-                                    <span style={{ color: '#ef4444', fontSize: '1rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
-                                        {puzzlePower}
-                                    </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
+                                            퍼즐력
+                                        </span>
+                                        <span style={{ color: '#ef4444', fontSize: '1rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
+                                            {puzzlePower}
+                                        </span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
+                                            등수
+                                        </span>
+                                        <span style={{ color: '#3b82f6', fontSize: '0.9rem', fontWeight: 800 }}>
+                                            {userRank}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -237,7 +330,7 @@ const LandingPage: React.FC = () => {
                 {window.location.hostname === 'localhost' && (
                     <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon">
-                            <img src="/logo.png" alt="Word Sort Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'hue-rotate(90deg)' }} />
+                            <img src="/wordstackLogo.png" alt="Word Sort Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         <div className="game-card-content">
                             <h3>단어 분류 퍼즐</h3>
@@ -254,6 +347,38 @@ const LandingPage: React.FC = () => {
 
             <footer className="landing-footer">
                 <p>© 2026 퍼즐 가든. 모든 권리 보유.</p>
+                {import.meta.env.DEV && (
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '1rem' }}>
+                        <button 
+                            onClick={seedFakeUsers}
+                            style={{ 
+                                fontSize: '10px', 
+                                opacity: 0.3, 
+                                background: 'none', 
+                                border: '1px solid #666', 
+                                color: '#666',
+                                cursor: 'pointer',
+                                padding: '2px 5px'
+                            }}
+                        >
+                            [DEV] Seed
+                        </button>
+                        <button 
+                            onClick={deleteFakeUsers}
+                            style={{ 
+                                fontSize: '10px', 
+                                opacity: 0.3, 
+                                background: 'none', 
+                                border: '1px solid #ff6b6b', 
+                                color: '#ff6b6b',
+                                cursor: 'pointer',
+                                padding: '2px 5px'
+                            }}
+                        >
+                            [DEV] Delete Fake
+                        </button>
+                    </div>
+                )}
             </footer>
 
             {showLoginModal && (

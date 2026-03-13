@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useReducer, type ReactNode } from 'react';
 
+export const WORDSORT_SAVE_KEY = 'wordSort_saveData';
+
 export type CardType = 'word' | 'category';
 
 export interface Card {
@@ -29,6 +31,9 @@ export interface WordSolitaireState {
     totalCategories: number;
     isGameOver: boolean;
     isWinner: boolean;
+    isStepsPurchased: boolean;
+    lockedStacks: number;
+    lockedSlots: number;
     lastCompletedSlot: number | null; // slot index that just completed, for animation trigger
     history: Omit<WordSolitaireState, 'history'>[]; // state snapshots for Undo
 }
@@ -41,6 +46,8 @@ export type WordSolitaireAction =
     | { type: 'UNLOCK_STACK' }
     | { type: 'UNLOCK_SLOT' }
     | { type: 'REMOVE_CATEGORY'; catId: string }
+    | { type: 'ADD_STEPS'; count: number }
+    | { type: 'RESTORE_GAME'; savedState: WordSolitaireState }
     | { type: 'UNDO_ACTION' };
 
 const initialState: WordSolitaireState = {
@@ -55,6 +62,9 @@ const initialState: WordSolitaireState = {
     totalCategories: 0,
     isGameOver: false,
     isWinner: false,
+    isStepsPurchased: false,
+    lockedStacks: 1,
+    lockedSlots: 1,
     lastCompletedSlot: null,
     history: [],
 };
@@ -80,6 +90,9 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     categories,
                     totalCategories: categories.length,
                     activeSlots,
+                    lockedStacks: 1,
+                    lockedSlots: 1,
+                    isStepsPurchased: false,
                 };
             }
 
@@ -109,8 +122,8 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             shuffle(categoryCards);
             shuffle(wordCards);
 
-            // Determine stack counts
-            const stackCounts = slotCount === 3 ? [4, 5, 6] : [4, 5, 6, 7];
+            // Determine stack counts based on slot count
+            const stackCounts = slotCount === 3 ? [3, 4, 5] : slotCount === 5 ? [3, 4, 5, 6, 7] : [3, 4, 5, 6];
             const totalStackCards = stackCounts.reduce((a, b) => a + b, 0);
 
             // Constraint: strictly less than half → floor((n-1)/2) gives correct max.
@@ -159,6 +172,9 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                 categories: categories,
                 totalCategories: categories.length,
                 activeSlots: activeSlots,
+                lockedStacks: 1,
+                lockedSlots: 1,
+                isStepsPurchased: false,
             };
         }
 
@@ -184,6 +200,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     deck: recycledDeck,
                     revealedDeck: [],
                     stepsLeft: state.stepsLeft - 1,
+                    isGameOver: state.stepsLeft - 1 <= 0,
                     history: newHistory,
                 };
             }
@@ -194,6 +211,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                 deck: remainingDeck,
                 revealedDeck: [...state.revealedDeck, { ...card, isRevealed: true }],
                 stepsLeft: state.stepsLeft - 1,
+                isGameOver: state.stepsLeft - 1 <= 0,
                 history: newHistory,
             };
         }
@@ -288,14 +306,6 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
         case 'CLEAR_COMPLETED_SLOT':
             return { ...state, lastCompletedSlot: null };
 
-        case 'UNLOCK_STACK':
-            return { ...state, stacks: [...state.stacks, []] };
-
-        case 'UNLOCK_SLOT': {
-            const existingKeys = Object.keys(state.activeSlots).map(Number);
-            const nextIndex = existingKeys.length > 0 ? Math.max(...existingKeys) + 1 : 0;
-            return { ...state, activeSlots: { ...state.activeSlots, [nextIndex]: null } };
-        }
 
         case 'REMOVE_CATEGORY': {
             const { catId } = action;
@@ -365,6 +375,42 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             return {
                 ...previousState,
                 history: state.history.slice(0, -1)
+            };
+        }
+
+        case 'ADD_STEPS': {
+            if (state.isStepsPurchased) return state;
+            return {
+                ...state,
+                stepsLeft: state.stepsLeft + action.count,
+                isStepsPurchased: true,
+                isGameOver: false // Resume if it was game over
+            };
+        }
+
+        case 'RESTORE_GAME': {
+            return {
+                ...action.savedState,
+                history: [] // Clear history on restore to keep it simple and clean
+            };
+        }
+
+        case 'UNLOCK_STACK': {
+            return {
+                ...state,
+                stacks: [[], ...state.stacks],
+                lockedStacks: Math.max(0, state.lockedStacks - 1)
+            };
+        }
+
+        case 'UNLOCK_SLOT': {
+            const keys = Object.keys(state.activeSlots).map(Number);
+            const minIndex = keys.length > 0 ? Math.min(...keys) : 1;
+            const newIndex = minIndex - 1;
+            return {
+                ...state,
+                activeSlots: { [newIndex]: null, ...state.activeSlots },
+                lockedSlots: Math.max(0, state.lockedSlots - 1)
             };
         }
 

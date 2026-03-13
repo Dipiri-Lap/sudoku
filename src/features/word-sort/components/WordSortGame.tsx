@@ -1,15 +1,25 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { useWordSort } from '../context/WordSortContext';
+import { useWordSort, WORDSORT_SAVE_KEY } from '../context/WordSortContext';
 import levels from '../data/levels.json';
 import tutorialLevel from '../data/tutorial-level.json';
-import TutorialOverlay from './TutorialOverlay';
-import { RotateCcw, Undo2, Layers as LayersIcon, Crown, Sparkles } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { useCoins } from '../../../context/CoinContext';
 import CoinDisplay from '../../../common/components/CoinDisplay';
 import { useCardBacks, cardBackDesigns } from '../context/CardBackContext';
 import CardBackShopModal from './CardBackShopModal';
 import GlobalOverlay from './board/GlobalOverlay';
+import { useWordSortDrag } from '../hooks/useWordSortDrag';
+import { useGatherAnimation } from '../hooks/useGatherAnimation';
+import { useTutorialStep } from '../hooks/useTutorialStep';
+import { WordSortUIProvider } from '../context/WordSortUIContext';
+import { DragGhost } from './DragGhost';
+import { LandingAnimation } from './LandingAnimation';
+import { GameBottomMenu } from './GameBottomMenu';
+import { GameOverlays } from './GameOverlays';
+import { DeckArea } from './DeckArea';
+import { SlotArea } from './SlotArea';
+import { StackArea } from './StackArea';
+import { Sparkles } from 'lucide-react';
+
 
 
 const WordSortGame: React.FC = () => {
@@ -17,14 +27,15 @@ const WordSortGame: React.FC = () => {
     const { state, dispatch } = useWordSort();
     const { addCoins, spendCoins, coins } = useCoins();
     const hasAwardedCoins = useRef(false);
+    const hasSavedLevelProgress = useRef(false);
 
-    const [lockedStacks, setLockedStacks] = useState(1);
-    const [lockedSlots, setLockedSlots] = useState(1);
+    const { lockedStacks, lockedSlots } = state;
     const [unlockConfirm, setUnlockConfirm] = useState<'stack' | 'slot' | null>(null);
     const [isShopOpen, setIsShopOpen] = useState(false);
     const [isRemoveMode, setIsRemoveMode] = useState(false);
-    const [gatheringCat, setGatheringCat] = useState<string | null>(null);
-    const [gatherPhase, setGatherPhase] = useState(0);
+    const [showMoveConfirm, setShowMoveConfirm] = useState(false);
+    const [showResumeConfirm, setShowResumeConfirm] = useState(false);
+    const [pendingSavedState, setPendingSavedState] = useState<any>(null);
 
     const { selectedBackId } = useCardBacks();
     const currentCardBack = cardBackDesigns.find((cb: any) => cb.id === selectedBackId) || cardBackDesigns[0];
@@ -35,8 +46,6 @@ const WordSortGame: React.FC = () => {
     const [containerMaxWidth, setContainerMaxWidth] = useState(
         Math.min(500, document.documentElement.clientWidth) - 64
     );
-    const [isRemovingAction, setIsRemovingAction] = useState(false);
-    const [removeTargetLocation, setRemoveTargetLocation] = useState<{x: number, y: number} | null>(null);
     useLayoutEffect(() => {
         const update = () => {
             if (gameContainerRef.current) {
@@ -59,51 +68,27 @@ const WordSortGame: React.FC = () => {
     // Lower minimum to 36 so 7 columns can fit on small screens
     const finalCardWidth = Math.min(110, Math.max(36, cardWidth));
     const cardHeight = Math.round(finalCardWidth * 1.4);
+    // Proportional font sizes that scale with card width (36–110px range)
+    const cardTextSize = Math.max(0.5, Math.min(0.92, finalCardWidth * 0.007 + 0.38));
+    const cardBadgeSize = `${(cardTextSize * 0.70).toFixed(2)}rem`;
+    const cardNameSize  = `${(cardTextSize * 0.83).toFixed(2)}rem`;
+    const cardWordSize  = `${(cardTextSize * (activeSlotCount >= 5 ? 0.95 : 1.15)).toFixed(2)}rem`;
     const visibleHeight = 25; // Height of the visible strip for overlapped cards
-    const overlapMargin = -(cardHeight - visibleHeight);
 
-    const [draggingGroup, setDraggingGroup] = useState<{
-        type: 'stack' | 'deck';
-        index: number;
-        cardIndex?: number;
-        count?: number;
-        grabOffsetX?: number;
-        grabOffsetY?: number;
-    } | null>(null);
-    const [landingGroup, setLandingGroup] = useState<{
-        targetIds: string[];
-        offsetX: number;
-        offsetY: number;
-        animating?: boolean;
-        isProxy?: boolean;
-        movingCards?: any[];
-        targetX?: number;
-        targetY?: number;
-        grabOffsetX?: number;
-        grabOffsetY?: number;
-        targetType?: 'slot' | 'stack';
-    } | null>(null);
     const [lastDrawnId, setLastDrawnId] = useState<string | null>(null);
     const [prevRevealedCount, setPrevRevealedCount] = useState(0);
 
     const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
     const stackRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [completingSlot, setCompletingSlot] = useState<number | null>(null);
-
-    // Tutorial
-    const [tutorialStep, setTutorialStep] = useState<number | null>(null);
-    const prevActiveSlotsRef = useRef(0);
-    const prevCollectedRef = useRef(0);
-    const prevRevealedDeckRef = useRef(0);
-    const prevStepsLeftRef = useRef(0);
+    const [showGameOverOverlay, setShowGameOverOverlay] = useState(false);
+    const gameOverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Dealing animation
     const [isDealingAnimation, setIsDealingAnimation] = useState(false);
     const [dealingProgress, setDealingProgress] = useState(0);
     const dealingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const deckCardRef = useRef<HTMLDivElement | null>(null);
-    const gatherOffsets = useRef<Map<string, { x: number, y: number, startX: number, startY: number, seq: number, card: any }>>(new Map());
-
 
     useEffect(() => {
         return () => { if (dealingTimerRef.current) clearInterval(dealingTimerRef.current); };
@@ -114,18 +99,11 @@ const WordSortGame: React.FC = () => {
         if (!state.isWinner) hasAwardedCoins.current = false;
     }, [state.isWinner]);
 
-    // Award coins on win (not tutorial)
-    useEffect(() => {
-        if (state.isWinner && tutorialStep === null && !hasAwardedCoins.current) {
-            hasAwardedCoins.current = true;
-            addCoins(10);
-            import('../../../firebase').then(({ auth }) => {
-                if (auth.currentUser) {
-                    import('../../../services/rankingService').then(m => m.incrementPuzzlePower(auth.currentUser!.uid)).catch(console.error);
-                }
-            });
-        }
-    }, [state.isWinner, tutorialStep, addCoins]);
+    const splitText = (value: string) => {
+        if (value.length < 5) return <>{value}</>;
+        const firstLine = Math.ceil(value.length / 2);
+        return <>{value.slice(0, firstLine)}<br />{value.slice(firstLine)}</>;
+    };
 
     const triggerDealing = (totalCards: number) => {
         if (dealingTimerRef.current) clearInterval(dealingTimerRef.current);
@@ -142,6 +120,44 @@ const WordSortGame: React.FC = () => {
             }
         }, 80);
     };
+
+    // Hook: tutorial step management
+    const { tutorialStep, setTutorialStep, completeTutorial, tutorialHighlightCards, tutorialHighlightSlots, tutorialHighlightDeck } = useTutorialStep({ state, dispatch, triggerDealing });
+
+    // Hook: gather/remove animation
+    const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef });
+
+    // Hook: drag and drop
+    const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, handleDragStart, handleDragMove, handleDrop } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight });
+
+    // Award coins on win (not tutorial)
+    useEffect(() => {
+        if (state.isWinner && tutorialStep === null && !hasAwardedCoins.current) {
+            hasAwardedCoins.current = true;
+            addCoins(10);
+            import('../../../firebase').then(({ auth }) => {
+                if (auth.currentUser) {
+                    const uid = auth.currentUser!.uid;
+                    import('../../../services/rankingService').then(m => {
+                        m.incrementPuzzlePower(uid).catch(console.error);
+                        // Save cleared level progress (only once per win)
+                        if (!hasSavedLevelProgress.current) {
+                            hasSavedLevelProgress.current = true;
+                            m.saveWordSortProgress(uid, state.level).catch(console.error);
+                        }
+                    });
+                }
+            });
+        }
+    }, [state.isWinner, tutorialStep, addCoins, state.level]);
+
+    // Reset coin award and level progress save flags on new game
+    useEffect(() => {
+        if (!state.isWinner) {
+            hasAwardedCoins.current = false;
+            hasSavedLevelProgress.current = false;
+        }
+    }, [state.isWinner]);
 
     // Set CSS variables on each newly-dealt card so it animates FROM the deck position
     useLayoutEffect(() => {
@@ -183,25 +199,16 @@ const WordSortGame: React.FC = () => {
             cardEl.style.setProperty('--deal-from-x', `${fromX}px`);
             cardEl.style.setProperty('--deal-from-y', `${fromY}px`);
         }
-    }, [dealingProgress, isDealingAnimation]);
+    }, [dealingProgress, isDealingAnimation, finalCardWidth, cardHeight, visibleHeight, state.stacks]);
 
     const levelStackTotal = (levelData: any): number => {
         if (levelData.fixedStacks) {
             return levelData.fixedStacks.reduce((s: number, st: any[]) => s + st.length, 0);
         }
-        const counts = (levelData.slots || 4) === 3 ? [4, 5, 6] : [4, 5, 6, 7];
+        const slots = levelData.slots || 4;
+        const counts = slots === 3 ? [3, 4, 5] : slots === 5 ? [3, 4, 5, 6, 7] : [3, 4, 5, 6];
         return counts.reduce((a: number, b: number) => a + b, 0);
     };
-
-    // Trigger animation shortly after landing state is set
-    useEffect(() => {
-        if (landingGroup && !landingGroup.animating) {
-            const timer = setTimeout(() => {
-                setLandingGroup(prev => prev ? { ...prev, animating: true } : null);
-            }, 20);
-            return () => clearTimeout(timer);
-        }
-    }, [landingGroup?.targetIds, landingGroup?.animating]);
 
     // Synchronous calibration check to prevent "target location" flash
     if (state.revealedDeck.length > prevRevealedCount) {
@@ -211,29 +218,148 @@ const WordSortGame: React.FC = () => {
         setPrevRevealedCount(state.revealedDeck.length);
     }
 
+    // Auto-save effect
     useEffect(() => {
-        const tutorialDone = !import.meta.env.DEV && localStorage.getItem('wordSort_tutorialDone');
+        if (!state || state.isTutorial) return;
+
+        // Don't save if game is over or won
+        if (state.isGameOver || state.isWinner) {
+            localStorage.removeItem(WORDSORT_SAVE_KEY);
+            return;
+        }
+
+        // Exclude history to keep data small
+        const { history, ...stateToSave } = state;
+
+        // Only save if the game has actually started (e.g., stacks are generated)
+        if (stateToSave.stacks.length > 0) {
+            localStorage.setItem(WORDSORT_SAVE_KEY, JSON.stringify(stateToSave));
+        }
+    }, [state]);
+
+    // Unified initialization: check Firebase progress first, then decide restore vs new game
+    useEffect(() => {
+        const doInit = async () => {
+            const tutorialDone = localStorage.getItem('wordSort_tutorialDone');
+            if (!tutorialDone) {
+                dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
+                setTutorialStep(1);
+                triggerDealing(levelStackTotal(tutorialLevel));
+                return;
+            }
+
+            // Wait for Firebase auth state to be resolved
+            let clearedLevel = 0;
+            try {
+                const { auth } = await import('../../../firebase');
+                const user = await new Promise<any>((resolve) => {
+                    const unsubscribe = auth.onAuthStateChanged((u) => {
+                        unsubscribe();
+                        resolve(u);
+                    });
+                });
+                if (user) {
+                    const { getWordSortProgress } = await import('../../../services/rankingService');
+                    clearedLevel = await getWordSortProgress(user.uid);
+                }
+            } catch (e) {
+                console.error('Failed to load wordSort progress:', e);
+            }
+
+            // Check localStorage — only restore if it's a level NOT yet cleared
+            const savedData = localStorage.getItem(WORDSORT_SAVE_KEY);
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed && parsed.stacks?.length > 0 && !parsed.isTutorial) {
+                        // Only restore if the saved level is beyond what's been cleared
+                        if (clearedLevel === 0 || (parsed.level ?? 1) > clearedLevel) {
+                            // Validate stack count matches current level config
+                            const savedLevelData = levels.find((l: any) => l.id === parsed.level);
+                            const expectedSlots = savedLevelData?.slots || 4;
+                            const expectedStacks = expectedSlots === 3 ? 3 : expectedSlots === 5 ? 5 : 4;
+                            if (parsed.stacks.length === expectedStacks) {
+                                dispatch({ type: 'RESTORE_GAME', savedState: parsed });
+                                return;
+                            }
+                            // Stack count mismatch (old save) — discard
+                            localStorage.removeItem(WORDSORT_SAVE_KEY);
+                        } else {
+                            // Saved game is for an already-cleared level — discard it
+                            localStorage.removeItem(WORDSORT_SAVE_KEY);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to parse saved game:', e);
+                    localStorage.removeItem(WORDSORT_SAVE_KEY);
+                }
+            }
+
+            // Start from the next uncleared level
+            let startLevelIndex = 0;
+            if (clearedLevel > 0) {
+                const nextIdx = levels.findIndex((l: any) => l.id === clearedLevel + 1);
+                startLevelIndex = nextIdx >= 0 ? nextIdx : levels.length - 1;
+            }
+            const levelData = levels[startLevelIndex] || levels[0];
+            dispatch({ type: 'START_LEVEL', levelData });
+            triggerDealing(levelStackTotal(levelData));
+        };
+
+        doInit();
+    }, []);
+
+    const initializeNewGame = async () => {
+        const tutorialDone = localStorage.getItem('wordSort_tutorialDone');
         if (!tutorialDone) {
             dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
             setTutorialStep(1);
             triggerDealing(levelStackTotal(tutorialLevel));
-        } else if (levels && levels.length > 0) {
-            dispatch({ type: 'START_LEVEL', levelData: levels[0] });
-            triggerDealing(levelStackTotal(levels[0]));
+            return;
         }
-    }, [dispatch]);
 
-    const resetUnlocks = () => {
-        setLockedStacks(1);
-        setLockedSlots(1);
+        // Wait for Firebase auth to be ready, then load cleared level
+        let startLevelIndex = 0;
+        try {
+            const { auth } = await import('../../../firebase');
+            // Wait for auth state to be resolved (currentUser might be null on cold start)
+            const user = await new Promise<any>((resolve) => {
+                const unsubscribe = auth.onAuthStateChanged((u) => {
+                    unsubscribe();
+                    resolve(u);
+                });
+            });
+            if (user) {
+                const { getWordSortProgress } = await import('../../../services/rankingService');
+                const clearedLevel = await getWordSortProgress(user.uid);
+                if (clearedLevel > 0) {
+                    // Find the next level after the cleared one
+                    const nextIdx = levels.findIndex((l: any) => l.id === clearedLevel + 1);
+                    startLevelIndex = nextIdx >= 0 ? nextIdx : levels.length - 1;
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load wordSort progress:', e);
+        }
+
+        const levelData = levels[startLevelIndex] || levels[0];
+        dispatch({ type: 'START_LEVEL', levelData });
+        triggerDealing(levelStackTotal(levelData));
     };
 
-    const completeTutorial = () => {
-        localStorage.setItem('wordSort_tutorialDone', 'true');
-        setTutorialStep(null);
-        resetUnlocks();
-        dispatch({ type: 'START_LEVEL', levelData: levels[0] });
-        triggerDealing(levelStackTotal(levels[0]));
+    const handleResumeConfirm = (confirmed: boolean) => {
+        if (confirmed && pendingSavedState) {
+            dispatch({ type: 'RESTORE_GAME', savedState: pendingSavedState });
+        } else {
+            localStorage.removeItem(WORDSORT_SAVE_KEY);
+            initializeNewGame();
+        }
+        setShowResumeConfirm(false);
+        setPendingSavedState(null);
+    };
+
+    const resetUnlocks = () => {
+        // No local state to reset anymore, START_LEVEL in reducer handles this
     };
 
     const handleUnlockConfirm = async () => {
@@ -242,626 +368,26 @@ const WordSortGame: React.FC = () => {
         if (!success) { setUnlockConfirm(null); return; }
         if (unlockConfirm === 'stack') {
             dispatch({ type: 'UNLOCK_STACK' });
-            setLockedStacks(prev => prev - 1);
         } else {
             dispatch({ type: 'UNLOCK_SLOT' });
-            setLockedSlots(prev => prev - 1);
         }
         setUnlockConfirm(null);
     };
 
-    // Advance tutorial based on game state changes
+    // Game over overlay: wait for slot/gather animations to finish before showing
     useEffect(() => {
-        if (tutorialStep === null || tutorialStep === 1 || tutorialStep === 8) return;
-
-        const activeSlotsCount = Object.values(state.activeSlots).filter(Boolean).length;
-        const totalCollected = Object.values(state.activeSlots).reduce((acc, s) => acc + (s?.collected.length ?? 0), 0);
-        const revealedCount = state.revealedDeck.length;
-
-        if (tutorialStep === 2 && activeSlotsCount > prevActiveSlotsRef.current) {
-            setTutorialStep(3);
-        } else if (tutorialStep === 3 && revealedCount > prevRevealedDeckRef.current) {
-            setTutorialStep(4);
-        } else if (tutorialStep === 4 && totalCollected > prevCollectedRef.current) {
-            setTutorialStep(5);
-        } else if (tutorialStep === 5) {
-            // Detect when 딸기 is placed on 사과 (same-cat pair forms in a stack)
-            const hasSameCatPair = state.stacks.some(stack => {
-                if (stack.length < 2) return false;
-                const top = stack[stack.length - 1];
-                const below = stack[stack.length - 2];
-                return top?.isRevealed && below?.isRevealed &&
-                    top.type === 'word' && below.type === 'word' &&
-                    top.cat === below.cat;
-            });
-            if (hasSameCatPair) setTutorialStep(6);
-        } else if (tutorialStep === 6 && state.lastCompletedSlot !== null) {
-            setTutorialStep(7);
-        } else if (tutorialStep === 7 && state.isWinner) {
-            setTutorialStep(8);
-        }
-
-        prevActiveSlotsRef.current = activeSlotsCount;
-        prevCollectedRef.current = totalCollected;
-        prevRevealedDeckRef.current = revealedCount;
-        prevStepsLeftRef.current = state.stepsLeft;
-    }, [state, tutorialStep]);
-
-    // Fire confetti + glow animation when a slot completes
-    useEffect(() => {
-        if (state.lastCompletedSlot === null) return;
-        const slotIndex = state.lastCompletedSlot;
-        setCompletingSlot(slotIndex);
-
-        const slotEl = slotRefs.current[slotIndex];
-        if (slotEl) {
-            let x = 0.5, y = 0.5;
-            
-            if (isRemovingAction && removeTargetLocation) {
-                // If cards gathered somewhere specific (like a slot), explode there
-                x = removeTargetLocation.x;
-                y = removeTargetLocation.y;
-            } else if (!isRemovingAction) {
-                // Standard slot complete (not removal)
-                const rect = slotEl.getBoundingClientRect();
-                x = (rect.left + rect.width / 2) / window.innerWidth;
-                y = (rect.top + rect.height / 2) / window.innerHeight;
+        if (state.isGameOver && completingSlot === null && !gatheringCat) {
+            gameOverTimerRef.current = setTimeout(() => {
+                setShowGameOverOverlay(true);
+            }, 300);
+        } else {
+            if (gameOverTimerRef.current) {
+                clearTimeout(gameOverTimerRef.current);
+                gameOverTimerRef.current = null;
             }
-
-            // Phase 1: Burst at slot center
-            confetti({
-                particleCount: 60,
-                spread: 55,
-                startVelocity: 28,
-                origin: { x, y },
-                colors: ['#FFD700', '#FFA500', '#FF6B6B', '#48DBFB', '#1DD1A1'],
-                scalar: 0.9,
-                gravity: 0.9,
-                ticks: 200,
-            });
-
-            // Phase 2: Small sparkle burst slightly later
-            setTimeout(() => {
-                confetti({
-                    particleCount: 25,
-                    spread: 80,
-                    startVelocity: 12,
-                    origin: { x, y },
-                    colors: ['#FFD700', '#FFFFFF'],
-                    scalar: 0.6,
-                    gravity: 0.5,
-                    ticks: 150,
-                });
-            }, 180);
+            setShowGameOverOverlay(false);
         }
-
-        // Clear glow after animation
-        const timer = setTimeout(() => {
-            setCompletingSlot(null);
-            setIsRemovingAction(false);
-            setRemoveTargetLocation(null);
-            dispatch({ type: 'CLEAR_COMPLETED_SLOT' });
-        }, 900);
-
-        return () => clearTimeout(timer);
-    }, [state.lastCompletedSlot, dispatch]);
-
-
-
-    // Obsolete useLayoutEffect removed to allow coordinate-based gathering in handleRemoveClick
-
-
-    const handleRemoveClick = async (catId: string) => {
-        if (!isRemoveMode || gatheringCat) return;
-
-        const success = await spendCoins(50);
-        if (!success) return;
-
-        // 1. Find the target slot for this category to determine destination
-        let targetX = window.innerWidth / 2 - finalCardWidth / 2;
-        let targetY = window.innerHeight / 2 - cardHeight / 2;
-        
-        const slotEntry = Object.entries(state.activeSlots).find(([_, s]) => s?.catId === catId);
-        if (slotEntry) {
-            const slotIdx = Number(slotEntry[0]);
-            const slotEl = slotRefs.current[slotIdx];
-            if (slotEl) {
-                const rect = slotEl.getBoundingClientRect();
-                // We use fixed top-left of the slot as target
-                targetX = rect.left;
-                targetY = rect.top;
-            }
-        }
-
-        setRemoveTargetLocation({ 
-            x: (targetX + finalCardWidth / 2) / window.innerWidth, 
-            y: (targetY + cardHeight / 2) / window.innerHeight 
-        });
-
-        const newGatherOffsets = new Map<string, { x: number, y: number, startX: number, startY: number, seq: number, card: any }>();
-        let seq = 0;
-
-        const addTarget = (card: any, startXOverride?: number, startYOverride?: number) => {
-            if (newGatherOffsets.has(card.id)) return;
-            const el = document.querySelector(`[data-card-id="${card.id}"]`);
-            let sX = 0, sY = 0;
-            if (startXOverride !== undefined && startYOverride !== undefined) {
-                sX = startXOverride;
-                sY = startYOverride;
-            } else if (el) {
-                const r = el.getBoundingClientRect();
-                sX = r.left;
-                sY = r.top;
-            } else {
-                // Fallback to deck position
-                if (deckCardRef.current) {
-                    const r = deckCardRef.current.getBoundingClientRect();
-                    sX = r.left;
-                    sY = r.top;
-                } else {
-                    // Universal fallback: screen center
-                    sX = window.innerWidth / 2 - finalCardWidth / 2;
-                    sY = window.innerHeight / 2 - cardHeight / 2;
-                }
-            }
-            newGatherOffsets.set(card.id, {
-                startX: sX,
-                startY: sY,
-                x: targetX,
-                y: targetY,
-                seq: seq++,
-                card
-            });
-        };
-
-        // Find and add cards in order: Category first, then words
-        // 1. Target Slot (The main category card in its destination)
-        const targetSlot = Object.entries(state.activeSlots).find(([_, s]) => s?.catId === catId);
-        if (targetSlot) {
-            const [sIdxString, slot] = targetSlot;
-            const slotIdx = Number(sIdxString);
-            const slotEl = slotRefs.current[slotIdx];
-            if (slotEl && slot) {
-                const rect = slotEl.getBoundingClientRect();
-                addTarget({ id: `slot-${slotIdx}`, value: slot.name, type: 'category', cat: catId }, rect.left, rect.top);
-            }
-        }
-
-        // 2. Category in Revealed Deck / Stacks / Draw Pile (if not handled by slot)
-        state.revealedDeck.forEach(card => {
-            if (card.cat === catId && card.type === 'category' && !newGatherOffsets.has(card.id)) addTarget(card);
-        });
-        state.stacks.forEach(stack => {
-            stack.forEach(card => {
-                if (card.cat === catId && card.type === 'category' && !newGatherOffsets.has(card.id)) addTarget(card);
-            });
-        });
-        state.deck.forEach(card => {
-            if (card.cat === catId && card.type === 'category' && !newGatherOffsets.has(card.id)) addTarget(card);
-        });
-
-        // 3. Words in Stacks (Priority to stacks for gameplay feel)
-        state.stacks.forEach(stack => {
-            stack.forEach(card => {
-                if (card.cat === catId && card.type === 'word') addTarget(card);
-            });
-        });
-
-        // 4. Words in Revealed Deck
-        state.revealedDeck.forEach(card => {
-            if (card.cat === catId && card.type === 'word') addTarget(card);
-        });
-
-        // 5. Words in Draw Pile
-        state.deck.forEach(card => {
-            if (card.cat === catId && card.type === 'word') addTarget(card);
-        });
-
-        gatherOffsets.current = newGatherOffsets;
-        setGatheringCat(catId);
-        setGatherPhase(-1); // Start at -1 to ensure mount before movement
-        setIsRemovingAction(true);
-
-        // Phase transitions
-        // Iterate through all collected cards and trigger their movement phase
-        let accumulatedDelay = 0;
-        let currentInterval = 400; // Start quite slow
-        
-        newGatherOffsets.forEach((info) => {
-            const seqNum = info.seq;
-            accumulatedDelay += currentInterval;
-            
-            // Delay each phase
-            setTimeout(() => setGatherPhase(seqNum), accumulatedDelay);
-            
-            // Speed up the next interval by 20%, but never faster than 40ms
-            currentInterval = Math.max(40, currentInterval * 0.8);
-        });
-
-        // After all animations complete, actually remove them from the game state
-        setTimeout(() => {
-            dispatch({ type: 'REMOVE_CATEGORY', catId: catId });
-            setGatheringCat(null);
-            setGatherPhase(0);
-            setIsRemoveMode(false);
-        }, accumulatedDelay + 500); // 500ms buffer to allow the last 0.3s transition to finish
-    };
-
-    const handleDragStart = (e: React.DragEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => {
-        // Step 2: only top-of-stack category cards are allowed
-        if (tutorialStep === 2) {
-            if (type === 'deck') return;
-            if (type === 'stack' && cardIndex !== undefined) {
-                const stack = state.stacks[index];
-                const card = stack[cardIndex];
-                if (!(card.isRevealed && card.type === 'category' && cardIndex === stack.length - 1)) return;
-            }
-        }
-        // Step 3: only deck interaction is allowed
-        if (tutorialStep === 3 && type === 'stack') return;
-        // Step 4: only 바나나(t4) is draggable; deck blocked
-        if (tutorialStep === 4) {
-            if (type === 'deck') return;
-            if (type === 'stack' && cardIndex !== undefined) {
-                const card = state.stacks[index][cardIndex];
-                if (card.id !== 't4' || cardIndex !== state.stacks[index].length - 1) return;
-            }
-        }
-        // Step 5: only 딸기(t3) is draggable; deck blocked
-        if (tutorialStep === 5) {
-            if (type === 'deck') return;
-            if (type === 'stack' && cardIndex !== undefined) {
-                const card = state.stacks[index][cardIndex];
-                if (card.id !== 't3' || cardIndex !== state.stacks[index].length - 1) return;
-            }
-        }
-        // Step 6: only top card of a stack with a consecutive same-cat pair below is draggable; deck blocked
-        if (tutorialStep === 6) {
-            if (type === 'deck') return;
-            if (type === 'stack' && cardIndex !== undefined) {
-                const stack = state.stacks[index];
-                const card = stack[cardIndex];
-                const below = cardIndex >= 1 ? stack[cardIndex - 1] : null;
-                if (!(card.isRevealed && card.type === 'word' && cardIndex === stack.length - 1 &&
-                    below?.isRevealed && below.cat === card.cat)) return;
-            }
-        }
-
-        const target = e.currentTarget as HTMLElement;
-        const rect = target.getBoundingClientRect();
-
-        // Calculate grab offset relative to the clicked card's top-left
-        let grabOffsetX = e.clientX - rect.left;
-        let grabOffsetY = e.clientY - rect.top;
-
-        e.dataTransfer.setData('text/plain', '');
-
-        // Logical "Movable Unit" Start Index and Count
-        let effectiveCardIndex = cardIndex;
-        let count = 1;
-
-        if (type === 'stack' && cardIndex !== undefined) {
-            const stack = state.stacks[index];
-            const clickedCard = stack[cardIndex];
-
-            // 1. 클릭한 카드의 카테고리 기점(Base) 탐색
-            let baseIndex = cardIndex;
-            for (let i = cardIndex; i >= 0; i--) {
-                if (stack[i].cat === clickedCard.cat && stack[i].isRevealed) {
-                    baseIndex = i;
-                    if (stack[i].type === 'category') break;
-                } else {
-                    break;
-                }
-            }
-
-            // Adjustment for grabOffsetY: If we clicked a card in a stack,
-            // the drag group might start at baseIndex.
-            // We need the offset relative to the baseIndex card.
-            if (cardIndex > baseIndex) {
-                grabOffsetY += (cardIndex - baseIndex) * visibleHeight;
-            }
-
-            // 2. 드래그 범위 결정
-            if (clickedCard.type === 'category') {
-                // 기반 카드 클릭 시: 기반 카드 단독 이동
-                effectiveCardIndex = cardIndex;
-                count = 1;
-            } else {
-                // 단어 카드 클릭 시: 기반 카드(baseIndex)부터 스택 끝까지 묶어서 이동
-                effectiveCardIndex = baseIndex;
-                count = stack.length - baseIndex;
-            }
-        }
-
-        if ((type === 'stack' && cardIndex !== undefined) || type === 'deck') {
-            const container = (type === 'stack') ? target.parentElement : target.parentElement;
-            if (container) {
-                const ghost = document.createElement('div');
-                ghost.style.width = `${target.offsetWidth}px`;
-                ghost.style.position = 'absolute';
-                ghost.style.top = '-2000px';
-                ghost.style.left = '-2000px';
-                ghost.style.display = 'flex';
-                ghost.style.flexDirection = 'column';
-                ghost.style.pointerEvents = 'none';
-
-                let cardsToClone: Element[] = [];
-                if (type === 'stack') {
-                    const siblings = Array.from(container.children).filter(child => !child.classList.contains('drag-ghost-extra'));
-                    cardsToClone = siblings.slice(effectiveCardIndex!, (effectiveCardIndex || 0) + count);
-                } else {
-                    cardsToClone = [target];
-                }
-
-                cardsToClone.forEach((node, idx) => {
-                    const clone = node.cloneNode(true) as HTMLElement;
-                    clone.style.visibility = 'visible';
-                    clone.style.opacity = '1';
-                    clone.style.transform = 'none';
-                    clone.style.animation = 'none'; // 애니메이션 제거
-
-                    // 드래그 시 뒷면 제거 로직
-                    const backLayer = clone.querySelector('.drag-back-layer');
-                    if (backLayer) backLayer.remove();
-
-                    // 실제 보드와 유사하게 중첩(Overlap) 효과 재현 (스택일 때만)
-                    if (type === 'stack') {
-                        clone.style.marginBottom = idx === cardsToClone.length - 1 ? '0' : `${overlapMargin}px`;
-                    }
-                    clone.style.zIndex = `${idx}`;
-
-                    // 선명한 녹색 테두리 추가
-                    clone.style.border = '2.5px solid #2ecc71';
-                    clone.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
-
-                    // 배지 표시 로직 (두 장 이상일 때 가장 '상단' 카드에 표시)
-                    if (idx === cardsToClone.length - 1 && cardsToClone.length > 1) {
-                        const badge = document.createElement('div');
-                        badge.innerText = `${cardsToClone.length}`;
-                        badge.style.position = 'absolute';
-                        badge.style.top = '-12px';
-                        badge.style.left = '-12px';
-                        badge.style.background = '#e74c3c';
-                        badge.style.color = 'white';
-                        badge.style.borderRadius = '50%';
-                        badge.style.width = '32px';
-                        badge.style.height = '32px';
-                        badge.style.fontSize = '1.1rem';
-                        badge.style.display = 'flex';
-                        badge.style.alignItems = 'center';
-                        badge.style.justifyContent = 'center';
-                        badge.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
-                        badge.style.zIndex = '2000';
-                        badge.style.fontWeight = '900';
-                        badge.style.border = '2px solid white';
-                        clone.appendChild(badge);
-                    }
-                    ghost.appendChild(clone);
-                });
-
-                document.body.appendChild(ghost);
-
-                // Preserve original grab position in ghost
-                e.dataTransfer.setDragImage(ghost, grabOffsetX, grabOffsetY);
-
-                setTimeout(() => {
-                    if (ghost.parentNode) document.body.removeChild(ghost);
-                }, 100);
-            }
-        }
-
-        setTimeout(() => {
-            setDraggingGroup({ type, index, cardIndex: effectiveCardIndex, count, grabOffsetX, grabOffsetY });
-        }, 0);
-    };
-
-    // 두 rect의 겹치는 면적 계산
-    const getOverlapArea = (
-        r1: { left: number; top: number; right: number; bottom: number },
-        r2: { left: number; top: number; right: number; bottom: number }
-    ): number => {
-        const overlapX = Math.max(0, Math.min(r1.right, r2.right) - Math.max(r1.left, r2.left));
-        const overlapY = Math.max(0, Math.min(r1.bottom, r2.bottom) - Math.max(r1.top, r2.top));
-        return overlapX * overlapY;
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        if (!draggingGroup) return;
-
-        const x = e.clientX;
-        const y = e.clientY;
-        const grabOffsetX = draggingGroup.grabOffsetX || 0;
-        const grabOffsetY = draggingGroup.grabOffsetY || 0;
-        const dragLeft = x - grabOffsetX;
-        const dragTop = y - grabOffsetY;
-
-        // 드래그 카드 그룹의 rect
-        const count = draggingGroup.count || 1;
-        const groupHeight = cardHeight + (count - 1) * visibleHeight;
-        const dragRect = {
-            left: dragLeft,
-            top: dragTop,
-            right: dragLeft + finalCardWidth,
-            bottom: dragTop + groupHeight,
-        };
-
-        let bestTarget: { type: 'slot' | 'stack', index: number } | null = null;
-        let bestOverlap = 0;
-
-        // 슬롯과의 겹침 검사 (22px 탭 spacer 제외, 실제 카드 영역만)
-        for (let i = 0; i < slotRefs.current.length; i++) {
-            const ref = slotRefs.current[i];
-            if (ref) {
-                const r = ref.getBoundingClientRect();
-                const slotCardRect = { left: r.left, top: r.top + 25, right: r.right, bottom: r.bottom };
-                const overlap = getOverlapArea(dragRect, slotCardRect);
-                if (overlap > bestOverlap) {
-                    bestOverlap = overlap;
-                    bestTarget = { type: 'slot', index: i };
-                }
-            }
-        }
-
-        // 스택의 각 개별 카드 rect와 겹침 검사
-        for (let i = 0; i < stackRefs.current.length; i++) {
-            const ref = stackRefs.current[i];
-            if (!ref) continue;
-            const stackRect = ref.getBoundingClientRect();
-            const stack = state.stacks[i];
-
-            if (stack.length === 0) {
-                // 빈 스택: 컨테이너 rect 전체로 검사
-                const overlap = getOverlapArea(dragRect, {
-                    left: stackRect.left, top: stackRect.top,
-                    right: stackRect.right, bottom: stackRect.bottom
-                });
-                if (overlap > bestOverlap) {
-                    bestOverlap = overlap;
-                    bestTarget = { type: 'stack', index: i };
-                }
-            } else {
-                // 각 카드의 rect를 수학적으로 계산
-                const numToCompress = Math.max(0, stack.length - 8);
-                let topOffset = 0;
-                for (let j = 0; j < stack.length; j++) {
-                    const isFaceDown = !stack[j].isRevealed;
-                    const cardRect = {
-                        left: stackRect.left,
-                        top: stackRect.top + topOffset,
-                        right: stackRect.left + finalCardWidth,
-                        bottom: stackRect.top + topOffset + cardHeight,
-                    };
-                    const overlap = getOverlapArea(dragRect, cardRect);
-                    if (overlap > bestOverlap) {
-                        bestOverlap = overlap;
-                        bestTarget = { type: 'stack', index: i };
-                    }
-                    topOffset += (j < numToCompress && isFaceDown) ? 13 : visibleHeight;
-                }
-            }
-        }
-
-        // 겹치는 영역이 전혀 없으면 원위치
-        if (!bestTarget || bestOverlap === 0) {
-            setDraggingGroup(null);
-            return;
-        }
-
-        const dropTarget = bestTarget as { type: 'slot' | 'stack', index: number };
-
-        // Step 4: block stack drops (바나나 must go to the slot only)
-        if (tutorialStep === 4 && dropTarget.type === 'stack') {
-            setDraggingGroup(null);
-            return;
-        }
-
-        // Step 5: block slot drops (this step teaches stack-to-stack movement)
-        if (tutorialStep === 5 && dropTarget.type === 'slot') {
-            setDraggingGroup(null);
-            return;
-        }
-
-        const movingCards = draggingGroup.type === 'deck'
-            ? [state.revealedDeck[state.revealedDeck.length - 1]]
-            : state.stacks[draggingGroup.index].slice(draggingGroup.cardIndex, (draggingGroup.cardIndex || 0) + (draggingGroup.count || 0));
-
-        if (!movingCards.length) {
-            setDraggingGroup(null);
-            return;
-        }
-
-        // Synchronized compatibility check
-        let isCompatible = false;
-        const isSameSource = (draggingGroup.type === dropTarget.type && draggingGroup.index === dropTarget.index);
-
-        if (!isSameSource && movingCards.length > 0) {
-            if (dropTarget.type === 'slot') {
-                const slot = state.activeSlots[dropTarget.index];
-                if (movingCards[0].type === 'category') {
-                    isCompatible = movingCards.length === 1 && slot === null;
-                } else if (movingCards[0].type === 'word') {
-                    isCompatible = slot !== null && movingCards.every(c => c.cat === slot.catId);
-                }
-            } else {
-                const targetStack = state.stacks[dropTarget.index];
-                if (targetStack.length === 0) {
-                    isCompatible = true; // 빈 스택에는 일반 카드(단어)와 카테고리 기점 카드 모두 배치 가능
-                } else {
-                    const topTarget = targetStack[targetStack.length - 1];
-                    // Explicitly same as reducer: (topTarget.type === 'category' || topTarget.cat !== movingCards[0].cat) -> disallowed
-                    isCompatible = topTarget.type === 'word' && topTarget.cat === movingCards[0].cat;
-                }
-            }
-        }
-
-        if (isCompatible) {
-            const containerRef = dropTarget.type === 'slot' ? slotRefs.current[dropTarget.index] : stackRefs.current[dropTarget.index];
-            if (containerRef) {
-                const rect = containerRef.getBoundingClientRect();
-                const targetCenterX = rect.left + finalCardWidth / 2;
-                let targetCenterY = 0;
-
-                if (dropTarget.type === 'slot') {
-                    targetCenterY = rect.top + 25 + cardHeight / 2;
-                } else {
-                    const targetStack = state.stacks[dropTarget.index];
-                    const nextIndex = targetStack.length;
-                    const numToCompress = Math.max(0, (nextIndex + movingCards.length) - 8);
-                    let topOffset = 0;
-                    for (let i = 0; i < nextIndex; i++) {
-                        const isFaceDown = !targetStack[i].isRevealed;
-                        topOffset += (i < numToCompress && isFaceDown) ? 13 : 25;
-                    }
-                    targetCenterY = rect.top + topOffset + cardHeight / 2;
-                }
-
-                const diffX = dragLeft - (targetCenterX - finalCardWidth / 2);
-                const diffY = dragTop - (targetCenterY - cardHeight / 2);
-
-                setLandingGroup({
-                    targetIds: [],
-                    isProxy: true,
-                    movingCards,
-                    targetX: targetCenterX,
-                    targetY: targetCenterY,
-                    offsetX: diffX,
-                    offsetY: diffY,
-                    grabOffsetX,
-                    grabOffsetY,
-                    animating: false,
-                    targetType: dropTarget.type
-                });
-
-                // Small delay to trigger transition
-                setTimeout(() => {
-                    setLandingGroup(prev => prev ? { ...prev, animating: true } : null);
-                }, 10);
-
-                const staggeredDelay = movingCards.length * 40;
-                const totalAnimationTime = 380 + staggeredDelay;
-
-                setTimeout(() => {
-                    dispatch({
-                        type: 'MOVE_CARD',
-                        from: {
-                            type: draggingGroup.type,
-                            index: draggingGroup.index,
-                            cardIndex: draggingGroup.cardIndex,
-                            count: draggingGroup.count
-                        },
-                        to: dropTarget
-                    });
-                    setDraggingGroup(null);
-                }, totalAnimationTime - 20);
-
-                setTimeout(() => setLandingGroup(null), totalAnimationTime);
-                return;
-            }
-        }
-        setDraggingGroup(null);
-    };
+    }, [state.isGameOver, completingSlot, gatheringCat]);
 
     const drawDeck = () => {
         if (isRemoveMode) return;
@@ -905,56 +431,6 @@ const WordSortGame: React.FC = () => {
     const faceDownPattern = currentCardBack.pattern;
 
 
-    // Tutorial highlight sets
-    const tutorialHighlightCards = new Set<string>();
-    const tutorialHighlightSlots = new Set<number>();
-    let tutorialHighlightDeck = false;
-
-    if (tutorialStep === 2) {
-        // 카테고리 카드(스택 상단) + 빈 슬롯
-        state.stacks.forEach(stack => {
-            const top = stack[stack.length - 1];
-            if (top?.isRevealed && top.type === 'category') tutorialHighlightCards.add(top.id);
-        });
-        if (state.revealedDeck.length > 0) {
-            const top = state.revealedDeck[state.revealedDeck.length - 1];
-            if (top.type === 'category') tutorialHighlightCards.add(top.id);
-        }
-        Object.entries(state.activeSlots).forEach(([k, slot]) => {
-            if (!slot) tutorialHighlightSlots.add(Number(k));
-        });
-    } else if (tutorialStep === 3) {
-        tutorialHighlightDeck = true;
-    } else if (tutorialStep === 4) {
-        // 활성 슬롯 + 바나나(t4)만 강조
-        Object.entries(state.activeSlots).forEach(([k, slot]) => {
-            if (slot) tutorialHighlightSlots.add(Number(k));
-        });
-        state.stacks.forEach(stack => {
-            const top = stack[stack.length - 1];
-            if (top?.isRevealed && top.id === 't4') tutorialHighlightCards.add(top.id);
-        });
-    } else if (tutorialStep === 5) {
-        // 딸기(t3)만 강조
-        state.stacks.forEach(stack => {
-            const top = stack[stack.length - 1];
-            if (top?.isRevealed && top.id === 't3') tutorialHighlightCards.add(top.id);
-        });
-    } else if (tutorialStep === 6) {
-        // 그룹 이동 가능한 묶음의 최상단 + 활성 슬롯 강조
-        state.stacks.forEach(stack => {
-            // 연속 같은카테고리 2장 이상이면 최상단 카드 강조
-            if (stack.length >= 2) {
-                const top = stack[stack.length - 1];
-                const second = stack[stack.length - 2];
-                if (top?.isRevealed && second?.isRevealed && top.cat === second.cat)
-                    tutorialHighlightCards.add(top.id);
-            }
-        });
-        Object.entries(state.activeSlots).forEach(([k, slot]) => {
-            if (slot) tutorialHighlightSlots.add(Number(k));
-        });
-    }
 
     // Dealing: cumulative start index per stack (for global card ordering)
     const stackStartIndices = state.stacks.map((_, idx) =>
@@ -962,6 +438,60 @@ const WordSortGame: React.FC = () => {
     );
 
     return (
+        <WordSortUIProvider value={{
+            finalCardWidth,
+            cardHeight,
+            visibleHeight,
+            cardTextSize,
+            cardBadgeSize,
+            cardNameSize,
+            cardWordSize,
+            stackCardStyle,
+            slotCardStyle,
+            faceDownPattern,
+            draggingGroup,
+            setDraggingGroup,
+            dragGhostPos,
+            setDragGhostPos,
+            landingGroup,
+            setLandingGroup,
+            nearestValidTarget,
+            setNearestValidTarget,
+            handleDragStart,
+            handleDragMove,
+            handleDrop,
+            tutorialStep,
+            setTutorialStep,
+            tutorialHighlightCards,
+            tutorialHighlightSlots,
+            tutorialHighlightDeck,
+            completeTutorial,
+            gatheringCat,
+            gatherPhase,
+            gatherOffsets,
+            handleRemoveClick,
+            isRemovingAction,
+            removeTargetLocation,
+            isRemoveMode,
+            setIsRemoveMode,
+            completingSlot,
+            showGameOverOverlay,
+            coins,
+            spendCoins,
+            addCoins,
+            stackRefs,
+            slotRefs,
+            deckCardRef,
+            drawDeck,
+            splitText,
+            setUnlockConfirm,
+            setShowMoveConfirm,
+            isDealingAnimation,
+            dealingProgress,
+            lastDrawnId,
+            stackStartIndices,
+            triggerDealing,
+        }}>
         <div
             ref={gameContainerRef}
             className="word-solitaire-game"
@@ -1011,614 +541,18 @@ const WordSortGame: React.FC = () => {
 
             )}
 
-            {/* Stats area (Steps & Deck) */}
-            <div style={{ display: 'grid', gridTemplateColumns: `${Math.max(95, finalCardWidth)}px auto`, gap: '12px', marginBottom: '1.5rem', alignItems: 'center' }}>
-                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', padding: '10px 5px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>남은 횟수</div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: '900' }}>{state.stepsLeft}</div>
-                </div>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', position: 'relative' }}>
-                    <style>{`
-                     @keyframes flipAndMove {
-                        0% {
-                            transform: translateX(var(--startX, 150px)) rotateY(180deg);
-                            opacity: 1;
-                            z-index: 100;
-                        }
-                        15% {
-                            transform: translateX(var(--startX, 150px)) rotateY(0deg);
-                            opacity: 1;
-                        }
-                        100% {
-                            transform: translateX(0) rotateY(0deg);
-                            opacity: 1;
-                            z-index: 5;
-                        }
-                    }
-                    .animate-card-draw {
-                        animation: flipAndMove 0.6s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
-                        transform-style: preserve-3d;
-                        backface-visibility: hidden;
-                    }
-                    @keyframes slotComplete {
-                        0%   { transform: scale(1);     box-shadow: 0 0 0px rgba(255,215,0,0); }
-                        20%  { transform: scale(1.12);  box-shadow: 0 0 28px rgba(255,215,0,0.9); }
-                        45%  { transform: scale(0.96);  box-shadow: 0 0 16px rgba(255,215,0,0.6); }
-                        65%  { transform: scale(1.06);  box-shadow: 0 0 22px rgba(255,215,0,0.8); }
-                        80%  { transform: scale(0.99);  box-shadow: 0 0 10px rgba(255,215,0,0.4); }
-                        100% { transform: scale(1);     box-shadow: 0 0 0px rgba(255,215,0,0); }
-                    }
-                    .animate-slot-complete {
-                        animation: slotComplete 0.9s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
-                    }
-                    @keyframes dealCard {
-                        0% {
-                            transform: translate(var(--deal-from-x, 150px), var(--deal-from-y, -100px)) scale(0.85) rotate(-3deg);
-                            opacity: 0.8;
-                        }
-                        100% {
-                            transform: translate(0, 0) scale(1) rotate(0deg);
-                            opacity: 1;
-                        }
-                    }
-                    .deal-animation {
-                        animation: dealCard 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) forwards !important;
-                    }
-                    @keyframes tutorialPulse {
-                        0%, 100% {
-                            outline-color: rgba(74, 222, 128, 0.5);
-                            box-shadow: 0 0 12px rgba(74, 222, 128, 0.3);
-                        }
-                        50% {
-                            outline-color: #4ade80;
-                            box-shadow: 0 0 26px rgba(74, 222, 128, 0.75);
-                        }
-                    }
-                    .tutorial-highlight {
-                        animation: tutorialPulse 1.2s ease-in-out infinite !important;
-                        outline: 3px solid rgba(74, 222, 128, 0.5);
-                        outline-offset: 2px;
-                        position: relative;
-                        z-index: 200 !important;
-                    }
-                    @keyframes gatherToCenter {
-                        0% { transform: translate(0, 0) scale(1); opacity: 1; }
-                        0.1% { z-index: 5000; }
-                        100% {
-                            transform: translate(var(--gather-x, 0px), var(--gather-y, 0px)) scale(1);
-                            opacity: 1;
-                            z-index: 5000;
-                        }
-                    }
-                    .gathering-animation {
-                        animation: gatherToCenter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-                        animation-delay: var(--gather-delay, 0s) !important;
-                        pointer-events: none;
-                        transition: none !important;
-                    }
-                    @keyframes revealCard {
-                        0% { opacity: 1; }
-                        100% { opacity: 0; }
-                    }
-                    .reveal-overlay {
-                        position: absolute;
-                        inset: 0;
-                        z-index: 10;
-                        border-radius: 3px;
-                        animation: revealCard 0.1s forwards !important;
-                        pointer-events: none;
-                    }
-                    .central-glow {
-                        position: fixed;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        width: 150px;
-                        height: 200px;
-                        border-radius: 12px;
-                        background: rgba(255, 215, 0, 0.3);
-                        box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.5);
-                        z-index: 4500;
-                        animation: centralGlowPulse 0.8s ease-out forwards;
-                    }
-                    @keyframes centralGlowPulse {
-                        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-                        50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-                        100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0; }
-                    }
-                `}</style>
-                    <div style={{
-                        display: 'flex',
-                        gap: '12px',
-                        justifyContent: 'flex-end',
-                        position: 'absolute',
-                        right: `${finalCardWidth + 12}px`,
-                        top: 0,
-                        width: `${finalCardWidth + 84}px`,
-                        minHeight: '80px',
-                        perspective: gatheringCat ? 'none' : '1200px',
-                        zIndex: gatheringCat ? 6000 : 10
-                    }}>
-                        {(state.revealedDeck.length === 0 || (state.revealedDeck.length === 1 && draggingGroup?.type === 'deck')) && (
-                            <div style={{ ...slotCardStyle, width: `${finalCardWidth}px`, background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', position: 'absolute', right: 0 }}>
-                                <div style={{ opacity: 0.2, fontSize: '0.7rem' }}>카드 없음</div>
-                            </div>
-                        )}
-                        {(() => {
-                            const last4 = state.revealedDeck.slice(-4);
-                            const renderCards = last4.map((c, i) => ({ card: c, idx: i, isTop: i === last4.length - 1 }));
+            <DeckArea />
 
-                            return renderCards.map(({ card, idx, isTop }) => {
-                                const isGathering = gatherOffsets.current.has(card.id);
-                                const category = state.categories.find(c => c.id === card.cat);
-                                const offsetGap = 28;
-                                const offset = idx * offsetGap;
+            <SlotArea />
 
-                                return (
-                                    <div
-                                        key={card.id}
-                                        data-card-id={card.id}
-                                        draggable={isTop && tutorialStep !== 2 && tutorialStep !== 4 && tutorialStep !== 5 && tutorialStep !== 6}
-                                        onDragStart={(e) => isTop && handleDragStart(e, 'deck', 0)}
-                                        onDragEnd={() => !landingGroup && setDraggingGroup(null)}
-                                        className={[
-                                            card.id === lastDrawnId ? 'animate-card-draw' : '',
-                                            isTop && tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : ''
-                                        ].filter(Boolean).join(' ')}
-                                        style={{
-                                            ...slotCardStyle,
-                                            position: 'absolute',
-                                            right: `${offset}px`,
-                                            zIndex: isTop ? 50 : idx,
-                                            width: `${finalCardWidth}px`,
-                                            backgroundColor: card.isRevealed ? (card.type === 'category' ? '#fff9f2' : '#ffffff') : 'transparent',
-                                            backgroundImage: card.isRevealed ? 'none' : faceDownPattern,
-                                            backgroundSize: card.isRevealed ? 'auto' : '100% 100%',
-                                            border: card.isRevealed ? (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999') : 'none',
-                                            boxShadow: (card.isRevealed && card.type === 'category') ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
-                                            visibility: ((isGathering && (gatherOffsets.current.get(card.id)?.seq ?? 0) <= gatherPhase) || (isTop && draggingGroup?.type === 'deck') || (landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id))) ? 'hidden' : 'visible',
-                                            cursor: isRemoveMode ? 'pointer' : (isTop ? 'grab' : 'default'),
-                                            color: card.isRevealed ? '#333' : 'transparent',
-                                            padding: isTop ? '5px' : '0',
-                                            transformOrigin: 'center',
-                                            '--startX': `${finalCardWidth + 12 + offset}px`,
-                                        } as any}
-                                        onClick={() => isRemoveMode && (card.isRevealed || (gatheringCat === card.cat)) && handleRemoveClick(card.cat)}
-                                    >
-                                        <div style={{
-                                            position: 'absolute',
-                                            inset: '2px',
-                                            border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
-                                            borderRadius: '3px',
-                                            pointerEvents: 'none',
-                                            zIndex: 1
-                                        }} />
+            <StackArea />
 
-                                        {isTop && card.type === 'category' && (
-                                            <>
-                                                <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
-                                                    0/{category?.words?.length ?? 5}
-                                                </div>
-                                                <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                                    <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
-                                                </div>
-                                            </>
-                                        )}
-                                        <div style={{
-                                            height: '100%',
-                                            width: '100%',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            position: 'relative'
-                                        }}>
-                                            <span style={{
-                                                fontWeight: '900',
-                                                fontSize: finalCardWidth < 60 ? '0.75rem' : '0.9rem',
-                                                lineHeight: '1.2',
-                                                zIndex: 2,
-                                                ...( !isTop ? {
-                                                    writingMode: 'vertical-rl',
-                                                    textOrientation: 'upright',
-                                                    position: 'absolute',
-                                                    right: '4px',
-                                                    letterSpacing: '-2px',
-                                                    color: '#666'
-                                                } : { textAlign: 'center' })
-                                            }}>
-                                                {card.value}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            });
-                        })()}
-                    </div>
-                    <div onClick={drawDeck} style={{ position: 'relative', cursor: 'pointer' }}>
-                        <div
-                            ref={deckCardRef}
-                            className={tutorialHighlightDeck ? 'tutorial-highlight' : ''}
-                            style={{
-                                ...slotCardStyle,
-                                width: `${finalCardWidth}px`,
-                                backgroundColor: state.deck.length > 0 ? 'transparent' : 'rgba(255,255,255,0.05)',
-                                backgroundImage: state.deck.length > 0 ? faceDownPattern : 'none',
-                                backgroundSize: state.deck.length > 0 ? '100% 100%' : 'auto',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat',
-                                border: state.deck.length > 0 ? 'none' : '1px dashed rgba(255,255,255,0.2)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                            {state.deck.length > 0 ? (
-                                <span style={{
-                                    position: 'absolute',
-                                    bottom: '5px',
-                                    right: '5px',
-                                    color: 'white',
-                                    zIndex: 2,
-                                    textShadow: '1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000'
-                                }}>{state.deck.length}</span>
-                            ) : state.revealedDeck.length > 0 ? (
-                                <RotateCcw size={20} color="white" style={{ opacity: 0.6 }} />
-                            ) : null}
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            {/* Slots */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${Object.keys(state.activeSlots).length + (tutorialStep === null ? lockedSlots : 0)}, ${finalCardWidth}px)`,
-                gap: `${gap}px`,
-                marginBottom: '1.5rem',
-                maxWidth: 'fit-content',
-                marginInline: 'auto',
-                position: 'relative',
-                zIndex: gatheringCat ? 6000 : 1
-            }}>
-                {tutorialStep === null && Array.from({ length: lockedSlots }).map((_, i) => (
-                    <div key={`locked-slot-${i}`} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                        <div style={{ height: '25px' }} />
-                        <div
-                            onClick={() => setUnlockConfirm('slot')}
-                            style={{
-                                ...slotCardStyle,
-                                width: `${finalCardWidth}px`,
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1.5px dashed rgba(255,255,255,0.25)',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '3px',
-                                color: 'rgba(255,255,255,0.5)',
-                            }}
-                        >
-                            <span style={{ fontSize: '1.1rem' }}>🔒</span>
-                            <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
-                            <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>
-                        </div>
-                    </div>
-                ))}
-                {Object.keys(state.activeSlots).map(key => {
-                    const i = Number(key);
-                    const slot = state.activeSlots[i];
-
-                    return (
-                        <div key={i} ref={el => { slotRefs.current[i] = el; }} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                            {/* Tab Area - Only spacer for alignment (No tab as per request) */}
-                            <div style={{ height: '25px' }} />
-                            <div
-                                onDragOver={e => e.preventDefault()}
-                                onDrop={(e) => { handleDrop(e); e.stopPropagation(); }}
-                                className={[
-                                    !isRemovingAction && completingSlot === i ? 'animate-slot-complete' : '',
-                                    tutorialHighlightSlots.has(i) ? 'tutorial-highlight' : ''
-                                ].filter(Boolean).join(' ')}
-                                style={{
-                                    ...slotCardStyle,
-                                    backgroundColor: slot ? '#ffffff' : 'rgba(255,255,255,0.03)',
-                                    backgroundImage: 'none',
-                                    color: '#333',
-                                    border: slot
-                                        ? '3px solid #ff9f43'
-                                        : '1px dashed rgba(255,255,255,0.2)',
-                                    opacity: 1,
-                                    width: `${finalCardWidth}px`,
-                                    boxShadow: slot ? '0 0 15px rgba(255,159,67,0.3)' : 'none',
-                                    borderRadius: '6px',
-                                    position: 'relative',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    visibility: (gatheringCat === slot?.catId && gatherOffsets.current.has(`slot-${i}`) && (gatherOffsets.current.get(`slot-${i}`)?.seq ?? 0) <= gatherPhase) ? 'hidden' : 'visible',
-                                } as any}
-                            >
-                                {slot ? (
-                                    <>
-                                        <div style={{
-                                            position: 'absolute',
-                                            inset: '2px',
-                                            border: '1px solid #ffba75',
-                                            borderRadius: '3px',
-                                            pointerEvents: 'none',
-                                            zIndex: 1
-                                        }} />
-                                        {/* 내부 상단: '0/4 주방' 형식 및 왕관 아이콘 */}
-                                        <div style={{
-                                            position: 'absolute', top: '6px', left: '8px', right: '8px',
-                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            zIndex: 2
-                                        }}>
-                                            <span style={{
-                                                fontSize: (slot.collected.length + slot.target + 1 + (slot.name?.length || 0)) > 8 ? '0.65rem' : '0.75rem',
-                                                color: '#a0522d',
-                                                fontWeight: '900',
-                                                whiteSpace: 'nowrap'
-                                            }}>
-                                                {slot.collected.length}/{slot.target} {slot.name}
-                                            </span>
-                                        </div>
-                                        {/* 중앙: 마지막 단어 */}
-                                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#2c3e50', marginTop: '12px', zIndex: 2 }}>
-                                            {slot.collected.length > 0 ? slot.collected[slot.collected.length - 1] : slot.name}
-                                        </div>
-                                    </>
-                                ) : (
-                                    <Sparkles size={24} style={{ opacity: 0.1, color: 'white' }} />
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Play Stacks Area */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${state.stacks.length + (tutorialStep === null ? lockedStacks : 0)}, ${finalCardWidth}px)`,
-                gap: `${gap}px`,
-                flex: 1,
-                alignItems: 'flex-start',
-                maxWidth: 'fit-content',
-                marginInline: 'auto',
-                position: 'relative',
-                zIndex: gatheringCat ? 6000 : 1
-            }}>
-                {tutorialStep === null && Array.from({ length: lockedStacks }).map((_, i) => (
-                    <div
-                        key={`locked-stack-${i}`}
-                        onClick={() => setUnlockConfirm('stack')}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'flex-start',
-                            minHeight: `${cardHeight}px`,
-                            cursor: 'pointer',
-                        }}
-                    >
-                        <div style={{
-                            ...stackCardStyle,
-                            width: `${finalCardWidth}px`,
-                            height: `${cardHeight}px`,
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1.5px dashed rgba(255,255,255,0.25)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '3px',
-                            color: 'rgba(255,255,255,0.5)',
-                            cursor: 'pointer',
-                        }}>
-                            <span style={{ fontSize: '1.1rem' }}>🔒</span>
-                            <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
-                            <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>
-                        </div>
-                    </div>
-                ))}
-                {state.stacks.map((stack, sIdx) => (
-                    <div
-                        key={sIdx}
-                        ref={el => { stackRefs.current[sIdx] = el; }}
-                        onDragOver={e => e.preventDefault()}
-                        onDrop={(e) => { handleDrop(e); e.stopPropagation(); }}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            position: 'relative',
-                            minHeight: `${cardHeight}px`
-                        }}
-                    >
-                        {(stack.length === 0 || (
-                            draggingGroup?.type === 'stack' && draggingGroup.index === sIdx &&
-                            (draggingGroup.cardIndex ?? 0) === 0 && (draggingGroup.count ?? 1) >= stack.length
-                        )) && (
-                                <div style={{ ...stackCardStyle, borderRadius: '6px', background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.2)' }} />
-                            )}
-                        {stack.map((card, cIdx) => {
-                            const cardSeq = gatherOffsets.current.get(card.id)?.seq ?? 0;
-                            const isGatheringTarget = gatheringCat === card.cat && gatherOffsets.current.has(card.id) && cardSeq <= gatherPhase;
-                            const isMoving = gatheringCat === card.cat && gatherOffsets.current.has(card.id);
-                            // Only reveal if it's actually their turn to move (cardSeq <= gatherPhase)
-                            const isRevealed = !!card.isRevealed || (isMoving && cardSeq <= gatherPhase);
-                            const numToCompress = Math.max(0, stack.length - 8);
-                            const currentVisibleHeight = (cIdx < numToCompress && !isRevealed) ? 13 : visibleHeight;
-                            const currentOverlapMargin = -(cardHeight - currentVisibleHeight);
-
-                            // Drag evaluation: can drag if all cards ABOVE it match the target category
-                            let canDrag = isRevealed;
-                            if (canDrag && cIdx < stack.length - 1) {
-                                for (let k = cIdx; k < stack.length - 1; k++) {
-                                    if (stack[k].cat !== stack[k + 1].cat || !stack[k + 1].isRevealed) {
-                                        canDrag = false;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // Step 2: only highlighted category cards are draggable
-                            if (tutorialStep === 2 && !tutorialHighlightCards.has(card.id)) canDrag = false;
-                            // Step 3: no stack dragging allowed
-                            if (tutorialStep === 3) canDrag = false;
-                            // Step 4: only 바나나(t4) is draggable
-                            if (tutorialStep === 4 && !tutorialHighlightCards.has(card.id)) canDrag = false;
-                            // Step 5: only 딸기(t3) is draggable
-                            if (tutorialStep === 5 && !tutorialHighlightCards.has(card.id)) canDrag = false;
-                            // Step 6: only group-top cards are draggable
-                            if (tutorialStep === 6 && !tutorialHighlightCards.has(card.id)) canDrag = false;
-
-                            const globalCardIndex = stackStartIndices[sIdx] + cIdx;
-                            const isDealtYet = !isDealingAnimation || globalCardIndex < dealingProgress;
-                            const isCurrentlyDealing = isDealingAnimation && globalCardIndex < dealingProgress;
-
-
-
-                            return (
-                                <div
-                                    key={card.id}
-                                    data-card-id={card.id}
-                                    draggable={canDrag && !isRemoveMode}
-                                    onDragStart={e => canDrag && !isRemoveMode && handleDragStart(e, 'stack', sIdx, cIdx)}
-                                    onDragEnd={() => !landingGroup && setDraggingGroup(null)}
-                                    onDragOver={e => e.preventDefault()}
-                                    onClick={() => isRemoveMode && (card.isRevealed || (gatheringCat === card.cat)) && handleRemoveClick(card.cat)}
-                                    className={[
-                                        tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : '',
-                                        isCurrentlyDealing ? 'deal-animation' : ''
-                                    ].filter(Boolean).join(' ')}
-                                    style={{
-                                        ...stackCardStyle,
-                                        width: `${finalCardWidth}px`,
-                                        height: `${cardHeight}px`,
-                                        backgroundColor: isRevealed ? (card.type === 'category' ? '#fff9f2' : '#ffffff') : 'transparent',
-                                        backgroundImage: isRevealed ? 'none' : faceDownPattern,
-                                        backgroundSize: isRevealed ? 'auto' : '100% 100%',
-                                        backgroundPosition: 'center',
-                                        backgroundRepeat: 'no-repeat',
-                                        color: isRevealed ? '#333' : 'transparent',
-                                        marginBottom: cIdx === stack.length - 1 ? '0' : `${currentOverlapMargin}px`,
-                                        zIndex: cIdx,
-                                        padding: '5px',
-                                        cursor: isRemoveMode && (card.isRevealed || gatheringCat === card.cat) ? 'pointer' : (canDrag ? 'grab' : 'default'),
-                                        border: isRevealed
-                                            ? (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999')
-                                            : 'none',
-                                        boxShadow: (isRevealed && card.type === 'category') ? '0 0 10px rgba(255,159,67,0.2)' : 'none',
-                                        visibility: (isGatheringTarget || (draggingGroup?.type === 'stack' && draggingGroup.index === sIdx && draggingGroup.cardIndex !== undefined && cIdx >= draggingGroup.cardIndex && cIdx < draggingGroup.cardIndex + (draggingGroup.count || 1)) || (landingGroup?.isProxy && landingGroup.movingCards?.some(mc => mc.id === card.id)) || !isDealtYet) ? 'hidden' : 'visible',
-                                    } as any}
-                                >
-                                    {!card.isRevealed && gatheringCat === card.cat && (
-                                        <div className="reveal-overlay" style={{ backgroundImage: faceDownPattern, backgroundSize: '100% 100%' } as any} />
-                                    )}
-                                    {isRevealed && (
-                                        <>
-                                            <div style={{
-                                                position: 'absolute',
-                                                inset: '2px',
-                                                border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
-                                                borderRadius: '3px',
-                                                pointerEvents: 'none',
-                                                zIndex: 1
-                                            }} />
-                                            <div style={{
-                                                height: '100%',
-                                                width: '100%',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                justifyContent: (cIdx === stack.length - 1 || isGatheringTarget) ? 'center' : 'flex-start',
-                                                alignItems: 'center',
-                                                paddingTop: '0',
-                                                position: 'relative'
-                                            }}>
-                                                {card.type === 'category' && (() => {
-                                                    const category = state.categories.find(c => c.id === card.cat);
-                                                    return (
-                                                        <>
-                                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
-                                                                0/{category?.words?.length ?? 5}
-                                                            </div>
-                                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                                                <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
-                                                            </div>
-                                                        </>
-                                                    );
-                                                })()}
-                                                <span style={{
-                                                    fontWeight: '900',
-                                                    lineHeight: '1.2',
-                                                    zIndex: 2
-                                                }}>
-                                                    {card.value}
-                                                </span>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                ))}
-            </div>
-
-            {/* Bottom Menu */}
-            <div style={{
-                display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', padding: '1.5rem 0.5rem',
-                borderTop: '1px solid rgba(255,255,255,0.1)'
-            }}>
-                <div style={{ textAlign: 'center' }}><RotateCcw size={24} onClick={() => {
-                    resetUnlocks();
-                    if (tutorialStep !== null) {
-                        dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
-                        setTutorialStep(1);
-                        triggerDealing(levelStackTotal(tutorialLevel));
-                    } else {
-                        dispatch({ type: 'START_LEVEL', levelData: levels[0] });
-                        triggerDealing(levelStackTotal(levels[0]));
-                    }
-                }} /><div style={{ fontSize: '0.7rem' }}>재시작</div></div>
-                <div 
-                    style={{ 
-                        textAlign: 'center', 
-                        cursor: (state.history.length > 0 && coins >= 10) ? 'pointer' : 'not-allowed', 
-                        color: (state.history.length > 0 && coins >= 10) ? 'white' : 'rgba(255,255,255,0.3)',
-                        opacity: (state.history.length > 0 && coins >= 10) ? 1 : 0.5
-                    }}
-                    onClick={async () => {
-                        if (state.history.length === 0 || coins < 10) return;
-                        const success = await spendCoins(10);
-                        if (success) {
-                            dispatch({ type: 'UNDO_ACTION' });
-                        }
-                    }}
-                >
-                    <Undo2 size={24} style={{ margin: '0 auto' }} />
-                    <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>철회</div>
-                    <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 10</div>
-                </div>
-                <div 
-                    style={{ 
-                        textAlign: 'center', 
-                        cursor: (coins >= 50 || isRemoveMode) ? 'pointer' : 'not-allowed', 
-                        color: isRemoveMode ? '#ff6b6b' : (coins >= 50 ? 'white' : 'rgba(255,255,255,0.3)'),
-                        opacity: isRemoveMode ? 1 : (coins >= 50 ? 1 : 0.5)
-                    }}
-                    onClick={() => {
-                        if (!isRemoveMode && coins < 50) return;
-                        setIsRemoveMode(!isRemoveMode);
-                    }}
-                >
-                    <LayersIcon size={24} style={{ margin: '0 auto' }} />
-                    <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>{isRemoveMode ? '취소' : '제거'}</div>
-                    {!isRemoveMode && <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 50</div>}
-                </div>
-            </div>
+            {/* Bottom Menu - 튜토리얼 중에는 숨김 */}
+            <GameBottomMenu
+                triggerDealing={triggerDealing}
+                levelStackTotal={levelStackTotal}
+                resetUnlocks={resetUnlocks}
+            />
 
             {/* Unlock Confirm Dialog */}
             {unlockConfirm && (
@@ -1656,59 +590,56 @@ const WordSortGame: React.FC = () => {
                 </div>
             )}
 
-            {/* Win Overlay */}
-            {state.isWinner && tutorialStep === null && (
+            {/* Move Purchase Confirm Dialog */}
+            {showMoveConfirm && (
                 <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
                 }}>
-                    <h2 style={{ fontSize: '2.5rem', color: '#f1c40f', marginBottom: '1.5rem' }}>🎉 VICTORY!</h2>
-                    <button onClick={() => { resetUnlocks(); dispatch({ type: 'START_LEVEL', levelData: levels[0] }); triggerDealing(levelStackTotal(levels[0])); }} style={{ padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', border: 'none', background: '#f39c12', color: 'white', fontWeight: 'bold' }}>재시작</button>
+                    <div style={{
+                        background: '#3a3c5a', borderRadius: '16px', padding: '1.5rem',
+                        textAlign: 'center', width: '240px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ fontSize: '1.8rem', marginBottom: '0.4rem' }}>➕</div>
+                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.4rem' }}>횟수 추가</div>
+                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                            🪙 50 코인을 사용하여<br />
+                            이동 횟수 20회를 추가하시겠습니까?
+                        </div>
+                        {coins < 50 && (
+                            <div style={{ fontSize: '0.78rem', color: '#ff6b6b', marginBottom: '0.6rem' }}>
+                                코인 부족 (현재 {coins}개)
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => setShowMoveConfirm(false)}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
+                            >취소</button>
+                            <button
+                                onClick={async () => {
+                                    const success = await spendCoins(50);
+                                    if (success) {
+                                        dispatch({ type: 'ADD_STEPS', count: 20 });
+                                    }
+                                    setShowMoveConfirm(false);
+                                }}
+                                disabled={coins < 50}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= 50 ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= 50 ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
+                            >확인</button>
+                        </div>
+                    </div>
                 </div>
             )}
 
-            {/* Interaction blocker during dealing animation */}
-            {isDealingAnimation && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 500 }} />
-            )}
-
-            {/* Interaction blocker for step 1 (welcome screen — must press 다음 first) */}
-            {isRemoveMode && !gatheringCat && (
-                <div style={{
-                    position: 'fixed',
-                    top: '20%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: 'rgba(0,0,0,0.8)',
-                    color: 'white',
-                    padding: '12px 24px',
-                    borderRadius: '20px',
-                    zIndex: 10000,
-                    fontWeight: 'bold',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                    border: '1px solid rgba(255,255,255,0.2)'
-                }}>
-                    제거할 카테고리 카드를 선택하세요
-                </div>
-            )}
-
-            {tutorialStep === 1 && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 9500 }} />
-            )}
-
-            {/* Tutorial Overlay */}
-            {tutorialStep !== null && (
-                <TutorialOverlay
-                    step={tutorialStep}
-                    onNext={() => {
-                        if (tutorialStep === 1) setTutorialStep(2);
-                        else if (tutorialStep === 5) setTutorialStep(6);
-                        else if (tutorialStep === 6) setTutorialStep(7);
-                        else if (tutorialStep === 8) completeTutorial();
-                    }}
-                    onSkip={completeTutorial}
-                />
-            )}
+            <GameOverlays
+                showResumeConfirm={showResumeConfirm}
+                pendingSavedState={pendingSavedState}
+                handleResumeConfirm={handleResumeConfirm}
+                triggerDealing={triggerDealing}
+                levelStackTotal={levelStackTotal}
+                resetUnlocks={resetUnlocks}
+            />
 
             {/* Shop Modal */}
             {isShopOpen && <CardBackShopModal onClose={() => setIsShopOpen(false)} />}
@@ -1722,84 +653,14 @@ const WordSortGame: React.FC = () => {
                 finalCardWidth={finalCardWidth}
                 cardHeight={cardHeight}
             />
-            
-            {landingGroup?.isProxy && landingGroup.movingCards && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    pointerEvents: 'none',
-                    zIndex: 9999
-                }}>
-                    {landingGroup.movingCards.map((card, idx) => {
-                        return (
-                            <div
-                                key={card.id}
-                                style={{
-                                    ...stackCardStyle,
-                                    position: 'absolute',
-                                    width: `${finalCardWidth}px`,
-                                    height: `${cardHeight}px`,
-                                    flexShrink: 0,
-                                    left: `${(landingGroup.targetX ?? 0) - finalCardWidth / 2}px`,
-                                    top: `${(landingGroup.targetY ?? 0) - cardHeight / 2}px`,
-                                    backgroundColor: card.type === 'category' ? '#fff9f2' : '#ffffff',
-                                    backgroundImage: 'none',
-                                    color: '#333',
-                                    border: card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999',
-                                    boxShadow: card.type === 'category' ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
-                                    zIndex: 1000 + idx,
-                                    transform: landingGroup.animating
-                                        ? (landingGroup.targetType === 'stack' ? `translate(0, ${idx * visibleHeight}px)` : 'none')
-                                        : `translate(${landingGroup.offsetX}px, ${landingGroup.offsetY + idx * visibleHeight}px)`,
-                                    transition: landingGroup.animating
-                                        ? 'transform 0.35s cubic-bezier(0.2, 0.8, 0.4, 1)'
-                                        : 'none',
-                                    transitionDelay: (landingGroup.animating && landingGroup.targetType === 'slot')
-                                        ? `${idx * 40}ms`
-                                        : '0ms',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    padding: '5px'
-                                }}
-                            >
-                                <div style={{
-                                    position: 'absolute',
-                                    inset: '2px',
-                                    border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
-                                    borderRadius: '3px',
-                                    pointerEvents: 'none',
-                                    zIndex: 1
-                                }} />
-                                {card.type === 'category' && (() => {
-                                    const category = state.categories.find(c => c.id === card.cat);
-                                    return (
-                                        <>
-                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
-                                                0/{category?.words?.length ?? 5}
-                                            </div>
-                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                                <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
-                                            </div>
-                                        </>
-                                    );
-                                })()}
-                                <span style={{
-                                    fontWeight: '900',
-                                    fontSize: card.type === 'category' ? '0.9rem' : '0.85rem',
-                                    zIndex: 2
-                                }}>
-                                    {card.value}
-                                </span>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+
+            {/* 드래그 플로팅 고스트 */}
+            <DragGhost />
+
+            {/* Landing animation proxy */}
+            <LandingAnimation />
         </div>
+        </WordSortUIProvider>
     );
 };
 
