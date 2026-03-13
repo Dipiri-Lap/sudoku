@@ -179,22 +179,23 @@ const LandingPage: React.FC = () => {
                 }}>
                     {/* Left: Avatar & Info */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        {currentUser && !isGuest && (
+                        {currentUser && (
                             <div
-                                onClick={() => setShowProfileModal(true)}
+                                onClick={isGuest ? undefined : () => setShowProfileModal(true)}
                                 style={{
                                     width: '48px',
                                     height: '48px',
                                     borderRadius: '14px',
-                                    border: '3px solid #fde047', // bright yellow border
-                                    backgroundColor: '#cbd5e1', // Slightly darker slate for better character contrast
+                                    border: `3px solid ${isGuest ? '#64748b' : '#fde047'}`,
+                                    backgroundColor: '#cbd5e1',
                                     overflow: 'hidden',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                    cursor: 'pointer',
-                                    transition: 'transform 0.1s'
+                                    cursor: isGuest ? 'default' : 'pointer',
+                                    transition: 'transform 0.1s',
+                                    opacity: isGuest ? 0.7 : 1,
                                 }}>
                                 <img
                                     src={getAvatarUrl(userPhoto || nickname || '1')}
@@ -205,29 +206,46 @@ const LandingPage: React.FC = () => {
                         )}
 
                         {/* 닉네임 + 퍼즐력 영역 */}
-                        {currentUser && !isGuest && (
+                        {currentUser && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
-                                <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
-                                    {nickname}
-                                </span>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
-                                            퍼즐력
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                                        {nickname || currentUser.uid.slice(0, 8)}
+                                    </span>
+                                    {isGuest && (
+                                        <span style={{
+                                            color: '#94a3b8',
+                                            fontSize: '0.65rem',
+                                            fontWeight: 600,
+                                            backgroundColor: 'rgba(148,163,184,0.15)',
+                                            padding: '1px 6px',
+                                            borderRadius: '4px',
+                                            border: '1px solid rgba(148,163,184,0.3)',
+                                        }}>
+                                            게스트
                                         </span>
-                                        <span style={{ color: '#ef4444', fontSize: '1rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
-                                            {puzzlePower}
-                                        </span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
-                                            등수
-                                        </span>
-                                        <span style={{ color: '#3b82f6', fontSize: '0.9rem', fontWeight: 800 }}>
-                                            {userRank}
-                                        </span>
-                                    </div>
+                                    )}
                                 </div>
+                                {!isGuest && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
+                                                퍼즐력
+                                            </span>
+                                            <span style={{ color: '#ef4444', fontSize: '1rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
+                                                {puzzlePower}
+                                            </span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
+                                                등수
+                                            </span>
+                                            <span style={{ color: '#3b82f6', fontSize: '0.9rem', fontWeight: 800 }}>
+                                                {userRank}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
