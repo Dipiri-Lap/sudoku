@@ -59,9 +59,10 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                         await setDoc(userRef, updates, { merge: true });
                     }
                 }
-                setIsInitialized(true);
             } catch (e) {
                 console.error('UserInitProvider error:', e);
+            } finally {
+                setIsInitialized(true);
             }
         });
 
