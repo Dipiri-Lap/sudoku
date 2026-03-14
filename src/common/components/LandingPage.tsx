@@ -249,9 +249,7 @@ const LandingPage: React.FC = () => {
 
                     {/* Right: Coins and Logout/Login */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <div onClick={() => setShowCoinShop(true)} style={{ cursor: 'pointer' }}>
-                            <CoinDisplay />
-                        </div>
+                        <CoinDisplay />
 
                         <div style={{ marginLeft: '0.2rem', height: '24px', width: '1px', backgroundColor: 'rgba(255,255,255,0.2)' }} />
 
