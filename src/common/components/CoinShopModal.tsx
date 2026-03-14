@@ -43,7 +43,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
         if (adCooldownLeft > 0 || adWatching) return;
 
         // 개발 환경: 광고 API 없으면 시뮬레이션
-        if (import.meta.env.DEV || !window.googletag?.adBreak) {
+        if (import.meta.env.DEV || !window.adBreak) {
             setAdWatching(true);
             setTimeout(async () => {
                 await addCoins(50);
@@ -55,35 +55,33 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
             return;
         }
 
-        window.googletag.cmd.push(() => {
-            window.googletag.adBreak!({
-                type: 'reward',
-                name: 'coin-reward',
-                beforeAd: () => {
-                    setAdWatching(true);
-                },
-                beforeReward: (showAdFn: () => void) => {
-                    showAdFn(); // 버튼 클릭 컨텍스트 안에서 즉시 호출
-                },
-                afterAd: () => {
-                    setAdWatching(false);
-                },
-                adViewed: async () => {
-                    await addCoins(50);
-                    localStorage.setItem(AD_STORAGE_KEY, String(Date.now()));
-                    setAdCooldownLeft(AD_COOLDOWN_MS);
-                    showToast('🪙 50 코인 획득!');
-                },
-                adDismissed: () => {
-                    showToast('광고를 끝까지 시청해야 코인을 받을 수 있어요.');
-                },
-                adBreakDone: (info: { status: string }) => {
-                    setAdWatching(false);
-                    if (info.status === 'noAdPreloaded') {
-                        showToast('현재 준비된 광고가 없습니다. 잠시 후 다시 시도해주세요.');
-                    }
-                },
-            });
+        window.adBreak({
+            type: 'reward',
+            name: 'coin-reward',
+            beforeAd: () => {
+                setAdWatching(true);
+            },
+            beforeReward: (showAdFn: () => void) => {
+                showAdFn();
+            },
+            afterAd: () => {
+                setAdWatching(false);
+            },
+            adViewed: async () => {
+                await addCoins(50);
+                localStorage.setItem(AD_STORAGE_KEY, String(Date.now()));
+                setAdCooldownLeft(AD_COOLDOWN_MS);
+                showToast('🪙 50 코인 획득!');
+            },
+            adDismissed: () => {
+                showToast('광고를 끝까지 시청해야 코인을 받을 수 있어요.');
+            },
+            adBreakDone: (info: { status: string }) => {
+                setAdWatching(false);
+                if (info.status === 'noAdPreloaded') {
+                    showToast('현재 준비된 광고가 없습니다. 잠시 후 다시 시도해주세요.');
+                }
+            },
         });
     };
 
