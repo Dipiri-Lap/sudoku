@@ -20,6 +20,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
     const { coins, addCoins } = useCoins();
     const [adCooldownLeft, setAdCooldownLeft] = useState(0);
     const [adWatching, setAdWatching] = useState(false);
+    const [pendingShowAd, setPendingShowAd] = useState<(() => void) | null>(null);
 
     const getAdCooldownLeft = useCallback(() => {
         const last = Number(localStorage.getItem(AD_STORAGE_KEY) || 0);
@@ -58,11 +59,12 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
         window.adBreak({
             type: 'reward',
             name: 'coin-reward',
+            beforeReward: (showAdFn: () => void) => {
+                setPendingShowAd(() => showAdFn);
+            },
             beforeAd: () => {
                 setAdWatching(true);
-            },
-            beforeReward: (showAdFn: () => void) => {
-                showAdFn();
+                setPendingShowAd(null);
             },
             afterAd: () => {
                 setAdWatching(false);
@@ -78,6 +80,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
             },
             adBreakDone: (info: { status: string }) => {
                 setAdWatching(false);
+                setPendingShowAd(null);
                 if (info.status === 'noAdPreloaded') {
                     showToast('현재 준비된 광고가 없습니다. 잠시 후 다시 시도해주세요.');
                 }
@@ -85,7 +88,11 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
         });
     };
 
-    const canWatchAd = adCooldownLeft === 0 && !adWatching;
+    const handleConfirmAd = () => {
+        if (pendingShowAd) pendingShowAd();
+    };
+
+    const canWatchAd = adCooldownLeft === 0 && !adWatching && !pendingShowAd;
 
     return (
         <div
@@ -169,26 +176,26 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                                 </div>
                             </div>
                             <button
-                                onClick={handleWatchAd}
-                                disabled={!canWatchAd}
+                                onClick={pendingShowAd ? handleConfirmAd : handleWatchAd}
+                                disabled={adWatching || adCooldownLeft > 0}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '0.4rem',
                                     padding: '0.5rem 1rem',
                                     borderRadius: '10px',
                                     border: 'none',
-                                    background: canWatchAd
-                                        ? 'linear-gradient(to bottom, #4ade80, #22c55e)'
-                                        : 'rgba(255,255,255,0.1)',
+                                    background: (adWatching || adCooldownLeft > 0)
+                                        ? 'rgba(255,255,255,0.1)'
+                                        : 'linear-gradient(to bottom, #4ade80, #22c55e)',
                                     color: 'white',
                                     fontWeight: 700,
                                     fontSize: '0.85rem',
-                                    cursor: canWatchAd ? 'pointer' : 'not-allowed',
-                                    boxShadow: canWatchAd ? '0 4px 6px rgba(0,0,0,0.15), inset 0 2px 2px rgba(255,255,255,0.3)' : 'none',
+                                    cursor: (adWatching || adCooldownLeft > 0) ? 'not-allowed' : 'pointer',
+                                    boxShadow: (adWatching || adCooldownLeft > 0) ? 'none' : '0 4px 6px rgba(0,0,0,0.15), inset 0 2px 2px rgba(255,255,255,0.3)',
                                     whiteSpace: 'nowrap',
                                     transition: 'all 0.2s',
                                 }}
                             >
-                                {adWatching ? '로딩...' : <><Play size={13} fill="white" /> 보기</>}
+                                {adWatching ? '로딩...' : pendingShowAd ? <><Play size={13} fill="white" /> 광고 시청</> : <><Play size={13} fill="white" /> 보기</>}
                             </button>
                         </div>
                     </div>
