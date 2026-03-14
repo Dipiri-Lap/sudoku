@@ -117,7 +117,7 @@ export const SlotArea: React.FC = () => {
                                         <div style={{
                                             position: 'absolute', top: '4px', left: '4px', right: '4px',
                                             display: 'flex',
-                                            flexDirection: finalCardWidth < 65 ? 'column' : 'row',
+                                            flexDirection: 'column',
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                             zIndex: 2,
@@ -132,12 +132,13 @@ export const SlotArea: React.FC = () => {
                                                 {slot.collected.length}/{slot.target}
                                             </span>
                                             <span style={{
-                                                fontSize: cardNameSize,
+                                                fontSize: `${(parseFloat(cardNameSize) * 0.85).toFixed(2)}rem`,
                                                 color: '#a0522d',
                                                 fontWeight: '900',
-                                                marginLeft: finalCardWidth < 65 ? '0' : '4px',
                                                 textAlign: 'center',
-                                                whiteSpace: 'nowrap'
+                                                whiteSpace: 'normal',
+                                                wordBreak: 'keep-all',
+                                                overflowWrap: 'break-word',
                                             }}>
                                                 {slot.name}
                                             </span>
@@ -146,7 +147,7 @@ export const SlotArea: React.FC = () => {
                                             fontSize: cardWordSize,
                                             fontWeight: '900',
                                             color: '#2c3e50',
-                                            marginTop: finalCardWidth < 65 ? '20px' : '12px',
+                                            marginTop: '20px',
                                             zIndex: 2,
                                             textAlign: 'center',
                                             whiteSpace: 'nowrap',

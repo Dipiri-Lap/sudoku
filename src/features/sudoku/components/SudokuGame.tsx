@@ -8,6 +8,7 @@ import { Play, Pause, ChevronLeft, ArrowRight, Trophy } from 'lucide-react';
 import { auth } from '../../../firebase';
 import { getUserProfile, saveRecord, updateProfileInfo } from '../../../services/rankingService';
 import { useCoins } from '../../../context/CoinContext';
+import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 import CoinDisplay from '../../../common/components/CoinDisplay';
 
 const SudokuGame: React.FC = () => {
@@ -15,6 +16,7 @@ const SudokuGame: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { addCoins } = useCoins();
+    const { stageProgress } = useSudokuProgress();
     const hasAwardedCoins = useRef(false);
 
     // Ranking State
@@ -149,12 +151,25 @@ const SudokuGame: React.FC = () => {
         const isGameEmpty = state.solution[0][0] === null;
 
         if (mode === 'stage' && level !== null && level !== state.currentLevel) {
+            // Progression Guard: Prevent skipping levels via URL
+            if (level > stageProgress) {
+                alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${stageProgress})`);
+                navigate('/sudoku/stage?mode=stage&level=' + stageProgress, { replace: true });
+                return;
+            }
+
             dispatch({ type: 'START_STAGE', level });
             return;
         }
 
         if (isGameEmpty) {
             if (mode === 'stage' && level !== null) {
+                // Progression Guard for initial load as well
+                if (level > stageProgress) {
+                    alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${stageProgress})`);
+                    navigate('/sudoku/stage?mode=stage&level=' + stageProgress, { replace: true });
+                    return;
+                }
                 dispatch({ type: 'START_STAGE', level });
             } else {
                 const diffParam = params.get('difficulty') as Difficulty || 'Easy';

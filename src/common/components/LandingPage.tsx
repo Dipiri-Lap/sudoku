@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Download, LogIn, LogOut } from 'lucide-react';
+import { Play, Download, LogIn, LogOut, Share2 } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { usePWAInstall } from '../hooks/usePWAInstall';
@@ -7,6 +7,7 @@ import { auth } from '../../firebase';
 import { signOut } from '../../services/authService';
 import LoginModal from './LoginModal';
 import CoinDisplay from './CoinDisplay';
+import CoinShopModal from './CoinShopModal';
 import ProfileModal, { getAvatarUrl } from './ProfileModal';
 import { db } from '../../firebase';
 import { doc, writeBatch, collection, getDocs, query, where, limit } from 'firebase/firestore';
@@ -21,6 +22,7 @@ const LandingPage: React.FC = () => {
     const [userRank, setUserRank] = useState<string>('');
     const [toast, setToast] = useState<string | null>(null);
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
+    const [showCoinShop, setShowCoinShop] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -65,6 +67,24 @@ const LandingPage: React.FC = () => {
 
     const isGuest = currentUser?.isAnonymous;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    const handleShare = async () => {
+        const url = window.location.origin;
+        const text = currentUser && !isGuest && puzzlePower > 0
+            ? `나는 퍼즐력 ${puzzlePower}! 퍼즐 가든에서 같이 두뇌 트레이닝 해요 🧩`
+            : '두뇌를 깨우는 즐거운 퍼즐의 세계, 퍼즐 가든 🧩';
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: '퍼즐 가든', text, url });
+            } catch {
+                // 사용자가 취소한 경우 무시
+            }
+        } else {
+            await navigator.clipboard.writeText(`${text} ${url}`);
+            showToast('링크가 복사되었습니다.');
+        }
+    };
 
     const seedFakeUsers = async () => {
         if (!confirm('500명의 가짜 유저 데이터를 생성하시겠습니까?')) return;
@@ -183,9 +203,9 @@ const LandingPage: React.FC = () => {
                             <div
                                 onClick={() => setShowProfileModal(true)}
                                 style={{
-                                    width: '48px',
-                                    height: '48px',
-                                    borderRadius: '14px',
+                                    width: '60px',
+                                    height: '60px',
+                                    borderRadius: '16px',
                                     border: '3px solid #fde047',
                                     backgroundColor: '#cbd5e1',
                                     overflow: 'hidden',
@@ -194,7 +214,8 @@ const LandingPage: React.FC = () => {
                                     justifyContent: 'center',
                                     boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                                     cursor: 'pointer',
-                                    transition: 'transform 0.1s'
+                                    transition: 'transform 0.1s',
+                                    flexShrink: 0,
                                 }}>
                                 <img
                                     src={getAvatarUrl(userPhoto || nickname || '1')}
@@ -206,27 +227,21 @@ const LandingPage: React.FC = () => {
 
                         {/* 닉네임 + 퍼즐력 영역 */}
                         {currentUser && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
                                 <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
                                     {nickname || currentUser.uid.slice(0, 8)}
                                 </span>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
-                                            퍼즐력
-                                        </span>
-                                        <span style={{ color: '#ef4444', fontSize: '1rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
-                                            {puzzlePower}
-                                        </span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
-                                            등수
-                                        </span>
-                                        <span style={{ color: '#3b82f6', fontSize: '0.9rem', fontWeight: 800 }}>
-                                            {userRank}
-                                        </span>
-                                    </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>퍼즐력</span>
+                                    <span style={{ color: '#ef4444', fontSize: '0.95rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
+                                        {puzzlePower}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>등수</span>
+                                    <span style={{ color: '#3b82f6', fontSize: '0.9rem', fontWeight: 800 }}>
+                                        {userRank}
+                                    </span>
                                 </div>
                             </div>
                         )}
@@ -234,7 +249,9 @@ const LandingPage: React.FC = () => {
 
                     {/* Right: Coins and Logout/Login */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <CoinDisplay />
+                        <div onClick={() => setShowCoinShop(true)} style={{ cursor: 'pointer' }}>
+                            <CoinDisplay />
+                        </div>
 
                         <div style={{ marginLeft: '0.2rem', height: '24px', width: '1px', backgroundColor: 'rgba(255,255,255,0.2)' }} />
 
@@ -285,6 +302,33 @@ const LandingPage: React.FC = () => {
 
                 <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} />
                 <p>두뇌를 깨우는 즐거운 퍼즐의 세계</p>
+
+                <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', letterSpacing: '0.02em' }}>
+                            친구에게 퍼즐력 자랑하기 💪
+                        </p>
+                        <button
+                            onClick={handleShare}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.6rem 1.4rem',
+                                borderRadius: '2rem',
+                                border: '1.5px solid #3b6b91',
+                                backgroundColor: 'transparent',
+                                color: '#3b6b91',
+                                fontWeight: 700,
+                                fontSize: '0.9rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            <Share2 size={15} />
+                            친구 초대하고 함께 즐기기
+                        </button>
+                    </div>
+
                 {isInstallable && (
                     <button
                         onClick={promptToInstall}
@@ -380,6 +424,13 @@ const LandingPage: React.FC = () => {
                     </div>
                 )}
             </footer>
+
+            {showCoinShop && (
+                <CoinShopModal
+                    onClose={() => setShowCoinShop(false)}
+                    showToast={showToast}
+                />
+            )}
 
             {showLoginModal && (
                 <LoginModal

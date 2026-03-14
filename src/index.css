@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'Kaph';
+  src: url('./assets/fonts/Kaph-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'monogram';
+  src: url('./assets/fonts/monogram.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f0f4f8;

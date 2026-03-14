@@ -76,20 +76,17 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
                     <div style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>
                         남은 횟수를 모두 소진했습니다
                     </div>
-                    <button
-                        onClick={() => {
-                            const currentLevelData = levels.find((l: any) => l.id === state.level) || levels[0];
-                            resetUnlocks();
-                            dispatch({ type: 'START_LEVEL', levelData: currentLevelData });
-                            triggerDealing(levelStackTotal(currentLevelData));
-                        }}
+                    <a
+                        href={`/word-sort?level=${state.level}`}
                         style={{
                             padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px',
                             border: 'none', background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
                             color: 'white', fontWeight: 'bold', cursor: 'pointer',
-                            boxShadow: '0 4px 15px rgba(231,76,60,0.4)'
+                            boxShadow: '0 4px 15px rgba(231,76,60,0.4)',
+                            textDecoration: 'none',
+                            display: 'inline-block'
                         }}
-                    >재시작 🔄</button>
+                    >재시작 🔄</a>
                 </div>
             )}
 
@@ -131,10 +128,17 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
                         ) : null}
                         {hasNextLevel && (
                             <div style={{ display: 'flex', gap: '12px' }}>
-                                <button
-                                    onClick={handleNext}
-                                    style={{ padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', border: 'none', background: 'linear-gradient(135deg, #f6d365, #f39c12)', color: 'white', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(243,156,18,0.4)' }}
-                                >다음 레벨 →</button>
+                                <a
+                                    href={`/word-sort?level=${state.level + 1}`}
+                                    style={{ 
+                                        padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', 
+                                        border: 'none', background: 'linear-gradient(135deg, #f6d365, #f39c12)', 
+                                        color: 'white', fontWeight: 'bold', cursor: 'pointer', 
+                                        boxShadow: '0 4px 15px rgba(243,156,18,0.4)',
+                                        textDecoration: 'none',
+                                        display: 'inline-block'
+                                    }}
+                                >다음 레벨 →</a>
                             </div>
                         )}
                     </div>

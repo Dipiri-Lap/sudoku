@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useWordSort, WORDSORT_SAVE_KEY } from '../context/WordSortContext';
 import levels from '../data/levels.json';
 import tutorialLevel from '../data/tutorial-level.json';
@@ -25,6 +26,7 @@ import { Sparkles } from 'lucide-react';
 const WordSortGame: React.FC = () => {
 
     const { state, dispatch } = useWordSort();
+    const location = useLocation();
     const { addCoins, spendCoins, coins } = useCoins();
     const hasAwardedCoins = useRef(false);
     const hasSavedLevelProgress = useRef(false);
@@ -237,10 +239,24 @@ const WordSortGame: React.FC = () => {
         }
     }, [state]);
 
-    // Unified initialization: check Firebase progress first, then decide restore vs new game
+    // Unified initialization: check URL query first, then Firebase progress, then restore
     useEffect(() => {
         const doInit = async () => {
             const tutorialDone = localStorage.getItem('wordSort_tutorialDone');
+
+            // 1. Check URL query params first (for refresh/direct link level transitions)
+            const params = new URLSearchParams(location.search);
+            const urlLevelStr = params.get('level');
+            const urlLevel = urlLevelStr ? parseInt(urlLevelStr) : null;
+
+            if (urlLevel !== null && !isNaN(urlLevel)) {
+                // If specific level requested via URL, start it (skips tutorial/restore)
+                const levelData = levels.find((l: any) => l.id === urlLevel) || levels[0];
+                dispatch({ type: 'START_LEVEL', levelData });
+                triggerDealing(levelStackTotal(levelData));
+                return;
+            }
+
             if (!tutorialDone) {
                 dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
                 setTutorialStep(1);
