@@ -298,7 +298,7 @@ const LandingPage: React.FC = () => {
                     </div>
                 </div>
 
-                <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} />
+                {/* <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} /> */}
                 <p>두뇌를 깨우는 즐거운 퍼즐의 세계</p>
 
                 <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
