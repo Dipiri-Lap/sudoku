@@ -17,7 +17,7 @@ interface ProfileModalProps {
 const AVATAR_SEEDS = Array.from({ length: 40 }, (_, i) => String(i + 1));
 
 export const getAvatarUrl = (seed: string) => {
-    if (seed.startsWith('http')) return seed;
+    if (seed.startsWith('http') || seed.startsWith('/')) return seed;
     const num = parseInt(seed, 10);
     const validSeed = (!isNaN(num) && num >= 1 && num <= 40) ? seed : '1';
     return `/assets/profiles/${validSeed}.png`;

@@ -1,10 +1,38 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { generatePuzzles, Difficulty } from '../src/engine/generator';
+import { generatePuzzles, type Difficulty } from '../src/engine/generator';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/**
+ * 레벨별 난이도 결정 규칙:
+ * - 1레벨: 입문 (Very Easy)
+ * - 2~5레벨: 쉬움, 초급, 보통, 어려움
+ * - 6레벨~: 5개 사이클 (쉬움, 초급, 보통, 보통, 어려움)
+ *   - 25의 배수: 어려움 → 고급 (Expert)
+ *   - 100의 배수: 고급 → 전문가 (Master)
+ */
+function getLevelDifficulty(level: number): Difficulty {
+    if (level === 1) return 'Very Easy'; // 입문
+
+    if (level <= 5) {
+        const map: Difficulty[] = ['Easy', 'Beginner', 'Medium', 'Hard'];
+        return map[level - 2];
+    }
+
+    const pos = (level - 6) % 5; // 0=쉬움, 1=초급, 2=보통, 3=보통, 4=어려움/고급/전문가
+
+    if (pos === 4) {
+        if (level % 100 === 0) return 'Master';  // 전문가
+        if (level % 25 === 0) return 'Expert';   // 고급
+        return 'Hard';                            // 어려움
+    }
+
+    const map: Difficulty[] = ['Easy', 'Beginner', 'Medium', 'Medium'];
+    return map[pos];
+}
 
 interface Stage {
     id: number;
@@ -14,81 +42,36 @@ interface Stage {
 }
 
 async function main() {
-    const TARGET_STAGES_COUNT = 500;
+    const TARGET = 500;
     const dataDir = path.join(__dirname, '../src/data');
     const outputPath = path.join(dataDir, 'stages.json');
 
-    let stages: Stage[] = [];
+    const stages: Stage[] = [];
     const seenPuzzles = new Set<string>();
 
-    // 1. Load existing stages if they exist
-    if (fs.existsSync(outputPath)) {
-        const existingData = fs.readFileSync(outputPath, 'utf8');
-        try {
-            stages = JSON.parse(existingData);
-            console.log(`Loaded ${stages.length} existing stages.`);
+    console.log(`Generating ${TARGET} stages with new difficulty pattern...`);
 
-            // Populate seen puzzles for duplicate checking
-            stages.forEach(s => {
-                const key = s.board.flat().map(v => v === null ? '0' : v).join('');
-                seenPuzzles.add(key);
-            });
-        } catch (e) {
-            console.warn('Failed to parse existing stages.json, starting fresh.');
-        }
-    }
-
-    const currentCount = stages.length;
-    if (currentCount >= TARGET_STAGES_COUNT) {
-        console.log(`Already have ${currentCount} stages. No more needed.`);
-        return;
-    }
-
-    console.log(`Generating ${TARGET_STAGES_COUNT - currentCount} more unique stages (Total target: ${TARGET_STAGES_COUNT})...`);
-
-    for (let i = currentCount + 1; i <= TARGET_STAGES_COUNT; i++) {
-        // Determine difficulty based on pattern: Easy-Easy-Medium-Medium-Hard
-        let difficulty: Difficulty;
-        const patternIndex = (i - 1) % 5;
-
-        if (i % 20 === 0) {
-            difficulty = 'Expert'; // Boss level every 20 stages
-        } else {
-            switch (patternIndex) {
-                case 0:
-                case 1:
-                    difficulty = 'Easy';
-                    break;
-                case 2:
-                case 3:
-                    difficulty = 'Medium';
-                    break;
-                default:
-                    difficulty = 'Hard';
-                    break;
-            }
-        }
+    for (let level = 1; level <= TARGET; level++) {
+        const difficulty = getLevelDifficulty(level);
 
         let puzzleData;
         let puzzleKey: string;
 
-        // Ensure uniqueness
         do {
             puzzleData = generatePuzzles(difficulty);
             puzzleKey = puzzleData.puzzle.flat().map(v => v === null ? '0' : v).join('');
         } while (seenPuzzles.has(puzzleKey));
 
         seenPuzzles.add(puzzleKey);
-
         stages.push({
-            id: i,
+            id: level,
             difficulty,
             board: puzzleData.puzzle,
-            solution: puzzleData.solution as number[][]
+            solution: puzzleData.solution as number[][],
         });
 
-        if (i % 50 === 0 || i === TARGET_STAGES_COUNT) {
-            console.log(`Generated ${i}/${TARGET_STAGES_COUNT} stages...`);
+        if (level % 50 === 0 || level === TARGET) {
+            console.log(`  ${level}/${TARGET} (level ${level}: ${difficulty})`);
         }
     }
 
@@ -97,8 +80,13 @@ async function main() {
     }
 
     fs.writeFileSync(outputPath, JSON.stringify(stages, null, 2));
+    console.log(`\nDone! ${stages.length} stages saved to ${outputPath}`);
 
-    console.log(`Success! Total ${stages.length} stages saved to ${outputPath}`);
+    // 분포 출력
+    const dist: Record<string, number> = {};
+    stages.forEach(s => { dist[s.difficulty] = (dist[s.difficulty] || 0) + 1; });
+    console.log('\nDifficulty distribution:');
+    Object.entries(dist).forEach(([d, c]) => console.log(`  ${d}: ${c}`));
 }
 
 main().catch(err => {
