@@ -31,7 +31,7 @@ const SudokuModeSelect: React.FC = () => {
 
             <div className="mode-grid">
                 <div className="game-card animate-fade-in" style={{ '--delay': '0.1s', position: 'relative' } as any} onClick={() => {
-                    const startLevel = beginnerAllCleared ? 1 : beginnerProgress;
+                    const startLevel = beginnerAllCleared ? 1 : Math.min(beginnerProgress + 1, 5);
                     dispatch({ type: 'START_BEGINNER', level: startLevel });
                     navigate(`/sudoku/beginner?level=${startLevel}`);
                 }}>
@@ -48,7 +48,7 @@ const SudokuModeSelect: React.FC = () => {
                         <p>6×6 스도쿠로 시작해 9×9로 단계별 입문하세요.</p>
                         <div className="game-card-footer">
                             <span className="play-now">
-                                {beginnerAllCleared ? '처음부터 하기' : beginnerProgress > 1 ? `Level ${beginnerProgress} 이어하기` : 'Level 1 시작하기'}
+                                {beginnerAllCleared ? '처음부터 하기' : beginnerProgress > 0 ? `Level ${beginnerProgress + 1} 시작하기` : 'Level 1 시작하기'}
                             </span>
                         </div>
                     </div>
