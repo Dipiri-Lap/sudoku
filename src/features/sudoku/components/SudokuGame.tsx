@@ -6,7 +6,7 @@ import Board from './Board';
 import Controls from './Controls';
 import BeginnerTutorialModal from './BeginnerTutorialModal';
 import type { Difficulty } from '../../../engine/generator';
-import { Play, Pause, ChevronLeft, ArrowRight, Trophy, Heart, Palette, Settings, House } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ArrowRight, Trophy, Heart, House } from 'lucide-react';
 import { auth } from '../../../firebase';
 import { getUserProfile, saveRecord, updateProfileInfo } from '../../../services/rankingService';
 import { useCoins } from '../../../context/CoinContext';
@@ -250,18 +250,18 @@ const SudokuGame: React.FC = () => {
                         <button className="nav-icon-btn" onClick={handleBack}>
                             <ChevronLeft size={22} />
                         </button>
-                        <div className="nav-icon-btn" style={{ color: '#f4c430' }}>
+                        {/* <div className="nav-icon-btn" style={{ color: '#f4c430' }}>
                             <Trophy size={20} />
-                        </div>
+                        </div> */}
                     </div>
-                    <div className="game-nav-right">
+                    {/* <div className="game-nav-right">
                         <button className="nav-icon-btn">
                             <Palette size={20} />
                         </button>
                         <button className="nav-icon-btn">
                             <Settings size={20} />
                         </button>
-                    </div>
+                    </div> */}
                 </div>
                 {/* Info bar */}
                 <div className="game-info-bar">
