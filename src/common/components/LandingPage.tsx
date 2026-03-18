@@ -11,7 +11,7 @@ import CoinShopModal from './CoinShopModal';
 import ProfileModal, { getAvatarUrl } from './ProfileModal';
 import { db } from '../../firebase';
 import { doc, writeBatch, collection, getDocs, query, where, limit } from 'firebase/firestore';
-import { CHALLENGE_MAP, ALL_CHALLENGES } from '../../data/challenges';
+import { CHALLENGE_MAP } from '../../data/challenges';
 import { useChallenges } from '../../context/ChallengeContext';
 
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
@@ -19,12 +19,7 @@ const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 const LandingPage: React.FC = () => {
     const { isInstallable, promptToInstall } = usePWAInstall();
     const challenges = useChallenges();
-    const hasUnclaimed = Object.values(ALL_CHALLENGES).flat().some(c => {
-        if (challenges.isChallengeCompleted(c.id)) return false;
-        const { source } = c.progressConfig;
-        if (source === 'time_attack') return challenges.isChallengeCleared(c.id);
-        return false; // LandingPage doesn't have full progress context; basic check
-    });
+    const hasUnclaimed = [...challenges.clearedIds].some(id => challenges.isChallengeCleared(id));
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
