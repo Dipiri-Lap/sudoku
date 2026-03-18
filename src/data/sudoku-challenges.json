@@ -78,7 +78,7 @@
     "id": "stage_50",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "💎 스도쿠 베테랑",
+    "title": "🏅 9의 수호자",
     "condition": "스테이지 50 클리어",
     "progressConfig": {
       "source": "regular_stage",
@@ -93,7 +93,7 @@
     "id": "stage_100",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "🏅 9의 수호자",
+    "title": "💎 스도쿠 베테랑",
     "condition": "스테이지 100 클리어",
     "progressConfig": {
       "source": "regular_stage",
@@ -123,7 +123,7 @@
     "id": "stage_300",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "👑 스도쿠 제왕",
+    "title": "🌟 스도쿠 매니아",
     "condition": "스테이지 300 클리어",
     "progressConfig": {
       "source": "regular_stage",
@@ -138,7 +138,7 @@
     "id": "stage_400",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "🌟 완전한 배열",
+    "title": "🌌 스도쿠 지배자",
     "condition": "스테이지 400 클리어",
     "progressConfig": {
       "source": "regular_stage",
@@ -153,7 +153,7 @@
     "id": "stage_500",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "🌌 수리의 절대자",
+    "title": "👑 스도쿠 제왕",
     "condition": "스테이지 500 클리어",
     "progressConfig": {
       "source": "regular_stage",
