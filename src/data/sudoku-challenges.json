@@ -5,8 +5,14 @@
     "game": "sudoku",
     "title": "📝 숫자 입문생",
     "condition": "입문 스테이지 1 클리어",
-    "progressConfig": { "source": "beginner_stage", "target": 1 },
-    "reward": { "puzzle_power": 10, "coin": 10 }
+    "progressConfig": {
+      "source": "beginner_stage",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
   },
   {
     "id": "stage_005",
@@ -14,8 +20,14 @@
     "game": "sudoku",
     "title": "🔢 기초 수사관",
     "condition": "입문 스테이지 5 클리어",
-    "progressConfig": { "source": "beginner_stage", "target": 5 },
-    "reward": { "puzzle_power": 10, "coin": 30 }
+    "progressConfig": {
+      "source": "beginner_stage",
+      "target": 5
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 30
+    }
   },
   {
     "id": "stage_5",
@@ -23,8 +35,14 @@
     "game": "sudoku",
     "title": "🔎 단서 추적자",
     "condition": "스테이지 5 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 5 },
-    "reward": { "puzzle_power": 10, "coin": 10 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 5
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
   },
   {
     "id": "stage_10",
@@ -32,17 +50,29 @@
     "game": "sudoku",
     "title": "📜 논리 분석가",
     "condition": "스테이지 10 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 10 },
-    "reward": { "puzzle_power": 20, "coin": 25 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 10
+    },
+    "reward": {
+      "puzzle_power": 20,
+      "coin": 25
+    }
   },
   {
     "id": "stage_25",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "🎓 숙련된 수리공",
+    "title": "🎓 숙련된 스도커",
     "condition": "스테이지 25 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 25 },
-    "reward": { "puzzle_power": 30, "coin": 50 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 25
+    },
+    "reward": {
+      "puzzle_power": 30,
+      "coin": 50
+    }
   },
   {
     "id": "stage_50",
@@ -50,8 +80,14 @@
     "game": "sudoku",
     "title": "💎 스도쿠 베테랑",
     "condition": "스테이지 50 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 50 },
-    "reward": { "puzzle_power": 50, "coin": 75 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 50
+    },
+    "reward": {
+      "puzzle_power": 50,
+      "coin": 75
+    }
   },
   {
     "id": "stage_100",
@@ -59,8 +95,14 @@
     "game": "sudoku",
     "title": "🏅 9의 수호자",
     "condition": "스테이지 100 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 100 },
-    "reward": { "puzzle_power": 100, "coin": 100 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 100
+    },
+    "reward": {
+      "puzzle_power": 100,
+      "coin": 100
+    }
   },
   {
     "id": "stage_200",
@@ -68,8 +110,14 @@
     "game": "sudoku",
     "title": "🔮 직관의 눈",
     "condition": "스테이지 200 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 200 },
-    "reward": { "puzzle_power": 150, "coin": 200 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 200
+    },
+    "reward": {
+      "puzzle_power": 150,
+      "coin": 200
+    }
   },
   {
     "id": "stage_300",
@@ -77,8 +125,14 @@
     "game": "sudoku",
     "title": "👑 스도쿠 제왕",
     "condition": "스테이지 300 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 300 },
-    "reward": { "puzzle_power": 200, "coin": 300 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 300
+    },
+    "reward": {
+      "puzzle_power": 200,
+      "coin": 300
+    }
   },
   {
     "id": "stage_400",
@@ -86,8 +140,14 @@
     "game": "sudoku",
     "title": "🌟 완전한 배열",
     "condition": "스테이지 400 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 400 },
-    "reward": { "puzzle_power": 250, "coin": 400 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 400
+    },
+    "reward": {
+      "puzzle_power": 250,
+      "coin": 400
+    }
   },
   {
     "id": "stage_500",
@@ -95,8 +155,14 @@
     "game": "sudoku",
     "title": "🌌 수리의 절대자",
     "condition": "스테이지 500 클리어",
-    "progressConfig": { "source": "regular_stage", "target": 500 },
-    "reward": { "puzzle_power": 300, "coin": 500 }
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 500
+    },
+    "reward": {
+      "puzzle_power": 300,
+      "coin": 500
+    }
   },
   {
     "id": "ta_easy",
@@ -104,8 +170,14 @@
     "game": "sudoku",
     "title": "⏱️ 퀵 스타터",
     "condition": "타임어택 [쉬움] 클리어",
-    "progressConfig": { "source": "time_attack", "target": 1 },
-    "reward": { "puzzle_power": 10, "coin": 10 }
+    "progressConfig": {
+      "source": "time_attack",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
   },
   {
     "id": "ta_normal",
@@ -113,8 +185,14 @@
     "game": "sudoku",
     "title": "⚡ 스피드 레이서",
     "condition": "타임어택 [보통] 클리어",
-    "progressConfig": { "source": "time_attack", "target": 1 },
-    "reward": { "puzzle_power": 30, "coin": 20 }
+    "progressConfig": {
+      "source": "time_attack",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 30,
+      "coin": 20
+    }
   },
   {
     "id": "ta_hard",
@@ -122,8 +200,14 @@
     "game": "sudoku",
     "title": "🔥 극한의 집중력",
     "condition": "타임어택 [어려움] 클리어",
-    "progressConfig": { "source": "time_attack", "target": 1 },
-    "reward": { "puzzle_power": 50, "coin": 40 }
+    "progressConfig": {
+      "source": "time_attack",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 50,
+      "coin": 40
+    }
   },
   {
     "id": "ta_expert",
@@ -131,8 +215,14 @@
     "game": "sudoku",
     "title": "🌀 시공의 분석자",
     "condition": "타임어택 [전문가] 클리어",
-    "progressConfig": { "source": "time_attack", "target": 1 },
-    "reward": { "puzzle_power": 100, "coin": 100 }
+    "progressConfig": {
+      "source": "time_attack",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 100,
+      "coin": 100
+    }
   },
   {
     "id": "ta_master",
@@ -140,7 +230,13 @@
     "game": "sudoku",
     "title": "👑 신의 직관",
     "condition": "타임어택 [마스터] 클리어",
-    "progressConfig": { "source": "time_attack", "target": 1 },
-    "reward": { "puzzle_power": 300, "coin": 200 }
+    "progressConfig": {
+      "source": "time_attack",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 300,
+      "coin": 200
+    }
   }
 ]
