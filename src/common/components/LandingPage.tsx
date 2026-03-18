@@ -11,9 +11,20 @@ import CoinShopModal from './CoinShopModal';
 import ProfileModal, { getAvatarUrl } from './ProfileModal';
 import { db } from '../../firebase';
 import { doc, writeBatch, collection, getDocs, query, where, limit } from 'firebase/firestore';
+import { CHALLENGE_MAP, ALL_CHALLENGES } from '../../data/challenges';
+import { useChallenges } from '../../context/ChallengeContext';
+
+const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
 const LandingPage: React.FC = () => {
     const { isInstallable, promptToInstall } = usePWAInstall();
+    const challenges = useChallenges();
+    const hasUnclaimed = Object.values(ALL_CHALLENGES).flat().some(c => {
+        if (challenges.isChallengeCompleted(c.id)) return false;
+        const { source } = c.progressConfig;
+        if (source === 'time_attack') return challenges.isChallengeCleared(c.id);
+        return false; // LandingPage doesn't have full progress context; basic check
+    });
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -23,19 +34,36 @@ const LandingPage: React.FC = () => {
     const [toast, setToast] = useState<string | null>(null);
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
     const [showCoinShop, setShowCoinShop] = useState(false);
+    const [activeTitle, setActiveTitle] = useState<string | null>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
             if (user) {
-                const { getUserProfile } = await import('../../services/rankingService');
+                // Load cache immediately to prevent flicker
+                const cached = localStorage.getItem(PROFILE_CACHE_KEY(user.uid));
+                if (cached) {
+                    const c = JSON.parse(cached);
+                    setNickname(c.nickname || '');
+                    setUserPhoto(c.photoURL || null);
+                    setPuzzlePower(c.puzzlePower || 0);
+                    setActiveTitle(c.activeTitle ?? null);
+                }
+
+                const { getUserProfile, getUserRank } = await import('../../services/rankingService');
                 try {
                     const profile = await getUserProfile(user.uid);
                     setNickname(profile.nickname);
                     setUserPhoto(profile.photoURL || null);
                     setPuzzlePower(profile.puzzlePower || 0);
+                    setActiveTitle(profile.activeTitle ?? null);
+                    localStorage.setItem(PROFILE_CACHE_KEY(user.uid), JSON.stringify({
+                        nickname: profile.nickname,
+                        photoURL: profile.photoURL || null,
+                        puzzlePower: profile.puzzlePower || 0,
+                        activeTitle: profile.activeTitle ?? null,
+                    }));
 
-                    const { getUserRank } = await import('../../services/rankingService');
                     const rank = await getUserRank(profile.puzzlePower || 0);
                     setUserRank(rank);
                 } catch (e) {
@@ -202,7 +230,9 @@ const LandingPage: React.FC = () => {
                         {currentUser && (
                             <div
                                 onClick={() => setShowProfileModal(true)}
-                                style={{
+                                style={{ position: 'relative', flexShrink: 0, cursor: 'pointer' }}
+                            >
+                            <div style={{
                                     width: '60px',
                                     height: '60px',
                                     borderRadius: '16px',
@@ -213,9 +243,7 @@ const LandingPage: React.FC = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                    cursor: 'pointer',
                                     transition: 'transform 0.1s',
-                                    flexShrink: 0,
                                 }}>
                                 <img
                                     src={getAvatarUrl(userPhoto || nickname || '1')}
@@ -223,22 +251,49 @@ const LandingPage: React.FC = () => {
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
+                            {hasUnclaimed && (
+                                <div style={{
+                                    position: 'absolute', top: '-4px', left: '-4px',
+                                    width: '18px', height: '18px', borderRadius: '50%',
+                                    background: '#ef4444', border: '2px solid #1e293b',
+                                    color: 'white', fontSize: '0.65rem', fontWeight: '900',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    pointerEvents: 'none'
+                                }}>!</div>
+                            )}
+                            </div>
                         )}
 
                         {/* 닉네임 + 퍼즐력 영역 */}
                         {currentUser && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
-                                <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
-                                    {nickname || currentUser.uid.slice(0, 8)}
-                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                                        {nickname || currentUser.uid.slice(0, 8)}
+                                    </span>
+                                    {activeTitle && CHALLENGE_MAP[activeTitle] && (
+                                        <span style={{
+                                            fontSize: '0.65rem',
+                                            fontWeight: 700,
+                                            color: '#fde047',
+                                            background: 'rgba(251,191,36,0.12)',
+                                            border: '1px solid rgba(251,191,36,0.3)',
+                                            borderRadius: '4px',
+                                            padding: '1px 5px',
+                                            whiteSpace: 'nowrap',
+                                        }}>
+                                            {CHALLENGE_MAP[activeTitle].title}
+                                        </span>
+                                    )}
+                                </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>퍼즐력</span>
+                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>퍼즐력 :</span>
                                     <span style={{ color: '#ef4444', fontSize: '0.95rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
                                         {puzzlePower}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>등수</span>
+                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>랭크 :</span>
                                     <span style={{ color: '#3b82f6', fontSize: '0.9rem', fontWeight: 800 }}>
                                         {userRank}
                                     </span>
@@ -278,14 +333,14 @@ const LandingPage: React.FC = () => {
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '0.4rem',
-                                    padding: '0.45rem 1.1rem',
-                                    borderRadius: '2rem',
+                                    gap: '0.3rem',
+                                    padding: '0.35rem 0.8rem',
+                                    borderRadius: '8px',
                                     border: 'none',
                                     backgroundColor: '#4a90e2',
                                     color: 'white',
                                     fontWeight: 700,
-                                    fontSize: '0.85rem',
+                                    fontSize: '0.78rem',
                                     cursor: 'pointer',
                                     boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
                                     transition: 'all 0.2s'
@@ -446,7 +501,22 @@ const LandingPage: React.FC = () => {
                     onSaveSuccess={(newNickname, newPhotoURL) => {
                         setNickname(newNickname);
                         setUserPhoto(newPhotoURL);
+                        localStorage.setItem(PROFILE_CACHE_KEY(currentUser.uid), JSON.stringify({
+                            nickname: newNickname,
+                            photoURL: newPhotoURL,
+                            puzzlePower,
+                            activeTitle,
+                        }));
                         showToast('프로필이 업데이트되었습니다.');
+                    }}
+                    onActiveTitleChange={(titleId) => {
+                        setActiveTitle(titleId);
+                        localStorage.setItem(PROFILE_CACHE_KEY(currentUser.uid), JSON.stringify({
+                            nickname,
+                            photoURL: userPhoto,
+                            puzzlePower,
+                            activeTitle: titleId,
+                        }));
                     }}
                 />
             )}

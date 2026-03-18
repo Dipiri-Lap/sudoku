@@ -4,6 +4,7 @@ import type { Grid } from '../../../engine/validator';
 import type { Difficulty } from '../../../engine/generator';
 import { generatePuzzles } from '../../../engine/generator';
 import stagesData from '../../../data/stages.json';
+import { beginnerStages } from '../../../data/beginner-stages';
 
 interface GameState {
     board: Grid;
@@ -24,7 +25,9 @@ interface GameState {
     animatingCols: number[];
     animatingSectors: number[];
     mistakeCell: { row: number; col: number } | null;
-    gameMode: 'TimeAttack' | 'Stage';
+    hintCell: { row: number; col: number } | null;
+    gameMode: 'TimeAttack' | 'Stage' | 'Beginner';
+    boardSize: 6 | 9;
     currentLevel: number | null;
     hintsRemaining: number;
 }
@@ -42,7 +45,9 @@ type GameAction =
     | { type: 'TOGGLE_PAUSE' }
     | { type: 'CLEAR_ANIMATIONS' }
     | { type: 'CLEAR_MISTAKE' }
-    | { type: 'START_STAGE'; level: number };
+    | { type: 'CLEAR_HINT' }
+    | { type: 'START_STAGE'; level: number }
+    | { type: 'START_BEGINNER'; level: number };
 
 const initialState: GameState = {
     board: Array(9).fill(null).map(() => Array(9).fill(null)),
@@ -63,7 +68,9 @@ const initialState: GameState = {
     animatingCols: [],
     animatingSectors: [],
     mistakeCell: null,
+    hintCell: null,
     gameMode: 'TimeAttack',
+    boardSize: 9,
     currentLevel: null,
     hintsRemaining: 1,
 };
@@ -98,6 +105,39 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                 currentLevel: action.level,
                 hintsRemaining: 1,
             };
+        }
+
+        case 'START_BEGINNER': {
+            const level = action.level;
+            if (level <= 2) {
+                const stage = beginnerStages[level - 1];
+                const size = 6;
+                return {
+                    ...initialState,
+                    board: stage.board.map(r => [...r]),
+                    initialBoard: stage.board.map(r => [...r]),
+                    solution: stage.solution.map(r => [...r]),
+                    notes: Array(size).fill(null).map(() => Array(size).fill(null).map(() => [])),
+                    boardSize: 6,
+                    gameMode: 'Beginner',
+                    currentLevel: level,
+                    hintsRemaining: 0,
+                };
+            } else {
+                const stageJsonId = level - 2; // level 3→id 1, 4→id 2, 5→id 3
+                const stage = stagesData.find(s => s.id === stageJsonId);
+                if (!stage) return state;
+                return {
+                    ...initialState,
+                    board: stage.board.map(r => r.map(c => c as number | null)) as Grid,
+                    initialBoard: stage.board.map(r => r.map(c => c as number | null)) as Grid,
+                    solution: stage.solution.map(r => r.map(c => c as number)) as Grid,
+                    boardSize: 9,
+                    gameMode: 'Beginner',
+                    currentLevel: level,
+                    hintsRemaining: 0,
+                };
+            }
         }
 
         case 'SELECT_CELL':
@@ -182,13 +222,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                     animatingCols.push(col);
                 }
 
-                // Check sector
-                const startRow = Math.floor(row / 3) * 3;
-                const startCol = Math.floor(col / 3) * 3;
-                const sectorIdx = Math.floor(row / 3) * 3 + Math.floor(col / 3);
+                // Check sector (supports 6x6 with 2×3 boxes and 9x9 with 3×3 boxes)
+                const boxRows = state.boardSize === 6 ? 2 : 3;
+                const boxCols = 3;
+                const numBoxCols = state.boardSize / boxCols;
+                const startRow = Math.floor(row / boxRows) * boxRows;
+                const startCol = Math.floor(col / boxCols) * boxCols;
+                const sectorIdx = Math.floor(row / boxRows) * numBoxCols + Math.floor(col / boxCols);
                 let sectorCompleted = true;
-                for (let r = 0; r < 3; r++) {
-                    for (let c = 0; c < 3; c++) {
+                for (let r = 0; r < boxRows; r++) {
+                    for (let c = 0; c < boxCols; c++) {
                         if (newBoard[startRow + r][startCol + c] !== state.solution[startRow + r][startCol + c]) {
                             sectorCompleted = false;
                             break;
@@ -294,17 +337,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'HINT': {
-            if (!state.selectedCell || state.isGameOver || state.hintsRemaining <= 0) return state;
-            const { row, col } = state.selectedCell;
-            if (state.board[row][col] !== null) return state;
-
+            if (state.isGameOver) return state;
+            const emptyCells: { row: number; col: number }[] = [];
+            for (let r = 0; r < state.boardSize; r++) {
+                for (let c = 0; c < state.boardSize; c++) {
+                    if (state.board[r][c] === null && state.initialBoard[r][c] === null) {
+                        emptyCells.push({ row: r, col: c });
+                    }
+                }
+            }
+            if (emptyCells.length === 0) return state;
+            const { row, col } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
             const value = state.solution[row][col];
             const nextState = gameReducer(state, { type: 'SET_CELL', row, col, value });
-            return {
-                ...nextState,
-                hintsRemaining: state.hintsRemaining - 1,
-            };
+            return { ...nextState, hintCell: { row, col } };
         }
+
+        case 'CLEAR_HINT':
+            return { ...state, hintCell: null };
 
         case 'TICK_TIMER':
             if (state.isPaused || state.isGameOver || state.isWinner) return state;

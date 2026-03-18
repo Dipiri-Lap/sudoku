@@ -54,7 +54,7 @@ const CoinDisplay: React.FC<CoinDisplayProps> = ({ style }) => {
                 height: '26px', // Slightly taller
                 padding: '0 12px 0 20px',
                 marginLeft: '-15px',
-                borderRadius: '0 13px 13px 0',
+                borderRadius: '0 6px 6px 0',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

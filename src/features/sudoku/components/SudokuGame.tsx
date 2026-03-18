@@ -1,38 +1,66 @@
 import React, { useEffect, useState, useRef } from 'react';
+import confetti from 'canvas-confetti';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useGame } from '../context/SudokuContext';
 import Board from './Board';
 import Controls from './Controls';
+import BeginnerTutorialModal from './BeginnerTutorialModal';
 import type { Difficulty } from '../../../engine/generator';
-import { Play, Pause, ChevronLeft, ArrowRight, Trophy } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ArrowRight, Trophy, Heart, Palette, Settings, House } from 'lucide-react';
 import { auth } from '../../../firebase';
 import { getUserProfile, saveRecord, updateProfileInfo } from '../../../services/rankingService';
 import { useCoins } from '../../../context/CoinContext';
 import { useSudokuProgress } from '../../../context/SudokuProgressContext';
-import CoinDisplay from '../../../common/components/CoinDisplay';
 
 const SudokuGame: React.FC = () => {
     const { state, dispatch } = useGame();
     const navigate = useNavigate();
     const location = useLocation();
     const { addCoins } = useCoins();
-    const { stageProgress } = useSudokuProgress();
+    const { stageProgress, saveBeginnerProgress } = useSudokuProgress();
     const hasAwardedCoins = useRef(false);
+    const [showBeginnerTutorial, setShowBeginnerTutorial] = useState(false);
+    const [tutorialBoardSize, setTutorialBoardSize] = useState<6 | 9>(6);
+
+    useEffect(() => {
+        if (!location.pathname.includes('/beginner')) return;
+        const level = parseInt(new URLSearchParams(location.search).get('level') || '0', 10);
+        if (level === 1 && (import.meta.env.DEV || !localStorage.getItem('beginner_tutorial_6x6_shown'))) {
+            setTutorialBoardSize(6);
+            setShowBeginnerTutorial(true);
+        } else if (level === 3 && (import.meta.env.DEV || !localStorage.getItem('beginner_tutorial_9x9_shown'))) {
+            setTutorialBoardSize(9);
+            setShowBeginnerTutorial(true);
+        }
+    }, [location.pathname, location.search]);
 
     // Ranking State
     const [inputNickname, setInputNickname] = useState('');
     const [isNewRecord, setIsNewRecord] = useState(false);
-    const [bestTime, setBestTime] = useState<number | null>(null);
     const hasSavedRecord = useRef(false);
+    const hasPlayedConfetti = useRef(false);
 
     useEffect(() => {
         // Reset saved record flag when game starts/restarts
         if (!state.isWinner) {
             hasSavedRecord.current = false;
             hasAwardedCoins.current = false;
+            hasPlayedConfetti.current = false;
             setIsNewRecord(false);
         }
     }, [state.isWinner]);
+
+    useEffect(() => {
+        const modalVisible = state.isWinner
+            && state.animatingRows.length === 0
+            && state.animatingCols.length === 0
+            && state.animatingSectors.length === 0;
+        if (!modalVisible || hasPlayedConfetti.current) return;
+        hasPlayedConfetti.current = true;
+
+        const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#f9a825', '#ab47bc'];
+        confetti({ particleCount: 220, spread: 100, origin: { x: 0.5, y: 0.05 }, colors, gravity: 2.0, scalar: 1.1, startVelocity: 45 });
+    }, [state.isWinner, state.animatingRows.length, state.animatingCols.length, state.animatingSectors.length]);
 
     useEffect(() => {
         if (state.isWinner && !hasAwardedCoins.current) {
@@ -41,6 +69,12 @@ const SudokuGame: React.FC = () => {
                 addCoins(10);
                 if (auth.currentUser) {
                     import('../../../services/rankingService').then(m => m.incrementPuzzlePower(auth.currentUser!.uid)).catch(console.error);
+                }
+            }
+            if (state.gameMode === 'Beginner' && state.currentLevel !== null) {
+                saveBeginnerProgress(state.currentLevel);
+                if (state.currentLevel === 5) {
+                    localStorage.setItem('beginner_all_cleared', '1');
                 }
             }
         }
@@ -52,9 +86,6 @@ const SudokuGame: React.FC = () => {
                 try {
                     const profile = await getUserProfile(user.uid);
                     setInputNickname(profile.nickname);
-                    if (state.gameMode === 'TimeAttack') {
-                        setBestTime(profile.bestTimes[state.difficulty] ?? null);
-                    }
                 } catch (error) {
                     console.error("Failed to fetch user profile:", error);
                 }
@@ -133,9 +164,6 @@ const SudokuGame: React.FC = () => {
                 hasSavedRecord.current = true;
                 const result = await saveRecord(auth.currentUser.uid, state.difficulty, state.timer);
                 setIsNewRecord(result.isNewRecord);
-                if (result.isNewRecord) {
-                    setBestTime(state.timer);
-                }
             }
         };
         handleWin();
@@ -149,6 +177,14 @@ const SudokuGame: React.FC = () => {
 
         // Fallback initialization: only run if the board is completely empty (e.g., direct URL access or refresh)
         const isGameEmpty = state.solution[0][0] === null;
+
+        // Beginner mode (from /sudoku/beginner?level=N)
+        if (location.pathname.includes('/beginner') && level !== null) {
+            if (level !== state.currentLevel || state.gameMode !== 'Beginner') {
+                dispatch({ type: 'START_BEGINNER', level });
+            }
+            return;
+        }
 
         if (mode === 'stage' && level !== null && level !== state.currentLevel) {
             // Progression Guard: Prevent skipping levels via URL
@@ -171,7 +207,7 @@ const SudokuGame: React.FC = () => {
                     return;
                 }
                 dispatch({ type: 'START_STAGE', level });
-            } else {
+            } else if (!location.pathname.includes('/beginner')) {
                 const diffParam = params.get('difficulty') as Difficulty || 'Easy';
                 dispatch({ type: 'START_GAME', difficulty: diffParam });
             }
@@ -197,10 +233,6 @@ const SudokuGame: React.FC = () => {
         }
     };
 
-    const getBestTime = () => {
-        if (bestTime === null) return null;
-        return formatTime(bestTime);
-    };
 
     const handleNicknameUpdate = async () => {
         if (auth.currentUser && inputNickname.trim()) {
@@ -212,15 +244,36 @@ const SudokuGame: React.FC = () => {
     return (
         <div className="sudoku-container">
             <header className="game-header">
-                <div className="header-item" style={{ alignItems: 'flex-start' }}>
-                    <button className="back-btn" onClick={handleBack}>
-                        <ChevronLeft size={24} />
-                    </button>
-                    {state.gameMode === 'Stage' ? (
-                        <div className="level-badge">Level {state.currentLevel}</div>
-                    ) : (
-                        <>
-                            <span className="header-label">난이도</span>
+                {/* Nav bar */}
+                <div className="game-nav">
+                    <div className="game-nav-left">
+                        <button className="nav-icon-btn" onClick={handleBack}>
+                            <ChevronLeft size={22} />
+                        </button>
+                        <div className="nav-icon-btn" style={{ color: '#f4c430' }}>
+                            <Trophy size={20} />
+                        </div>
+                    </div>
+                    <div className="game-nav-right">
+                        <button className="nav-icon-btn">
+                            <Palette size={20} />
+                        </button>
+                        <button className="nav-icon-btn">
+                            <Settings size={20} />
+                        </button>
+                    </div>
+                </div>
+                {/* Info bar */}
+                <div className="game-info-bar">
+                    <div className="info-left">
+                        {(state.gameMode === 'Stage' || state.gameMode === 'Beginner') ? (
+                            <div className="level-badge">
+                                {state.gameMode === 'Beginner' ? `입문 ${state.currentLevel}` : `Level ${state.currentLevel}`}
+                                {state.gameMode === 'Beginner' && state.boardSize === 6 && (
+                                    <span style={{ fontSize: '0.65rem', marginLeft: '4px', opacity: 0.8 }}>6×6</span>
+                                )}
+                            </div>
+                        ) : (
                             <select className="difficulty-select" value={state.difficulty} onChange={handleDifficultyChange}>
                                 <option value="Easy">쉬움</option>
                                 <option value="Medium">보통</option>
@@ -228,29 +281,33 @@ const SudokuGame: React.FC = () => {
                                 <option value="Expert">전문가</option>
                                 <option value="Master">마스터</option>
                             </select>
-                        </>
-                    )}
-                </div>
-                <div className="header-item">
-                    <span className="header-label">실수</span>
-                    <span className="header-value">{state.mistakes}/3</span>
-                </div>
-                <div className="header-item" style={{ alignItems: 'flex-end' }}>
-                    <span className="header-label">시간</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        )}
+                    </div>
+                    <div className="info-center">
+                        <div className="mistake-icons">
+                            {[0, 1, 2].map(i => (
+                                <Heart key={i} size={18} className={i < state.mistakes ? 'mistake-icon used' : 'mistake-icon'} fill={i < state.mistakes ? 'none' : 'currentColor'} />
+                            ))}
+                        </div>
+                    </div>
+                    <div className="info-right">
                         <span className="header-value">{formatTime(state.timer)}</span>
                         <button className="pause-btn" onClick={() => dispatch({ type: 'TOGGLE_PAUSE' })}>
-                            {state.isPaused ? <Play size={20} fill="currentColor" /> : <Pause size={20} fill="currentColor" />}
+                            {state.isPaused ? <Play size={18} fill="currentColor" /> : <Pause size={18} fill="currentColor" />}
                         </button>
                     </div>
-                    {state.gameMode === 'TimeAttack' && (
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 500 }}>
-                            최고: {getBestTime() || '--:--'}
-                        </div>
-                    )}
-                    <CoinDisplay style={{ marginTop: '4px' }} />
                 </div>
             </header>
+
+            {showBeginnerTutorial && (
+                <BeginnerTutorialModal
+                    boardSize={tutorialBoardSize}
+                    onClose={() => {
+                        localStorage.setItem(tutorialBoardSize === 6 ? 'beginner_tutorial_6x6_shown' : 'beginner_tutorial_9x9_shown', '1');
+                        setShowBeginnerTutorial(false);
+                    }}
+                />
+            )}
 
             <main style={{ position: 'relative' }}>
                 <Board />
@@ -300,76 +357,85 @@ const SudokuGame: React.FC = () => {
             {state.isWinner && state.animatingRows.length === 0 && state.animatingCols.length === 0 && state.animatingSectors.length === 0 && (
                 <div className="modal-overlay">
                     <div className="modal-content animate-fade-in">
-                        {isNewRecord && (
-                            <>
-                                <div style={{ color: '#fbbf24', marginBottom: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <Trophy size={48} fill="currentColor" />
-                                    <h3 style={{ margin: '0.5rem 0' }}>새로운 기록 달성!</h3>
+                        {/* Header */}
+                        <div className="modal-header">
+                            <h2>🎉 축하합니다!</h2>
+                        </div>
+                        {/* Body */}
+                        <div className="modal-body">
+                            {isNewRecord && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#fbbf24' }}>
+                                    <Trophy size={40} fill="currentColor" />
+                                    <span style={{ fontWeight: 700, fontSize: '0.95rem', marginTop: '0.3rem', color: '#fbbf24' }}>새로운 기록 달성!</span>
                                 </div>
-                            </>
-                        )}
-                        <h2>🎉 축하합니다! 🎉</h2>
-                        <p>{state.gameMode === 'Stage' ? `레벨 ${state.currentLevel} 클리어!` : '퍼즐을 모두 풀었습니다!'}</p>
-                        <p>소요 시간: {formatTime(state.timer)}</p>
-
-                        {state.gameMode === 'TimeAttack' && isNewRecord && (
-                            <div style={{ margin: '1.5rem 0', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
-                                <div style={{ fontSize: '0.9rem', marginBottom: '0.5rem', opacity: 0.8, display: 'flex', justifyContent: 'space-between' }}>
-                                    <span>닉네임</span>
-                                    <span style={{ fontSize: '0.8rem', color: inputNickname.length > 10 ? 'var(--error-color)' : 'inherit' }}>
-                                        {inputNickname.length}/10
-                                    </span>
-                                </div>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <input
-                                        type="text"
-                                        maxLength={10}
-                                        value={inputNickname}
-                                        onChange={(e) => setInputNickname(e.target.value)}
-                                        style={{
-                                            flex: 1,
-                                            padding: '0.5rem',
-                                            borderRadius: '8px',
-                                            border: '1px solid var(--border-color)',
-                                            background: 'var(--bg-primary)',
-                                            color: 'var(--text-primary)'
-                                        }}
-                                    />
-                                    <button
-                                        onClick={handleNicknameUpdate}
-                                        style={{
-                                            padding: '0.5rem 1rem',
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            background: 'var(--primary-color)',
-                                            color: 'white',
-                                            cursor: 'pointer',
-                                            fontSize: '0.9rem'
-                                        }}
-                                    >
-                                        변경
-                                    </button>
-                                </div>
+                            )}
+                            <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 600 }}>
+                                소요 시간: <span style={{ color: '#e2e8f0' }}>{formatTime(state.timer)}</span>
                             </div>
-                        )}
-
-                        {state.gameMode === 'Stage' ? (
-                            <a
-                                href={state.currentLevel ? `/sudoku/stage?mode=stage&level=${state.currentLevel + 1}` : '/sudoku'}
-                                className="primary-btn bonus-btn"
-                                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                                다음 레벨로 <ArrowRight size={20} />
+                            {state.gameMode !== 'TimeAttack' && (
+                                <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fef9e7', border: '1px solid #f4c430', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#b8860b', fontSize: '0.95rem' }}>
+                                        🪙 +10
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
+                                        ⚡ 퍼즐력 +1
+                                    </div>
+                                </div>
+                            )}
+                            {state.gameMode === 'TimeAttack' && isNewRecord && (
+                                <div style={{ width: '100%' }}>
+                                    <div style={{ fontSize: '0.85rem', marginBottom: '0.4rem', display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                                        <span>닉네임</span>
+                                        <span style={{ color: inputNickname.length > 10 ? '#ef4444' : '#94a3b8' }}>{inputNickname.length}/10</span>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <input
+                                            type="text"
+                                            maxLength={10}
+                                            value={inputNickname}
+                                            onChange={(e) => setInputNickname(e.target.value)}
+                                            style={{ flex: 1, padding: '0.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#1e293b' }}
+                                        />
+                                        <button onClick={handleNicknameUpdate} style={{ padding: '0.5rem 0.9rem', borderRadius: '8px', border: 'none', background: '#64748b', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
+                                            변경
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        {/* Footer */}
+                        <div className="modal-footer" style={{ flexDirection: 'row', gap: '0.5rem' }}>
+                            <a href="/sudoku" className="modal-home-btn" style={{ textDecoration: 'none' }}>
+                                <House size={22} />
                             </a>
-                        ) : (
-                            <a
-                                href="/sudoku/time-attack"
-                                className="primary-btn"
-                                style={{ textDecoration: 'none' }}
-                            >
-                                확인
-                            </a>
-                        )}
+                            {state.gameMode === 'Stage' ? (
+                                <a
+                                    href={state.currentLevel ? `/sudoku/stage?mode=stage&level=${state.currentLevel + 1}` : '/sudoku'}
+                                    className="primary-btn bonus-btn"
+                                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
+                                >
+                                    다음 레벨로 <ArrowRight size={20} />
+                                </a>
+                            ) : state.gameMode === 'Beginner' ? (
+                                state.currentLevel !== null && state.currentLevel < 5 ? (
+                                    <a
+                                        href={`/sudoku/beginner?level=${state.currentLevel + 1}`}
+                                        className="primary-btn bonus-btn"
+                                        style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
+                                    >
+                                        다음 스테이지 <ArrowRight size={20} />
+                                    </a>
+                                ) : (
+                                    <a href="/sudoku" className="primary-btn" style={{ textDecoration: 'none', textAlign: 'center', flex: 1 }}>
+                                        완료! 홈으로
+                                    </a>
+                                )
+                            ) : (
+                                <a href="/sudoku/time-attack" className="primary-btn" style={{ textDecoration: 'none', textAlign: 'center', flex: 1 }}>
+                                    확인
+                                </a>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

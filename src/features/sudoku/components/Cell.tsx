@@ -16,7 +16,9 @@ const Cell: React.FC<CellProps> = ({ row, col }) => {
     const isError = value !== null && !isInitial && !isCorrectSolution;
     const notes = state.notes[row][col];
 
-    const sectorIdx = Math.floor(row / 3) * 3 + Math.floor(col / 3);
+    const boardSize = state.board.length;
+    const boxRows = boardSize === 6 ? 2 : 3;
+    const sectorIdx = Math.floor(row / boxRows) * (boardSize / 3) + Math.floor(col / 3);
     const isAnimatingRow = state.animatingRows.includes(row);
     const isAnimatingCol = state.animatingCols.includes(col);
     const isAnimatingSector = state.animatingSectors.includes(sectorIdx);
@@ -25,13 +27,17 @@ const Cell: React.FC<CellProps> = ({ row, col }) => {
         dispatch({ type: 'SELECT_CELL', row, col });
     };
 
+    const isHintCell = state.hintCell?.row === row && state.hintCell?.col === col;
+
     return (
         <div
             className={`sudoku-cell ${isInitial ? 'initial' : 'user'} animate-entrance ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlight' : ''
                 } ${isError ? 'error' : ''} ${state.mistakeCell?.row === row && state.mistakeCell?.col === col ? 'animate-mistake' : ''
                 } ${isAnimatingRow ? 'animate-sweep-row' : ''} ${isAnimatingCol ? 'animate-sweep-col' : ''
-                } ${isAnimatingSector ? 'animate-sweep-sector' : ''}`}
+                } ${isAnimatingSector ? 'animate-sweep-sector' : ''
+                } ${isHintCell ? 'animate-hint' : ''}`}
             onClick={handleClick}
+            onAnimationEnd={isHintCell ? () => dispatch({ type: 'CLEAR_HINT' }) : undefined}
             style={{
                 '--row': row,
                 '--col': col,
@@ -45,7 +51,7 @@ const Cell: React.FC<CellProps> = ({ row, col }) => {
                 value
             ) : (
                 <div className="notes-grid">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                    {Array.from({ length: boardSize }, (_, i) => i + 1).map((n) => (
                         <div key={n} className="note-item">
                             {notes.includes(n) ? n : ''}
                         </div>

@@ -10,6 +10,7 @@ import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
 import { SudokuProgressProvider } from './context/SudokuProgressContext';
+import { ChallengeProvider } from './context/ChallengeContext';
 import { UserInitProvider, useUserInit } from './context/UserInitContext';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, signInAnonymously } from './firebase';
@@ -50,6 +51,7 @@ const AppContent: React.FC = () => {
 
   return (
     <CoinProvider>
+      <ChallengeProvider>
       <SudokuProgressProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -62,6 +64,7 @@ const AppContent: React.FC = () => {
                   <Route path="time-attack" element={<DifficultySelect />} />
                   <Route path="time-attack/play" element={<SudokuGame />} />
                   <Route path="stage" element={<SudokuGame />} />
+                  <Route path="beginner" element={<SudokuGame />} />
                 </Routes>
               </SudokuProvider>
             }
@@ -78,6 +81,7 @@ const AppContent: React.FC = () => {
           />
         </Routes>
       </SudokuProgressProvider>
+      </ChallengeProvider>
     </CoinProvider>
   );
 };

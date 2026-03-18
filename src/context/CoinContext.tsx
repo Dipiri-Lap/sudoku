@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc, setDoc, increment } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import CoinRewardToast from '../common/components/CoinRewardToast';
 
 const LS_KEY = 'puzzle_coins';
 
@@ -95,7 +94,6 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (
         <CoinContext.Provider value={{ coins, pendingReward, addCoins, spendCoins, clearPendingReward }}>
             {children}
-            <CoinRewardToast />
         </CoinContext.Provider>
     );
 };

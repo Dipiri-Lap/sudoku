@@ -18,10 +18,12 @@ const Board: React.FC = () => {
         return () => clearTimeout(timer);
     }, [boardKey]);
 
+    const boardSize = state.board.length;
+
     return (
-        <div className={`sudoku-board ${isEntering ? 'is-entering' : ''}`} key={boardKey}>
-            {Array(9).fill(0).map((_, r) =>
-                Array(9).fill(0).map((_, c) => (
+        <div className={`sudoku-board ${boardSize === 6 ? 'sudoku-board-6' : ''} ${isEntering ? 'is-entering' : ''}`} key={boardKey}>
+            {Array(boardSize).fill(0).map((_, r) =>
+                Array(boardSize).fill(0).map((_, c) => (
                     <Cell key={`${r}-${c}`} row={r} col={c} />
                 ))
             )}
