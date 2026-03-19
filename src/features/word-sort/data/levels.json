@@ -4701,5 +4701,4782 @@
                 ]
             }
         ]
+    },
+    {
+        "id": 42,
+        "maxMoves": 108,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "archaeology",
+                "name": "고고학",
+                "target": 8,
+                "words": [
+                    "유물",
+                    "화석",
+                    "발굴",
+                    "지층",
+                    "상형문자",
+                    "복원",
+                    "석기",
+                    "토기"
+                ]
+            },
+            {
+                "id": "volcano_eruption",
+                "name": "화산폭발",
+                "target": 6,
+                "words": [
+                    "용암",
+                    "화산재",
+                    "마그마",
+                    "분화구",
+                    "지진운",
+                    "현무암"
+                ]
+            },
+            {
+                "id": "courtroom_trial",
+                "name": "법정",
+                "target": 7,
+                "words": [
+                    "판사봉",
+                    "변호인",
+                    "증거물",
+                    "배심원",
+                    "피고석",
+                    "법전",
+                    "증인선서"
+                ]
+            },
+            {
+                "id": "scent_smell",
+                "name": "향기",
+                "target": 5,
+                "words": [
+                    "은은함",
+                    "잔향",
+                    "디퓨저",
+                    "아로마",
+                    "향수병"
+                ]
+            },
+            {
+                "id": "airport_terminal",
+                "name": "공항터미널",
+                "target": 6,
+                "words": [
+                    "면세점",
+                    "탑승게이트",
+                    "수하물벨트",
+                    "관제탑",
+                    "여권검사",
+                    "보딩패스"
+                ]
+            },
+            {
+                "id": "cleaning_chores",
+                "name": "청소",
+                "target": 5,
+                "words": [
+                    "걸레질",
+                    "먼지떨이",
+                    "진공청소기",
+                    "분리수거",
+                    "환기"
+                ]
+            },
+            {
+                "id": "cold_weather",
+                "name": "추위",
+                "target": 5,
+                "words": [
+                    "고드름",
+                    "한파",
+                    "살얼음",
+                    "손시림",
+                    "입김"
+                ]
+            },
+            {
+                "id": "forest_nature",
+                "name": "숲속",
+                "target": 4,
+                "words": [
+                    "오솔길",
+                    "도토리",
+                    "피톤치드",
+                    "이끼"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 43,
+        "maxMoves": 110,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "medieval_castle",
+                "name": "성곽",
+                "target": 6,
+                "words": [
+                    "해자",
+                    "성벽",
+                    "망루",
+                    "도개교",
+                    "석조",
+                    "요새"
+                ]
+            },
+            {
+                "id": "jewelry_store",
+                "name": "보석함",
+                "target": 6,
+                "words": [
+                    "다이아몬드",
+                    "사파이어",
+                    "진주목걸이",
+                    "금반지",
+                    "브로치",
+                    "원석"
+                ]
+            },
+            {
+                "id": "pharmacy_items",
+                "name": "약국",
+                "target": 7,
+                "words": [
+                    "처방전",
+                    "연고",
+                    "반창고",
+                    "해열제",
+                    "비타민",
+                    "소독약",
+                    "파스"
+                ]
+            },
+            {
+                "id": "winter_nature",
+                "name": "겨울풍경",
+                "target": 5,
+                "words": [
+                    "고드름",
+                    "눈보라",
+                    "살얼음",
+                    "서리",
+                    "만년설"
+                ]
+            },
+            {
+                "id": "carpentry_workshop",
+                "name": "목공소",
+                "target": 5,
+                "words": [
+                    "대패",
+                    "망치",
+                    "톱날",
+                    "사포",
+                    "측정권척"
+                ]
+            },
+            {
+                "id": "astronomy_observe",
+                "name": "별관측",
+                "target": 5,
+                "words": [
+                    "천체망원경",
+                    "별자리판",
+                    "천문대",
+                    "북극성",
+                    "은하수"
+                ]
+            },
+            {
+                "id": "musical_score",
+                "name": "악보",
+                "target": 4,
+                "words": [
+                    "높은음자리",
+                    "도돌이표",
+                    "쉼표",
+                    "오선지"
+                ]
+            },
+            {
+                "id": "laundry_day",
+                "name": "세탁",
+                "target": 6,
+                "words": [
+                    "섬유유연제",
+                    "건조대",
+                    "탈수기",
+                    "애벌빨래",
+                    "세탁망",
+                    "다림질"
+                ]
+            },
+            {
+                "id": "slow_speed",
+                "name": "느린동물",
+                "target": 3,
+                "words": [
+                    "거북이",
+                    "달팽이",
+                    "나무늘보"
+                ]
+            },
+            {
+                "id": "traditional_item",
+                "name": "전통소품",
+                "target": 3,
+                "words": [
+                    "복주머니",
+                    "꽃신",
+                    "노리개"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 44,
+        "maxMoves": 115,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "luxury_watch",
+                "name": "시계부품",
+                "target": 7,
+                "words": [
+                    "태엽",
+                    "초침",
+                    "톱니바퀴",
+                    "유리덮개",
+                    "회전추",
+                    "숫자판",
+                    "시계바늘"
+                ]
+            },
+            {
+                "id": "sculpture_studio",
+                "name": "조각실",
+                "target": 5,
+                "words": [
+                    "점토",
+                    "조각칼",
+                    "석고상",
+                    "물레",
+                    "심봉"
+                ]
+            },
+            {
+                "id": "tea_ceremony",
+                "name": "다도",
+                "target": 5,
+                "words": [
+                    "찻잔",
+                    "찻잎",
+                    "다관",
+                    "숙우",
+                    "차받침"
+                ]
+            },
+            {
+                "id": "pottery_studio",
+                "name": "도자기",
+                "target": 8,
+                "words": [
+                    "청자",
+                    "백자",
+                    "가마터",
+                    "유약",
+                    "초벌구이",
+                    "물레질",
+                    "도공",
+                    "분청사기"
+                ]
+            },
+            {
+                "id": "orchestra_concert",
+                "name": "오케스트라",
+                "target": 6,
+                "words": [
+                    "지휘봉",
+                    "단원",
+                    "악보대",
+                    "협주곡",
+                    "총보",
+                    "튜닝"
+                ]
+            },
+            {
+                "id": "hot_air_balloon",
+                "name": "열기구",
+                "target": 6,
+                "words": [
+                    "바구니",
+                    "버너",
+                    "모래주머니",
+                    "비행사",
+                    "이착륙",
+                    "기낭"
+                ]
+            },
+            {
+                "id": "printing_press",
+                "name": "인쇄소",
+                "target": 5,
+                "words": [
+                    "활자",
+                    "잉크",
+                    "교정지",
+                    "제본",
+                    "옵셋"
+                ]
+            },
+            {
+                "id": "lighthouse_coast",
+                "name": "등대",
+                "target": 4,
+                "words": [
+                    "안개신호",
+                    "회전등",
+                    "해안선",
+                    "파수꾼"
+                ]
+            },
+            {
+                "id": "magic_show",
+                "name": "마술",
+                "target": 3,
+                "words": [
+                    "트릭",
+                    "카드덱",
+                    "모자상자"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 45,
+        "maxMoves": 125,
+        "slots": 5,
+        "categories": [
+            {
+                "id": "vegetable_garden",
+                "name": "텃밭",
+                "target": 6,
+                "words": [
+                    "상추",
+                    "호미",
+                    "물조롱이",
+                    "거름",
+                    "허수아비",
+                    "모종"
+                ]
+            },
+            {
+                "id": "morning_routine",
+                "name": "아침상쾌",
+                "target": 5,
+                "words": [
+                    "기지개",
+                    "알람음",
+                    "이슬",
+                    "조깅",
+                    "세수"
+                ]
+            },
+            {
+                "id": "space_exploration",
+                "name": "행성탐사",
+                "target": 5,
+                "words": [
+                    "착륙선",
+                    "탐사로버",
+                    "운석구덩이",
+                    "성분분석",
+                    "교신안테나"
+                ]
+            },
+            {
+                "id": "chef_kitchen",
+                "name": "요리사",
+                "target": 7,
+                "words": [
+                    "레시피",
+                    "앞치마",
+                    "프라이팬",
+                    "식재료",
+                    "도마",
+                    "향신료",
+                    "플레이팅"
+                ]
+            },
+            {
+                "id": "forest_stroll",
+                "name": "숲속산책",
+                "target": 5,
+                "words": [
+                    "다람쥐",
+                    "솔방울",
+                    "등산로",
+                    "피톤치드",
+                    "도토리"
+                ]
+            },
+            {
+                "id": "sailing_ship",
+                "name": "범선",
+                "target": 5,
+                "words": [
+                    "돛대",
+                    "키잡이",
+                    "닻",
+                    "나침반",
+                    "망원경"
+                ]
+            },
+            {
+                "id": "antique_store",
+                "name": "골동품점",
+                "target": 4,
+                "words": [
+                    "타자기",
+                    "LP판",
+                    "회중시계",
+                    "놋그릇"
+                ]
+            },
+            {
+                "id": "snowy_mountain",
+                "name": "설산",
+                "target": 6,
+                "words": [
+                    "아이젠",
+                    "눈사태",
+                    "고글",
+                    "빙벽",
+                    "산장",
+                    "만년설"
+                ]
+            },
+            {
+                "id": "sewing_room",
+                "name": "바느질",
+                "target": 5,
+                "words": [
+                    "골무",
+                    "실패",
+                    "초크",
+                    "옷감",
+                    "시침핀"
+                ]
+            },
+            {
+                "id": "laboratory_exp",
+                "name": "실험실",
+                "target": 3,
+                "words": [
+                    "비커",
+                    "스포이트",
+                    "현미경"
+                ]
+            },
+            {
+                "id": "skating_rink",
+                "name": "스케이트장",
+                "target": 3,
+                "words": [
+                    "링크커버",
+                    "피겨날",
+                    "털장갑"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 46,
+        "maxMoves": 81,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "barbecue_party",
+                "name": "바비큐",
+                "target": 5,
+                "words": [
+                    "석쇠",
+                    "숯불",
+                    "집게",
+                    "허브솔트",
+                    "꼬치"
+                ]
+            },
+            {
+                "id": "scuba_diving",
+                "name": "스쿠버다이빙",
+                "target": 5,
+                "words": [
+                    "오리발",
+                    "공기통",
+                    "수중카메라",
+                    "웨트슈트",
+                    "호흡기"
+                ]
+            },
+            {
+                "id": "violin_repair",
+                "name": "바이올린",
+                "target": 5,
+                "words": [
+                    "송진",
+                    "활털",
+                    "조율개",
+                    "브릿지",
+                    "턱받침"
+                ]
+            },
+            {
+                "id": "marathon_run",
+                "name": "마라톤",
+                "target": 5,
+                "words": [
+                    "배번호",
+                    "반환점",
+                    "급수대",
+                    "러닝화",
+                    "완주메달"
+                ]
+            },
+            {
+                "id": "flea_market",
+                "name": "벼룩시장",
+                "target": 6,
+                "words": [
+                    "돗자리",
+                    "거스름돈",
+                    "중고물품",
+                    "에누리",
+                    "가격표",
+                    "봉투"
+                ]
+            },
+            {
+                "id": "leather_craft",
+                "name": "가죽공예",
+                "target": 6,
+                "words": [
+                    "가죽실",
+                    "펀칭기",
+                    "엣지코트",
+                    "망치",
+                    "재단칼",
+                    "패턴지"
+                ]
+            },
+            {
+                "id": "flour_base",
+                "name": "밀가루",
+                "target": 6,
+                "words": [
+                    "수제비",
+                    "칼국수",
+                    "부침개",
+                    "반죽",
+                    "소면",
+                    "덧가루"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 47,
+        "maxMoves": 98,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "fireworks_display",
+                "name": "불꽃놀이",
+                "target": 5,
+                "words": [
+                    "심지",
+                    "화약",
+                    "발사대",
+                    "섬광",
+                    "낙화"
+                ]
+            },
+            {
+                "id": "medieval_knight",
+                "name": "중세기사",
+                "target": 5,
+                "words": [
+                    "갑옷",
+                    "방패",
+                    "투구",
+                    "망토",
+                    "창시합"
+                ]
+            },
+            {
+                "id": "coffee_roasting",
+                "name": "원두커피",
+                "target": 5,
+                "words": [
+                    "핸드드립",
+                    "그라인더",
+                    "거름종이",
+                    "추출",
+                    "아로마"
+                ]
+            },
+            {
+                "id": "snowy_winter",
+                "name": "겨울눈",
+                "target": 5,
+                "words": [
+                    "눈사람",
+                    "고드름",
+                    "썰매장",
+                    "제설차",
+                    "털모자"
+                ]
+            },
+            {
+                "id": "desert_oasis",
+                "name": "오아시스",
+                "target": 5,
+                "words": [
+                    "야자수",
+                    "우물",
+                    "모래바람",
+                    "신기루",
+                    "낙타"
+                ]
+            },
+            {
+                "id": "airport_runway",
+                "name": "활주로",
+                "target": 6,
+                "words": [
+                    "유도등",
+                    "관제탑",
+                    "이륙",
+                    "착륙장치",
+                    "지상요원",
+                    "정지선"
+                ]
+            },
+            {
+                "id": "concert_hall",
+                "name": "공연장",
+                "target": 4,
+                "words": [
+                    "리허설",
+                    "관객석",
+                    "커튼콜",
+                    "음향시설"
+                ]
+            },
+            {
+                "id": "wicker_basket",
+                "name": "바구니",
+                "target": 3,
+                "words": [
+                    "대나무살",
+                    "채집",
+                    "엮기"
+                ]
+            },
+            {
+                "id": "honey_bee",
+                "name": "꿀벌",
+                "target": 3,
+                "words": [
+                    "벌집",
+                    "여왕벌",
+                    "꽃가루"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 48,
+        "maxMoves": 104,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "smart_farm",
+                "name": "스마트팜",
+                "target": 5,
+                "words": [
+                    "수경재배",
+                    "습도센서",
+                    "자동급수",
+                    "LED조명",
+                    "양액탱크"
+                ]
+            },
+            {
+                "id": "emergency_room",
+                "name": "응급실",
+                "target": 8,
+                "words": [
+                    "심제세동기",
+                    "환자모니터",
+                    "수액거치대",
+                    "청진기",
+                    "응급카트",
+                    "산소마스크",
+                    "혈압계",
+                    "지혈대"
+                ]
+            },
+            {
+                "id": "recording_studio",
+                "name": "녹음실",
+                "target": 7,
+                "words": [
+                    "방음벽",
+                    "믹싱콘솔",
+                    "콘덴서마이크",
+                    "헤드폰",
+                    "팝필터",
+                    "오디오인터페이스",
+                    "방음부스"
+                ]
+            },
+            {
+                "id": "botanical_garden",
+                "name": "식물원",
+                "target": 7,
+                "words": [
+                    "온실유리",
+                    "희귀식물",
+                    "관람로",
+                    "이름표",
+                    "분무기",
+                    "열대우림",
+                    "종자은행"
+                ]
+            },
+            {
+                "id": "medieval_library",
+                "name": "중세도서관",
+                "target": 6,
+                "words": [
+                    "양피지",
+                    "깃털펜",
+                    "봉인납",
+                    "필사본",
+                    "촛대",
+                    "사다리"
+                ]
+            },
+            {
+                "id": "sushi_restaurant",
+                "name": "초밥집",
+                "target": 8,
+                "words": [
+                    "초생강",
+                    "생와사비",
+                    "회칼",
+                    "나무도마",
+                    "간장종지",
+                    "회전레일",
+                    "미소시루",
+                    "녹차티백"
+                ]
+            },
+            {
+                "id": "cell_structure",
+                "name": "세포",
+                "target": 5,
+                "words": [
+                    "미토콘드리아",
+                    "핵막",
+                    "세포질",
+                    "리보솜",
+                    "엽록체"
+                ]
+            },
+            {
+                "id": "playing_cards",
+                "name": "카드",
+                "target": 4,
+                "words": [
+                    "셔플",
+                    "스페이드",
+                    "조커",
+                    "에이스"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 49,
+        "maxMoves": 92,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "aquarium_maintenance",
+                "name": "어항관리",
+                "target": 8,
+                "words": [
+                    "여과기",
+                    "기포기",
+                    "수초",
+                    "바닥재",
+                    "환수",
+                    "물잡이",
+                    "핀셋",
+                    "조명"
+                ]
+            },
+            {
+                "id": "winter_street_food",
+                "name": "겨울길거리음식",
+                "target": 7,
+                "words": [
+                    "붕어빵",
+                    "호떡",
+                    "군고구마",
+                    "어묵국물",
+                    "종이봉투",
+                    "가슴속삼천원",
+                    "설탕꿀"
+                ]
+            },
+            {
+                "id": "veterinary_clinic",
+                "name": "동물병원",
+                "target": 6,
+                "words": [
+                    "예방접종",
+                    "넥카라",
+                    "사료",
+                    "심장사상충",
+                    "이동장",
+                    "청진기"
+                ]
+            },
+            {
+                "id": "grandparents_house",
+                "name": "시골할머니댁",
+                "target": 7,
+                "words": [
+                    "아랫목",
+                    "가마솥",
+                    "메주",
+                    "평상",
+                    "고무신",
+                    "장독대",
+                    "시골강아지"
+                ]
+            },
+            {
+                "id": "mountain_hiking",
+                "name": "등산",
+                "target": 6,
+                "words": [
+                    "등산스틱",
+                    "정상석",
+                    "등산화",
+                    "이정표",
+                    "하산",
+                    "능선"
+                ]
+            },
+            {
+                "id": "vintage_record",
+                "name": "LP판",
+                "target": 6,
+                "words": [
+                    "턴테이블",
+                    "지지직소리",
+                    "바늘촉",
+                    "자켓디자인",
+                    "그루브",
+                    "도넛판"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 50,
+        "maxMoves": 168,
+        "slots": 5,
+        "categories": [
+            {
+                "id": "medical_treatment",
+                "name": "치료",
+                "target": 5,
+                "words": [
+                    "처방전",
+                    "소독약",
+                    "붕대",
+                    "재활",
+                    "완치"
+                ]
+            },
+            {
+                "id": "paper_bag",
+                "name": "봉투",
+                "target": 6,
+                "words": [
+                    "편지",
+                    "축의금",
+                    "우편번호",
+                    "서류함",
+                    "풀칠",
+                    "규격"
+                ]
+            },
+            {
+                "id": "headwear",
+                "name": "모자",
+                "target": 7,
+                "words": [
+                    "챙",
+                    "베레모",
+                    "비니",
+                    "안감",
+                    "사이즈조절",
+                    "멜빵",
+                    "털방울"
+                ]
+            },
+            {
+                "id": "bedding_sleep",
+                "name": "침대",
+                "target": 5,
+                "words": [
+                    "매트리스",
+                    "프레임",
+                    "포근함",
+                    "베개",
+                    "이불"
+                ]
+            },
+            {
+                "id": "swimming_pool",
+                "name": "수영장",
+                "target": 4,
+                "words": [
+                    "수모",
+                    "수경",
+                    "킥판",
+                    "라이프가드"
+                ]
+            },
+            {
+                "id": "law_firm",
+                "name": "법무법인",
+                "target": 5,
+                "words": [
+                    "변론",
+                    "성공보수",
+                    "상담실",
+                    "판례집",
+                    "공증"
+                ]
+            },
+            {
+                "id": "hair_salon",
+                "name": "미용실",
+                "target": 6,
+                "words": [
+                    "가운",
+                    "분무기",
+                    "파마롤",
+                    "중화제",
+                    "샴푸대",
+                    "잡지"
+                ]
+            },
+            {
+                "id": "coffee_roasting",
+                "name": "로스팅",
+                "target": 4,
+                "words": [
+                    "생두",
+                    "원두",
+                    "핸드픽",
+                    "쿨링팬"
+                ]
+            },
+            {
+                "id": "post_office",
+                "name": "우체국",
+                "target": 5,
+                "words": [
+                    "택배박스",
+                    "등기",
+                    "우표",
+                    "봉투건",
+                    "저울"
+                ]
+            },
+            {
+                "id": "gym_workout",
+                "name": "헬스장",
+                "target": 4,
+                "words": [
+                    "덤벨",
+                    "러닝머신",
+                    "단백질",
+                    "라커룸"
+                ]
+            },
+            {
+                "id": "photo_studio",
+                "name": "사진관",
+                "target": 5,
+                "words": [
+                    "반사판",
+                    "조명기",
+                    "배경지",
+                    "삼각대",
+                    "인화지"
+                ]
+            },
+            {
+                "id": "flower_shop",
+                "name": "꽃집",
+                "target": 4,
+                "words": [
+                    "꽃가위",
+                    "포장지",
+                    "리본",
+                    "화분"
+                ]
+            },
+            {
+                "id": "tailor_shop",
+                "name": "양복점",
+                "target": 3,
+                "words": [
+                    "줄자",
+                    "초크",
+                    "원단"
+                ]
+            },
+            {
+                "id": "orchestra_pit",
+                "name": "오케스트라",
+                "target": 3,
+                "words": [
+                    "지휘자",
+                    "보면대",
+                    "단원"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 51,
+        "maxMoves": 105,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "morning_routine",
+                "name": "아침",
+                "target": 8,
+                "words": [
+                    "알람음",
+                    "기지개",
+                    "새벽이슬",
+                    "신문배달",
+                    "토스트",
+                    "커피향",
+                    "세수",
+                    "조깅"
+                ]
+            },
+            {
+                "id": "car_wash",
+                "name": "세차",
+                "target": 7,
+                "words": [
+                    "고압건",
+                    "거품솔",
+                    "왁싱",
+                    "물걸레",
+                    "물통",
+                    "광택제",
+                    "하부세차"
+                ]
+            },
+            {
+                "id": "oil_painting",
+                "name": "유화",
+                "target": 6,
+                "words": [
+                    "캔버스",
+                    "이젤",
+                    "팔레트나이프",
+                    "테레빈유",
+                    "물감튜브",
+                    "덧칠"
+                ]
+            },
+            {
+                "id": "fire_disaster",
+                "name": "화재",
+                "target": 8,
+                "words": [
+                    "연기",
+                    "불길",
+                    "재더미",
+                    "그을음",
+                    "발화점",
+                    "진화",
+                    "대피로",
+                    "비상벨"
+                ]
+            },
+            {
+                "id": "french_fries",
+                "name": "감자튀김",
+                "target": 5,
+                "words": [
+                    "케첩",
+                    "바삭함",
+                    "기름솥",
+                    "소금간",
+                    "트레이"
+                ]
+            },
+            {
+                "id": "mountain_cabin",
+                "name": "산장",
+                "target": 6,
+                "words": [
+                    "벽난로",
+                    "흔들의자",
+                    "통나무",
+                    "다락방",
+                    "램프",
+                    "고립"
+                ]
+            },
+            {
+                "id": "elegance_vibe",
+                "name": "우아함",
+                "target": 3,
+                "words": [
+                    "턴",
+                    "도약",
+                    "곡선"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 52,
+        "maxMoves": 108,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "ocean_scenery",
+                "name": "바다",
+                "target": 8,
+                "words": [
+                    "수평선",
+                    "갈매기",
+                    "파도소리",
+                    "밀물",
+                    "짠기운",
+                    "등대",
+                    "모래사장",
+                    "윤슬"
+                ]
+            },
+            {
+                "id": "camping_fire",
+                "name": "모닥불",
+                "target": 7,
+                "words": [
+                    "장작",
+                    "불꽃",
+                    "연속",
+                    "부채질",
+                    "재더미",
+                    "감자구이",
+                    "그을음"
+                ]
+            },
+            {
+                "id": "popcorn_snack",
+                "name": "팝콘",
+                "target": 6,
+                "words": [
+                    "옥수수알",
+                    "버터향",
+                    "카라멜",
+                    "튀겨짐",
+                    "고소함",
+                    "종이봉투"
+                ]
+            },
+            {
+                "id": "bicycle_riding",
+                "name": "자전거",
+                "target": 5,
+                "words": [
+                    "페달",
+                    "체인",
+                    "안장",
+                    "경적",
+                    "헬멧"
+                ]
+            },
+            {
+                "id": "umbrella_tool",
+                "name": "우산",
+                "target": 5,
+                "words": [
+                    "살대",
+                    "방수천",
+                    "손잡이",
+                    "접이식",
+                    "빗물받이"
+                ]
+            },
+            {
+                "id": "knot_binding",
+                "name": "매듭",
+                "target": 6,
+                "words": [
+                    "올가미",
+                    "고리",
+                    "풀기",
+                    "묶음",
+                    "단단함",
+                    "교차"
+                ]
+            },
+            {
+                "id": "piano_lesson",
+                "name": "피아노",
+                "target": 4,
+                "words": [
+                    "건반",
+                    "악보",
+                    "페달링",
+                    "조율"
+                ]
+            },
+            {
+                "id": "library_vibe",
+                "name": "정숙",
+                "target": 3,
+                "words": [
+                    "속삭임",
+                    "발소리",
+                    "페이지"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 53,
+        "maxMoves": 102,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "morning_coffee",
+                "name": "커피",
+                "target": 6,
+                "words": [
+                    "원두",
+                    "에스프레소",
+                    "크레마",
+                    "그라인더",
+                    "추출",
+                    "머그잔"
+                ]
+            },
+            {
+                "id": "passport_travel",
+                "name": "여권",
+                "target": 5,
+                "words": [
+                    "비자",
+                    "입국심사",
+                    "증명사진",
+                    "만료일",
+                    "발급"
+                ]
+            },
+            {
+                "id": "heater_winter",
+                "name": "난로",
+                "target": 6,
+                "words": [
+                    "열기",
+                    "기름통",
+                    "심지",
+                    "군밤",
+                    "연통",
+                    "따스함"
+                ]
+            },
+            {
+                "id": "stage_performance",
+                "name": "무대",
+                "target": 4,
+                "words": [
+                    "막사",
+                    "동선",
+                    "리프트",
+                    "배경화면"
+                ]
+            },
+            {
+                "id": "soil_garden",
+                "name": "흙",
+                "target": 5,
+                "words": [
+                    "거름",
+                    "진흙",
+                    "양분",
+                    "지렁이",
+                    "삽질"
+                ]
+            },
+            {
+                "id": "butter_bakery",
+                "name": "버터",
+                "target": 5,
+                "words": [
+                    "풍미",
+                    "우유지방",
+                    "나이프",
+                    "냉장보관",
+                    "고소함"
+                ]
+            },
+            {
+                "id": "soccer_match",
+                "name": "축구",
+                "target": 4,
+                "words": [
+                    "골대",
+                    "유니폼",
+                    "심판",
+                    "잔디"
+                ]
+            },
+            {
+                "id": "stationery_set",
+                "name": "필기",
+                "target": 3,
+                "words": [
+                    "만년필",
+                    "잉크",
+                    "노트"
+                ]
+            },
+            {
+                "id": "fishing_trip",
+                "name": "낚시",
+                "target": 3,
+                "words": [
+                    "미끼",
+                    "찌",
+                    "그물"
+                ]
+            },
+            {
+                "id": "forest_trail",
+                "name": "숲",
+                "target": 3,
+                "words": [
+                    "나무",
+                    "이끼",
+                    "다람쥐"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 54,
+        "maxMoves": 108,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "hammock_relax",
+                "name": "해먹",
+                "target": 8,
+                "words": [
+                    "그물망",
+                    "지지대",
+                    "나무기둥",
+                    "낮잠",
+                    "흔들림",
+                    "매듭",
+                    "야외수면",
+                    "휴식"
+                ]
+            },
+            {
+                "id": "seaweed_ocean",
+                "name": "해초",
+                "target": 7,
+                "words": [
+                    "미역",
+                    "다시마",
+                    "바다풀",
+                    "광합성",
+                    "조류",
+                    "군락",
+                    "염분"
+                ]
+            },
+            {
+                "id": "newspaper_info",
+                "name": "신문",
+                "target": 6,
+                "words": [
+                    "호외",
+                    "사설",
+                    "취재",
+                    "활자",
+                    "구독",
+                    "배달"
+                ]
+            },
+            {
+                "id": "pantry_office",
+                "name": "탕비실",
+                "target": 7,
+                "words": [
+                    "정수기",
+                    "믹스커피",
+                    "종이컵",
+                    "티백",
+                    "티스푼",
+                    "간식",
+                    "싱크대"
+                ]
+            },
+            {
+                "id": "feign_ignorance",
+                "name": "시치미",
+                "target": 5,
+                "words": [
+                    "매사냥",
+                    "꼬리표",
+                    "모른척",
+                    "발뼘",
+                    "딴전"
+                ]
+            },
+            {
+                "id": "ticket_concert",
+                "name": "입장권",
+                "target": 6,
+                "words": [
+                    "좌석번호",
+                    "검표",
+                    "예매",
+                    "바코드",
+                    "발권기",
+                    "환불"
+                ]
+            },
+            {
+                "id": "hand_warmer",
+                "name": "손난로",
+                "target": 5,
+                "words": [
+                    "발열",
+                    "주머니",
+                    "똑딱이",
+                    "핫팩",
+                    "온기"
+                ]
+            },
+            {
+                "id": "basketball_sport",
+                "name": "농구",
+                "target": 6,
+                "words": [
+                    "리바운드",
+                    "드리블",
+                    "백보드",
+                    "자유투",
+                    "3점슛",
+                    "골대"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 55,
+        "maxMoves": 110,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "time_concept",
+                "name": "시간",
+                "target": 7,
+                "words": [
+                    "찰나",
+                    "영겁",
+                    "시공간",
+                    "순간",
+                    "유효기간",
+                    "시차",
+                    "정각"
+                ]
+            },
+            {
+                "id": "aquarium_fish",
+                "name": "금붕어",
+                "target": 6,
+                "words": [
+                    "어항",
+                    "산소발생기",
+                    "지느러미",
+                    "물방울",
+                    "먹이",
+                    "비늘"
+                ]
+            },
+            {
+                "id": "chalk_climbing",
+                "name": "초크",
+                "target": 7,
+                "words": [
+                    "미끄럼방지",
+                    "탄산마그네슘",
+                    "가루",
+                    "손땀",
+                    "백색",
+                    "가루주머니",
+                    "마찰력"
+                ]
+            },
+            {
+                "id": "pottery_relic",
+                "name": "도자기",
+                "target": 8,
+                "words": [
+                    "상감",
+                    "청자",
+                    "백자",
+                    "가마",
+                    "유약",
+                    "물레",
+                    "빙렬",
+                    "태토"
+                ]
+            },
+            {
+                "id": "rainy_day_essential",
+                "name": "장마",
+                "target": 5,
+                "words": [
+                    "제습기",
+                    "습기",
+                    "강수량",
+                    "침수",
+                    "곰팡이"
+                ]
+            },
+            {
+                "id": "tea_leaves_dado",
+                "name": "찻잎",
+                "target": 6,
+                "words": [
+                    "어린싹",
+                    "발효",
+                    "덖음",
+                    "녹차",
+                    "우전",
+                    "말차"
+                ]
+            },
+            {
+                "id": "scent_smell",
+                "name": "냄새",
+                "target": 5,
+                "words": [
+                    "악취",
+                    "킁킁",
+                    "후각",
+                    "꼬랑내",
+                    "코끝"
+                ]
+            },
+            {
+                "id": "marathon_race",
+                "name": "달리기",
+                "target": 6,
+                "words": [
+                    "완주",
+                    "기록",
+                    "페이스메이커",
+                    "반환점",
+                    "출발신호",
+                    "운동화"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 56,
+        "maxMoves": 112,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "winter_fashion",
+                "name": "겨울옷",
+                "target": 7,
+                "words": [
+                    "패딩",
+                    "목도리",
+                    "장갑",
+                    "핫팩",
+                    "부츠",
+                    "코트",
+                    "기모"
+                ]
+            },
+            {
+                "id": "fruit_juice",
+                "name": "과일",
+                "target": 8,
+                "words": [
+                    "사과",
+                    "바나나",
+                    "딸기",
+                    "포도",
+                    "오렌지",
+                    "수박",
+                    "복숭아",
+                    "자몽"
+                ]
+            },
+            {
+                "id": "office_supplies",
+                "name": "사무용품",
+                "target": 6,
+                "words": [
+                    "클립",
+                    "포스트잇",
+                    "형광펜",
+                    "스테이플러",
+                    "화이트보드",
+                    "파일"
+                ]
+            },
+            {
+                "id": "sea_creatures",
+                "name": "바다 생물",
+                "target": 7,
+                "words": [
+                    "문어",
+                    "오징어",
+                    "조개",
+                    "게",
+                    "해파리",
+                    "돌고래",
+                    "상어"
+                ]
+            },
+            {
+                "id": "musical_instruments",
+                "name": "악기",
+                "target": 6,
+                "words": [
+                    "피아노",
+                    "기타",
+                    "드럼",
+                    "바이올린",
+                    "트럼펫",
+                    "플루트"
+                ]
+            },
+            {
+                "id": "cooking_utensils",
+                "name": "조리도구",
+                "target": 7,
+                "words": [
+                    "국자",
+                    "뒤집개",
+                    "집게",
+                    "거품기",
+                    "칼",
+                    "도마",
+                    "채"
+                ]
+            },
+            {
+                "id": "weather_phenomena",
+                "name": "날씨",
+                "target": 5,
+                "words": [
+                    "천둥",
+                    "번개",
+                    "소나기",
+                    "안개",
+                    "무지개"
+                ]
+            },
+            {
+                "id": "school_subjects",
+                "name": "과목",
+                "target": 5,
+                "words": [
+                    "국어",
+                    "수학",
+                    "영어",
+                    "과학",
+                    "사회"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 57,
+        "maxMoves": 82,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "subscription_service",
+                "name": "구독",
+                "target": 6,
+                "words": [
+                    "정기배송",
+                    "월회비",
+                    "해지",
+                    "자동결제",
+                    "멤버십",
+                    "알림설정"
+                ]
+            },
+            {
+                "id": "net_mesh",
+                "name": "그물",
+                "target": 5,
+                "words": [
+                    "코걸이",
+                    "촘촘함",
+                    "투망",
+                    "올",
+                    "포획"
+                ]
+            },
+            {
+                "id": "kitchen_home",
+                "name": "부엌",
+                "target": 6,
+                "words": [
+                    "조리대",
+                    "찬장",
+                    "도마",
+                    "행주",
+                    "식기세척기",
+                    "가스레인지"
+                ]
+            },
+            {
+                "id": "feeling_sense",
+                "name": "느낌",
+                "target": 5,
+                "words": [
+                    "촉감",
+                    "뉘앙스",
+                    "예감",
+                    "분위기",
+                    "직감"
+                ]
+            },
+            {
+                "id": "seating_chart",
+                "name": "좌석",
+                "target": 6,
+                "words": [
+                    "등받이",
+                    "열번호",
+                    "통로측",
+                    "지정석",
+                    "팔걸이",
+                    "예약석"
+                ]
+            },
+            {
+                "id": "heat_energy",
+                "name": "열",
+                "target": 5,
+                "words": [
+                    "전도",
+                    "복사",
+                    "대류",
+                    "비열",
+                    "팽창"
+                ]
+            },
+            {
+                "id": "score_game",
+                "name": "점수",
+                "target": 7,
+                "words": [
+                    "득점",
+                    "전광판",
+                    "평점",
+                    "합계",
+                    "평균",
+                    "순위",
+                    "기록"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 58,
+        "maxMoves": 102,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "chess_game",
+                "name": "체스",
+                "target": 5,
+                "words": [
+                    "체크메이트",
+                    "기물",
+                    "나이트",
+                    "캐슬링",
+                    "엔드게임"
+                ]
+            },
+            {
+                "id": "holiday_vacation",
+                "name": "휴일",
+                "target": 5,
+                "words": [
+                    "빨간날",
+                    "늦잠",
+                    "연차",
+                    "황금연휴",
+                    "대체공휴일"
+                ]
+            },
+            {
+                "id": "water_nature",
+                "name": "물",
+                "target": 5,
+                "words": [
+                    "표면장력",
+                    "증발",
+                    "무색무취",
+                    "수질",
+                    "응고점"
+                ]
+            },
+            {
+                "id": "traditional_korean_music",
+                "name": "국악",
+                "target": 4,
+                "words": [
+                    "추임새",
+                    "판소리",
+                    "장단",
+                    "얼쑤"
+                ]
+            },
+            {
+                "id": "safety_equipment",
+                "name": "안전",
+                "target": 5,
+                "words": [
+                    "구명조끼",
+                    "소화기",
+                    "안전띠",
+                    "완강기",
+                    "방독면"
+                ]
+            },
+            {
+                "id": "weather_wind",
+                "name": "바람",
+                "target": 4,
+                "words": [
+                    "돌풍",
+                    "풍속계",
+                    "기류",
+                    "태풍"
+                ]
+            },
+            {
+                "id": "yeast_ferment",
+                "name": "효모",
+                "target": 4,
+                "words": [
+                    "발효",
+                    "팽창",
+                    "미생물",
+                    "당분"
+                ]
+            },
+            {
+                "id": "moss_nature",
+                "name": "이끼",
+                "target": 4,
+                "words": [
+                    "포자",
+                    "습지",
+                    "바위",
+                    "그늘"
+                ]
+            },
+            {
+                "id": "deduction_mystery",
+                "name": "추리",
+                "target": 3,
+                "words": [
+                    "알리바이",
+                    "트릭",
+                    "증거"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 59,
+        "maxMoves": 118,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "solar_system",
+                "name": "태양계",
+                "target": 8,
+                "words": [
+                    "수성",
+                    "금성",
+                    "지구",
+                    "화성",
+                    "목성",
+                    "토성",
+                    "천왕성",
+                    "해왕성"
+                ]
+            },
+            {
+                "id": "skating_rink",
+                "name": "스케이트",
+                "target": 6,
+                "words": [
+                    "에지",
+                    "빙판",
+                    "트리플악셀",
+                    "컴펄서리",
+                    "스핀",
+                    "링크장"
+                ]
+            },
+            {
+                "id": "coffee_extraction",
+                "name": "추출",
+                "target": 6,
+                "words": [
+                    "드립",
+                    "사이폰",
+                    "모카포트",
+                    "콜드브루",
+                    "프렌치프레스",
+                    "압력"
+                ]
+            },
+            {
+                "id": "traditional_game",
+                "name": "윷놀이",
+                "target": 6,
+                "words": [
+                    "도개걸윷모",
+                    "뒷도",
+                    "말판",
+                    "멍석",
+                    "낙",
+                    "업어가기"
+                ]
+            },
+            {
+                "id": "camel_desert",
+                "name": "낙타",
+                "target": 5,
+                "words": [
+                    "혹",
+                    "되새김질",
+                    "발바닥",
+                    "속눈썹",
+                    "내건성"
+                ]
+            },
+            {
+                "id": "chemical_element",
+                "name": "원소",
+                "target": 5,
+                "words": [
+                    "헬륨",
+                    "탄소",
+                    "산소",
+                    "질소",
+                    "수소"
+                ]
+            },
+            {
+                "id": "musical_term",
+                "name": "박자",
+                "target": 4,
+                "words": [
+                    "메트로놈",
+                    "엇박",
+                    "심박수",
+                    "강약"
+                ]
+            },
+            {
+                "id": "letter_post",
+                "name": "편지",
+                "target": 4,
+                "words": [
+                    "수신인",
+                    "발신인",
+                    "우체통",
+                    "속봉투"
+                ]
+            },
+            {
+                "id": "drawing_tools",
+                "name": "소묘",
+                "target": 3,
+                "words": [
+                    "콘테",
+                    "찰필",
+                    "연필깎이"
+                ]
+            },
+            {
+                "id": "honey_term",
+                "name": "꿀",
+                "target": 3,
+                "words": [
+                    "밀원",
+                    "프로폴리스",
+                    "숙성"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 60,
+        "maxMoves": 110,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "brush_art",
+                "name": "붓",
+                "target": 8,
+                "words": [
+                    "붓대",
+                    "붓모",
+                    "필통",
+                    "서예",
+                    "세필",
+                    "운필",
+                    "먹물",
+                    "벼루"
+                ]
+            },
+            {
+                "id": "orchestra_leader",
+                "name": "지휘자",
+                "target": 7,
+                "words": [
+                    "포디움",
+                    "보면대",
+                    "단원",
+                    "지휘봉",
+                    "총보",
+                    "앙상블",
+                    "서곡"
+                ]
+            },
+            {
+                "id": "camera_settings",
+                "name": "카메라",
+                "target": 6,
+                "words": [
+                    "조리개",
+                    "셔터속도",
+                    "감도",
+                    "초점",
+                    "뷰파인더",
+                    "노출"
+                ]
+            },
+            {
+                "id": "honey_nature",
+                "name": "꿀벌",
+                "target": 6,
+                "words": [
+                    "여왕벌",
+                    "일벌",
+                    "봉침",
+                    "꽃가루",
+                    "육각형",
+                    "날갯짓"
+                ]
+            },
+            {
+                "id": "discount_sale",
+                "name": "할인",
+                "target": 5,
+                "words": [
+                    "정가",
+                    "특가",
+                    "이월상품",
+                    "쿠폰",
+                    "적립"
+                ]
+            },
+            {
+                "id": "chemical_solution",
+                "name": "용액",
+                "target": 5,
+                "words": [
+                    "용매",
+                    "용질",
+                    "농도",
+                    "포화",
+                    "희석"
+                ]
+            },
+            {
+                "id": "kpop_culture",
+                "name": "kpop",
+                "target": 4,
+                "words": [
+                    "아이돌",
+                    "연습생",
+                    "데뷔",
+                    "응원봉"
+                ]
+            },
+            {
+                "id": "sweat_physical",
+                "name": "땀",
+                "target": 4,
+                "words": [
+                    "땀방울",
+                    "모공",
+                    "송글송글",
+                    "손수건"
+                ]
+            },
+            {
+                "id": "fast_food_set",
+                "name": "햄버거",
+                "target": 4,
+                "words": [
+                    "패티",
+                    "번",
+                    "피클",
+                    "소스"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 61,
+        "maxMoves": 145,
+        "slots": 5,
+        "categories": [
+            {
+                "id": "violin",
+                "name": "바이올린",
+                "target": 5,
+                "words": [
+                    "현악기",
+                    "활기",
+                    "송진",
+                    "f자홀",
+                    "턱받침"
+                ]
+            },
+            {
+                "id": "outdoors",
+                "name": "야외",
+                "target": 6,
+                "words": [
+                    "피크닉",
+                    "산책로",
+                    "바깥공기",
+                    "돗자리",
+                    "햇볕",
+                    "벌레기피제"
+                ]
+            },
+            {
+                "id": "landscape",
+                "name": "풍경",
+                "target": 7,
+                "words": [
+                    "지평선",
+                    "대자연",
+                    "원경",
+                    "구도",
+                    "수채화",
+                    "카메라",
+                    "전망대"
+                ]
+            },
+            {
+                "id": "soda",
+                "name": "탄산음료",
+                "target": 4,
+                "words": [
+                    "청량감",
+                    "기포",
+                    "얼음컵",
+                    "톡쏘는맛"
+                ]
+            },
+            {
+                "id": "barcode",
+                "name": "바코드",
+                "target": 5,
+                "words": [
+                    "스캐너",
+                    "검은선",
+                    "가격인식",
+                    "식별번호",
+                    "리더기"
+                ]
+            },
+            {
+                "id": "bread",
+                "name": "빵",
+                "target": 8,
+                "words": [
+                    "고소함",
+                    "갓구운",
+                    "베이커리",
+                    "밀가루음식",
+                    "효모",
+                    "식빵",
+                    "부드러움",
+                    "버터향"
+                ]
+            },
+            {
+                "id": "criminal",
+                "name": "범인",
+                "target": 3,
+                "words": [
+                    "알리바이",
+                    "현장검거",
+                    "용의자"
+                ]
+            },
+            {
+                "id": "helmet",
+                "name": "헬멧",
+                "target": 6,
+                "words": [
+                    "머리보호",
+                    "턱끈",
+                    "안전수칙",
+                    "내피",
+                    "충격흡수",
+                    "바이저"
+                ]
+            },
+            {
+                "id": "knight",
+                "name": "기사",
+                "target": 5,
+                "words": [
+                    "충성",
+                    "마구간",
+                    "창시합",
+                    "명예",
+                    "영주"
+                ]
+            },
+            {
+                "id": "tropical_fruit",
+                "name": "열대과일",
+                "target": 5,
+                "words": [
+                    "망고",
+                    "두리안",
+                    "파파야",
+                    "구아바",
+                    "코코넛"
+                ]
+            },
+            {
+                "id": "deep_sea",
+                "name": "심해",
+                "target": 4,
+                "words": [
+                    "심해어",
+                    "열수구",
+                    "수압",
+                    "암흑계"
+                ]
+            },
+            {
+                "id": "scary_movie",
+                "name": "공포영화",
+                "target": 5,
+                "words": [
+                    "비명",
+                    "심령현상",
+                    "깜짝상자",
+                    "음산함",
+                    "귀신"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 62,
+        "maxMoves": 94,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "toast",
+                "name": "토스트",
+                "target": 5,
+                "words": [
+                    "식빵",
+                    "토스터기",
+                    "잼",
+                    "버터",
+                    "바삭함"
+                ]
+            },
+            {
+                "id": "sound",
+                "name": "사운드",
+                "target": 6,
+                "words": [
+                    "스피커",
+                    "데시벨",
+                    "음향",
+                    "주파수",
+                    "진동",
+                    "헤드폰"
+                ]
+            },
+            {
+                "id": "cup",
+                "name": "컵",
+                "target": 7,
+                "words": [
+                    "손잡이",
+                    "받침대",
+                    "유리잔",
+                    "머그",
+                    "용량",
+                    "액체",
+                    "세라믹"
+                ]
+            },
+            {
+                "id": "parcel",
+                "name": "택배",
+                "target": 4,
+                "words": [
+                    "송장",
+                    "박스테이프",
+                    "배송기사",
+                    "물류센터"
+                ]
+            },
+            {
+                "id": "cheer",
+                "name": "환호",
+                "target": 5,
+                "words": [
+                    "응원봉",
+                    "박수갈채",
+                    "열광",
+                    "함성",
+                    "축제분위기"
+                ]
+            },
+            {
+                "id": "running_shoes",
+                "name": "운동화",
+                "target": 6,
+                "words": [
+                    "밑창",
+                    "신발끈",
+                    "깔창",
+                    "쿠션감",
+                    "브랜드",
+                    "메쉬소재"
+                ]
+            },
+            {
+                "id": "spicy_taste",
+                "name": "매움",
+                "target": 3,
+                "words": [
+                    "얼큰함",
+                    "캡사이신",
+                    "진땀"
+                ]
+            },
+            {
+                "id": "classic_car",
+                "name": "클래식카",
+                "target": 5,
+                "words": [
+                    "핸들",
+                    "엔진음",
+                    "광택",
+                    "수집가",
+                    "복원"
+                ]
+            },
+            {
+                "id": "night_sky",
+                "name": "밤하늘",
+                "target": 9,
+                "words": [
+                    "초승달",
+                    "은하수",
+                    "북극성",
+                    "정적",
+                    "유성우",
+                    "성단",
+                    "성운",
+                    "망원경",
+                    "어둠"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 63,
+        "maxMoves": 114,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "milk",
+                "name": "우유",
+                "target": 8,
+                "words": [
+                    "유제품",
+                    "칼슘",
+                    "흰색",
+                    "저지방",
+                    "신선함",
+                    "치즈",
+                    "요거트",
+                    "냉장보관"
+                ]
+            },
+            {
+                "id": "sunglasses",
+                "name": "선글라스",
+                "target": 7,
+                "words": [
+                    "자외선차단",
+                    "렌즈",
+                    "안경테",
+                    "눈보호",
+                    "패션아이템",
+                    "편광",
+                    "스포츠형"
+                ]
+            },
+            {
+                "id": "ribbon",
+                "name": "리본",
+                "target": 6,
+                "words": [
+                    "매듭",
+                    "선물포장",
+                    "장식용",
+                    "끈",
+                    "나비모양",
+                    "레이스"
+                ]
+            },
+            {
+                "id": "actor",
+                "name": "배우",
+                "target": 8,
+                "words": [
+                    "연기",
+                    "대본",
+                    "시상식",
+                    "주연",
+                    "조연",
+                    "카메라테스트",
+                    "분장실",
+                    "무대인사"
+                ]
+            },
+            {
+                "id": "snow",
+                "name": "눈",
+                "target": 8,
+                "words": [
+                    "함박눈",
+                    "결정체",
+                    "제설차",
+                    "눈사람",
+                    "화이트크리스마스",
+                    "고드름",
+                    "싸락눈",
+                    "강설량"
+                ]
+            },
+            {
+                "id": "canvas",
+                "name": "캔버스",
+                "target": 7,
+                "words": [
+                    "유화",
+                    "천재질",
+                    "나무틀",
+                    "젯소",
+                    "아크릴",
+                    "프레임",
+                    "작업대"
+                ]
+            },
+            {
+                "id": "old_bookstore",
+                "name": "헌책방",
+                "target": 8,
+                "words": [
+                    "종이냄새",
+                    "책갈피",
+                    "빛바랜",
+                    "서점주인",
+                    "초판본",
+                    "고서",
+                    "중고거래",
+                    "서가"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 64,
+        "maxMoves": 90,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "luxury_goods",
+                "name": "명품",
+                "target": 6,
+                "words": [
+                    "브랜드",
+                    "한정판",
+                    "품질보증",
+                    "장인정신",
+                    "희소성",
+                    "로고"
+                ]
+            },
+            {
+                "id": "martial_arts",
+                "name": "격투기",
+                "target": 5,
+                "words": [
+                    "옥타곤",
+                    "암바",
+                    "테이크다운",
+                    "라운드",
+                    "타격"
+                ]
+            },
+            {
+                "id": "meal_time",
+                "name": "식사",
+                "target": 7,
+                "words": [
+                    "숟가락",
+                    "식탁보",
+                    "반찬",
+                    "포만감",
+                    "후식",
+                    "식기세척기",
+                    "메뉴판"
+                ]
+            },
+            {
+                "id": "factory",
+                "name": "공장",
+                "target": 5,
+                "words": [
+                    "컨베이어",
+                    "대량생산",
+                    "조립라인",
+                    "안전모",
+                    "설비"
+                ]
+            },
+            {
+                "id": "pasta",
+                "name": "파스타",
+                "target": 6,
+                "words": [
+                    "스파게티면",
+                    "올리브유",
+                    "알덴테",
+                    "소스",
+                    "피클",
+                    "치즈가루"
+                ]
+            },
+            {
+                "id": "symphony_hall",
+                "name": "교향악단",
+                "target": 4,
+                "words": [
+                    "지휘자",
+                    "협주곡",
+                    "단원",
+                    "앙코르"
+                ]
+            },
+            {
+                "id": "tailor_shop",
+                "name": "양복점",
+                "target": 4,
+                "words": [
+                    "줄자",
+                    "원단",
+                    "가봉",
+                    "다림질"
+                ]
+            },
+            {
+                "id": "desert_island",
+                "name": "무인도",
+                "target": 5,
+                "words": [
+                    "난파선",
+                    "조난신호",
+                    "야자수",
+                    "뗏목",
+                    "동굴"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 65,
+        "maxMoves": 88,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "music_album",
+                "name": "앨범",
+                "target": 6,
+                "words": [
+                    "수록곡",
+                    "가사지",
+                    "재킷사진",
+                    "사인반",
+                    "트랙리스트",
+                    "커버디자인"
+                ]
+            },
+            {
+                "id": "maya_civilization",
+                "name": "마야문명",
+                "target": 7,
+                "words": [
+                    "치첸이트사",
+                    "계단식피라미드",
+                    "천문학",
+                    "마야력",
+                    "상형문자",
+                    "정글유적",
+                    "제사장"
+                ]
+            },
+            {
+                "id": "food_menu",
+                "name": "음식",
+                "target": 6,
+                "words": [
+                    "영양소",
+                    "레시피",
+                    "식재료",
+                    "감칠맛",
+                    "조리법",
+                    "플레이팅"
+                ]
+            },
+            {
+                "id": "fish_category",
+                "name": "생선",
+                "target": 6,
+                "words": [
+                    "비늘",
+                    "아가미",
+                    "지느러미",
+                    "수조",
+                    "손질",
+                    "잔가시"
+                ]
+            },
+            {
+                "id": "bamboo_forest",
+                "name": "대나무숲",
+                "target": 5,
+                "words": [
+                    "판다",
+                    "죽순",
+                    "바람소리",
+                    "푸른빛",
+                    "마디"
+                ]
+            },
+            {
+                "id": "skyscrapers",
+                "name": "고층빌딩",
+                "target": 6,
+                "words": [
+                    "엘리베이터",
+                    "옥상정원",
+                    "유리창",
+                    "강철골조",
+                    "스카이라인",
+                    "회전문"
+                ]
+            },
+            {
+                "id": "morning_fog",
+                "name": "안개",
+                "target": 5,
+                "words": [
+                    "뿌연시야",
+                    "가시거리",
+                    "습기",
+                    "새벽녘",
+                    "몽환적"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 66,
+        "maxMoves": 118,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "morning_jogging",
+                "name": "조깅",
+                "target": 6,
+                "words": [
+                    "스트레칭",
+                    "운동장",
+                    "반바지",
+                    "스마트워치",
+                    "호흡",
+                    "땀방울"
+                ]
+            },
+            {
+                "id": "jewelry_box",
+                "name": "보석함",
+                "target": 7,
+                "words": [
+                    "귀걸이",
+                    "목걸이",
+                    "반지",
+                    "벨벳패드",
+                    "펜던트",
+                    "귀금속",
+                    "브로치"
+                ]
+            },
+            {
+                "id": "science_fiction",
+                "name": "공상과학",
+                "target": 5,
+                "words": [
+                    "안드로이드",
+                    "차원이동",
+                    "외계인",
+                    "레이저건",
+                    "워프"
+                ]
+            },
+            {
+                "id": "rainy_window",
+                "name": "빗줄기",
+                "target": 6,
+                "words": [
+                    "창문",
+                    "물방울",
+                    "흐릿함",
+                    "습기",
+                    "번개",
+                    "회색하늘"
+                ]
+            },
+            {
+                "id": "ancient_shrine",
+                "name": "사당",
+                "target": 5,
+                "words": [
+                    "향로",
+                    "제사상",
+                    "병풍",
+                    "위패",
+                    "절하기"
+                ]
+            },
+            {
+                "id": "barista_tools",
+                "name": "바리스타",
+                "target": 8,
+                "words": [
+                    "탬퍼",
+                    "스팀피처",
+                    "원두가루",
+                    "샷잔",
+                    "앞치마",
+                    "저울",
+                    "린넨",
+                    "드립포트"
+                ]
+            },
+            {
+                "id": "deep_forest",
+                "name": "깊은숲",
+                "target": 6,
+                "words": [
+                    "이끼",
+                    "덩굴",
+                    "딱따구리",
+                    "수풀",
+                    "그늘",
+                    "낙엽층"
+                ]
+            },
+            {
+                "id": "scented_candle",
+                "name": "향초",
+                "target": 5,
+                "words": [
+                    "심지",
+                    "왁스",
+                    "그을음",
+                    "아로마",
+                    "촛불"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 67,
+        "maxMoves": 112,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "tongs",
+                "name": "집게",
+                "target": 5,
+                "words": [
+                    "악력",
+                    "스테인리스",
+                    "고기굽기",
+                    "핀셋",
+                    "빨래집게"
+                ]
+            },
+            {
+                "id": "teeth",
+                "name": "이빨",
+                "target": 6,
+                "words": [
+                    "어금니",
+                    "사랑니",
+                    "치아미백",
+                    "법랑질",
+                    "잇몸",
+                    "송곳니"
+                ]
+            },
+            {
+                "id": "electricity",
+                "name": "전기",
+                "target": 6,
+                "words": [
+                    "콘센트",
+                    "전압",
+                    "발전기",
+                    "절전",
+                    "회로",
+                    "전력선"
+                ]
+            },
+            {
+                "id": "bag",
+                "name": "가방",
+                "target": 5,
+                "words": [
+                    "백팩",
+                    "숄더백",
+                    "지퍼",
+                    "안감",
+                    "수납공간"
+                ]
+            },
+            {
+                "id": "taste",
+                "name": "맛",
+                "target": 6,
+                "words": [
+                    "미각",
+                    "풍미",
+                    "짠맛",
+                    "쓴맛",
+                    "신맛",
+                    "감칠맛"
+                ]
+            },
+            {
+                "id": "start",
+                "name": "출발",
+                "target": 5,
+                "words": [
+                    "준비선",
+                    "신호총",
+                    "가속",
+                    "첫걸음",
+                    "정시출발"
+                ]
+            },
+            {
+                "id": "turtle",
+                "name": "거북이",
+                "target": 4,
+                "words": [
+                    "등껍질",
+                    "장수",
+                    "느림보",
+                    "등갑"
+                ]
+            },
+            {
+                "id": "introduction",
+                "name": "소개",
+                "target": 5,
+                "words": [
+                    "자기소개서",
+                    "첫인상",
+                    "프로필",
+                    "중매",
+                    "추천사"
+                ]
+            },
+            {
+                "id": "old_attic",
+                "name": "다락방",
+                "target": 8,
+                "words": [
+                    "먼지",
+                    "흔들의자",
+                    "추억",
+                    "나무계단",
+                    "낡은상자",
+                    "기울어진천장",
+                    "작은창문",
+                    "비밀장소"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 68,
+        "maxMoves": 105,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "exercise",
+                "name": "운동",
+                "target": 6,
+                "words": [
+                    "스트레칭",
+                    "근력강화",
+                    "운동복",
+                    "심박수",
+                    "칼로리소모",
+                    "개인훈련"
+                ]
+            },
+            {
+                "id": "spider",
+                "name": "거미",
+                "target": 7,
+                "words": [
+                    "거미줄",
+                    "여덟개의다리",
+                    "독니",
+                    "곤충사냥",
+                    "탈피",
+                    "알주머니",
+                    "진동감지"
+                ]
+            },
+            {
+                "id": "apron",
+                "name": "앞치마",
+                "target": 6,
+                "words": [
+                    "허리끈",
+                    "방수재질",
+                    "주머니",
+                    "요리사복",
+                    "얼룩방지",
+                    "어깨끈"
+                ]
+            },
+            {
+                "id": "data_info",
+                "name": "데이터",
+                "target": 5,
+                "words": [
+                    "알고리즘",
+                    "클라우드",
+                    "디지털정보",
+                    "백업",
+                    "서버"
+                ]
+            },
+            {
+                "id": "guide_post",
+                "name": "이정표",
+                "target": 6,
+                "words": [
+                    "갈림길",
+                    "방향표시",
+                    "남은거리",
+                    "목적지",
+                    "안내판",
+                    "표지석"
+                ]
+            },
+            {
+                "id": "puzzle_game",
+                "name": "퍼즐",
+                "target": 7,
+                "words": [
+                    "조각맞추기",
+                    "두뇌회전",
+                    "그림완성",
+                    "미로",
+                    "추리",
+                    "인터로킹",
+                    "해결법"
+                ]
+            },
+            {
+                "id": "seaside_cafe",
+                "name": "해변카페",
+                "target": 5,
+                "words": [
+                    "바닷바람",
+                    "파라솔",
+                    "얼음물",
+                    "모래묻은신발",
+                    "전망창"
+                ]
+            },
+            {
+                "id": "car_repair",
+                "name": "정비소",
+                "target": 8,
+                "words": [
+                    "엔진오일",
+                    "타이어공기압",
+                    "스패너",
+                    "리프트",
+                    "부품교체",
+                    "차량진단",
+                    "기름때",
+                    "정비사"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 69,
+        "maxMoves": 160,
+        "slots": 5,
+        "categories": [
+            {
+                "id": "darkness",
+                "name": "암흑",
+                "target": 6,
+                "words": [
+                    "그림자",
+                    "칠흑",
+                    "심연",
+                    "블랙아웃",
+                    "장님거미",
+                    "야투경"
+                ]
+            },
+            {
+                "id": "camping_night",
+                "name": "랜턴",
+                "target": 7,
+                "words": [
+                    "건전지",
+                    "가스심지",
+                    "밝기조절",
+                    "야간조명",
+                    "캠핑고리",
+                    "어둠속빛",
+                    "손잡이"
+                ]
+            },
+            {
+                "id": "detective_office",
+                "name": "돋보기",
+                "target": 5,
+                "words": [
+                    "볼록렌즈",
+                    "확대",
+                    "초점",
+                    "지문채취",
+                    "세밀함"
+                ]
+            },
+            {
+                "id": "bakery_morning",
+                "name": "진열대",
+                "target": 8,
+                "words": [
+                    "쇼케이스",
+                    "가격표",
+                    "바구니",
+                    "빵냄새",
+                    "시식용",
+                    "유리창",
+                    "조명등",
+                    "우드트레이"
+                ]
+            },
+            {
+                "id": "desert_safari",
+                "name": "춤",
+                "target": 6,
+                "words": [
+                    "박자",
+                    "율동",
+                    "안무가",
+                    "회전",
+                    "공연복",
+                    "무대"
+                ]
+            },
+            {
+                "id": "concert_hall",
+                "name": "대표",
+                "target": 7,
+                "words": [
+                    "명함",
+                    "결재서류",
+                    "회의실",
+                    "경영권",
+                    "브리핑",
+                    "책임자",
+                    "직인"
+                ]
+            },
+            {
+                "id": "ancient_egypt",
+                "name": "퀴즈",
+                "target": 5,
+                "words": [
+                    "정답",
+                    "오답",
+                    "문제은행",
+                    "힌트",
+                    "제한시간"
+                ]
+            },
+            {
+                "id": "old_library",
+                "name": "잉크",
+                "target": 4,
+                "words": [
+                    "만년필",
+                    "번짐",
+                    "충전",
+                    "검정색"
+                ]
+            },
+            {
+                "id": "rainy_day",
+                "name": "장화",
+                "target": 6,
+                "words": [
+                    "고무재질",
+                    "방수",
+                    "물웅덩이",
+                    "무릎높이",
+                    "깔창",
+                    "레인코트"
+                ]
+            },
+            {
+                "id": "botanical_garden",
+                "name": "식물원",
+                "target": 6,
+                "words": [
+                    "온실",
+                    "희귀식물",
+                    "분갈이",
+                    "수생식물",
+                    "열대관",
+                    "이름표"
+                ]
+            },
+            {
+                "id": "ice_fishing",
+                "name": "빙어",
+                "target": 6,
+                "words": [
+                    "얼음낚시",
+                    "초장",
+                    "튀김",
+                    "견지낚시",
+                    "투명함",
+                    "겨울축제"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 70,
+        "maxMoves": 85,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "lighthouse_tower",
+                "name": "등대",
+                "target": 6,
+                "words": [
+                    "회전등대",
+                    "해안선",
+                    "뱃길",
+                    "야간항해",
+                    "무인도",
+                    "안개벽"
+                ]
+            },
+            {
+                "id": "light_velocity",
+                "name": "빛",
+                "target": 7,
+                "words": [
+                    "굴절",
+                    "반사",
+                    "광원",
+                    "무지개",
+                    "광속",
+                    "그림자",
+                    "레이저"
+                ]
+            },
+            {
+                "id": "coffee_bean",
+                "name": "원두",
+                "target": 5,
+                "words": [
+                    "생두",
+                    "핸드드립",
+                    "산미",
+                    "커피가루",
+                    "아라비카"
+                ]
+            },
+            {
+                "id": "polar_bear_habitat",
+                "name": "북극곰",
+                "target": 6,
+                "words": [
+                    "빙하",
+                    "보호색",
+                    "사냥꾼",
+                    "동면",
+                    "유빙",
+                    "콜라"
+                ]
+            },
+            {
+                "id": "school_life",
+                "name": "학교",
+                "target": 5,
+                "words": [
+                    "교실",
+                    "칠판",
+                    "급식",
+                    "교과서",
+                    "시간표"
+                ]
+            },
+            {
+                "id": "cooking_fire",
+                "name": "요리",
+                "target": 5,
+                "words": [
+                    "레시피",
+                    "도마",
+                    "프라이팬",
+                    "양념",
+                    "식재료"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 71,
+        "maxMoves": 102,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "surprise_emotion",
+                "name": "놀람",
+                "target": 5,
+                "words": [
+                    "경악",
+                    "눈휘둥그레",
+                    "깜짝파티",
+                    "비명",
+                    "심쿵"
+                ]
+            },
+            {
+                "id": "pressure_feeling",
+                "name": "압박",
+                "target": 7,
+                "words": [
+                    "중압감",
+                    "데드라인",
+                    "시험기간",
+                    "스트레스",
+                    "강요",
+                    "긴박함",
+                    "속박"
+                ]
+            },
+            {
+                "id": "fingerprint_clue",
+                "name": "지문",
+                "target": 6,
+                "words": [
+                    "와상문",
+                    "감식분말",
+                    "대조작업",
+                    "채취용테이프",
+                    "궁상문",
+                    "범인확인"
+                ]
+            },
+            {
+                "id": "evening_time",
+                "name": "저녁",
+                "target": 4,
+                "words": [
+                    "노을",
+                    "가로등",
+                    "퇴근길",
+                    "초승달"
+                ]
+            },
+            {
+                "id": "ancient_letters",
+                "name": "문자",
+                "target": 8,
+                "words": [
+                    "갑골문자",
+                    "쐐기문자",
+                    "알파벳",
+                    "한글",
+                    "점토판",
+                    "먹물",
+                    "필기구",
+                    "기록"
+                ]
+            },
+            {
+                "id": "tour_activity",
+                "name": "투어",
+                "target": 4,
+                "words": [
+                    "가이드",
+                    "단체관광",
+                    "패키지",
+                    "랜드마크"
+                ]
+            },
+            {
+                "id": "microphone_gear",
+                "name": "마이크",
+                "target": 3,
+                "words": [
+                    "하울링",
+                    "무대스탠드",
+                    "흡음재"
+                ]
+            },
+            {
+                "id": "sweet_stuff",
+                "name": "단것",
+                "target": 5,
+                "words": [
+                    "마카롱",
+                    "사탕",
+                    "솜사탕",
+                    "초콜릿",
+                    "시럽"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 72,
+        "maxMoves": 99,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "joy_emotion",
+                "name": "기쁨",
+                "target": 6,
+                "words": [
+                    "환희",
+                    "미소",
+                    "축하",
+                    "환호",
+                    "행복",
+                    "보람"
+                ]
+            },
+            {
+                "id": "bandage_medical",
+                "name": "붕대",
+                "target": 7,
+                "words": [
+                    "거즈",
+                    "반창고",
+                    "압박",
+                    "소독약",
+                    "드레싱",
+                    "부목",
+                    "지혈"
+                ]
+            },
+            {
+                "id": "secret_confidential",
+                "name": "비밀",
+                "target": 5,
+                "words": [
+                    "암호",
+                    "금고",
+                    "봉인",
+                    "기밀",
+                    "은폐"
+                ]
+            },
+            {
+                "id": "leaving_work",
+                "name": "퇴근",
+                "target": 8,
+                "words": [
+                    "지하철",
+                    "업무종료",
+                    "저녁식사",
+                    "자유",
+                    "해방감",
+                    "만원버스",
+                    "어스름",
+                    "시계"
+                ]
+            },
+            {
+                "id": "alphabet_letters",
+                "name": "알파벳",
+                "target": 6,
+                "words": [
+                    "대문자",
+                    "소문자",
+                    "모음",
+                    "자음",
+                    "라틴어",
+                    "철자"
+                ]
+            },
+            {
+                "id": "bus_transport",
+                "name": "버스",
+                "target": 7,
+                "words": [
+                    "정류장",
+                    "노선도",
+                    "하차벨",
+                    "운전기사",
+                    "환승",
+                    "요금함",
+                    "중앙차로"
+                ]
+            },
+            {
+                "id": "broadcasting_media",
+                "name": "방송",
+                "target": 4,
+                "words": [
+                    "온에어",
+                    "송신",
+                    "큐사인",
+                    "조정실"
+                ]
+            },
+            {
+                "id": "cloud_nature",
+                "name": "구름",
+                "target": 4,
+                "words": [
+                    "뭉게구름",
+                    "적란운",
+                    "수증기",
+                    "비행운"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 73,
+        "maxMoves": 104,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "furniture_set",
+                "name": "가구",
+                "target": 5,
+                "words": [
+                    "소파",
+                    "서랍장",
+                    "식탁",
+                    "침대프레임",
+                    "화장대"
+                ]
+            },
+            {
+                "id": "shipwreck_site",
+                "name": "난파선",
+                "target": 6,
+                "words": [
+                    "보물상자",
+                    "부식된닻",
+                    "해골깃발",
+                    "조타핸들",
+                    "나무파편",
+                    "이끼"
+                ]
+            },
+            {
+                "id": "computer_parts",
+                "name": "컴퓨터",
+                "target": 7,
+                "words": [
+                    "중앙처리장치",
+                    "그래픽카드",
+                    "메인보드",
+                    "냉각팬",
+                    "전원공급장치",
+                    "메모리카드",
+                    "본체케이스"
+                ]
+            },
+            {
+                "id": "ice_cream_cold",
+                "name": "아이스크림",
+                "target": 5,
+                "words": [
+                    "젤라또",
+                    "샤베트",
+                    "와플콘",
+                    "초코시럽",
+                    "스쿱"
+                ]
+            },
+            {
+                "id": "pig_farm",
+                "name": "돼지",
+                "target": 4,
+                "words": [
+                    "꼬리",
+                    "코등",
+                    "진흙목욕",
+                    "새끼돈"
+                ]
+            },
+            {
+                "id": "liquid_state",
+                "name": "액체",
+                "target": 6,
+                "words": [
+                    "점성",
+                    "표면장력",
+                    "흐름",
+                    "용액",
+                    "방울",
+                    "부피"
+                ]
+            },
+            {
+                "id": "vegetable_garden",
+                "name": "채소",
+                "target": 5,
+                "words": [
+                    "파프리카",
+                    "청경채",
+                    "방울토마토",
+                    "브로콜리",
+                    "양상추"
+                ]
+            },
+            {
+                "id": "fresh_morning",
+                "name": "상쾌함",
+                "target": 4,
+                "words": [
+                    "기지개",
+                    "이슬",
+                    "피톤치드",
+                    "새벽공기"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 74,
+        "maxMoves": 100,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "glass_material",
+                "name": "유리",
+                "target": 6,
+                "words": [
+                    "투명함",
+                    "강화유리",
+                    "파편",
+                    "석영",
+                    "블로우파이프",
+                    "스테인드글라스"
+                ]
+            },
+            {
+                "id": "hamburger_set",
+                "name": "햄버거",
+                "target": 7,
+                "words": [
+                    "패티",
+                    "참깨빵",
+                    "피클",
+                    "양상추",
+                    "치즈슬라이스",
+                    "케첩",
+                    "베이컨"
+                ]
+            },
+            {
+                "id": "black_hole_physics",
+                "name": "블랙홀",
+                "target": 5,
+                "words": [
+                    "사건의지평선",
+                    "특이점",
+                    "중력렌즈",
+                    "스파게티화",
+                    "강착원반"
+                ]
+            },
+            {
+                "id": "clothing_items",
+                "name": "옷",
+                "target": 8,
+                "words": [
+                    "단추",
+                    "소매",
+                    "지퍼",
+                    "안감",
+                    "주머니",
+                    "깃",
+                    "어깨패드",
+                    "솔기"
+                ]
+            },
+            {
+                "id": "sweltering_heat",
+                "name": "더위",
+                "target": 4,
+                "words": [
+                    "열대야",
+                    "땀방울",
+                    "아지랑이",
+                    "탈수"
+                ]
+            },
+            {
+                "id": "cat_pet",
+                "name": "고양이",
+                "target": 6,
+                "words": [
+                    "꾹꾹이",
+                    "그루밍",
+                    "수염",
+                    "스크래쳐",
+                    "캣닢",
+                    "하악질"
+                ]
+            },
+            {
+                "id": "japan_culture",
+                "name": "일본",
+                "target": 5,
+                "words": [
+                    "사쿠라",
+                    "다다미",
+                    "기모노",
+                    "온천",
+                    "후지산"
+                ]
+            },
+            {
+                "id": "detective_novel",
+                "name": "추리소설",
+                "target": 3,
+                "words": [
+                    "탐정",
+                    "알리바이",
+                    "트릭"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 75,
+        "maxMoves": 182,
+        "slots": 5,
+        "categories": [
+            {
+                "id": "camping_vibes",
+                "name": "고기",
+                "target": 8,
+                "words": [
+                    "삼겹살",
+                    "석쇠",
+                    "쌈장",
+                    "육즙",
+                    "스테이크",
+                    "마블링",
+                    "숯불",
+                    "정육점"
+                ]
+            },
+            {
+                "id": "ocean_deep",
+                "name": "파도",
+                "target": 7,
+                "words": [
+                    "서핑",
+                    "포말",
+                    "방파제",
+                    "수평선",
+                    "밀물",
+                    "썰물",
+                    "해수욕장"
+                ]
+            },
+            {
+                "id": "baking_time",
+                "name": "세균",
+                "target": 6,
+                "words": [
+                    "현미경",
+                    "유산균",
+                    "번식",
+                    "살균",
+                    "감염",
+                    "항생제"
+                ]
+            },
+            {
+                "id": "police_station",
+                "name": "경찰서",
+                "target": 7,
+                "words": [
+                    "수갑",
+                    "순찰차",
+                    "조사실",
+                    "사이렌",
+                    "경찰봉",
+                    "무전기",
+                    "형사"
+                ]
+            },
+            {
+                "id": "tropical_fruit",
+                "name": "열대야",
+                "target": 8,
+                "words": [
+                    "에어컨",
+                    "얼음물",
+                    "불면증",
+                    "선풍기",
+                    "매미소리",
+                    "샤워",
+                    "부채",
+                    "냉방"
+                ]
+            },
+            {
+                "id": "fast_pace",
+                "name": "근육",
+                "target": 6,
+                "words": [
+                    "단백질",
+                    "스쿼트",
+                    "이두박근",
+                    "수축",
+                    "이완",
+                    "헬스장"
+                ]
+            },
+            {
+                "id": "dentist_clinic",
+                "name": "충치",
+                "target": 8,
+                "words": [
+                    "단것",
+                    "양치질",
+                    "치통",
+                    "치과",
+                    "법랑질",
+                    "구멍",
+                    "신경치료",
+                    "설탕"
+                ]
+            },
+            {
+                "id": "desert_safari",
+                "name": "기린",
+                "target": 7,
+                "words": [
+                    "긴목",
+                    "초식",
+                    "아카시아",
+                    "얼룩무늬",
+                    "서서잠자기",
+                    "사바나",
+                    "긴혀"
+                ]
+            },
+            {
+                "id": "orchestra_pit",
+                "name": "하모니",
+                "target": 7,
+                "words": [
+                    "조화",
+                    "합창",
+                    "공명",
+                    "화음",
+                    "앙상블",
+                    "협동",
+                    "울림"
+                ]
+            },
+            {
+                "id": "library_hall",
+                "name": "대출",
+                "target": 8,
+                "words": [
+                    "도서관",
+                    "반납",
+                    "연체료",
+                    "예약",
+                    "바코드",
+                    "상호대차",
+                    "희망도서",
+                    "기한"
+                ]
+            },
+            {
+                "id": "winter_sport",
+                "name": "스노보드",
+                "target": 5,
+                "words": [
+                    "바인딩",
+                    "고글",
+                    "슬로프",
+                    "리프트",
+                    "데크"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 76,
+        "maxMoves": 105,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "insect_world",
+                "name": "곤충",
+                "target": 8,
+                "words": [
+                    "더듬이",
+                    "탈피",
+                    "애벌레",
+                    "날갯짓",
+                    "페로몬",
+                    "겹눈",
+                    "외골격",
+                    "꿀샘"
+                ]
+            },
+            {
+                "id": "sharp_objects",
+                "name": "날카로움",
+                "target": 7,
+                "words": [
+                    "바늘",
+                    "면도날",
+                    "송곳",
+                    "가시",
+                    "깨진유리",
+                    "메스",
+                    "칼날"
+                ]
+            },
+            {
+                "id": "alarm_system",
+                "name": "알람",
+                "target": 6,
+                "words": [
+                    "스누즈",
+                    "진동",
+                    "기상시간",
+                    "벨소리",
+                    "타이머",
+                    "초침"
+                ]
+            },
+            {
+                "id": "soft_texture",
+                "name": "부드러움",
+                "target": 7,
+                "words": [
+                    "솜사탕",
+                    "실크",
+                    "벨벳",
+                    "깃털",
+                    "푸딩",
+                    "스펀지",
+                    "생크림"
+                ]
+            },
+            {
+                "id": "baseball_game",
+                "name": "야구",
+                "target": 6,
+                "words": [
+                    "홈런",
+                    "글러브",
+                    "도루",
+                    "마운드",
+                    "타석",
+                    "포수"
+                ]
+            },
+            {
+                "id": "road_infrastructure",
+                "name": "도로",
+                "target": 7,
+                "words": [
+                    "아스팔트",
+                    "중앙선",
+                    "가드레일",
+                    "횡단보도",
+                    "이정표",
+                    "방지턱",
+                    "갓길"
+                ]
+            },
+            {
+                "id": "flight_travel",
+                "name": "비행",
+                "target": 5,
+                "words": [
+                    "여권",
+                    "이륙",
+                    "기내식",
+                    "난기류",
+                    "착륙"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 77,
+        "maxMoves": 98,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "mummy_curse",
+                "name": "미라",
+                "target": 5,
+                "words": [
+                    "붕대",
+                    "방부처리",
+                    "관",
+                    "피라미드",
+                    "사후세계"
+                ]
+            },
+            {
+                "id": "lemon_fresh",
+                "name": "레몬",
+                "target": 4,
+                "words": [
+                    "비타민C",
+                    "노란색",
+                    "상큼함",
+                    "시트러스"
+                ]
+            },
+            {
+                "id": "ash_remains",
+                "name": "재",
+                "target": 5,
+                "words": [
+                    "먼지",
+                    "회색",
+                    "소멸",
+                    "그을음",
+                    "화로"
+                ]
+            },
+            {
+                "id": "knife_edge",
+                "name": "칼",
+                "target": 6,
+                "words": [
+                    "도마",
+                    "숫돌",
+                    "칼날",
+                    "식도",
+                    "조각",
+                    "날카로움"
+                ]
+            },
+            {
+                "id": "traffic_light",
+                "name": "신호등",
+                "target": 5,
+                "words": [
+                    "빨간불",
+                    "초록불",
+                    "정지선",
+                    "교차로",
+                    "보행자"
+                ]
+            },
+            {
+                "id": "jump_action",
+                "name": "점프",
+                "target": 4,
+                "words": [
+                    "도약",
+                    "트램펄린",
+                    "착지",
+                    "높이뛰기"
+                ]
+            },
+            {
+                "id": "hollywood_dream",
+                "name": "할리우드",
+                "target": 7,
+                "words": [
+                    "레드카펫",
+                    "오스카",
+                    "영화배우",
+                    "스튜디오",
+                    "명예의전당",
+                    "영화제",
+                    "블록버스터"
+                ]
+            },
+            {
+                "id": "mountain_climbing",
+                "name": "등산",
+                "target": 6,
+                "words": [
+                    "정상",
+                    "등산화",
+                    "스틱",
+                    "능선",
+                    "대피소",
+                    "취사금지"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 78,
+        "maxMoves": 80,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "indoor_activities",
+                "name": "실내활동",
+                "target": 7,
+                "words": [
+                    "독서",
+                    "보드게임",
+                    "넷플릭스",
+                    "홈트레이닝",
+                    "퍼즐맞추기",
+                    "요리",
+                    "낮잠"
+                ]
+            },
+            {
+                "id": "musical_instruments",
+                "name": "악기",
+                "target": 6,
+                "words": [
+                    "피아노",
+                    "기타",
+                    "첼로",
+                    "드럼",
+                    "플루트",
+                    "트럼펫"
+                ]
+            },
+            {
+                "id": "store_essentials",
+                "name": "가게",
+                "target": 8,
+                "words": [
+                    "키오스크",
+                    "포스기",
+                    "진열대",
+                    "바구니",
+                    "영수증",
+                    "적립카드",
+                    "입구센서",
+                    "할인태그"
+                ]
+            },
+            {
+                "id": "magazine_elements",
+                "name": "잡지",
+                "target": 5,
+                "words": [
+                    "표지모델",
+                    "정기구독",
+                    "인터뷰",
+                    "광고면",
+                    "부록"
+                ]
+            },
+            {
+                "id": "cemetery_mood",
+                "name": "묘지",
+                "target": 5,
+                "words": [
+                    "비석",
+                    "헌화",
+                    "추모비",
+                    "상석",
+                    "잔디관리"
+                ]
+            },
+            {
+                "id": "idol_culture",
+                "name": "아이돌",
+                "target": 4,
+                "words": [
+                    "연습생",
+                    "데뷔곡",
+                    "팬클럽",
+                    "응원봉"
+                ]
+            },
+            {
+                "id": "salt_types",
+                "name": "소금",
+                "target": 4,
+                "words": [
+                    "천일염",
+                    "암염",
+                    "죽염",
+                    "맛소금"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 79,
+        "maxMoves": 122,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "news_broadcast",
+                "name": "뉴스",
+                "target": 8,
+                "words": [
+                    "앵커",
+                    "속보",
+                    "취재기자",
+                    "보도국",
+                    "헤드라인",
+                    "일기예보",
+                    "인터뷰",
+                    "브리핑"
+                ]
+            },
+            {
+                "id": "scary_things",
+                "name": "무서움",
+                "target": 7,
+                "words": [
+                    "귀신",
+                    "천둥번개",
+                    "비명",
+                    "소름",
+                    "식은땀",
+                    "악몽",
+                    "심박수"
+                ]
+            },
+            {
+                "id": "buffet_dining",
+                "name": "뷔페",
+                "target": 8,
+                "words": [
+                    "샐러드바",
+                    "디저트코너",
+                    "무제한",
+                    "식사권",
+                    "접시쌓기",
+                    "집게",
+                    "초밥",
+                    "과일식후경"
+                ]
+            },
+            {
+                "id": "driving_experience",
+                "name": "운전",
+                "target": 7,
+                "words": [
+                    "핸들",
+                    "내비게이션",
+                    "차선변경",
+                    "후방카메라",
+                    "안전벨트",
+                    "주차장",
+                    "하이패스"
+                ]
+            },
+            {
+                "id": "school_days",
+                "name": "학교",
+                "target": 7,
+                "words": [
+                    "급식",
+                    "체육복",
+                    "교과서",
+                    "방과후",
+                    "시간표",
+                    "조례",
+                    "짝꿍"
+                ]
+            },
+            {
+                "id": "bad_odor",
+                "name": "악취",
+                "target": 6,
+                "words": [
+                    "암모니아",
+                    "하수구",
+                    "쓰레기봉투",
+                    "매연",
+                    "환기",
+                    "코막힘"
+                ]
+            },
+            {
+                "id": "convenience_store",
+                "name": "편의점",
+                "target": 5,
+                "words": [
+                    "삼각김밥",
+                    "온수기",
+                    "행사상품",
+                    "택배접수",
+                    "ATM"
+                ]
+            },
+            {
+                "id": "theater_play",
+                "name": "연극",
+                "target": 5,
+                "words": [
+                    "커튼콜",
+                    "무대장치",
+                    "독백",
+                    "관객석",
+                    "암전"
+                ]
+            },
+            {
+                "id": "spring_season",
+                "name": "봄",
+                "target": 4,
+                "words": [
+                    "개나리",
+                    "입춘",
+                    "새싹",
+                    "춘곤증"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 80,
+        "maxMoves": 108,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "quantity",
+                "name": "수량",
+                "target": 6,
+                "words": [
+                    "개수",
+                    "부피",
+                    "무게",
+                    "단위",
+                    "용량",
+                    "치수"
+                ]
+            },
+            {
+                "id": "fossil",
+                "name": "화석",
+                "target": 5,
+                "words": [
+                    "삼엽충",
+                    "암석",
+                    "지층",
+                    "호박",
+                    "복원"
+                ]
+            },
+            {
+                "id": "description",
+                "name": "묘사",
+                "target": 6,
+                "words": [
+                    "세밀함",
+                    "관찰",
+                    "표현",
+                    "생동감",
+                    "윤곽",
+                    "질감"
+                ]
+            },
+            {
+                "id": "transformation",
+                "name": "변신",
+                "target": 5,
+                "words": [
+                    "탈바꿈",
+                    "진화",
+                    "변장",
+                    "각성",
+                    "메타몽"
+                ]
+            },
+            {
+                "id": "cow",
+                "name": "소",
+                "target": 7,
+                "words": [
+                    "송아지",
+                    "여물",
+                    "외양간",
+                    "뿔",
+                    "반추",
+                    "우유",
+                    "워낭"
+                ]
+            },
+            {
+                "id": "korean_traditional_food",
+                "name": "전통음식",
+                "target": 4,
+                "words": [
+                    "신선로",
+                    "구절판",
+                    "식혜",
+                    "약과"
+                ]
+            },
+            {
+                "id": "physics",
+                "name": "물리학",
+                "target": 5,
+                "words": [
+                    "중력",
+                    "에너지",
+                    "양자",
+                    "가속도",
+                    "입자"
+                ]
+            },
+            {
+                "id": "gardening",
+                "name": "원예",
+                "target": 4,
+                "words": [
+                    "분갈이",
+                    "영양제",
+                    "물조개",
+                    "전정가위"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 81,
+        "maxMoves": 102,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "ocean_blue",
+                "name": "파랑",
+                "target": 6,
+                "words": [
+                    "쪽빛",
+                    "청명함",
+                    "남색",
+                    "시원함",
+                    "포카리",
+                    "하늘색"
+                ]
+            },
+            {
+                "id": "value_and_price",
+                "name": "값",
+                "target": 5,
+                "words": [
+                    "비쌈",
+                    "공짜",
+                    "정찰제",
+                    "할인율",
+                    "가성비"
+                ]
+            },
+            {
+                "id": "warmth",
+                "name": "따뜻함",
+                "target": 7,
+                "words": [
+                    "온기",
+                    "담요",
+                    "햇살",
+                    "포근함",
+                    "핫팩",
+                    "모닥불",
+                    "코코아"
+                ]
+            },
+            {
+                "id": "transparency",
+                "name": "투명함",
+                "target": 4,
+                "words": [
+                    "유리창",
+                    "수정",
+                    "속비침",
+                    "결정체"
+                ]
+            },
+            {
+                "id": "time_machine",
+                "name": "타임머신",
+                "target": 6,
+                "words": [
+                    "시간여행",
+                    "미래",
+                    "과거",
+                    "평행우주",
+                    "차원이동",
+                    "공상과학"
+                ]
+            },
+            {
+                "id": "scent",
+                "name": "향기",
+                "target": 5,
+                "words": [
+                    "디퓨저",
+                    "은은함",
+                    "향수",
+                    "꽃내음",
+                    "아로마"
+                ]
+            },
+            {
+                "id": "weightlessness",
+                "name": "가벼움",
+                "target": 5,
+                "words": [
+                    "깃털",
+                    "민들레씨",
+                    "헬륨풍선",
+                    "솜사탕",
+                    "비눗방울"
+                ]
+            },
+            {
+                "id": "leisure",
+                "name": "여유",
+                "target": 4,
+                "words": [
+                    "빈둥빈둥",
+                    "낮잠",
+                    "명상",
+                    "느긋함"
+                ]
+            },
+            {
+                "id": "infiltration",
+                "name": "잠입",
+                "target": 4,
+                "words": [
+                    "야간투시경",
+                    "변장",
+                    "침투",
+                    "발소리"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 82,
+        "maxMoves": 70,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "explosion",
+                "name": "폭발",
+                "target": 6,
+                "words": [
+                    "도화선",
+                    "굉음",
+                    "파편",
+                    "충격파",
+                    "화약",
+                    "연쇄반응"
+                ]
+            },
+            {
+                "id": "quietness",
+                "name": "조용",
+                "target": 7,
+                "words": [
+                    "침묵",
+                    "적막",
+                    "속삭임",
+                    "음소거",
+                    "발소리",
+                    "정지",
+                    "고요함"
+                ]
+            },
+            {
+                "id": "magic_wand",
+                "name": "지팡이",
+                "target": 5,
+                "words": [
+                    "나무줄기",
+                    "마법가루",
+                    "주문",
+                    "휘두르기",
+                    "손잡이"
+                ]
+            },
+            {
+                "id": "armor_suit",
+                "name": "갑옷",
+                "target": 6,
+                "words": [
+                    "철제",
+                    "플레이트",
+                    "체인메일",
+                    "흉갑",
+                    "내구성",
+                    "무게감"
+                ]
+            },
+            {
+                "id": "new_year",
+                "name": "새해",
+                "target": 5,
+                "words": [
+                    "제야의종",
+                    "해돋이",
+                    "떡국",
+                    "세뱃돈",
+                    "결심"
+                ]
+            },
+            {
+                "id": "fresh_air",
+                "name": "공기",
+                "target": 5,
+                "words": [
+                    "산소",
+                    "질소",
+                    "환기",
+                    "기압",
+                    "대기권"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 83,
+        "maxMoves": 102,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "typewriter_parts",
+                "name": "타자기",
+                "target": 6,
+                "words": [
+                    "잉크리본",
+                    "활자",
+                    "종이받침",
+                    "자판",
+                    "줄바꿈",
+                    "타격음"
+                ]
+            },
+            {
+                "id": "routine_habit",
+                "name": "루틴",
+                "target": 5,
+                "words": [
+                    "반복",
+                    "규칙",
+                    "생활화",
+                    "습관",
+                    "지속성"
+                ]
+            },
+            {
+                "id": "superhero",
+                "name": "슈퍼히어로",
+                "target": 7,
+                "words": [
+                    "망토",
+                    "가면",
+                    "정의감",
+                    "초능력",
+                    "정체성",
+                    "빌런",
+                    "은신처"
+                ]
+            },
+            {
+                "id": "mosquito_annoyance",
+                "name": "모기",
+                "target": 5,
+                "words": [
+                    "흡혈",
+                    "날개짓",
+                    "가려움",
+                    "방충망",
+                    "살충제"
+                ]
+            },
+            {
+                "id": "detective_clue",
+                "name": "단서",
+                "target": 6,
+                "words": [
+                    "지문채취",
+                    "CCTV",
+                    "혈흔",
+                    "현장검증",
+                    "알리바이",
+                    "유실물"
+                ]
+            },
+            {
+                "id": "snack_and_cookie",
+                "name": "과자",
+                "target": 5,
+                "words": [
+                    "바삭함",
+                    "봉지",
+                    "질소포장",
+                    "밀가루",
+                    "부스러기"
+                ]
+            },
+            {
+                "id": "luxury_cruise",
+                "name": "크루즈",
+                "target": 6,
+                "words": [
+                    "갑판",
+                    "선상파티",
+                    "구명보트",
+                    "항해사",
+                    "망원경",
+                    "기적소리"
+                ]
+            },
+            {
+                "id": "it_technology",
+                "name": "IT",
+                "target": 3,
+                "words": [
+                    "알고리즘",
+                    "데이터베이스",
+                    "클라우드"
+                ]
+            }
+        ]
     }
 ]

@@ -428,20 +428,22 @@ const LandingPage: React.FC = () => {
                     </div>
                 </a>
 
-                <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
-                    <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
-                        🧩
-                    </div>
-                    <div className="game-card-content">
-                        <h3>타일 매치</h3>
-                        <p>3개의 같은 타일을 맞춰 보드를 비우는 퍼즐 게임</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                <Play size={16} fill="currentColor" /> 플레이하기
-                            </span>
+                {window.location.hostname === 'localhost' && (
+                    <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
+                        <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
+                            🧩
                         </div>
-                    </div>
-                </a>
+                        <div className="game-card-content">
+                            <h3>타일 매치</h3>
+                            <p>3개의 같은 타일을 맞춰 보드를 비우는 퍼즐 게임</p>
+                            <div className="game-card-footer">
+                                <span className="play-now">
+                                    <Play size={16} fill="currentColor" /> 플레이하기
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                )}
 
                 {window.location.hostname === 'localhost' && (
                     <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit' } as any}>
