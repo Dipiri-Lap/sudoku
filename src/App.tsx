@@ -6,6 +6,7 @@ import SudokuGame from './features/sudoku/components/SudokuGame';
 import DifficultySelect from './features/sudoku/components/DifficultySelect';
 import { GameProvider as SudokuProvider } from './features/sudoku/context/SudokuContext';
 import WordSortGame from './features/word-sort/components/WordSortGame';
+import TileMatchGame from './features/tile-match/components/TileMatchGame';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
@@ -79,6 +80,7 @@ const AppContent: React.FC = () => {
               </WordSortProvider>
             }
           />
+          <Route path="/tile-match" element={<TileMatchGame />} />
         </Routes>
       </SudokuProgressProvider>
       </ChallengeProvider>
