@@ -14,6 +14,7 @@ import { doc, writeBatch, collection, getDocs, query, where, limit } from 'fireb
 import { CHALLENGE_MAP, ALL_CHALLENGES } from '../../data/challenges';
 import { useChallenges } from '../../context/ChallengeContext';
 import { useSudokuProgress } from '../../context/SudokuProgressContext';
+import { useWordSortProgress } from '../../context/WordSortProgressContext';
 
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
@@ -21,12 +22,14 @@ const LandingPage: React.FC = () => {
     const { isInstallable, promptToInstall } = usePWAInstall();
     const challenges = useChallenges();
     const { stageProgress, beginnerProgress } = useSudokuProgress();
+    const { wordSortProgress } = useWordSortProgress();
     const hasUnclaimed = Object.values(ALL_CHALLENGES).flat().some(c => {
         if (challenges.isChallengeCompleted(c.id)) return false;
         const { source, target } = c.progressConfig;
         if (source === 'time_attack') return challenges.isChallengeCleared(c.id);
         if (source === 'regular_stage') return Math.min(stageProgress - 1, target) >= target;
         if (source === 'beginner_stage') return Math.min(beginnerProgress, target) >= target;
+        if (source === 'word_sort_stage') return Math.min(wordSortProgress, target) >= target;
         return false;
     });
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -102,8 +105,8 @@ const LandingPage: React.FC = () => {
 
     const handleShare = async () => {
         const url = window.location.origin;
-        const text = currentUser && !isGuest && puzzlePower > 0
-            ? `나는 퍼즐력 ${puzzlePower}! 퍼즐 가든에서 같이 두뇌 트레이닝 해요 🧩`
+        const text = currentUser && !isGuest && challenges.puzzlePower > 0
+            ? `나는 퍼즐력 ${challenges.puzzlePower}! 퍼즐 가든에서 같이 두뇌 트레이닝 해요 🧩`
             : '두뇌를 깨우는 즐거운 퍼즐의 세계, 퍼즐 가든 🧩';
 
         if (navigator.share) {
@@ -293,7 +296,7 @@ const LandingPage: React.FC = () => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>퍼즐력 :</span>
                                     <span style={{ color: '#ef4444', fontSize: '0.95rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
-                                        {puzzlePower}
+                                        {challenges.puzzlePower}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -308,7 +311,7 @@ const LandingPage: React.FC = () => {
 
                     {/* Right: Coins and Logout/Login */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <CoinDisplay />
+                        <CoinDisplay onClick={() => setShowCoinShop(true)} />
 
                         <div style={{ marginLeft: '0.2rem', height: '24px', width: '1px', backgroundColor: 'rgba(255,255,255,0.2)' }} />
 
@@ -413,7 +416,29 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <a href="/sudoku" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit' } as any}>
+                <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
+                    <div style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        backgroundColor: '#ef4444', color: 'white',
+                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
+                        padding: '2px 7px', borderRadius: '999px',
+                        boxShadow: '0 2px 6px rgba(239,68,68,0.5)'
+                    }}>HOT</div>
+                    <div className="game-card-icon">
+                        <img src="/wordstackLogo.png" alt="Word Sort Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                    <div className="game-card-content">
+                        <h3>단어 분류 퍼즐</h3>
+                        <p>단어를 알맞은 카테고리로 정리하는 분류 게임</p>
+                        <div className="game-card-footer">
+                            <span className="play-now">
+                                <Play size={16} fill="currentColor" /> 플레이하기
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="/sudoku" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
                     <div className="game-card-icon">
                         <img src="/logo.jpg" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
@@ -429,30 +454,13 @@ const LandingPage: React.FC = () => {
                 </a>
 
                 {window.location.hostname === 'localhost' && (
-                    <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
+                    <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             🧩
                         </div>
                         <div className="game-card-content">
                             <h3>타일 매치</h3>
                             <p>3개의 같은 타일을 맞춰 보드를 비우는 퍼즐 게임</p>
-                            <div className="game-card-footer">
-                                <span className="play-now">
-                                    <Play size={16} fill="currentColor" /> 플레이하기
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-                )}
-
-                {window.location.hostname === 'localhost' && (
-                    <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit' } as any}>
-                        <div className="game-card-icon">
-                            <img src="/wordstackLogo.png" alt="Word Sort Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        </div>
-                        <div className="game-card-content">
-                            <h3>단어 분류 퍼즐</h3>
-                            <p>단어를 알맞은 카테고리로 정리하는 분류 게임</p>
                             <div className="game-card-footer">
                                 <span className="play-now">
                                     <Play size={16} fill="currentColor" /> 플레이하기

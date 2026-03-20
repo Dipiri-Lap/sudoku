@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ChevronLeft, ShoppingCart } from 'lucide-react';
 import { useWordSort, WORDSORT_SAVE_KEY } from '../context/WordSortContext';
 import levels from '../data/levels.json';
 import tutorialLevel from '../data/tutorial-level.json';
 import { useCoins } from '../../../context/CoinContext';
-import CoinDisplay from '../../../common/components/CoinDisplay';
+import { useWordSortProgress } from '../../../context/WordSortProgressContext';
 import { useCardBacks, cardBackDesigns } from '../context/CardBackContext';
 import CardBackShopModal from './CardBackShopModal';
 import GlobalOverlay from './board/GlobalOverlay';
@@ -19,7 +20,6 @@ import { GameOverlays } from './GameOverlays';
 import { DeckArea } from './DeckArea';
 import { SlotArea } from './SlotArea';
 import { StackArea } from './StackArea';
-import { Sparkles } from 'lucide-react';
 
 
 
@@ -27,7 +27,9 @@ const WordSortGame: React.FC = () => {
 
     const { state, dispatch } = useWordSort();
     const location = useLocation();
+    const navigate = useNavigate();
     const { addCoins, spendCoins, coins } = useCoins();
+    const { saveWordSortProgress } = useWordSortProgress();
     const hasAwardedCoins = useRef(false);
     const hasSavedLevelProgress = useRef(false);
 
@@ -142,10 +144,9 @@ const WordSortGame: React.FC = () => {
                     const uid = auth.currentUser!.uid;
                     import('../../../services/rankingService').then(m => {
                         m.incrementPuzzlePower(uid).catch(console.error);
-                        // Save cleared level progress (only once per win)
                         if (!hasSavedLevelProgress.current) {
                             hasSavedLevelProgress.current = true;
-                            m.saveWordSortProgress(uid, state.level).catch(console.error);
+                            saveWordSortProgress(state.level).catch(console.error);
                         }
                     });
                 }
@@ -526,36 +527,26 @@ const WordSortGame: React.FC = () => {
                 paddingBottom: tutorialStep !== null ? '200px' : undefined,
             }}>
 
-            {/* Level label + Coin display */}
-            {tutorialStep === null && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.55, fontWeight: '700', letterSpacing: '0.08em' }}>
-                        LEVEL {state.level}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <button
-                            onClick={() => setIsShopOpen(true)}
-                            style={{
-                                background: 'rgba(255,255,255,0.15)',
-                                border: 'none',
-                                borderRadius: '20px',
-                                color: 'white',
-                                padding: '4px 12px',
-                                fontSize: '0.75rem',
-                                fontWeight: 'bold',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                            }}
-                        >
-                            <Sparkles size={14} className="text-yellow-400" /> SHOP
-                        </button>
-                        <CoinDisplay />
-                    </div>
+            {/* Nav bar */}
+            <div className="game-nav" style={{ marginBottom: '0.5rem', marginLeft: '-1rem', marginRight: '-1rem', marginTop: '-0.5rem', borderRadius: '0' }}>
+                <div className="game-nav-left">
+                    <button className="nav-icon-btn" onClick={() => navigate('/word-sort')}>
+                        <ChevronLeft size={22} />
+                    </button>
+                    {tutorialStep === null && (
+                        <span style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.08em', opacity: 0.7, color: 'white' }}>
+                            LEVEL {state.level}
+                        </span>
+                    )}
                 </div>
-
-            )}
+                {tutorialStep === null && (
+                    <div className="game-nav-right">
+                        <button className="nav-icon-btn" onClick={() => setIsShopOpen(true)}>
+                            <ShoppingCart size={20} />
+                        </button>
+                    </div>
+                )}
+            </div>
 
             <DeckArea />
 

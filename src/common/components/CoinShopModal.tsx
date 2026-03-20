@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Lock, Play, Coins } from 'lucide-react';
+import { X, Play } from 'lucide-react';
+const CoinImg = ({ size = 16 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { useCoins } from '../../context/CoinContext';
 
-const AD_COOLDOWN_MS = 30 * 1000; // 30초
+const AD_COOLDOWN_MS = 30 * 60 * 1000; // 30분
 const AD_STORAGE_KEY = 'lastAdWatchTime';
 
 interface CoinShopModalProps {
@@ -10,11 +11,6 @@ interface CoinShopModalProps {
     showToast: (msg: string) => void;
 }
 
-const purchasePackages = [
-    { coins: 100, price: '₩990' },
-    { coins: 550, price: '₩4,900', badge: '인기' },
-    { coins: 1200, price: '₩9,900', badge: '최고' },
-];
 
 const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => {
     const { coins, addCoins } = useCoins();
@@ -153,7 +149,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                     }}>
                         <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>보유 코인</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <Coins size={16} color="#fde047" />
+                            <CoinImg size={16} />
                             <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
                         </div>
                     </div>
@@ -200,49 +196,6 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                         </div>
                     </div>
 
-                    {/* 구매 패키지 */}
-                    <div style={{
-                        padding: '1rem',
-                        backgroundColor: '#1e293b',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                    }}>
-                        <div style={{ color: '#e2e8f0', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.75rem' }}>코인 구매</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {purchasePackages.map(pkg => (
-                                <div
-                                    key={pkg.coins}
-                                    style={{
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                        padding: '0.75rem 0.9rem',
-                                        borderRadius: '10px',
-                                        backgroundColor: '#334155',
-                                        opacity: 0.6,
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                        <Coins size={16} color="#fde047" />
-                                        <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'white' }}>
-                                            {pkg.coins.toLocaleString()} 코인
-                                        </span>
-                                        {pkg.badge && (
-                                            <span style={{
-                                                fontSize: '0.65rem', fontWeight: 700,
-                                                backgroundColor: '#f59e0b', color: 'white',
-                                                padding: '1px 6px', borderRadius: '2rem',
-                                            }}>
-                                                {pkg.badge}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <span style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.9rem' }}>{pkg.price}</span>
-                                        <Lock size={14} color="#64748b" />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </div>
 
                 {/* Footer */}

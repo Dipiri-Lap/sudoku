@@ -3,46 +3,27 @@ import { useCoins } from '../../context/CoinContext';
 
 interface CoinDisplayProps {
     style?: React.CSSProperties;
+    onClick?: () => void;
 }
 
 const GoldCoinIcon = () => (
-    <div style={{
-        width: '32px',
-        height: '32px',
-        borderRadius: '50%',
-        background: 'linear-gradient(145deg, #FFD700, #FFA500)',
-        border: '3px solid #CC8E00', // Slightly darker border for depth
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.6)',
-        position: 'relative',
-        zIndex: 2,
-        flexShrink: 0
-    }}>
-        {/* Shine effect */}
-        <div style={{
-            position: 'absolute',
-            top: '15%',
-            left: '15%',
-            width: '30%',
-            height: '30%',
-            background: 'rgba(255,255,255,0.4)',
-            borderRadius: '50%',
-            filter: 'blur(1px)'
-        }} />
-    </div>
+    <img
+        src="/coin_Icon.png"
+        alt="coin"
+        style={{ width: '40px', height: '40px', objectFit: 'contain', position: 'relative', zIndex: 2, flexShrink: 0 }}
+    />
 );
 
-const CoinDisplay: React.FC<CoinDisplayProps> = ({ style }) => {
+const CoinDisplay: React.FC<CoinDisplayProps> = ({ style, onClick }) => {
     const { coins } = useCoins();
 
     return (
-        <div style={{
+        <div onClick={onClick} style={{
             display: 'flex',
             alignItems: 'center',
             position: 'relative',
-            height: '32px',
+            height: '40px',
+            cursor: onClick ? 'pointer' : 'default',
             ...style
         }}>
             <GoldCoinIcon />
@@ -53,7 +34,7 @@ const CoinDisplay: React.FC<CoinDisplayProps> = ({ style }) => {
                 color: 'white',
                 height: '26px', // Slightly taller
                 padding: '0 12px 0 20px',
-                marginLeft: '-15px',
+                marginLeft: '-19px',
                 borderRadius: '0 6px 6px 0',
                 display: 'flex',
                 alignItems: 'center',

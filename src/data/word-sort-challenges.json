@@ -1,0 +1,92 @@
+[
+  {
+    "id": "word_st_1",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "📝 단어정렬 스타터",
+    "condition": "1스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
+  },
+  {
+    "id": "word_st_10",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "📚 단어정렬 입문",
+    "condition": "10스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 10
+    },
+    "reward": {
+      "puzzle_power": 20,
+      "coin": 25
+    }
+  },
+  {
+    "id": "word_st_25",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "📜 정렬의 기초",
+    "condition": "25스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 25
+    },
+    "reward": {
+      "puzzle_power": 40,
+      "coin": 50
+    }
+  },
+  {
+    "id": "word_st_50",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "📖 단어정렬을 깨닫다",
+    "condition": "50스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 50
+    },
+    "reward": {
+      "puzzle_power": 80,
+      "coin": 100
+    }
+  },
+  {
+    "id": "word_st_75",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🏛️ 단어정렬 분석가",
+    "condition": "75스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 75
+    },
+    "reward": {
+      "puzzle_power": 150,
+      "coin": 200
+    }
+  },
+  {
+    "id": "word_st_100",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🎓 단어정렬 전문가",
+    "condition": "100스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 100
+    },
+    "reward": {
+      "puzzle_power": 300,
+      "coin": 500
+    }
+  }
+]

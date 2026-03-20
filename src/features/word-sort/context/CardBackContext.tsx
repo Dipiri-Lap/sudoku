@@ -12,45 +12,15 @@ export interface CardBackDesign {
     isImage?: boolean;
 }
 
-export const cardBackDesigns: CardBackDesign[] = [
-    {
-        id: 'default',
-        name: '클래식 (기본)',
-        description: 'Word Sort의 전통적인 카드 뒷면입니다.',
-        pattern: "url('/assets/word-sort/card-back.png')",
-        isImage: true
-    },
-    {
-        id: 'checker-gray',
-        name: '화이트 체커',
-        description: '뚜렷한 대비가 느껴지는 깔끔한 패턴.',
-        pattern: 'conic-gradient(#ffffff 25%, #333333 0 50%, #ffffff 0 75%, #333333 0)'
-    },
-    {
-        id: 'royal-navy',
-        name: '로얄 네이비',
-        description: '우아하고 깊은 바다의 색상입니다.',
-        pattern: 'linear-gradient(135deg, #1A237E, #311B92)'
-    },
-    {
-        id: 'sunset-glow',
-        name: '선셋 글로우',
-        description: '저녁 노을의 따뜻한 감성을 담았습니다.',
-        pattern: 'linear-gradient(135deg, #FF512F, #DD2476)'
-    },
-    {
-        id: 'emerald-green',
-        name: '에메랄드 그린',
-        description: '자연의 신선함을 느낄 수 있습니다.',
-        pattern: 'linear-gradient(135deg, #0cebeb, #20e3b2, #29ffc6)'
-    },
-    {
-        id: 'purple-haze',
-        name: '퍼플 헤이즈',
-        description: '신비롭고 몽환적인 보라색 패턴.',
-        pattern: 'linear-gradient(135deg, #7F00FF, #E100FF)'
-    }
-];
+const FREE_BACK_IDS = ['1','2','3','4','5','6','7','8'];
+
+export const cardBackDesigns: CardBackDesign[] = Array.from({ length: 20 }, (_, i) => ({
+    id: String(i + 1),
+    name: `디자인 ${i + 1}`,
+    description: `카드 뒷면 디자인 ${i + 1}`,
+    pattern: `url('/assets/word-sort/${i + 1}.png')`,
+    isImage: true,
+}));
 
 const LS_UNLOCKED_KEY = 'wordSort_unlockedBacks';
 const LS_SELECTED_KEY = 'wordSort_selectedBack';
@@ -79,16 +49,18 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
     const { spendCoins } = useCoins();
     
     const [selectedBackId, setSelectedBackId] = useState<string>(() => {
-        return localStorage.getItem(LS_SELECTED_KEY) || 'default';
+        return localStorage.getItem(LS_SELECTED_KEY) || '1';
     });
     
     const [unlockedBacks, setUnlockedBacks] = useState<string[]>(() => {
         const stored = localStorage.getItem(LS_UNLOCKED_KEY);
         try {
             const parsed = stored ? JSON.parse(stored) : [];
-            return Array.isArray(parsed) && parsed.includes('default') ? parsed : ['default', ...parsed];
+            if (!Array.isArray(parsed)) return [...FREE_BACK_IDS];
+            const merged = new Set([...FREE_BACK_IDS, ...parsed]);
+            return Array.from(merged);
         } catch {
-            return ['default'];
+            return [...FREE_BACK_IDS];
         }
     });
 
@@ -96,21 +68,21 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user || user.isAnonymous || syncedRef.current) return;
+            if (!user || syncedRef.current) return;
             syncedRef.current = true;
 
             try {
                 const userRef = doc(db, 'users', user.uid);
                 const snap = await getDoc(userRef);
-                const cloudUnlocked: string[] = snap.exists() ? (snap.data().unlockedWordSortBacks || ['default']) : ['default'];
-                
+                const cloudUnlocked: string[] = snap.exists() ? (snap.data().unlockedWordSortBacks || []) : [];
+
                 const localUnlockedStr = localStorage.getItem(LS_UNLOCKED_KEY);
-                let localUnlocked: string[] = ['default'];
+                let localUnlocked: string[] = [];
                 try {
-                    localUnlocked = localUnlockedStr ? JSON.parse(localUnlockedStr) : ['default'];
+                    localUnlocked = localUnlockedStr ? JSON.parse(localUnlockedStr) : [];
                 } catch (e) {}
 
-                const mergedSet = new Set([...localUnlocked, ...cloudUnlocked, 'default']);
+                const mergedSet = new Set([...FREE_BACK_IDS, ...localUnlocked, ...cloudUnlocked]);
                 const mergedArray = Array.from(mergedSet);
 
                 if (mergedArray.length !== localUnlocked.length || !mergedArray.every(id => localUnlocked.includes(id))) {
@@ -118,8 +90,22 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
                     localStorage.setItem(LS_UNLOCKED_KEY, JSON.stringify(mergedArray));
                 }
 
+                // 선택된 카드 동기화: 클라우드 우선, 없으면 로컬 유지
+                const cloudSelected: string | null = snap.exists() ? (snap.data().selectedWordSortBack ?? null) : null;
+                if (cloudSelected && mergedArray.includes(cloudSelected)) {
+                    setSelectedBackId(cloudSelected);
+                    localStorage.setItem(LS_SELECTED_KEY, cloudSelected);
+                }
+
+                const updatePayload: Record<string, unknown> = {};
                 if (mergedArray.length !== cloudUnlocked.length || !mergedArray.every(id => cloudUnlocked.includes(id))) {
-                    await setDoc(userRef, { unlockedWordSortBacks: mergedArray }, { merge: true });
+                    updatePayload.unlockedWordSortBacks = mergedArray;
+                }
+                if (!cloudSelected) {
+                    updatePayload.selectedWordSortBack = localStorage.getItem(LS_SELECTED_KEY) || '1';
+                }
+                if (Object.keys(updatePayload).length > 0) {
+                    await setDoc(userRef, updatePayload, { merge: true });
                 }
 
             } catch (err) {
@@ -147,7 +133,7 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
         localStorage.setItem(LS_UNLOCKED_KEY, JSON.stringify(newUnlocked));
 
         const user = auth.currentUser;
-        if (user && !user.isAnonymous) {
+        if (user) {
             try {
                 const userRef = doc(db, 'users', user.uid);
                 await setDoc(userRef, { unlockedWordSortBacks: newUnlocked }, { merge: true });
@@ -165,6 +151,13 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
         if (!hasUnlocked(id)) return;
         setSelectedBackId(id);
         localStorage.setItem(LS_SELECTED_KEY, id);
+        const user = auth.currentUser;
+        if (user) {
+            const userRef = doc(db, 'users', user.uid);
+            setDoc(userRef, { selectedWordSortBack: id }, { merge: true }).catch(err =>
+                console.error("Failed to save selected card back", err)
+            );
+        }
     };
 
     const currentDesign = cardBackDesigns.find(d => d.id === selectedBackId) || cardBackDesigns[0];

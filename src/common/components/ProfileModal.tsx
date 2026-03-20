@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Edit2, Check, Lock, Coins, Star } from 'lucide-react'; // Lock은 아바타 탭에서 사용
+import { X, Edit2, Check, Lock, Star, ChevronDown } from 'lucide-react'; // Lock은 아바타 탭에서 사용
+const CoinImg = ({ size = 14 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle } from '../../services/rankingService';
 import type { UserProfile as UserProfileType } from '../../services/rankingService';
 import { Trophy, Users } from 'lucide-react';
@@ -7,6 +8,7 @@ import { useCoins } from '../../context/CoinContext';
 import { useChallenges } from '../../context/ChallengeContext';
 import { ALL_CHALLENGES, CHALLENGE_MAP, type Challenge } from '../../data/challenges';
 import { useSudokuProgress } from '../../context/SudokuProgressContext';
+import { useWordSortProgress } from '../../context/WordSortProgressContext';
 
 interface ProfileModalProps {
     uid: string;
@@ -45,6 +47,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
     const challenges = useChallenges();
     const { stageProgress, beginnerProgress } = useSudokuProgress();
+    const { wordSortProgress } = useWordSortProgress();
 
     /** Returns { current, target } for the challenge's progress bar */
     const getProgress = (challenge: Challenge): { current: number; target: number } => {
@@ -54,6 +57,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 return { current: Math.min(stageProgress - 1, target), target };
             case 'beginner_stage':
                 return { current: Math.min(beginnerProgress, target), target };
+            case 'word_sort_stage':
+                return { current: Math.min(wordSortProgress, target), target };
             case 'time_attack': {
                 const cleared = challenges.isChallengeCleared(challenge.id) || challenges.isChallengeCompleted(challenge.id);
                 return { current: cleared ? 1 : 0, target: 1 };
@@ -74,6 +79,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
     // Tab & Ranking state
     const [activeTab, setActiveTab] = useState<'avatar' | 'ranking' | 'challenge'>('avatar');
+    const [expandedGames, setExpandedGames] = useState<Set<string>>(new Set());
+    const toggleGame = (game: string) => setExpandedGames(prev => {
+        const next = new Set(prev);
+        next.has(game) ? next.delete(game) : next.add(game);
+        return next;
+    });
     const [topRankings, setTopRankings] = useState<UserProfileType[]>([]);
     const [userRank, setUserRank] = useState<string>('');
     const [isLoadingRankings, setIsLoadingRankings] = useState(false);
@@ -424,7 +435,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             }}>
                                 <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>보유 코인</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <Coins size={16} color="#fde047" />
+                                    <CoinImg size={16} />
                                     <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
                                 </div>
                             </div>
@@ -558,18 +569,31 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 {Object.entries(ALL_CHALLENGES).map(([game, list]) =>
                                     list.length === 0 ? null : (
                                         <div key={game}>
-                                            {/* Game section header */}
-                                            <div style={{
-                                                fontSize: '0.72rem',
-                                                fontWeight: 'bold',
-                                                color: '#94a3b8',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.06em',
-                                                padding: '0.3rem 0.4rem 0.5rem',
-                                            }}>
-                                                {game === 'sudoku' ? '스도쿠' : 'Word Sort'}
-                                            </div>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            {/* Game section header (toggle) */}
+                                            <button
+                                                onClick={() => toggleGame(game)}
+                                                style={{
+                                                    width: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    padding: '0.5rem 0.4rem',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    color: '#94a3b8',
+                                                }}
+                                            >
+                                                <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: expandedGames.has(game) ? 'rotate(0deg)' : 'rotate(-90deg)', flexShrink: 0 }} />
+                                                <span style={{ fontSize: '0.72rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                                    {game === 'sudoku' ? '스도쿠' : 'Word Sort'}
+                                                    <span style={{ marginLeft: '5px', fontSize: '0.65rem', color: '#64748b' }}>
+                                                        ({list.filter(c => challenges.isChallengeCompleted(c.id)).length}/{list.length})
+                                                    </span>
+                                                </span>
+                                            </button>
+                                            {expandedGames.has(game) && (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '0.4rem' }}>
                                                 {list.map((challenge) => {
                                                     const completed = challenges.isChallengeCompleted(challenge.id);
                                                     const cleared = isReadyToClaim(challenge);
@@ -708,7 +732,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                         <Star size={10} fill="#fde047" color="#fde047" />퍼즐력 +{challenge.reward.puzzle_power}
                                                                     </span>
                                                                     <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                        <Coins size={10} color="#fde047" />코인 +{challenge.reward.coin}
+                                                                        <CoinImg size={10} />코인 +{challenge.reward.coin}
                                                                     </span>
                                                                     <span style={{ fontSize: '0.58rem', color: '#fbbf24', marginTop: '1px', alignSelf: 'center' }}>보상받기</span>
                                                                 </button>
@@ -730,7 +754,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                         <Star size={10} fill="#475569" color="#475569" />퍼즐력 +{challenge.reward.puzzle_power}
                                                                     </span>
                                                                     <span style={{ fontSize: '0.65rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                        <Coins size={10} color="#475569" />코인 +{challenge.reward.coin}
+                                                                        <CoinImg size={10} />코인 +{challenge.reward.coin}
                                                                     </span>
                                                                 </div>
                                                             )}
@@ -738,6 +762,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                     );
                                                 })}
                                             </div>
+                                            )}
                                         </div>
                                     )
                                 )}
@@ -948,7 +973,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>잠금 해제</div>
                         <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)', marginBottom: '0.75rem', lineHeight: 1.8 }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: '700', color: '#fde047' }}>
-                                <Coins size={15} color="#fde047" />100
+                                <CoinImg size={15} />100
                             </span> 코인을 사용하여 해제 하시겠습니까?
                         </div>
                         {coins < 100 && (

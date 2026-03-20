@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCardBacks, cardBackDesigns, type CardBackDesign } from '../context/CardBackContext';
 import { useCoins } from '../../../context/CoinContext';
-import { X, Lock, Check, Coins } from 'lucide-react';
+import { X, Lock, Check } from 'lucide-react';
+const CoinImg = ({ size = 16 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 
 interface ShopProps {
     onClose: () => void;
@@ -10,15 +11,20 @@ interface ShopProps {
 const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
     const { selectedBackId, hasUnlocked, unlockBack, selectBack } = useCardBacks();
     const { coins } = useCoins();
+    const [confirmDesign, setConfirmDesign] = useState<CardBackDesign | null>(null);
 
-    const handleAction = async (design: CardBackDesign) => {
+    const handleAction = (design: CardBackDesign) => {
         if (hasUnlocked(design.id)) {
             selectBack(design.id);
-        } else {
-            if (coins >= 200) {
-                await unlockBack(design.id);
-            }
+        } else if (coins >= 200) {
+            setConfirmDesign(design);
         }
+    };
+
+    const handleConfirmUnlock = async () => {
+        if (!confirmDesign) return;
+        await unlockBack(confirmDesign.id);
+        setConfirmDesign(null);
     };
 
     return (
@@ -70,7 +76,7 @@ const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
                         }}>
                             <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>보유 코인</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <Coins size={16} color="#fde047" />
+                                <CoinImg size={16} />
                                 <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
                             </div>
                         </div>
@@ -82,7 +88,7 @@ const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
                         backgroundColor: '#475569', borderRadius: '16px', padding: '1rem'
                     }}>
                         <div style={{
-                            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '1rem'
+                            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem'
                         }}>
                             {cardBackDesigns.map((design) => {
                                 const unlocked = hasUnlocked(design.id);
@@ -93,7 +99,7 @@ const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
                                     <div key={design.id} style={{
                                         backgroundColor: '#334155',
                                         border: isSelected ? '2px solid #4ade80' : '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: '12px', padding: '1rem',
+                                        borderRadius: '12px', padding: '0.6rem',
                                         display: 'flex', flexDirection: 'column', alignItems: 'center',
                                         transition: 'transform 0.2s', cursor: 'default'
                                     }}>
@@ -104,7 +110,7 @@ const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
                                             backgroundSize: design.isImage ? '100% 100%' : '16px 16px',
                                             backgroundPosition: design.isImage ? 'center' : '0 0',
                                             backgroundRepeat: design.isImage ? 'no-repeat' : 'repeat',
-                                            marginBottom: '1rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                                            marginBottom: '0.6rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
                                             border: '1.5px solid #999999', position: 'relative'
                                         }}>
                                             {!unlocked && (
@@ -115,10 +121,6 @@ const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
                                                     <Lock size={20} color="white" />
                                                 </div>
                                             )}
-                                        </div>
-
-                                        <div style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.2rem', textAlign: 'center', color: 'white' }}>
-                                            {design.name}
                                         </div>
 
                                         <button
@@ -146,7 +148,7 @@ const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
                                             ) : unlocked ? (
                                                 '선택'
                                             ) : (
-                                                <><Coins size={13} /> 200</>
+                                                <><CoinImg size={13} /> 200</>
                                             )}
                                         </button>
                                     </div>
@@ -156,6 +158,46 @@ const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Confirm Unlock Modal */}
+            {confirmDesign && (
+                <div style={{
+                    position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: '16px', zIndex: 1
+                }}>
+                    <div style={{
+                        backgroundColor: '#334155', borderRadius: '16px', padding: '1.5rem',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
+                        width: '220px', boxShadow: '0 10px 25px rgba(0,0,0,0.4)'
+                    }}>
+                        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1rem' }}>잠금 해제</span>
+                        <div style={{
+                            width: '72px', height: '100px', borderRadius: '6px',
+                            backgroundImage: confirmDesign.pattern,
+                            backgroundSize: '100% 100%',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+                            border: '1.5px solid #999999'
+                        }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'white', fontSize: '0.9rem' }}>
+                            <CoinImg size={16} /><span>200 코인을 사용하여 해제 하시겠습니까?</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.6rem', width: '100%' }}>
+                            <button onClick={() => setConfirmDesign(null)} style={{
+                                flex: 1, padding: '0.5rem', borderRadius: '8px', border: 'none',
+                                backgroundColor: '#475569', color: 'white', fontWeight: 'bold', cursor: 'pointer'
+                            }}>취소</button>
+                            <button onClick={handleConfirmUnlock} style={{
+                                flex: 1, padding: '0.5rem', borderRadius: '8px', border: 'none',
+                                background: 'linear-gradient(135deg, #f6d365, #fda085)',
+                                color: 'white', fontWeight: 'bold', cursor: 'pointer'
+                            }}>확인</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

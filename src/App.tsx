@@ -6,11 +6,13 @@ import SudokuGame from './features/sudoku/components/SudokuGame';
 import DifficultySelect from './features/sudoku/components/DifficultySelect';
 import { GameProvider as SudokuProvider } from './features/sudoku/context/SudokuContext';
 import WordSortGame from './features/word-sort/components/WordSortGame';
+import WordSortModeSelect from './features/word-sort/components/WordSortModeSelect';
 import TileMatchGame from './features/tile-match/components/TileMatchGame';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
 import { SudokuProgressProvider } from './context/SudokuProgressContext';
+import { WordSortProgressProvider } from './context/WordSortProgressContext';
 import { ChallengeProvider } from './context/ChallengeContext';
 import { UserInitProvider, useUserInit } from './context/UserInitContext';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -54,6 +56,8 @@ const AppContent: React.FC = () => {
     <CoinProvider>
       <ChallengeProvider>
       <SudokuProgressProvider>
+      <WordSortProgressProvider>
+      <CardBackProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route
@@ -70,18 +74,19 @@ const AppContent: React.FC = () => {
               </SudokuProvider>
             }
           />
+          <Route path="/word-sort" element={<WordSortModeSelect />} />
           <Route
-            path="/word-sort"
+            path="/word-sort/play"
             element={
               <WordSortProvider>
-                <CardBackProvider>
-                  <WordSortGame />
-                </CardBackProvider>
+                <WordSortGame />
               </WordSortProvider>
             }
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
         </Routes>
+      </CardBackProvider>
+      </WordSortProgressProvider>
       </SudokuProgressProvider>
       </ChallengeProvider>
     </CoinProvider>
