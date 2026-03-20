@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { WordSolitaireState } from '../context/WordSortContext';
 
 interface UseWordSortDragParams {
@@ -43,6 +43,16 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         targetType?: 'slot' | 'stack';
     } | null>(null);
 
+    // Ref for synchronous access during touch events (state updates are async)
+    const touchDragRef = useRef<{
+        type: 'stack' | 'deck';
+        index: number;
+        cardIndex?: number;
+        count?: number;
+        grabOffsetX?: number;
+        grabOffsetY?: number;
+    } | null>(null);
+
     // Trigger animation shortly after landing state is set
     useEffect(() => {
         if (landingGroup && !landingGroup.animating) {
@@ -63,56 +73,54 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         return overlapX * overlapY;
     };
 
-    const handleDragStart = (e: React.DragEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => {
-        // Step 2: only top-of-stack category cards are allowed
+    // ─── Shared: Compute drag start info from coordinates ───────────────────────
+    const _computeDragStart = (
+        clientX: number,
+        clientY: number,
+        target: HTMLElement,
+        type: 'stack' | 'deck',
+        index: number,
+        cardIndex?: number
+    ) => {
+        // Tutorial step guards
         if (tutorialStep === 2) {
-            if (type === 'deck') return;
+            if (type === 'deck') return null;
             if (type === 'stack' && cardIndex !== undefined) {
                 const stack = state.stacks[index];
                 const card = stack[cardIndex];
-                if (!(card.isRevealed && card.type === 'category' && cardIndex === stack.length - 1)) return;
+                if (!(card.isRevealed && card.type === 'category' && cardIndex === stack.length - 1)) return null;
             }
         }
-        // Step 3: only deck interaction is allowed
-        if (tutorialStep === 3 && type === 'stack') return;
-        // Step 4: only 바나나(t4) is draggable; deck blocked
+        if (tutorialStep === 3 && type === 'stack') return null;
         if (tutorialStep === 4) {
-            if (type === 'deck') return;
+            if (type === 'deck') return null;
             if (type === 'stack' && cardIndex !== undefined) {
                 const card = state.stacks[index][cardIndex];
-                if (card.id !== 't4' || cardIndex !== state.stacks[index].length - 1) return;
+                if (card.id !== 't4' || cardIndex !== state.stacks[index].length - 1) return null;
             }
         }
-        // Step 5: only 딸기(t3) is draggable; deck blocked
         if (tutorialStep === 5) {
-            if (type === 'deck') return;
+            if (type === 'deck') return null;
             if (type === 'stack' && cardIndex !== undefined) {
                 const card = state.stacks[index][cardIndex];
-                if (card.id !== 't3' || cardIndex !== state.stacks[index].length - 1) return;
+                if (card.id !== 't3' || cardIndex !== state.stacks[index].length - 1) return null;
             }
         }
-        // Step 6: only top card of a stack with a consecutive same-cat pair below is draggable; deck blocked
         if (tutorialStep === 6) {
-            if (type === 'deck') return;
+            if (type === 'deck') return null;
             if (type === 'stack' && cardIndex !== undefined) {
                 const stack = state.stacks[index];
                 const card = stack[cardIndex];
                 const below = cardIndex >= 1 ? stack[cardIndex - 1] : null;
                 if (!(card.isRevealed && card.type === 'word' && cardIndex === stack.length - 1 &&
-                    below?.isRevealed && below.cat === card.cat)) return;
+                    below?.isRevealed && below.cat === card.cat)) return null;
             }
         }
 
-        const target = e.currentTarget as HTMLElement;
         const rect = target.getBoundingClientRect();
+        let grabOffsetX = clientX - rect.left;
+        let grabOffsetY = clientY - rect.top;
 
-        // Calculate grab offset relative to the clicked card's top-left
-        let grabOffsetX = e.clientX - rect.left;
-        let grabOffsetY = e.clientY - rect.top;
-
-        e.dataTransfer.setData('text/plain', '');
-
-        // Logical "Movable Unit" Start Index and Count
         let effectiveCardIndex = cardIndex;
         let count = 1;
 
@@ -120,7 +128,6 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             const stack = state.stacks[index];
             const clickedCard = stack[cardIndex];
 
-            // 1. 클릭한 카드의 카테고리 기점(Base) 탐색
             let baseIndex = cardIndex;
             for (let i = cardIndex; i >= 0; i--) {
                 if (stack[i].cat === clickedCard.cat && stack[i].isRevealed) {
@@ -131,46 +138,31 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                 }
             }
 
-            // Adjustment for grabOffsetY: If we clicked a card in a stack,
-            // the drag group might start at baseIndex.
-            // We need the offset relative to the baseIndex card.
             if (cardIndex > baseIndex) {
                 grabOffsetY += (cardIndex - baseIndex) * visibleHeight;
             }
 
-            // 2. 드래그 범위 결정
             if (clickedCard.type === 'category') {
-                // 기반 카드 클릭 시: 기반 카드 단독 이동
                 effectiveCardIndex = cardIndex;
                 count = 1;
             } else {
-                // 단어 카드 클릭 시: 기반 카드(baseIndex)부터 스택 끝까지 묶어서 이동
                 effectiveCardIndex = baseIndex;
                 count = stack.length - baseIndex;
             }
         }
 
-        // 빈 드래그 이미지 설정 → React 플로팅 고스트 사용
-        const emptyImg = new Image();
-        e.dataTransfer.setDragImage(emptyImg, 0, 0);
-        setDragGhostPos({ x: e.clientX, y: e.clientY });
-
-        setTimeout(() => {
-            setDraggingGroup({ type, index, cardIndex: effectiveCardIndex, count, grabOffsetX, grabOffsetY });
-        }, 0);
+        return { type, index, cardIndex: effectiveCardIndex, count, grabOffsetX, grabOffsetY };
     };
 
-    const handleDragMove = (e: React.DragEvent) => {
-        if (!e.clientX && !e.clientY) return;
-        setDragGhostPos({ x: e.clientX, y: e.clientY });
+    // ─── Shared: Process move (used by both drag and touch) ─────────────────────
+    const _processMove = (clientX: number, clientY: number, dragInfo: NonNullable<typeof draggingGroup>) => {
+        setDragGhostPos({ x: clientX, y: clientY });
 
-        if (!draggingGroup) return;
-
-        const grabOffsetX = draggingGroup.grabOffsetX || 0;
-        const grabOffsetY = draggingGroup.grabOffsetY || 0;
-        const dragLeft = e.clientX - grabOffsetX;
-        const dragTop = e.clientY - grabOffsetY;
-        const count = draggingGroup.count || 1;
+        const grabOffsetX = dragInfo.grabOffsetX || 0;
+        const grabOffsetY = dragInfo.grabOffsetY || 0;
+        const dragLeft = clientX - grabOffsetX;
+        const dragTop = clientY - grabOffsetY;
+        const count = dragInfo.count || 1;
         const groupHeight = cardHeight + (count - 1) * visibleHeight;
         const dragRect = { left: dragLeft, top: dragTop, right: dragLeft + finalCardWidth, bottom: dragTop + groupHeight };
 
@@ -208,13 +200,13 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
 
         if (!bestTarget || bestOverlap === 0) { setNearestValidTarget(null); return; }
 
-        const movingCards = draggingGroup.type === 'deck'
+        const movingCards = dragInfo.type === 'deck'
             ? [state.revealedDeck[state.revealedDeck.length - 1]]
-            : state.stacks[draggingGroup.index].slice(draggingGroup.cardIndex, (draggingGroup.cardIndex || 0) + (draggingGroup.count || 0));
+            : state.stacks[dragInfo.index].slice(dragInfo.cardIndex, (dragInfo.cardIndex || 0) + (dragInfo.count || 0));
 
         if (!movingCards.length) { setNearestValidTarget(null); return; }
 
-        const isSameSource = draggingGroup.type === bestTarget.type && draggingGroup.index === bestTarget.index;
+        const isSameSource = dragInfo.type === bestTarget.type && dragInfo.index === bestTarget.index;
         let isCompatible = false;
 
         if (!isSameSource) {
@@ -239,19 +231,14 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         setNearestValidTarget(isCompatible ? bestTarget : null);
     };
 
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        if (!draggingGroup) return;
+    // ─── Shared: Process drop (used by both drag and touch) ─────────────────────
+    const _processDrop = (clientX: number, clientY: number, dragInfo: NonNullable<typeof draggingGroup>) => {
+        const grabOffsetX = dragInfo.grabOffsetX || 0;
+        const grabOffsetY = dragInfo.grabOffsetY || 0;
+        const dragLeft = clientX - grabOffsetX;
+        const dragTop = clientY - grabOffsetY;
 
-        const x = e.clientX;
-        const y = e.clientY;
-        const grabOffsetX = draggingGroup.grabOffsetX || 0;
-        const grabOffsetY = draggingGroup.grabOffsetY || 0;
-        const dragLeft = x - grabOffsetX;
-        const dragTop = y - grabOffsetY;
-
-        // 드래그 카드 그룹의 rect
-        const count = draggingGroup.count || 1;
+        const count = dragInfo.count || 1;
         const groupHeight = cardHeight + (count - 1) * visibleHeight;
         const dragRect = {
             left: dragLeft,
@@ -263,7 +250,6 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         let bestTarget: { type: 'slot' | 'stack', index: number } | null = null;
         let bestOverlap = 0;
 
-        // 슬롯과의 겹침 검사 (22px 탭 spacer 제외, 실제 카드 영역만)
         for (let i = 0; i < slotRefs.current.length; i++) {
             const ref = slotRefs.current[i];
             if (ref) {
@@ -277,7 +263,6 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             }
         }
 
-        // 스택의 각 개별 카드 rect와 겹침 검사
         for (let i = 0; i < stackRefs.current.length; i++) {
             const ref = stackRefs.current[i];
             if (!ref) continue;
@@ -285,7 +270,6 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             const stack = state.stacks[i];
 
             if (stack.length === 0) {
-                // 빈 스택: 컨테이너 rect 전체로 검사
                 const overlap = getOverlapArea(dragRect, {
                     left: stackRect.left, top: stackRect.top,
                     right: stackRect.right, bottom: stackRect.bottom
@@ -295,7 +279,6 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                     bestTarget = { type: 'stack', index: i };
                 }
             } else {
-                // 각 카드의 rect를 수학적으로 계산
                 const numToCompress = Math.max(0, stack.length - 8);
                 let topOffset = 0;
                 for (let j = 0; j < stack.length; j++) {
@@ -316,7 +299,6 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             }
         }
 
-        // 겹치는 영역이 전혀 없으면 원위치
         if (!bestTarget || bestOverlap === 0) {
             setDraggingGroup(null);
             return;
@@ -324,30 +306,26 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
 
         const dropTarget = bestTarget as { type: 'slot' | 'stack', index: number };
 
-        // Step 4: block stack drops (바나나 must go to the slot only)
         if (tutorialStep === 4 && dropTarget.type === 'stack') {
             setDraggingGroup(null);
             return;
         }
-
-        // Step 5: block slot drops (this step teaches stack-to-stack movement)
         if (tutorialStep === 5 && dropTarget.type === 'slot') {
             setDraggingGroup(null);
             return;
         }
 
-        const movingCards = draggingGroup.type === 'deck'
+        const movingCards = dragInfo.type === 'deck'
             ? [state.revealedDeck[state.revealedDeck.length - 1]]
-            : state.stacks[draggingGroup.index].slice(draggingGroup.cardIndex, (draggingGroup.cardIndex || 0) + (draggingGroup.count || 0));
+            : state.stacks[dragInfo.index].slice(dragInfo.cardIndex, (dragInfo.cardIndex || 0) + (dragInfo.count || 0));
 
         if (!movingCards.length) {
             setDraggingGroup(null);
             return;
         }
 
-        // Synchronized compatibility check
         let isCompatible = false;
-        const isSameSource = (draggingGroup.type === dropTarget.type && draggingGroup.index === dropTarget.index);
+        const isSameSource = (dragInfo.type === dropTarget.type && dragInfo.index === dropTarget.index);
 
         if (!isSameSource && movingCards.length > 0) {
             if (dropTarget.type === 'slot') {
@@ -360,10 +338,9 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             } else {
                 const targetStack = state.stacks[dropTarget.index];
                 if (targetStack.length === 0) {
-                    isCompatible = true; // 빈 스택에는 일반 카드(단어)와 카테고리 기점 카드 모두 배치 가능
+                    isCompatible = true;
                 } else {
                     const topTarget = targetStack[targetStack.length - 1];
-                    // Explicitly same as reducer: (topTarget.type === 'category' || topTarget.cat !== movingCards[0].cat) -> disallowed
                     isCompatible = topTarget.type === 'word' && topTarget.cat === movingCards[0].cat;
                 }
             }
@@ -407,7 +384,6 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                     targetType: dropTarget.type
                 });
 
-                // Small delay to trigger transition
                 setTimeout(() => {
                     setLandingGroup(prev => prev ? { ...prev, animating: true } : null);
                 }, 10);
@@ -419,10 +395,10 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                     dispatch({
                         type: 'MOVE_CARD',
                         from: {
-                            type: draggingGroup.type,
-                            index: draggingGroup.index,
-                            cardIndex: draggingGroup.cardIndex,
-                            count: draggingGroup.count
+                            type: dragInfo.type,
+                            index: dragInfo.index,
+                            cardIndex: dragInfo.cardIndex,
+                            count: dragInfo.count
                         },
                         to: dropTarget
                     });
@@ -433,6 +409,70 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                 return;
             }
         }
+        setDraggingGroup(null);
+    };
+
+    // ─── HTML5 Drag handlers ─────────────────────────────────────────────────────
+    const handleDragStart = (e: React.DragEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => {
+        const result = _computeDragStart(e.clientX, e.clientY, e.currentTarget as HTMLElement, type, index, cardIndex);
+        if (!result) return;
+
+        e.dataTransfer.setData('text/plain', '');
+        const emptyImg = new Image();
+        e.dataTransfer.setDragImage(emptyImg, 0, 0);
+        setDragGhostPos({ x: e.clientX, y: e.clientY });
+
+        setTimeout(() => {
+            setDraggingGroup(result);
+        }, 0);
+    };
+
+    const handleDragMove = (e: React.DragEvent) => {
+        if (!e.clientX && !e.clientY) return;
+        if (!draggingGroup) return;
+        _processMove(e.clientX, e.clientY, draggingGroup);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        if (!draggingGroup) return;
+        _processDrop(e.clientX, e.clientY, draggingGroup);
+    };
+
+    // ─── Touch handlers ──────────────────────────────────────────────────────────
+    const handleTouchStart = (e: React.TouchEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => {
+        const touch = e.touches[0];
+        const result = _computeDragStart(touch.clientX, touch.clientY, e.currentTarget as HTMLElement, type, index, cardIndex);
+        if (!result) return;
+
+        // Store in ref for synchronous access in subsequent touch events
+        touchDragRef.current = result;
+        setDragGhostPos({ x: touch.clientX, y: touch.clientY });
+        setDraggingGroup(result);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        const dragInfo = touchDragRef.current;
+        if (!dragInfo) return;
+        e.preventDefault(); // prevent page scroll while dragging
+        const touch = e.touches[0];
+        _processMove(touch.clientX, touch.clientY, dragInfo);
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const dragInfo = touchDragRef.current;
+        touchDragRef.current = null;
+        if (!dragInfo) return;
+        const touch = e.changedTouches[0];
+        _processDrop(touch.clientX, touch.clientY, dragInfo);
+        setDragGhostPos(null);
+        setNearestValidTarget(null);
+    };
+
+    const handleTouchCancel = () => {
+        touchDragRef.current = null;
+        setDragGhostPos(null);
+        setNearestValidTarget(null);
         setDraggingGroup(null);
     };
 
@@ -448,5 +488,9 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         handleDragStart,
         handleDragMove,
         handleDrop,
+        handleTouchStart,
+        handleTouchMove,
+        handleTouchEnd,
+        handleTouchCancel,
     };
 }

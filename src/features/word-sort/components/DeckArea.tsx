@@ -18,6 +18,10 @@ export const DeckArea: React.FC = () => {
         landingGroup,
         handleDragStart,
         handleDragMove,
+        handleTouchStart,
+        handleTouchMove,
+        handleTouchEnd,
+        handleTouchCancel,
         tutorialStep,
         tutorialHighlightCards,
         tutorialHighlightDeck,
@@ -103,6 +107,10 @@ export const DeckArea: React.FC = () => {
                                     onDragStart={(e) => isTop && handleDragStart(e, 'deck', 0)}
                                     onDrag={handleDragMove}
                                     onDragEnd={() => { setDragGhostPos(null); setNearestValidTarget(null); !landingGroup && setDraggingGroup(null); }}
+                                    onTouchStart={(e) => { const canTouchDrag = isTop && tutorialStep !== 2 && tutorialStep !== 4 && tutorialStep !== 5 && tutorialStep !== 6; canTouchDrag && handleTouchStart(e, 'deck', 0); }}
+                                    onTouchMove={handleTouchMove}
+                                    onTouchEnd={handleTouchEnd}
+                                    onTouchCancel={handleTouchCancel}
                                     className={[
                                         card.id === lastDrawnId ? 'animate-card-draw' : '',
                                         isTop && tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : ''
@@ -120,6 +128,7 @@ export const DeckArea: React.FC = () => {
                                         boxShadow: (card.isRevealed && card.type === 'category') ? '0 0 15px rgba(255,159,67,0.3)' : '0 2px 5px rgba(0,0,0,0.1)',
                                         visibility: ((isGathering && (gatherOffsets.current.get(card.id)?.seq ?? 0) <= gatherPhase) || (isTop && draggingGroup?.type === 'deck') || (landingGroup?.isProxy && landingGroup.movingCards?.some((mc: any) => mc.id === card.id))) ? 'hidden' : 'visible',
                                         cursor: isRemoveMode ? 'pointer' : (isTop ? 'grab' : 'default'),
+                                        touchAction: isTop && !isRemoveMode ? 'none' : 'auto',
                                         color: card.isRevealed ? '#333' : 'transparent',
                                         padding: isTop ? '5px' : '0',
                                         transformOrigin: 'center',

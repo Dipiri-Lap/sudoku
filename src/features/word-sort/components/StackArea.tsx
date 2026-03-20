@@ -17,6 +17,10 @@ export const StackArea: React.FC = () => {
         setDragGhostPos,
         setNearestValidTarget,
         handleDragMove,
+        handleTouchStart,
+        handleTouchMove,
+        handleTouchEnd,
+        handleTouchCancel,
         landingGroup,
         gatheringCat,
         gatherPhase,
@@ -151,6 +155,10 @@ export const StackArea: React.FC = () => {
                                     onDrag={handleDragMove}
                                     onDragEnd={() => { setDragGhostPos(null); setNearestValidTarget(null); !landingGroup && setDraggingGroup(null); }}
                                     onDragOver={e => e.preventDefault()}
+                                    onTouchStart={e => canDrag && !isRemoveMode && handleTouchStart(e, 'stack', sIdx, cIdx)}
+                                    onTouchMove={handleTouchMove}
+                                    onTouchEnd={handleTouchEnd}
+                                    onTouchCancel={handleTouchCancel}
                                     onClick={() => isRemoveMode && (card.isRevealed || (gatheringCat === card.cat)) && handleRemoveClick(card.cat)}
                                     className={[
                                         tutorialHighlightCards.has(card.id) ? 'tutorial-highlight' : '',
@@ -170,6 +178,7 @@ export const StackArea: React.FC = () => {
                                         zIndex: cIdx,
                                         padding: '5px',
                                         cursor: isRemoveMode && (card.isRevealed || gatheringCat === card.cat) ? 'pointer' : (canDrag ? 'grab' : 'default'),
+                                        touchAction: canDrag && !isRemoveMode ? 'none' : 'auto',
                                         border: isRevealed
                                             ? (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999')
                                             : 'none',

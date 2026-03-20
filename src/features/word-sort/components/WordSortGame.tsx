@@ -132,7 +132,7 @@ const WordSortGame: React.FC = () => {
     const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef });
 
     // Hook: drag and drop
-    const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, handleDragStart, handleDragMove, handleDrop } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight });
+    const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, handleDragStart, handleDragMove, handleDrop, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight });
 
     // Award coins on win (not tutorial)
     useEffect(() => {
@@ -477,6 +477,10 @@ const WordSortGame: React.FC = () => {
             handleDragStart,
             handleDragMove,
             handleDrop,
+            handleTouchStart,
+            handleTouchMove,
+            handleTouchEnd,
+            handleTouchCancel,
             tutorialStep,
             setTutorialStep,
             tutorialHighlightCards,

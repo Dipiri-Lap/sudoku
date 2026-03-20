@@ -25,6 +25,10 @@ interface WordSortUIContextType {
     handleDragStart: (e: React.DragEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => void;
     handleDragMove: (e: React.DragEvent) => void;
     handleDrop: (e: React.DragEvent) => void;
+    handleTouchStart: (e: React.TouchEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => void;
+    handleTouchMove: (e: React.TouchEvent) => void;
+    handleTouchEnd: (e: React.TouchEvent) => void;
+    handleTouchCancel: () => void;
     // Tutorial
     tutorialStep: number | null;
     setTutorialStep: (s: number | null) => void;
