@@ -98,6 +98,13 @@ const WordSortGame: React.FC = () => {
         return () => { if (dealingTimerRef.current) clearInterval(dealingTimerRef.current); };
     }, []);
 
+    // Prevent body scroll while game is active
+    useEffect(() => {
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = prev; };
+    }, []);
+
     // Reset coin award flag on new game
     useEffect(() => {
         if (!state.isWinner) hasAwardedCoins.current = false;
