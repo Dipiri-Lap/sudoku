@@ -62,7 +62,7 @@ const WordSortGame: React.FC = () => {
         window.addEventListener('resize', update);
         return () => window.removeEventListener('resize', update);
     }, []);
-    const gap = 8;
+    const gap = 5;
     const activeSlotCount = Object.keys(state.activeSlots).length;
     const displayColumns = Math.min(7, Math.max(
         state.stacks.length + lockedStacks,
@@ -533,6 +533,10 @@ const WordSortGame: React.FC = () => {
             onDrop={e => handleDrop(e)}
             style={{
                 padding: '0.5rem 1rem 1rem',
+                marginLeft: '-1rem',
+                marginRight: '-1rem',
+                marginTop: '-1rem',
+                width: 'calc(100% + 2rem)',
                 color: 'white',
                 background: 'radial-gradient(circle at center, #7a7da1 0%, #2c2e49 100%)',
                 minHeight: '100dvh',

@@ -40,7 +40,7 @@ export const StackArea: React.FC = () => {
     } = useWordSortUI();
 
     const { lockedStacks } = state;
-    const gap = 8;
+    const gap = 5;
 
     return (
         <div style={{
