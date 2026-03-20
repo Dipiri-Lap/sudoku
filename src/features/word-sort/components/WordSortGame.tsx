@@ -62,7 +62,7 @@ const WordSortGame: React.FC = () => {
         window.addEventListener('resize', update);
         return () => window.removeEventListener('resize', update);
     }, []);
-    const gap = 12;
+    const gap = 8;
     const activeSlotCount = Object.keys(state.activeSlots).length;
     const displayColumns = Math.min(7, Math.max(
         state.stacks.length + lockedStacks,
@@ -77,7 +77,7 @@ const WordSortGame: React.FC = () => {
     const cardBadgeSize = `${(cardTextSize * 0.70).toFixed(2)}rem`;
     const cardNameSize  = `${(cardTextSize * 0.83).toFixed(2)}rem`;
     const cardWordSize  = `${(cardTextSize * (activeSlotCount >= 5 ? 0.95 : 1.15)).toFixed(2)}rem`;
-    const visibleHeight = 25; // Height of the visible strip for overlapped cards
+    const visibleHeight = 20; // Height of the visible strip for overlapped cards
 
     const [lastDrawnId, setLastDrawnId] = useState<string | null>(null);
     const [prevRevealedCount, setPrevRevealedCount] = useState(0);
@@ -250,23 +250,22 @@ const WordSortGame: React.FC = () => {
             const urlLevelStr = params.get('level');
             const urlLevel = urlLevelStr ? parseInt(urlLevelStr) : null;
 
-            if (urlLevel !== null && !isNaN(urlLevel)) {
-                // If specific level requested via URL, start it (skips tutorial/restore)
-                const levelData = levels.find((l: any) => l.id === urlLevel) || levels[0];
-                dispatch({ type: 'START_LEVEL', levelData });
-                triggerDealing(levelStackTotal(levelData));
+            // Fast path: state was pre-loaded by ModeSelect dispatch (like Sudoku)
+            if (state.stacks.length > 0 && urlLevel !== null && state.level === urlLevel) {
+                const levelData = levels.find((l: any) => l.id === state.level);
+                if (levelData) triggerDealing(levelStackTotal(levelData));
                 return;
             }
 
-            if (!tutorialDone) {
+            if (!tutorialDone && urlLevel === null) {
                 dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
                 setTutorialStep(1);
                 triggerDealing(levelStackTotal(tutorialLevel));
                 return;
             }
 
-            // Wait for Firebase auth state to be resolved
-            let clearedLevel = 0;
+            // Wait for Firebase auth state to be resolved (used for both URL and non-URL paths)
+            let clearedLevel = parseInt(localStorage.getItem('word_sort_progress') ?? '0', 10) || 0;
             try {
                 const { auth } = await import('../../../firebase');
                 const user = await new Promise<any>((resolve) => {
@@ -277,10 +276,24 @@ const WordSortGame: React.FC = () => {
                 });
                 if (user) {
                     const { getWordSortProgress } = await import('../../../services/rankingService');
-                    clearedLevel = await getWordSortProgress(user.uid);
+                    const firebaseLevel = await getWordSortProgress(user.uid);
+                    clearedLevel = Math.max(clearedLevel, firebaseLevel);
                 }
             } catch (e) {
                 console.error('Failed to load wordSort progress:', e);
+            }
+
+            if (urlLevel !== null && !isNaN(urlLevel)) {
+                const maxAllowed = clearedLevel + 1;
+                if (urlLevel > maxAllowed) {
+                    alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${maxAllowed})`);
+                    window.location.replace(`/word-sort/play?level=${maxAllowed}`);
+                    return;
+                }
+                const levelData = levels.find((l: any) => l.id === urlLevel) || levels[0];
+                dispatch({ type: 'START_LEVEL', levelData });
+                triggerDealing(levelStackTotal(levelData));
+                return;
             }
 
             // Check localStorage — only restore if it's a level NOT yet cleared
@@ -522,7 +535,7 @@ const WordSortGame: React.FC = () => {
                 padding: '0.5rem 1rem 1rem',
                 color: 'white',
                 background: 'radial-gradient(circle at center, #7a7da1 0%, #2c2e49 100%)',
-                minHeight: '100vh',
+                minHeight: '100dvh',
                 fontFamily: "'Inter', sans-serif",
                 display: 'flex',
                 flexDirection: 'column',
@@ -556,7 +569,9 @@ const WordSortGame: React.FC = () => {
 
             <SlotArea />
 
-            <StackArea />
+            <div style={{ minHeight: cardHeight + 7 * visibleHeight }}>
+                <StackArea />
+            </div>
 
             {/* Bottom Menu - 튜토리얼 중에는 숨김 */}
             <GameBottomMenu
@@ -645,11 +660,7 @@ const WordSortGame: React.FC = () => {
 
             <GameOverlays
                 showResumeConfirm={showResumeConfirm}
-                pendingSavedState={pendingSavedState}
                 handleResumeConfirm={handleResumeConfirm}
-                triggerDealing={triggerDealing}
-                levelStackTotal={levelStackTotal}
-                resetUnlocks={resetUnlocks}
             />
 
             {/* Shop Modal */}

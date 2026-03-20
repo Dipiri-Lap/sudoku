@@ -1,27 +1,19 @@
 import React from 'react';
+import { House, ArrowRight } from 'lucide-react';
 import TutorialOverlay from './TutorialOverlay';
 import { useWordSort } from '../context/WordSortContext';
 import { useWordSortUI } from '../context/WordSortUIContext';
-import levels from '../data/levels.json';
 
 interface GameOverlaysProps {
     showResumeConfirm: boolean;
-    pendingSavedState: any;
     handleResumeConfirm: (confirmed: boolean) => void;
-    triggerDealing: (n: number) => void;
-    levelStackTotal: (ld: any) => number;
-    resetUnlocks: () => void;
 }
 
 export const GameOverlays: React.FC<GameOverlaysProps> = ({
     showResumeConfirm,
-    pendingSavedState,
     handleResumeConfirm,
-    triggerDealing,
-    levelStackTotal,
-    resetUnlocks,
 }) => {
-    const { state, dispatch } = useWordSort();
+    const { state } = useWordSort();
     const {
         tutorialStep,
         setTutorialStep,
@@ -30,7 +22,6 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
         isRemoveMode,
         gatheringCat,
         showGameOverOverlay,
-        coins,
     } = useWordSortUI();
 
     return (
@@ -91,59 +82,40 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
             )}
 
             {/* Win Overlay */}
-            {state.isWinner && tutorialStep === null && (() => {
-                const nextLevelIdx = levels.findIndex((l: any) => l.id === state.level + 1);
-                const hasNextLevel = nextLevelIdx >= 0;
-                const handleNext = () => {
-                    resetUnlocks();
-                    if (hasNextLevel) {
-                        dispatch({ type: 'START_LEVEL', levelData: levels[nextLevelIdx] });
-                        triggerDealing(levelStackTotal(levels[nextLevelIdx]));
-                    } else {
-                        // All levels cleared — restart from level 1
-                        dispatch({ type: 'START_LEVEL', levelData: levels[0] });
-                        triggerDealing(levelStackTotal(levels[0]));
-                    }
-                };
-                return (
-                    <div style={{
-                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex',
-                        flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-                    }}>
-                        <h2 style={{ fontSize: '2.5rem', color: '#f1c40f', marginBottom: '0.5rem' }}>🎉 VICTORY!</h2>
-                        <div style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.7)', marginBottom: '1.5rem' }}>
-                            LEVEL {state.level} 클리어!
-                        </div>
-                        {!hasNextLevel ? (
-                            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🛠️</div>
-                                <div style={{ fontSize: '1.05rem', color: 'white', fontWeight: '700', marginBottom: '0.4rem' }}>
-                                    모든 레벨을 클리어했습니다!
+            {state.isWinner && tutorialStep === null && (
+                    <div className="modal-overlay">
+                        <div className="modal-content animate-fade-in">
+                            <div className="modal-header">
+                                <h2>🎉 축하합니다!</h2>
+                            </div>
+                            <div className="modal-body">
+                                <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 600 }}>
+                                    LEVEL <span style={{ color: '#e2e8f0' }}>{state.level}</span> 클리어!
                                 </div>
-                                <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-                                    새로운 레벨을 열심히 제작 중입니다.<br />
-                                    조금만 기다려 주세요 😊
+                                <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fef9e7', border: '1px solid #f4c430', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#b8860b', fontSize: '0.95rem' }}>
+                                        🪙 +10
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
+                                        ⚡ 퍼즐력 +1
+                                    </div>
                                 </div>
                             </div>
-                        ) : null}
-                        {hasNextLevel && (
-                            <div style={{ display: 'flex', gap: '12px' }}>
+                            <div className="modal-footer" style={{ flexDirection: 'row', gap: '0.5rem' }}>
+                                <a href="/word-sort" className="modal-home-btn" style={{ textDecoration: 'none' }}>
+                                    <House size={22} />
+                                </a>
                                 <a
-                                    href={`/word-sort?level=${state.level + 1}`}
-                                    style={{ 
-                                        padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', 
-                                        border: 'none', background: 'linear-gradient(135deg, #f6d365, #f39c12)', 
-                                        color: 'white', fontWeight: 'bold', cursor: 'pointer', 
-                                        boxShadow: '0 4px 15px rgba(243,156,18,0.4)',
-                                        textDecoration: 'none',
-                                        display: 'inline-block'
-                                    }}
-                                >다음 레벨 →</a>
+                                    href={`/word-sort/play?level=${state.level + 1}`}
+                                    className="primary-btn bonus-btn"
+                                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
+                                >
+                                    다음 레벨로 <ArrowRight size={20} />
+                                </a>
                             </div>
-                        )}
+                        </div>
                     </div>
-                );
-            })()}
+            )}
 
             {/* Tutorial Overlay */}
             {tutorialStep !== null && (

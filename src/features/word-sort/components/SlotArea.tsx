@@ -27,7 +27,7 @@ export const SlotArea: React.FC = () => {
     } = useWordSortUI();
 
     const { lockedSlots } = state;
-    const gap = 12;
+    const gap = 8;
 
     return (
         <div style={{

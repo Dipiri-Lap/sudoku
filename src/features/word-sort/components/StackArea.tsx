@@ -40,14 +40,13 @@ export const StackArea: React.FC = () => {
     } = useWordSortUI();
 
     const { lockedStacks } = state;
-    const gap = 12;
+    const gap = 8;
 
     return (
         <div style={{
             display: 'grid',
             gridTemplateColumns: `repeat(${state.stacks.length + (tutorialStep === null ? lockedStacks : 0)}, ${finalCardWidth}px)`,
             gap: `${gap}px`,
-            flex: 1,
             alignItems: 'flex-start',
             maxWidth: 'fit-content',
             marginInline: 'auto',

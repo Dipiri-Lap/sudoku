@@ -2392,107 +2392,6 @@
         ]
     },
     {
-        "id": 21,
-        "maxMoves": 104,
-        "slots": 3,
-        "categories": [
-            {
-                "id": "sound_characteristics",
-                "name": "소리",
-                "target": 7,
-                "words": [
-                    "음색",
-                    "잔향",
-                    "공명",
-                    "음량",
-                    "고저",
-                    "잡음",
-                    "파형"
-                ]
-            },
-            {
-                "id": "cosmetic_procedures",
-                "name": "미용시술",
-                "target": 7,
-                "words": [
-                    "보톡스",
-                    "필러",
-                    "레이저토닝",
-                    "박피",
-                    "제모",
-                    "리프팅",
-                    "문신제거"
-                ]
-            },
-            {
-                "id": "breathing_patterns",
-                "name": "호흡패턴",
-                "target": 6,
-                "words": [
-                    "복식호흡",
-                    "흉식호흡",
-                    "과호흡",
-                    "무호흡",
-                    "얕은호흡",
-                    "깊은호흡"
-                ]
-            },
-            {
-                "id": "surface_friction_states",
-                "name": "표면마찰",
-                "target": 6,
-                "words": [
-                    "정지마찰",
-                    "운동마찰",
-                    "윤활",
-                    "거칠기",
-                    "마모",
-                    "미끄럼"
-                ]
-            },
-            {
-                "id": "hallucination_types",
-                "name": "환각유형",
-                "target": 6,
-                "words": [
-                    "환청",
-                    "환시",
-                    "촉각환각",
-                    "후각환각",
-                    "미각환각",
-                    "착각"
-                ]
-            },
-            {
-                "id": "traditional_clothing",
-                "name": "전통의상",
-                "target": 6,
-                "words": [
-                    "한복",
-                    "기모노",
-                    "사리",
-                    "아오자이",
-                    "킬트",
-                    "치파오"
-                ]
-            },
-            {
-                "id": "teen_culture",
-                "name": "청소년문화",
-                "target": 7,
-                "words": [
-                    "교복패션",
-                    "팬덤",
-                    "급식체",
-                    "틱톡댄스",
-                    "동아리",
-                    "수능스트레스",
-                    "PC방"
-                ]
-            }
-        ]
-    },
-    {
         "id": 22,
         "maxMoves": 112,
         "slots": 4,
@@ -3048,7 +2947,7 @@
                 "words": [
                     "모루",
                     "망치",
-                    "집게",
+                    "칼",
                     "화덕",
                     "풀무",
                     "쇠막대"
@@ -3232,9 +3131,110 @@
         ]
     },
     {
+        "id": 28,
+        "maxMoves": 104,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "sound_characteristics",
+                "name": "소리",
+                "target": 7,
+                "words": [
+                    "음색",
+                    "잔향",
+                    "공명",
+                    "음량",
+                    "고저",
+                    "잡음",
+                    "파형"
+                ]
+            },
+            {
+                "id": "cosmetic_procedures",
+                "name": "미용시술",
+                "target": 7,
+                "words": [
+                    "보톡스",
+                    "필러",
+                    "레이저토닝",
+                    "박피",
+                    "제모",
+                    "리프팅",
+                    "문신제거"
+                ]
+            },
+            {
+                "id": "breathing_patterns",
+                "name": "호흡패턴",
+                "target": 6,
+                "words": [
+                    "복식호흡",
+                    "흉식호흡",
+                    "과호흡",
+                    "무호흡",
+                    "얕은호흡",
+                    "깊은호흡"
+                ]
+            },
+            {
+                "id": "surface_friction_states",
+                "name": "표면마찰",
+                "target": 6,
+                "words": [
+                    "정지마찰",
+                    "운동마찰",
+                    "윤활",
+                    "거칠기",
+                    "마모",
+                    "미끄럼"
+                ]
+            },
+            {
+                "id": "hallucination_types",
+                "name": "환각유형",
+                "target": 6,
+                "words": [
+                    "환청",
+                    "환시",
+                    "촉각환각",
+                    "후각환각",
+                    "미각환각",
+                    "착각"
+                ]
+            },
+            {
+                "id": "traditional_clothing",
+                "name": "전통의상",
+                "target": 6,
+                "words": [
+                    "한복",
+                    "기모노",
+                    "사리",
+                    "아오자이",
+                    "킬트",
+                    "치파오"
+                ]
+            },
+            {
+                "id": "teen_culture",
+                "name": "청소년문화",
+                "target": 7,
+                "words": [
+                    "교복패션",
+                    "팬덤",
+                    "급식체",
+                    "틱톡댄스",
+                    "동아리",
+                    "수능스트레스",
+                    "PC방"
+                ]
+            }
+        ]
+    },
+    {
         "id": 29,
         "maxMoves": 100,
-        "slots": 8,
+        "slots": 4,
         "categories": [
             {
                 "id": "adventure_spirit",

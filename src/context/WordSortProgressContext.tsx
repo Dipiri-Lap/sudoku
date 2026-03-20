@@ -8,6 +8,7 @@ const FIRESTORE_DOC = (uid: string) => doc(db, 'users', uid, 'wordSortProgress',
 
 interface WordSortProgressContextValue {
     wordSortProgress: number;
+    isSynced: boolean;
     saveWordSortProgress: (level: number) => Promise<void>;
 }
 
@@ -24,11 +25,16 @@ export const WordSortProgressProvider: React.FC<{ children: React.ReactNode }> =
         const stored = localStorage.getItem(LS_KEY);
         return stored ? parseInt(stored, 10) || 0 : 0;
     });
+    const [isSynced, setIsSynced] = useState(false);
     const syncedRef = useRef(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user || syncedRef.current) return;
+            if (!user) {
+                // App always signs in anonymously, so null is transient — wait for real user
+                return;
+            }
+            if (syncedRef.current) return;
             syncedRef.current = true;
             try {
                 const snap = await getDoc(FIRESTORE_DOC(user.uid));
@@ -47,6 +53,7 @@ export const WordSortProgressProvider: React.FC<{ children: React.ReactNode }> =
             } catch (e) {
                 console.error('WordSortProgressContext sync error:', e);
             }
+            setIsSynced(true);
         });
         return unsubscribe;
     }, []);
@@ -63,7 +70,7 @@ export const WordSortProgressProvider: React.FC<{ children: React.ReactNode }> =
     }, []);
 
     return (
-        <WordSortProgressContext.Provider value={{ wordSortProgress, saveWordSortProgress }}>
+        <WordSortProgressContext.Provider value={{ wordSortProgress, isSynced, saveWordSortProgress }}>
             {children}
         </WordSortProgressContext.Provider>
     );

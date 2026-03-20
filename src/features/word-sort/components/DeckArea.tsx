@@ -39,7 +39,7 @@ export const DeckArea: React.FC = () => {
     } = useWordSortUI();
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: `${Math.max(95, finalCardWidth)}px auto`, gap: '12px', marginBottom: '1.5rem', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: `${Math.max(95, finalCardWidth)}px auto`, gap: '12px', marginBottom: '0.375rem', alignItems: 'center' }}>
             {/* Steps counter */}
             <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', padding: '10px 5px', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '85px' }}>
                 <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>남은 횟수</div>

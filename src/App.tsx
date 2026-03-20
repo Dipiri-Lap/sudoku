@@ -74,12 +74,14 @@ const AppContent: React.FC = () => {
               </SudokuProvider>
             }
           />
-          <Route path="/word-sort" element={<WordSortModeSelect />} />
           <Route
-            path="/word-sort/play"
+            path="/word-sort/*"
             element={
               <WordSortProvider>
-                <WordSortGame />
+                <Routes>
+                  <Route index element={<WordSortModeSelect />} />
+                  <Route path="play" element={<WordSortGame />} />
+                </Routes>
               </WordSortProvider>
             }
           />
