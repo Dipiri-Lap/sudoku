@@ -105,8 +105,8 @@ const LandingPage: React.FC = () => {
 
     const handleShare = async () => {
         const url = window.location.origin;
-        const text = currentUser && !isGuest && challenges.puzzlePower > 0
-            ? `나는 퍼즐력 ${challenges.puzzlePower}! 퍼즐 가든에서 같이 두뇌 트레이닝 해요 🧩`
+        const text = currentUser && !isGuest && puzzlePower > 0
+            ? `나는 퍼즐력 ${puzzlePower}! 퍼즐 가든에서 같이 두뇌 트레이닝 해요 🧩`
             : '두뇌를 깨우는 즐거운 퍼즐의 세계, 퍼즐 가든 🧩';
 
         if (navigator.share) {
@@ -296,7 +296,7 @@ const LandingPage: React.FC = () => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>퍼즐력 :</span>
                                     <span style={{ color: '#ef4444', fontSize: '0.95rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
-                                        {challenges.puzzlePower}
+                                        {puzzlePower}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
