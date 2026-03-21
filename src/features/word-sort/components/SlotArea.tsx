@@ -24,6 +24,8 @@ export const SlotArea: React.FC = () => {
         handleDrop,
         splitText,
         slotRefs,
+        nearestTarget,
+        invalidDropTarget,
     } = useWordSortUI();
 
     const { lockedSlots } = state;
@@ -34,7 +36,7 @@ export const SlotArea: React.FC = () => {
             display: 'grid',
             gridTemplateColumns: `repeat(${Object.keys(state.activeSlots).length + (tutorialStep === null ? lockedSlots : 0)}, ${finalCardWidth}px)`,
             gap: `${gap}px`,
-            marginBottom: '1.5rem',
+            marginBottom: '0.875rem',
             maxWidth: 'fit-content',
             marginInline: 'auto',
             position: 'relative',
@@ -89,9 +91,15 @@ export const SlotArea: React.FC = () => {
                                     backgroundColor: slot ? '#ffffff' : 'rgba(255,255,255,0.03)',
                                     backgroundImage: 'none',
                                     color: '#333',
-                                    border: slot
-                                        ? '3px solid #ff9f43'
-                                        : '1px dashed rgba(255,255,255,0.2)',
+                                    border: (() => {
+                                        if (nearestTarget?.type === 'slot' && nearestTarget.index === i) {
+                                            return '3px solid #2ecc71';
+                                        }
+                                        if (invalidDropTarget?.type === 'slot' && invalidDropTarget.index === i) {
+                                            return '3px solid #e74c3c';
+                                        }
+                                        return slot ? '3px solid #ff9f43' : '1px dashed rgba(255,255,255,0.2)';
+                                    })(),
                                     opacity: 1,
                                     width: `${finalCardWidth}px`,
                                     boxShadow: slot ? '0 0 15px rgba(255,159,67,0.3)' : 'none',

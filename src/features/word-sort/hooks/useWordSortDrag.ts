@@ -28,6 +28,8 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
     const [dragGhostPos, setDragGhostPos] = useState<{ x: number; y: number } | null>(null);
 
     const [nearestValidTarget, setNearestValidTarget] = useState<{ type: 'slot' | 'stack'; index: number } | null>(null);
+    const [nearestTarget, setNearestTarget] = useState<{ type: 'slot' | 'stack'; index: number } | null>(null);
+    const [invalidDropTarget, setInvalidDropTarget] = useState<{ type: 'slot' | 'stack'; index: number } | null>(null);
 
     const [landingGroup, setLandingGroup] = useState<{
         targetIds: string[];
@@ -198,7 +200,7 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             }
         }
 
-        if (!bestTarget || bestOverlap === 0) { setNearestValidTarget(null); return; }
+        if (!bestTarget || bestOverlap === 0) { setNearestValidTarget(null); setNearestTarget(null); return; }
 
         const movingCards = dragInfo.type === 'deck'
             ? [state.revealedDeck[state.revealedDeck.length - 1]]
@@ -228,11 +230,14 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             }
         }
 
+        setNearestTarget(isSameSource ? null : bestTarget);
         setNearestValidTarget(isCompatible ? bestTarget : null);
     };
 
     // ─── Shared: Process drop (used by both drag and touch) ─────────────────────
     const _processDrop = (clientX: number, clientY: number, dragInfo: NonNullable<typeof draggingGroup>) => {
+        setNearestTarget(null);
+        setNearestValidTarget(null);
         const grabOffsetX = dragInfo.grabOffsetX || 0;
         const grabOffsetY = dragInfo.grabOffsetY || 0;
         const dragLeft = clientX - grabOffsetX;
@@ -362,7 +367,7 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                     let topOffset = 0;
                     for (let i = 0; i < nextIndex; i++) {
                         const isFaceDown = !targetStack[i].isRevealed;
-                        topOffset += (i < numToCompress && isFaceDown) ? 13 : 25;
+                        topOffset += (i < numToCompress && isFaceDown) ? 13 : visibleHeight;
                     }
                     targetCenterY = rect.top + topOffset + cardHeight / 2;
                 }
@@ -409,6 +414,11 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                 return;
             }
         }
+        // Incompatible drop: flash red on target for 500ms
+        if (!isSameSource && !isCompatible) {
+            setInvalidDropTarget(dropTarget);
+            setTimeout(() => setInvalidDropTarget(null), 500);
+        }
         setDraggingGroup(null);
     };
 
@@ -421,6 +431,7 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         const emptyImg = new Image();
         e.dataTransfer.setDragImage(emptyImg, 0, 0);
         setDragGhostPos({ x: e.clientX, y: e.clientY });
+        setInvalidDropTarget(null);
 
         setTimeout(() => {
             setDraggingGroup(result);
@@ -448,6 +459,7 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         // Store in ref for synchronous access in subsequent touch events
         touchDragRef.current = result;
         setDragGhostPos({ x: touch.clientX, y: touch.clientY });
+        setInvalidDropTarget(null);
         setDraggingGroup(result);
     };
 
@@ -467,12 +479,14 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         _processDrop(touch.clientX, touch.clientY, dragInfo);
         setDragGhostPos(null);
         setNearestValidTarget(null);
+        setNearestTarget(null);
     };
 
     const handleTouchCancel = () => {
         touchDragRef.current = null;
         setDragGhostPos(null);
         setNearestValidTarget(null);
+        setNearestTarget(null);
         setDraggingGroup(null);
     };
 
@@ -485,6 +499,9 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         setLandingGroup,
         nearestValidTarget,
         setNearestValidTarget,
+        nearestTarget,
+        setNearestTarget,
+        invalidDropTarget,
         handleDragStart,
         handleDragMove,
         handleDrop,

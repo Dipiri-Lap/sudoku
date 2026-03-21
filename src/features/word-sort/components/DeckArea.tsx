@@ -36,10 +36,11 @@ export const DeckArea: React.FC = () => {
         splitText,
         setShowMoveConfirm,
         coins,
+        setNearestTarget,
     } = useWordSortUI();
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: `${Math.max(95, finalCardWidth)}px auto`, gap: '12px', marginBottom: '0.375rem', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: `${Math.max(95, finalCardWidth)}px auto`, gap: '12px', marginBottom: '0.2rem', alignItems: 'center' }}>
             {/* Steps counter */}
             <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', padding: '10px 5px', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '85px' }}>
                 <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>남은 횟수</div>
@@ -90,7 +91,9 @@ export const DeckArea: React.FC = () => {
                         </div>
                     )}
                     {(() => {
-                        const last4 = state.revealedDeck.slice(-4);
+                        const slotCount = Object.keys(state.activeSlots).length;
+                        const maxVisible = slotCount === 3 ? 3 : 4;
+                        const last4 = state.revealedDeck.slice(-maxVisible);
                         const renderCards = last4.map((c, i) => ({ card: c, idx: i, isTop: i === last4.length - 1 }));
 
                         return renderCards.map(({ card, idx, isTop }) => {
@@ -106,7 +109,7 @@ export const DeckArea: React.FC = () => {
                                     draggable={isTop && tutorialStep !== 2 && tutorialStep !== 4 && tutorialStep !== 5 && tutorialStep !== 6}
                                     onDragStart={(e) => isTop && handleDragStart(e, 'deck', 0)}
                                     onDrag={handleDragMove}
-                                    onDragEnd={() => { setDragGhostPos(null); setNearestValidTarget(null); !landingGroup && setDraggingGroup(null); }}
+                                    onDragEnd={() => { setDragGhostPos(null); setNearestValidTarget(null); setNearestTarget(null); !landingGroup && setDraggingGroup(null); }}
                                     onTouchStart={(e) => { const canTouchDrag = isTop && tutorialStep !== 2 && tutorialStep !== 4 && tutorialStep !== 5 && tutorialStep !== 6; canTouchDrag && handleTouchStart(e, 'deck', 0); }}
                                     onTouchMove={handleTouchMove}
                                     onTouchEnd={handleTouchEnd}

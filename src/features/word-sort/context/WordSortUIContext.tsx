@@ -22,6 +22,9 @@ interface WordSortUIContextType {
     setLandingGroup: (g: any) => void;
     nearestValidTarget: { type: 'slot' | 'stack'; index: number } | null;
     setNearestValidTarget: (t: { type: 'slot' | 'stack'; index: number } | null) => void;
+    nearestTarget: { type: 'slot' | 'stack'; index: number } | null;
+    setNearestTarget: (t: { type: 'slot' | 'stack'; index: number } | null) => void;
+    invalidDropTarget: { type: 'slot' | 'stack'; index: number } | null;
     handleDragStart: (e: React.DragEvent, type: 'stack' | 'deck', index: number, cardIndex?: number) => void;
     handleDragMove: (e: React.DragEvent) => void;
     handleDrop: (e: React.DragEvent) => void;

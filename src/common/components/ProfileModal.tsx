@@ -44,6 +44,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const [unlockedAvatars, setUnlockedAvatars] = useState<string[]>(['1', '2', '3', '4', '5', '6', '7', '8']);
     const [pendingUnlockAvatar, setPendingUnlockAvatar] = useState<string | null>(null);
     const [activeTitle, setActiveTitle] = useState<string | null>(null);
+    const [displayPP, setDisplayPP] = useState<number>(0);
 
     const challenges = useChallenges();
     const { stageProgress, beginnerProgress } = useSudokuProgress();
@@ -135,7 +136,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 setActiveTitle(profile.activeTitle ?? null);
             }
 
-            // Initial rank fetch
+            setDisplayPP(profile.puzzlePower || 0);
             const r = await getUserRank(profile.puzzlePower || 0);
             setUserRank(r);
         };
@@ -544,7 +545,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     <Star size={14} color="#f59e0b" fill="#f59e0b" />
                                     <span style={{ color: '#f59e0b', fontWeight: 'bold', fontSize: '1rem' }}>
-                                        {challenges.puzzlePower.toLocaleString()}
+                                        {displayPP.toLocaleString()}
                                     </span>
                                 </div>
                             </div>
@@ -712,7 +713,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                 </div>
                                                             ) : cleared ? (
                                                                 <button
-                                                                    onClick={() => challenges.claimReward(challenge.id)}
+                                                                    onClick={async () => {
+                                                                        const c = await challenges.claimReward(challenge.id);
+                                                                        if (c) setDisplayPP(p => p + c.reward.puzzle_power);
+                                                                    }}
                                                                     style={{
                                                                         flexShrink: 0,
                                                                         padding: '0.45rem 0.6rem',

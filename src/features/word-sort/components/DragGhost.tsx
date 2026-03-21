@@ -8,7 +8,6 @@ export const DragGhost: React.FC = () => {
     const {
         draggingGroup,
         dragGhostPos,
-        nearestValidTarget,
         finalCardWidth,
         cardHeight,
         visibleHeight,
@@ -56,7 +55,7 @@ export const DragGhost: React.FC = () => {
                         backgroundImage: card.isRevealed ? 'none' : faceDownPattern,
                         backgroundSize: '100% 100%',
                         color: card.isRevealed ? '#333' : 'transparent',
-                        border: card.isRevealed ? (nearestValidTarget ? '3px solid #2ecc71' : (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999')) : 'none',
+                        border: card.isRevealed ? (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999') : 'none',
                         boxShadow: isTop ? '0 8px 20px rgba(0,0,0,0.3)' : 'none',
                         padding: '5px',
                     }}>
@@ -65,7 +64,7 @@ export const DragGhost: React.FC = () => {
                                 <div style={{
                                     position: 'absolute',
                                     inset: '2px',
-                                    border: nearestValidTarget ? '1px solid #27ae60' : (card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777'),
+                                    border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
                                     borderRadius: '3px',
                                     pointerEvents: 'none',
                                     zIndex: 1

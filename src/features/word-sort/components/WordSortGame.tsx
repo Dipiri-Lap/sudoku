@@ -139,7 +139,7 @@ const WordSortGame: React.FC = () => {
     const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef });
 
     // Hook: drag and drop
-    const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, handleDragStart, handleDragMove, handleDrop, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight });
+    const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, nearestTarget, setNearestTarget, invalidDropTarget, handleDragStart, handleDragMove, handleDrop, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight });
 
     // Award coins on win (not tutorial)
     useEffect(() => {
@@ -494,6 +494,9 @@ const WordSortGame: React.FC = () => {
             setLandingGroup,
             nearestValidTarget,
             setNearestValidTarget,
+            nearestTarget,
+            setNearestTarget,
+            invalidDropTarget,
             handleDragStart,
             handleDragMove,
             handleDrop,
@@ -556,7 +559,7 @@ const WordSortGame: React.FC = () => {
             }}>
 
             {/* Nav bar */}
-            <div className="game-nav" style={{ marginBottom: '0.5rem', marginLeft: '-1rem', marginRight: '-1rem', marginTop: '-0.5rem', borderRadius: '0' }}>
+            <div className="game-nav" style={{ marginBottom: '0.25rem', marginLeft: '-1rem', marginRight: '-1rem', marginTop: '-0.5rem', borderRadius: '0' }}>
                 <div className="game-nav-left">
                     <button className="nav-icon-btn" onClick={() => navigate('/word-sort')}>
                         <ChevronLeft size={22} />

@@ -37,6 +37,9 @@ export const StackArea: React.FC = () => {
         stackRefs,
         splitText,
         handleRemoveClick,
+        nearestTarget,
+        setNearestTarget,
+        invalidDropTarget,
     } = useWordSortUI();
 
     const { lockedStacks } = state;
@@ -152,7 +155,7 @@ export const StackArea: React.FC = () => {
                                     draggable={canDrag && !isRemoveMode}
                                     onDragStart={e => canDrag && !isRemoveMode && handleDragStart(e, 'stack', sIdx, cIdx)}
                                     onDrag={handleDragMove}
-                                    onDragEnd={() => { setDragGhostPos(null); setNearestValidTarget(null); !landingGroup && setDraggingGroup(null); }}
+                                    onDragEnd={() => { setDragGhostPos(null); setNearestValidTarget(null); setNearestTarget(null); !landingGroup && setDraggingGroup(null); }}
                                     onDragOver={e => e.preventDefault()}
                                     onTouchStart={e => canDrag && !isRemoveMode && handleTouchStart(e, 'stack', sIdx, cIdx)}
                                     onTouchMove={handleTouchMove}
@@ -179,7 +182,16 @@ export const StackArea: React.FC = () => {
                                         cursor: isRemoveMode && (card.isRevealed || gatheringCat === card.cat) ? 'pointer' : (canDrag ? 'grab' : 'default'),
                                         touchAction: canDrag && !isRemoveMode ? 'none' : 'auto',
                                         border: isRevealed
-                                            ? (card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999')
+                                            ? (() => {
+                                                const isTopCard = cIdx === stack.length - 1;
+                                                if (isTopCard && nearestTarget?.type === 'stack' && nearestTarget.index === sIdx) {
+                                                    return '3px solid #2ecc71';
+                                                }
+                                                if (isTopCard && invalidDropTarget?.type === 'stack' && invalidDropTarget.index === sIdx) {
+                                                    return '3px solid #e74c3c';
+                                                }
+                                                return card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999';
+                                            })()
                                             : 'none',
                                         boxShadow: (isRevealed && card.type === 'category') ? '0 0 10px rgba(255,159,67,0.2)' : 'none',
                                         visibility: (isGatheringTarget || (draggingGroup?.type === 'stack' && draggingGroup.index === sIdx && draggingGroup.cardIndex !== undefined && cIdx >= draggingGroup.cardIndex && cIdx < draggingGroup.cardIndex + (draggingGroup.count || 1)) || (landingGroup?.isProxy && landingGroup.movingCards?.some((mc: any) => mc.id === card.id)) || !isDealtYet) ? 'hidden' : 'visible',

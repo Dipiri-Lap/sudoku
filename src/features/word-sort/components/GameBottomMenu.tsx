@@ -24,8 +24,8 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
 
     return (
         <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', padding: '1.5rem 0.5rem',
-            marginTop: '1.5rem',
+            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', padding: '1rem 0.5rem',
+            marginTop: '1rem',
             borderTop: '1px solid rgba(255,255,255,0.1)'
         }}>
             <div style={{ textAlign: 'center' }}>
