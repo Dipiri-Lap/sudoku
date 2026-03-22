@@ -22,6 +22,7 @@ const Controls: React.FC = () => {
     };
 
     const handleUndo = () => dispatch({ type: 'UNDO' });
+
     const handleErase = () => {
         if (!state.selectedCell) return;
         const { row, col } = state.selectedCell;

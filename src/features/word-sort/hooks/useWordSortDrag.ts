@@ -11,10 +11,11 @@ interface UseWordSortDragParams {
     finalCardWidth: number;
     cardHeight: number;
     visibleHeight: number;
+    sfxVolume: number;
 }
 
 export function useWordSortDrag(params: UseWordSortDragParams) {
-    const { state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight } = params;
+    const { state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight, sfxVolume } = params;
 
     const [draggingGroup, setDraggingGroup] = useState<{
         type: 'stack' | 'deck';
@@ -352,6 +353,9 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         }
 
         if (isCompatible) {
+            const sfx = new Audio('/assets/word-sort/sounds/cardsfx1.wav');
+            sfx.volume = sfxVolume;
+            sfx.play().catch(() => {});
             const containerRef = dropTarget.type === 'slot' ? slotRefs.current[dropTarget.index] : stackRefs.current[dropTarget.index];
             if (containerRef) {
                 const rect = containerRef.getBoundingClientRect();
@@ -416,6 +420,9 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         }
         // Incompatible drop: flash red on target for 500ms
         if (!isSameSource && !isCompatible) {
+            const sfx = new Audio('/assets/word-sort/sounds/fail.wav');
+            sfx.volume = sfxVolume;
+            sfx.play().catch(() => {});
             setInvalidDropTarget(dropTarget);
             setTimeout(() => setInvalidDropTarget(null), 500);
         }

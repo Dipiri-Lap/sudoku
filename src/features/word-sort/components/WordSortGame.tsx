@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ShoppingCart } from 'lucide-react';
+import { ChevronLeft, ShoppingCart, Settings } from 'lucide-react';
 import { useWordSort, WORDSORT_SAVE_KEY } from '../context/WordSortContext';
 import levels from '../data/levels.json';
 import tutorialLevel from '../data/tutorial-level.json';
@@ -8,6 +8,7 @@ import { useCoins } from '../../../context/CoinContext';
 import { useWordSortProgress } from '../../../context/WordSortProgressContext';
 import { useCardBacks, cardBackDesigns } from '../context/CardBackContext';
 import CardBackShopModal from './CardBackShopModal';
+import WordSortSettingsModal from './WordSortSettingsModal';
 import GlobalOverlay from './board/GlobalOverlay';
 import { useWordSortDrag } from '../hooks/useWordSortDrag';
 import { useGatherAnimation } from '../hooks/useGatherAnimation';
@@ -36,10 +37,17 @@ const WordSortGame: React.FC = () => {
     const { lockedStacks, lockedSlots } = state;
     const [unlockConfirm, setUnlockConfirm] = useState<'stack' | 'slot' | null>(null);
     const [isShopOpen, setIsShopOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isRemoveMode, setIsRemoveMode] = useState(false);
     const [showMoveConfirm, setShowMoveConfirm] = useState(false);
     const [showResumeConfirm, setShowResumeConfirm] = useState(false);
     const [pendingSavedState, setPendingSavedState] = useState<any>(null);
+
+    const [bgmVolume, setBgmVolume] = useState(() => parseFloat(localStorage.getItem('wordSort_bgmVolume') || '0.1'));
+    const [sfxVolume, setSfxVolume] = useState(() => parseFloat(localStorage.getItem('wordSort_sfxVolume') || '0.5'));
+
+    useEffect(() => { localStorage.setItem('wordSort_bgmVolume', bgmVolume.toString()); }, [bgmVolume]);
+    useEffect(() => { localStorage.setItem('wordSort_sfxVolume', sfxVolume.toString()); }, [sfxVolume]);
 
     const { selectedBackId } = useCardBacks();
     const currentCardBack = cardBackDesigns.find((cb: any) => cb.id === selectedBackId) || cardBackDesigns[0];
@@ -93,10 +101,27 @@ const WordSortGame: React.FC = () => {
     const [dealingProgress, setDealingProgress] = useState(0);
     const dealingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const deckCardRef = useRef<HTMLDivElement | null>(null);
+    const bgmRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
-        return () => { if (dealingTimerRef.current) clearInterval(dealingTimerRef.current); };
+        bgmRef.current = new Audio('/assets/word-sort/sounds/wordbgm.mp3');
+        bgmRef.current.loop = true;
+        bgmRef.current.volume = bgmVolume;
+        
+        return () => { 
+            if (dealingTimerRef.current) clearInterval(dealingTimerRef.current); 
+            if (bgmRef.current) {
+                bgmRef.current.pause();
+                bgmRef.current.src = '';
+            }
+        };
     }, []);
+
+    useEffect(() => {
+        if (bgmRef.current) {
+            bgmRef.current.volume = bgmVolume;
+        }
+    }, [bgmVolume]);
 
     // Prevent body scroll while game is active
     useEffect(() => {
@@ -123,11 +148,19 @@ const WordSortGame: React.FC = () => {
         let count = 0;
         dealingTimerRef.current = setInterval(() => {
             count++;
+            const sfx = new Audio('/assets/word-sort/sounds/cardsfx1.wav');
+            sfx.volume = sfxVolume;
+            sfx.play().catch(() => {});
             setDealingProgress(count);
             if (count >= totalCards) {
                 clearInterval(dealingTimerRef.current!);
                 dealingTimerRef.current = null;
-                setTimeout(() => setIsDealingAnimation(false), 350);
+                setTimeout(() => {
+                    setIsDealingAnimation(false);
+                    if (bgmRef.current && bgmRef.current.paused) {
+                        bgmRef.current.play().catch(e => console.warn('BGM play prevented:', e));
+                    }
+                }, 350);
             }
         }, 80);
     };
@@ -139,7 +172,7 @@ const WordSortGame: React.FC = () => {
     const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef });
 
     // Hook: drag and drop
-    const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, nearestTarget, setNearestTarget, invalidDropTarget, handleDragStart, handleDragMove, handleDrop, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight });
+    const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, nearestTarget, setNearestTarget, invalidDropTarget, handleDragStart, handleDragMove, handleDrop, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight, sfxVolume });
 
     // Award coins on win (not tutorial)
     useEffect(() => {
@@ -429,6 +462,9 @@ const WordSortGame: React.FC = () => {
     const drawDeck = () => {
         if (isRemoveMode) return;
         if (tutorialStep === 2 || tutorialStep === 4 || tutorialStep === 5 || tutorialStep === 6) return;
+        const sfx = new Audio('/assets/word-sort/sounds/cardsfx2.wav');
+        sfx.volume = sfxVolume;
+        sfx.play().catch(() => {});
         dispatch({ type: 'DRAW_DECK' });
     };
 
@@ -486,6 +522,10 @@ const WordSortGame: React.FC = () => {
             stackCardStyle,
             slotCardStyle,
             faceDownPattern,
+            bgmVolume,
+            setBgmVolume,
+            sfxVolume,
+            setSfxVolume,
             draggingGroup,
             setDraggingGroup,
             dragGhostPos,
@@ -571,9 +611,12 @@ const WordSortGame: React.FC = () => {
                     )}
                 </div>
                 {tutorialStep === null && (
-                    <div className="game-nav-right">
+                    <div className="game-nav-right" style={{ display: 'flex', gap: '8px' }}>
                         <button className="nav-icon-btn" onClick={() => setIsShopOpen(true)}>
                             <ShoppingCart size={20} />
+                        </button>
+                        <button className="nav-icon-btn" onClick={() => setIsSettingsOpen(true)}>
+                            <Settings size={20} />
                         </button>
                     </div>
                 )}
@@ -679,6 +722,9 @@ const WordSortGame: React.FC = () => {
 
             {/* Shop Modal */}
             {isShopOpen && <CardBackShopModal onClose={() => setIsShopOpen(false)} />}
+
+            {/* Settings Modal */}
+            {isSettingsOpen && <WordSortSettingsModal onClose={() => setIsSettingsOpen(false)} />}
 
             {/* Global Gathering Animation Overlay */}
             <GlobalOverlay

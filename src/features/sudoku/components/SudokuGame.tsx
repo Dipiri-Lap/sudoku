@@ -328,28 +328,41 @@ const SudokuGame: React.FC = () => {
             </footer>
 
             {state.isGameOver && (
-                <div className="modal-overlay">
-                    <div className="modal-content animate-fade-in">
-                        <h2 style={{ color: 'var(--error-color)' }}>게임 오버</h2>
-                        <p>실수를 3번 하셨습니다.</p>
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', width: '100%' }}>
-                            <a
-                                href={state.gameMode === 'Stage' ? '/sudoku' : '/sudoku/time-attack'}
-                                className="primary-btn"
-                                style={{ textDecoration: 'none', flex: 1, background: 'var(--bg-secondary)', color: 'var(--text-main)' }}
-                            >
-                                뒤로
-                            </a>
-                            <a
-                                href={state.gameMode === 'Stage'
-                                    ? `/sudoku/stage?mode=stage&level=${state.currentLevel}`
-                                    : `/sudoku/time-attack/play?difficulty=${state.difficulty}`}
-                                className="primary-btn"
-                                style={{ textDecoration: 'none', flex: 1 }}
-                            >
-                                다시 시도
-                            </a>
-                        </div>
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex',
+                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>💀</div>
+                    <h2 style={{ fontSize: '2.2rem', color: '#e74c3c', marginBottom: '0.5rem', fontWeight: 'bold', letterSpacing: '2px' }}>GAME OVER</h2>
+                    <div style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>
+                        실수를 {state.mistakes}번 하셨습니다
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <a
+                            href={state.gameMode === 'Stage' ? '/sudoku' : '/sudoku/time-attack'}
+                            style={{
+                                padding: '0.75rem 1.8rem', fontSize: '1rem', borderRadius: '30px',
+                                border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)',
+                                color: 'rgba(255,255,255,0.8)', fontWeight: '600', cursor: 'pointer',
+                                textDecoration: 'none', display: 'inline-block'
+                            }}
+                        >
+                            뒤로
+                        </a>
+                        <a
+                            href={state.gameMode === 'Stage'
+                                ? `/sudoku/stage?mode=stage&level=${state.currentLevel}`
+                                : `/sudoku/time-attack/play?difficulty=${state.difficulty}`}
+                            style={{
+                                padding: '0.75rem 2.2rem', fontSize: '1rem', borderRadius: '30px',
+                                border: 'none', background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
+                                color: 'white', fontWeight: 'bold', cursor: 'pointer',
+                                boxShadow: '0 4px 15px rgba(231,76,60,0.4)',
+                                textDecoration: 'none', display: 'inline-block'
+                            }}
+                        >
+                            다시 시도 🔄
+                        </a>
                     </div>
                 </div>
             )}

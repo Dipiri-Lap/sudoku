@@ -55,6 +55,11 @@ interface WordSortUIContextType {
     coins: number;
     spendCoins: (n: number) => Promise<boolean>;
     addCoins: (n: number) => void;
+    // Volume Settings
+    bgmVolume: number;
+    setBgmVolume: (v: number) => void;
+    sfxVolume: number;
+    setSfxVolume: (v: number) => void;
     // Refs
     stackRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
     slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
