@@ -28,7 +28,7 @@ const CoinDisplay: React.FC<CoinDisplayProps> = ({ style, onClick }) => {
         }}>
             <GoldCoinIcon />
             <div style={{
-                background: 'rgba(255, 245, 220, 0.6)', // Even brighter, more opaque background
+                background: 'rgba(15, 23, 42, 0.75)', // Darker slate background for contrast
                 border: '1.5px solid rgba(255, 215, 0, 0.5)', // Golden border
                 backdropFilter: 'blur(8px)',
                 color: 'white',

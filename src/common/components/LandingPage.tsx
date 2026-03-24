@@ -220,10 +220,66 @@ const LandingPage: React.FC = () => {
             )}
 
             <header className="landing-header" style={{ width: '100%' }}>
-                {/* 상단 프로필/코인 다크 바 영역 */}
+                {/* 상단 코인 & 로그인 버튼 (위로 뺌) */}
                 <div style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    width: '100%',
+                    marginBottom: '0.5rem',
+                    padding: '0 0.25rem'
+                }}>
+                    <CoinDisplay onClick={() => setShowCoinShop(true)} />
+
+                    {currentUser && !isGuest ? (
+                        <button
+                            onClick={handleSignOut}
+                            title="로그아웃"
+                            style={{
+                                padding: '0.5rem',
+                                borderRadius: '50%',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                backgroundColor: 'rgba(255,255,255,0.1)',
+                                color: '#fff',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            <LogOut size={16} />
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setShowLoginModal(true)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                padding: '0.35rem 0.8rem',
+                                borderRadius: '8px',
+                                border: 'none',
+                                backgroundColor: '#4a90e2',
+                                color: 'white',
+                                fontWeight: 700,
+                                fontSize: '0.78rem',
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <LogIn size={15} />
+                            로그인
+                        </button>
+                    )}
+                </div>
+
+                {/* 상단 프로필 다크 바 영역 (코인 제외) */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-start',
                     alignItems: 'center',
                     width: '100%',
                     marginBottom: '1rem',
@@ -309,55 +365,7 @@ const LandingPage: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Right: Coins and Logout/Login */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <CoinDisplay onClick={() => setShowCoinShop(true)} />
-
-                        <div style={{ marginLeft: '0.2rem', height: '24px', width: '1px', backgroundColor: 'rgba(255,255,255,0.2)' }} />
-
-                        {currentUser && !isGuest ? (
-                            <button
-                                onClick={handleSignOut}
-                                title="로그아웃"
-                                style={{
-                                    padding: '0.5rem',
-                                    borderRadius: '50%',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    backgroundColor: 'rgba(255,255,255,0.1)',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s',
-                                }}
-                            >
-                                <LogOut size={16} />
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setShowLoginModal(true)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.3rem',
-                                    padding: '0.35rem 0.8rem',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    backgroundColor: '#4a90e2',
-                                    color: 'white',
-                                    fontWeight: 700,
-                                    fontSize: '0.78rem',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                <LogIn size={15} />
-                                로그인
-                            </button>
-                        )}
-                    </div>
+                    {/* Right: Coins and Logout/Login moved up */}
                 </div>
 
                 {/* <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} /> */}
