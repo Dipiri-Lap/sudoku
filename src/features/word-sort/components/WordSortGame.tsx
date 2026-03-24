@@ -40,8 +40,54 @@ const WordSortGame: React.FC = () => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isRemoveMode, setIsRemoveMode] = useState(false);
     const [showMoveConfirm, setShowMoveConfirm] = useState(false);
+    const [showUndoConfirm, setShowUndoConfirm] = useState(false);
+    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+
     const [showResumeConfirm, setShowResumeConfirm] = useState(false);
     const [pendingSavedState, setPendingSavedState] = useState<any>(null);
+
+    // Ad Reward State
+    const [adWatching, setAdWatching] = useState(false);
+    const [pendingShowAd, setPendingShowAd] = useState<(() => void) | null>(null);
+    const [adOfferConfig, setAdOfferConfig] = useState<{
+        type: 'move' | 'unlock_stack' | 'unlock_slot' | 'undo' | 'remove';
+        cost: number;
+        action: () => Promise<void> | void;
+    } | null>(null);
+
+    const handleWatchAd = (onSuccess: () => Promise<void> | void) => {
+        if (adWatching) return;
+
+        const awardCoinsAndProceed = async () => {
+            await addCoins(50);
+            setAdOfferConfig(null);
+            await onSuccess(); // Auto execute after finding sufficient coins
+        };
+
+        if (import.meta.env.DEV || !window.adBreak) {
+            setAdWatching(true);
+            setTimeout(async () => {
+                await awardCoinsAndProceed();
+                setAdWatching(false);
+            }, 1000);
+            return;
+        }
+
+        window.adBreak({
+            type: 'reward',
+            name: 'coin-reward',
+            beforeReward: (showAdFn: () => void) => { setPendingShowAd(() => showAdFn); },
+            beforeAd: () => { setAdWatching(true); setPendingShowAd(null); },
+            afterAd: () => { setAdWatching(false); },
+            adViewed: awardCoinsAndProceed,
+            adDismissed: () => { alert('광고를 끝까지 시청해야 코인을 받을 수 있어요.'); },
+            adBreakDone: (info: { status: string }) => {
+                setAdWatching(false);
+                setPendingShowAd(null);
+                if (info.status === 'noAdPreloaded') alert('현재 준비된 광고가 없습니다. 잠시 후 시도해주세요.');
+            },
+        });
+    };
 
     const [bgmVolume, setBgmVolume] = useState(() => parseFloat(localStorage.getItem('wordSort_bgmVolume') || '0.1'));
     const [sfxVolume, setSfxVolume] = useState(() => parseFloat(localStorage.getItem('wordSort_sfxVolume') || '0.5'));
@@ -570,6 +616,8 @@ const WordSortGame: React.FC = () => {
             splitText,
             setUnlockConfirm,
             setShowMoveConfirm,
+            setShowUndoConfirm,
+            setShowRemoveConfirm,
             isDealingAnimation,
             dealingProgress,
             lastDrawnId,
@@ -638,7 +686,7 @@ const WordSortGame: React.FC = () => {
             />
 
             {/* Unlock Confirm Dialog */}
-            {unlockConfirm && (
+            {unlockConfirm && !adOfferConfig && (
                 <div style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
@@ -664,9 +712,14 @@ const WordSortGame: React.FC = () => {
                                 style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
                             >취소</button>
                             <button
-                                onClick={handleUnlockConfirm}
-                                disabled={coins < 50}
-                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= 50 ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= 50 ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
+                                onClick={async () => {
+                                    if (coins < 50) {
+                                        setAdOfferConfig({ type: unlockConfirm === 'stack' ? 'unlock_stack' : 'unlock_slot', cost: 50, action: handleUnlockConfirm });
+                                        return;
+                                    }
+                                    handleUnlockConfirm();
+                                }}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #f6d365, #fda085)', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '0.9rem' }}
                             >확인</button>
                         </div>
                     </div>
@@ -674,7 +727,7 @@ const WordSortGame: React.FC = () => {
             )}
 
             {/* Move Purchase Confirm Dialog */}
-            {showMoveConfirm && (
+            {showMoveConfirm && !adOfferConfig && (
                 <div style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
@@ -701,15 +754,144 @@ const WordSortGame: React.FC = () => {
                             >취소</button>
                             <button
                                 onClick={async () => {
-                                    const success = await spendCoins(50);
-                                    if (success) {
-                                        dispatch({ type: 'ADD_STEPS', count: 20 });
+                                    const action = async () => {
+                                        const success = await spendCoins(50);
+                                        if (success) { dispatch({ type: 'ADD_STEPS', count: 20 }); }
+                                        setShowMoveConfirm(false);
+                                    };
+                                    if (coins < 50) {
+                                        setAdOfferConfig({ type: 'move', cost: 50, action });
+                                        return;
                                     }
-                                    setShowMoveConfirm(false);
+                                    action();
                                 }}
-                                disabled={coins < 50}
-                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= 50 ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= 50 ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #f6d365, #fda085)', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '0.9rem' }}
                             >확인</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Undo Confirm Dialog */}
+            {showUndoConfirm && !adOfferConfig && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+                }}>
+                    <div style={{
+                        background: '#3a3c5a', borderRadius: '16px', padding: '1.5rem',
+                        textAlign: 'center', width: '240px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ fontSize: '1.8rem', marginBottom: '0.4rem' }}>↩️</div>
+                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.4rem' }}>철회</div>
+                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                            🪙 10 코인을 사용하여<br />
+                            이전 행동을 철회하시겠습니까?
+                        </div>
+                        {coins < 10 && (
+                            <div style={{ fontSize: '0.78rem', color: '#ff6b6b', marginBottom: '0.6rem' }}>
+                                코인 부족 (현재 {coins}개)
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => setShowUndoConfirm(false)}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
+                            >취소</button>
+                            <button
+                                onClick={async () => {
+                                    const action = async () => {
+                                        const success = await spendCoins(10);
+                                        if (success) { dispatch({ type: 'UNDO_ACTION' }); }
+                                        setShowUndoConfirm(false);
+                                    };
+                                    if (coins < 10) {
+                                        setAdOfferConfig({ type: 'undo', cost: 10, action });
+                                        return;
+                                    }
+                                    action();
+                                }}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #f6d365, #fda085)', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '0.9rem' }}
+                            >확인</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Remove Confirm Dialog */}
+            {showRemoveConfirm && !adOfferConfig && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+                }}>
+                    <div style={{
+                        background: '#3a3c5a', borderRadius: '16px', padding: '1.5rem',
+                        textAlign: 'center', width: '240px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ fontSize: '1.8rem', marginBottom: '0.4rem' }}>🗑️</div>
+                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.4rem' }}>제거 모드</div>
+                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                            🪙 50 코인을 사용하여<br />
+                            카테고리 제거 모드에 진입하시겠습니까?<br />
+                            (진입 후 카드 클릭 시 제거됩니다.)
+                        </div>
+                        {coins < 50 && (
+                            <div style={{ fontSize: '0.78rem', color: '#ff6b6b', marginBottom: '0.6rem' }}>
+                                코인 부족 (현재 {coins}개)
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => setShowRemoveConfirm(false)}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
+                            >취소</button>
+                            <button
+                                onClick={async () => {
+                                    const action = async () => {
+                                        setIsRemoveMode(true);
+                                        setShowRemoveConfirm(false);
+                                    };
+                                    if (coins < 50) {
+                                        setAdOfferConfig({ type: 'remove', cost: 50, action });
+                                        return;
+                                    }
+                                    action();
+                                }}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #f6d365, #fda085)', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '0.9rem' }}
+                            >확인</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Ad Offer Overlay */}
+            {adOfferConfig && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2050
+                }}>
+                    <div style={{
+                        background: '#3a3c5a', borderRadius: '16px', padding: '1.5rem',
+                        textAlign: 'center', width: '250px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ fontSize: '1.8rem', marginBottom: '0.4rem' }}>📺</div>
+                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.4rem' }}>코인 부족</div>
+                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                            코인이 부족합니다.<br />
+                            광고를 시청하고 🪙 50 코인을 획득하여 바로 사용하시겠습니까?
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => { setAdOfferConfig(null); setUnlockConfirm(null); setShowMoveConfirm(false); setShowUndoConfirm(false); setShowRemoveConfirm(false); }}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
+                            >취소</button>
+                            <button
+                                onClick={() => handleWatchAd(adOfferConfig.action)}
+                                disabled={adWatching}
+                                style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #4ade80, #22c55e)', color: 'white', fontWeight: '700', cursor: adWatching ? 'not-allowed' : 'pointer', fontSize: '0.9rem' }}
+                            >
+                                {adWatching ? '로딩...' : '광고 시청'}
+                            </button>
                         </div>
                     </div>
                 </div>

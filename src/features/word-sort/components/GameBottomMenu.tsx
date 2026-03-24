@@ -18,6 +18,8 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
         isRemoveMode,
         setIsRemoveMode,
         tutorialStep,
+        setShowUndoConfirm,
+        setShowRemoveConfirm,
     } = useWordSortUI();
 
     if (tutorialStep !== null) return null;
@@ -44,12 +46,9 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
                     color: (state.history.length > 0 && coins >= 10) ? 'white' : 'rgba(255,255,255,0.3)',
                     opacity: (state.history.length > 0 && coins >= 10) ? 1 : 0.5
                 }}
-                onClick={async () => {
-                    if (state.history.length === 0 || coins < 10) return;
-                    const success = await spendCoins(10);
-                    if (success) {
-                        dispatch({ type: 'UNDO_ACTION' });
-                    }
+                onClick={() => {
+                    if (state.history.length === 0) return;
+                    setShowUndoConfirm(true);
                 }}
             >
                 <Undo2 size={24} style={{ margin: '0 auto' }} />
@@ -64,8 +63,11 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
                     opacity: isRemoveMode ? 1 : (coins >= 50 ? 1 : 0.5)
                 }}
                 onClick={() => {
-                    if (!isRemoveMode && coins < 50) return;
-                    setIsRemoveMode(!isRemoveMode);
+                    if (isRemoveMode) {
+                        setIsRemoveMode(false);
+                    } else {
+                        setShowRemoveConfirm(true);
+                    }
                 }}
             >
                 <LayersIcon size={24} style={{ margin: '0 auto' }} />

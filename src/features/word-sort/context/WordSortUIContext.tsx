@@ -69,6 +69,8 @@ interface WordSortUIContextType {
     splitText: (value: string) => React.ReactNode;
     setUnlockConfirm: (v: 'stack' | 'slot' | null) => void;
     setShowMoveConfirm: (v: boolean) => void;
+    setShowUndoConfirm: (v: boolean) => void;
+    setShowRemoveConfirm: (v: boolean) => void;
     // Dealing animation
     isDealingAnimation: boolean;
     dealingProgress: number;
