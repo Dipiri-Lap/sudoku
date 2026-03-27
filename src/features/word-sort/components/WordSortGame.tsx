@@ -54,12 +54,15 @@ const WordSortGame: React.FC = () => {
         cost: number;
         action: () => Promise<void> | void;
     } | null>(null);
+    const [adUsedThisGame, setAdUsedThisGame] = useState(false);
+    const [showCoinInsufficient, setShowCoinInsufficient] = useState(false);
 
     const handleWatchAd = (onSuccess: () => Promise<void> | void) => {
         if (adWatching) return;
 
         const awardCoinsAndProceed = async () => {
             await addCoins(50);
+            setAdUsedThisGame(true);
             setAdOfferConfig(null);
             await onSuccess(); // Auto execute after finding sufficient coins
         };
@@ -426,6 +429,7 @@ const WordSortGame: React.FC = () => {
     }, []);
 
     const initializeNewGame = async () => {
+        setAdUsedThisGame(false);
         const tutorialDone = localStorage.getItem('wordSort_tutorialDone');
         if (!tutorialDone) {
             dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
@@ -714,7 +718,8 @@ const WordSortGame: React.FC = () => {
                             <button
                                 onClick={async () => {
                                     if (coins < 50) {
-                                        setAdOfferConfig({ type: unlockConfirm === 'stack' ? 'unlock_stack' : 'unlock_slot', cost: 50, action: handleUnlockConfirm });
+                                        if (adUsedThisGame) { setShowCoinInsufficient(true); }
+                                        else { setAdOfferConfig({ type: unlockConfirm === 'stack' ? 'unlock_stack' : 'unlock_slot', cost: 50, action: handleUnlockConfirm }); }
                                         return;
                                     }
                                     handleUnlockConfirm();
@@ -760,7 +765,8 @@ const WordSortGame: React.FC = () => {
                                         setShowMoveConfirm(false);
                                     };
                                     if (coins < 50) {
-                                        setAdOfferConfig({ type: 'move', cost: 50, action });
+                                        if (adUsedThisGame) { setShowCoinInsufficient(true); }
+                                        else { setAdOfferConfig({ type: 'move', cost: 50, action }); }
                                         return;
                                     }
                                     action();
@@ -806,7 +812,8 @@ const WordSortGame: React.FC = () => {
                                         setShowUndoConfirm(false);
                                     };
                                     if (coins < 10) {
-                                        setAdOfferConfig({ type: 'undo', cost: 10, action });
+                                        if (adUsedThisGame) { setShowCoinInsufficient(true); }
+                                        else { setAdOfferConfig({ type: 'undo', cost: 10, action }); }
                                         return;
                                     }
                                     action();
@@ -852,7 +859,8 @@ const WordSortGame: React.FC = () => {
                                         setShowRemoveConfirm(false);
                                     };
                                     if (coins < 50) {
-                                        setAdOfferConfig({ type: 'remove', cost: 50, action });
+                                        if (adUsedThisGame) { setShowCoinInsufficient(true); }
+                                        else { setAdOfferConfig({ type: 'remove', cost: 50, action }); }
                                         return;
                                     }
                                     action();
@@ -886,13 +894,36 @@ const WordSortGame: React.FC = () => {
                                 style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
                             >취소</button>
                             <button
-                                onClick={() => handleWatchAd(adOfferConfig.action)}
+                                onClick={() => pendingShowAd ? pendingShowAd() : handleWatchAd(adOfferConfig.action)}
                                 disabled={adWatching}
                                 style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #4ade80, #22c55e)', color: 'white', fontWeight: '700', cursor: adWatching ? 'not-allowed' : 'pointer', fontSize: '0.9rem' }}
                             >
                                 {adWatching ? '로딩...' : '광고 시청'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Coin Insufficient Overlay (ad already used this game) */}
+            {showCoinInsufficient && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2050
+                }}>
+                    <div style={{
+                        background: '#3a3c5a', borderRadius: '16px', padding: '1.5rem',
+                        textAlign: 'center', width: '250px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ fontSize: '1.8rem', marginBottom: '0.4rem' }}>🪙</div>
+                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.4rem' }}>코인 부족</div>
+                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                            이번 게임에서 광고 보상은<br />이미 사용되었습니다.<br />코인 상점에서 코인을 충전해주세요.
+                        </div>
+                        <button
+                            onClick={() => setShowCoinInsufficient(false)}
+                            style={{ padding: '0.45rem 1.4rem', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #64748b, #475569)', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '0.9rem' }}
+                        >확인</button>
                     </div>
                 </div>
             )}

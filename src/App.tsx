@@ -8,6 +8,7 @@ import { GameProvider as SudokuProvider } from './features/sudoku/context/Sudoku
 import WordSortGame from './features/word-sort/components/WordSortGame';
 import WordSortModeSelect from './features/word-sort/components/WordSortModeSelect';
 import TileMatchGame from './features/tile-match/components/TileMatchGame';
+import SnapSpotGame from './features/snapspot/components/SnapSpotGame';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
@@ -86,6 +87,7 @@ const AppContent: React.FC = () => {
             }
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
+          <Route path="/snapspot" element={<SnapSpotGame />} />
         </Routes>
       </CardBackProvider>
       </WordSortProgressProvider>
