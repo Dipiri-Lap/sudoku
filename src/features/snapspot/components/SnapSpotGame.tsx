@@ -333,6 +333,7 @@ const SnapSpotGame: React.FC = () => {
       <title>스냅스팟 틀린그림찾기 - 퍼즐 가든</title>
       <meta name="description" content="두 사진을 비교해서 다른 부분을 찾는 틀린그림찾기 게임. 눈썰미를 테스트해보세요!" />
       <link rel="canonical" href="https://puzzles.tmhub.co.kr/snapspot" />
+      <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"스냅스팟","item":"https://puzzles.tmhub.co.kr/snapspot"}]}`}</script>
     </Helmet>
     <div className="snapspot-game" ref={gameRef}>
       <div className="snapspot-header">

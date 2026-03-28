@@ -583,34 +583,42 @@ const LandingPage: React.FC = () => {
             )}
 
             {/* SEO 콘텐츠 섹션 */}
-            <section style={{ padding: '2.5rem 1.5rem 3rem', maxWidth: '720px', margin: '0 auto', color: '#555', lineHeight: '1.8' }}>
-                <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#333', marginBottom: '0.75rem' }}>
+            <details style={{ padding: '2rem 1.5rem 3rem', maxWidth: '720px', margin: '0 auto', color: '#555', lineHeight: '1.8' }}>
+                <summary style={{
+                    fontSize: '1.1rem', fontWeight: 700, color: '#444',
+                    cursor: 'pointer', listStyle: 'none',
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                    userSelect: 'none',
+                }}>
+                    <span style={{ fontSize: '0.75rem', color: '#888' }}>▶</span>
                     두뇌를 깨우는 무료 퍼즐 게임 모음
-                </h2>
-                <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>
-                    퍼즐 가든은 언제 어디서나 즐길 수 있는 <strong>무료 두뇌 퍼즐 게임</strong> 사이트입니다.
-                    스도쿠, 단어 정렬, 틀린그림찾기(스냅스팟)까지 — 설치 없이 브라우저에서 바로 플레이하세요.
-                </p>
+                </summary>
+                <div style={{ marginTop: '1rem' }}>
+                    <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+                        퍼즐 가든은 언제 어디서나 즐길 수 있는 <strong>무료 두뇌 퍼즐 게임</strong> 사이트입니다.
+                        스도쿠, 단어 정렬, 틀린그림찾기(스냅스팟)까지 — 설치 없이 브라우저에서 바로 플레이하세요.
+                    </p>
 
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🔢 스도쿠</h3>
-                <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                    9×9 격자에 1~9 숫자를 채우는 클래식 논리 퍼즐. 초보자를 위한 쉬운 난이도부터 고수를 위한 어려운 스테이지까지 제공합니다.
-                    매일 꾸준히 풀면 집중력과 논리적 사고력 향상에 도움이 됩니다.
-                </p>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🔢 스도쿠</h3>
+                    <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
+                        9×9 격자에 1~9 숫자를 채우는 클래식 논리 퍼즐. 초보자를 위한 쉬운 난이도부터 고수를 위한 어려운 스테이지까지 제공합니다.
+                        매일 꾸준히 풀면 집중력과 논리적 사고력 향상에 도움이 됩니다.
+                    </p>
 
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🃏 단어 정렬</h3>
-                <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                    카드를 드래그해 같은 주제의 단어끼리 분류하는 <strong>단어 카드 게임</strong>.
-                    다양한 주제의 레벨이 준비되어 있어 어휘력과 연상 능력을 자연스럽게 키울 수 있습니다.
-                </p>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🃏 단어 정렬</h3>
+                    <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
+                        카드를 드래그해 같은 주제의 단어끼리 분류하는 <strong>단어 카드 게임</strong>.
+                        다양한 주제의 레벨이 준비되어 있어 어휘력과 연상 능력을 자연스럽게 키울 수 있습니다.
+                    </p>
 
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>퍼즐 게임의 효과</h3>
-                <p style={{ fontSize: '0.9rem' }}>
-                    퍼즐 게임은 단순한 오락을 넘어 <strong>뇌 건강</strong>에 실질적인 도움을 줍니다.
-                    집중력 강화, 단기 기억력 향상, 스트레스 해소 등 다양한 효과가 연구를 통해 확인되었습니다.
-                    퍼즐 가든의 게임들은 짧은 시간에도 두뇌를 효율적으로 자극할 수 있도록 설계되어 있습니다.
-                </p>
-            </section>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>퍼즐 게임의 효과</h3>
+                    <p style={{ fontSize: '0.9rem' }}>
+                        퍼즐 게임은 단순한 오락을 넘어 <strong>뇌 건강</strong>에 실질적인 도움을 줍니다.
+                        집중력 강화, 단기 기억력 향상, 스트레스 해소 등 다양한 효과가 연구를 통해 확인되었습니다.
+                        퍼즐 가든의 게임들은 짧은 시간에도 두뇌를 효율적으로 자극할 수 있도록 설계되어 있습니다.
+                    </p>
+                </div>
+            </details>
 
         </div>
         </>
