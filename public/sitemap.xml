@@ -9,7 +9,30 @@
 
 <url>
   <loc>https://puzzles.tmhub.co.kr/</loc>
-  <lastmod>2026-02-18T03:12:52+00:00</lastmod>
+  <lastmod>2026-03-28T00:00:00+00:00</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>1.0</priority>
+</url>
+
+<url>
+  <loc>https://puzzles.tmhub.co.kr/sudoku</loc>
+  <lastmod>2026-03-28T00:00:00+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.9</priority>
+</url>
+
+<url>
+  <loc>https://puzzles.tmhub.co.kr/word-sort</loc>
+  <lastmod>2026-03-28T00:00:00+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.9</priority>
+</url>
+
+<url>
+  <loc>https://puzzles.tmhub.co.kr/snapspot</loc>
+  <lastmod>2026-03-28T00:00:00+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.9</priority>
 </url>
 
 
