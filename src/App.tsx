@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import LandingPage from './common/components/LandingPage';
 import SudokuModeSelect from './features/sudoku/components/SudokuModeSelect';
 import SudokuGame from './features/sudoku/components/SudokuGame';
@@ -111,11 +112,13 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="app-container">
-      <UserInitProvider>
-        <AppContent />
-      </UserInitProvider>
-    </div>
+    <HelmetProvider>
+      <div className="app-container">
+        <UserInitProvider>
+          <AppContent />
+        </UserInitProvider>
+      </div>
+    </HelmetProvider>
   );
 };
 

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install react-helmet-async)",
+      "Bash(npm run build)"
+    ]
+  }
+}

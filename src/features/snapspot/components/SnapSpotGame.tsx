@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import '../styles/SnapSpotGame.css';
 
 // Unity Canvas RectTransform: Width=1020, Height=770, Pivot=0.5/0.5, Pos=0/0
@@ -327,6 +328,12 @@ const SnapSpotGame: React.FC = () => {
   };
 
   return (
+    <>
+    <Helmet>
+      <title>스냅스팟 틀린그림찾기 - 퍼즐 가든</title>
+      <meta name="description" content="두 사진을 비교해서 다른 부분을 찾는 틀린그림찾기 게임. 눈썰미를 테스트해보세요!" />
+      <link rel="canonical" href="https://puzzles.tmhub.co.kr/snapspot" />
+    </Helmet>
     <div className="snapspot-game" ref={gameRef}>
       <div className="snapspot-header">
         <h2 className="snapspot-title">틀린 그림 찾기</h2>
@@ -442,6 +449,7 @@ const SnapSpotGame: React.FC = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
