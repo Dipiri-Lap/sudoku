@@ -28,6 +28,7 @@ const SudokuModeSelect: React.FC = () => {
             <meta name="description" content="9×9 격자에 1~9 숫자를 채우는 클래식 두뇌 퍼즐! 쉬움부터 어려움까지 다양한 난이도의 스도쿠를 무료로 즐기세요." />
             <link rel="canonical" href="https://puzzles.tmhub.co.kr/sudoku" />
             <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"스도쿠","item":"https://puzzles.tmhub.co.kr/sudoku"}]}`}</script>
+            <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"SoftwareApplication","name":"스도쿠 - 퍼즐 가든","applicationCategory":"GameApplication","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}`}</script>
             <script type="application/ld+json">{`{
   "@context": "https://schema.org",
   "@type": "FAQPage",

@@ -16,6 +16,7 @@ const routes = [
     description: '9×9 격자에 1~9 숫자를 채우는 클래식 두뇌 퍼즐! 쉬움부터 어려움까지 다양한 난이도의 스도쿠를 무료로 즐기세요.',
     canonical: `${BASE_URL}/sudoku`,
     breadcrumbSchema: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"스도쿠","item":"https://puzzles.tmhub.co.kr/sudoku"}]}),
+    softwareSchema: JSON.stringify({"@context":"https://schema.org","@type":"SoftwareApplication","name":"스도쿠 - 퍼즐 가든","applicationCategory":"GameApplication","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}),
     faqSchema: JSON.stringify({
       "@context": "https://schema.org",
       "@type": "FAQPage",
@@ -58,6 +59,7 @@ const routes = [
     description: '카드를 드래그해서 같은 주제의 단어끼리 분류하는 단어 카드 게임. 다양한 주제의 레벨을 무료로 즐기세요.',
     canonical: `${BASE_URL}/word-sort`,
     breadcrumbSchema: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"단어 정렬","item":"https://puzzles.tmhub.co.kr/word-sort"}]}),
+    softwareSchema: JSON.stringify({"@context":"https://schema.org","@type":"SoftwareApplication","name":"단어 정렬 - 퍼즐 가든","applicationCategory":"GameApplication","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}),
     faqSchema: JSON.stringify({
       "@context": "https://schema.org",
       "@type": "FAQPage",
@@ -100,6 +102,7 @@ const routes = [
     description: '두 사진을 비교해서 다른 부분을 찾는 틀린그림찾기 게임. 눈썰미를 테스트해보세요!',
     canonical: `${BASE_URL}/snapspot`,
     breadcrumbSchema: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"스냅스팟","item":"https://puzzles.tmhub.co.kr/snapspot"}]}),
+    softwareSchema: JSON.stringify({"@context":"https://schema.org","@type":"SoftwareApplication","name":"스냅스팟 - 퍼즐 가든","applicationCategory":"GameApplication","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}),
     faqSchema: null,
     seoContent: '',
   },
@@ -151,6 +154,14 @@ for (const route of routes) {
     html = html.replace(
       '</head>',
       `<script type="application/ld+json">${route.breadcrumbSchema}</script>\n</head>`
+    );
+  }
+
+  // SoftwareApplication Schema 삽입
+  if (route.softwareSchema) {
+    html = html.replace(
+      '</head>',
+      `<script type="application/ld+json">${route.softwareSchema}</script>\n</head>`
     );
   }
 

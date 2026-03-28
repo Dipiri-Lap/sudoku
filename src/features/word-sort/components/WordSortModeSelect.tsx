@@ -32,6 +32,7 @@ const WordSortModeSelect: React.FC = () => {
             <meta name="description" content="카드를 드래그해서 같은 주제의 단어끼리 분류하는 단어 카드 게임. 다양한 주제의 레벨을 무료로 즐기세요." />
             <link rel="canonical" href="https://puzzles.tmhub.co.kr/word-sort" />
             <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"단어 정렬","item":"https://puzzles.tmhub.co.kr/word-sort"}]}`}</script>
+            <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"SoftwareApplication","name":"단어 정렬 - 퍼즐 가든","applicationCategory":"GameApplication","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}`}</script>
             <script type="application/ld+json">{`{
   "@context": "https://schema.org",
   "@type": "FAQPage",
