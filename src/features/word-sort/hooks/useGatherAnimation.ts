@@ -16,6 +16,8 @@ interface UseGatherAnimationParams {
     finalCardWidth: number;
     cardHeight: number;
     deckCardRef: React.MutableRefObject<HTMLDivElement | null>;
+    adUnlockedRemove: boolean;
+    setAdUnlockedRemove: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function useGatherAnimation(params: UseGatherAnimationParams) {
@@ -32,6 +34,8 @@ export function useGatherAnimation(params: UseGatherAnimationParams) {
         finalCardWidth,
         cardHeight,
         deckCardRef,
+        adUnlockedRemove,
+        setAdUnlockedRemove,
     } = params;
 
     const [gatheringCat, setGatheringCat] = useState<string | null>(null);
@@ -103,8 +107,12 @@ export function useGatherAnimation(params: UseGatherAnimationParams) {
     const handleRemoveClick = async (catId: string) => {
         if (!isRemoveMode || gatheringCat) return;
 
-        const success = await spendCoins(50);
-        if (!success) return;
+        if (adUnlockedRemove) {
+            setAdUnlockedRemove(false);
+        } else {
+            const success = await spendCoins(50);
+            if (!success) return;
+        }
 
         // 1. Find the target slot for this category to determine destination
         let targetX = window.innerWidth / 2 - finalCardWidth / 2;

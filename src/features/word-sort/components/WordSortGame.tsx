@@ -57,20 +57,21 @@ const WordSortGame: React.FC = () => {
     const [adUsedThisGame, setAdUsedThisGame] = useState(false);
     const [showCoinInsufficient, setShowCoinInsufficient] = useState(false);
 
+    const [adUnlockedRemove, setAdUnlockedRemove] = useState(false);
+
     const handleWatchAd = (onSuccess: () => Promise<void> | void) => {
         if (adWatching) return;
 
-        const awardCoinsAndProceed = async () => {
-            await addCoins(50);
+        const proceed = async () => {
             setAdUsedThisGame(true);
             setAdOfferConfig(null);
-            await onSuccess(); // Auto execute after finding sufficient coins
+            await onSuccess();
         };
 
         if (import.meta.env.DEV || !window.adBreak) {
             setAdWatching(true);
             setTimeout(async () => {
-                await awardCoinsAndProceed();
+                await proceed();
                 setAdWatching(false);
             }, 1000);
             return;
@@ -82,8 +83,8 @@ const WordSortGame: React.FC = () => {
             beforeReward: (showAdFn: () => void) => { setPendingShowAd(() => showAdFn); },
             beforeAd: () => { setAdWatching(true); setPendingShowAd(null); },
             afterAd: () => { setAdWatching(false); },
-            adViewed: awardCoinsAndProceed,
-            adDismissed: () => { alert('광고를 끝까지 시청해야 코인을 받을 수 있어요.'); },
+            adViewed: proceed,
+            adDismissed: () => { alert('광고를 끝까지 시청해야 기능을 사용할 수 있어요.'); },
             adBreakDone: (info: { status: string }) => {
                 setAdWatching(false);
                 setPendingShowAd(null);
@@ -218,7 +219,7 @@ const WordSortGame: React.FC = () => {
     const { tutorialStep, setTutorialStep, completeTutorial, tutorialHighlightCards, tutorialHighlightSlots, tutorialHighlightDeck } = useTutorialStep({ state, dispatch, triggerDealing });
 
     // Hook: gather/remove animation
-    const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef });
+    const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef, adUnlockedRemove, setAdUnlockedRemove });
 
     // Hook: drag and drop
     const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, nearestTarget, setNearestTarget, invalidDropTarget, handleDragStart, handleDragMove, handleDrop, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight, sfxVolume });
@@ -719,7 +720,7 @@ const WordSortGame: React.FC = () => {
                                 onClick={async () => {
                                     if (coins < 50) {
                                         if (adUsedThisGame) { setShowCoinInsufficient(true); }
-                                        else { setAdOfferConfig({ type: unlockConfirm === 'stack' ? 'unlock_stack' : 'unlock_slot', cost: 50, action: handleUnlockConfirm }); }
+                                        else { setAdOfferConfig({ type: unlockConfirm === 'stack' ? 'unlock_stack' : 'unlock_slot', cost: 50, action: async () => { if (unlockConfirm === 'stack') dispatch({ type: 'UNLOCK_STACK' }); else dispatch({ type: 'UNLOCK_SLOT' }); setUnlockConfirm(null); } }); }
                                         return;
                                     }
                                     handleUnlockConfirm();
@@ -766,7 +767,7 @@ const WordSortGame: React.FC = () => {
                                     };
                                     if (coins < 50) {
                                         if (adUsedThisGame) { setShowCoinInsufficient(true); }
-                                        else { setAdOfferConfig({ type: 'move', cost: 50, action }); }
+                                        else { setAdOfferConfig({ type: 'move', cost: 50, action: async () => { dispatch({ type: 'ADD_STEPS', count: 20 }); setShowMoveConfirm(false); } }); }
                                         return;
                                     }
                                     action();
@@ -813,7 +814,7 @@ const WordSortGame: React.FC = () => {
                                     };
                                     if (coins < 10) {
                                         if (adUsedThisGame) { setShowCoinInsufficient(true); }
-                                        else { setAdOfferConfig({ type: 'undo', cost: 10, action }); }
+                                        else { setAdOfferConfig({ type: 'undo', cost: 10, action: async () => { dispatch({ type: 'UNDO_ACTION' }); setShowUndoConfirm(false); } }); }
                                         return;
                                     }
                                     action();
@@ -860,7 +861,7 @@ const WordSortGame: React.FC = () => {
                                     };
                                     if (coins < 50) {
                                         if (adUsedThisGame) { setShowCoinInsufficient(true); }
-                                        else { setAdOfferConfig({ type: 'remove', cost: 50, action }); }
+                                        else { setAdOfferConfig({ type: 'remove', cost: 50, action: async () => { setAdUnlockedRemove(true); setIsRemoveMode(true); setShowRemoveConfirm(false); } }); }
                                         return;
                                     }
                                     action();
