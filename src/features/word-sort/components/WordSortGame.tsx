@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { logEvent } from '../../../firebase';
 import { ChevronLeft, ShoppingCart, Settings } from 'lucide-react';
 import { useWordSort, WORDSORT_SAVE_KEY } from '../context/WordSortContext';
 import levels from '../data/levels.json';
@@ -33,6 +34,7 @@ const WordSortGame: React.FC = () => {
     const { saveWordSortProgress } = useWordSortProgress();
     const hasAwardedCoins = useRef(false);
     const hasSavedLevelProgress = useRef(false);
+    const hasLoggedPlay = useRef(false);
 
     const { lockedStacks, lockedSlots } = state;
     const [unlockConfirm, setUnlockConfirm] = useState<'stack' | 'slot' | null>(null);
@@ -223,6 +225,13 @@ const WordSortGame: React.FC = () => {
 
     // Hook: drag and drop
     const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, nearestTarget, setNearestTarget, invalidDropTarget, handleDragStart, handleDragMove, handleDrop, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight, sfxVolume });
+
+    // Log game_play event once when a real (non-tutorial) level starts
+    useEffect(() => {
+        if (tutorialStep !== null || !state.level || hasLoggedPlay.current) return;
+        hasLoggedPlay.current = true;
+        logEvent('game_play', { game: 'word_sort', level: state.level });
+    }, [state.level, tutorialStep]);
 
     // Award coins on win (not tutorial)
     useEffect(() => {
