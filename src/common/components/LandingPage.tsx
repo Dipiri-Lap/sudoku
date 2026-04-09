@@ -503,41 +503,7 @@ const LandingPage: React.FC = () => {
                 )}
             </div>
 
-            <footer className="landing-footer">
-                <p>© 2026 퍼즐 가든. 모든 권리 보유.</p>
-                {import.meta.env.DEV && (
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '1rem' }}>
-                        <button 
-                            onClick={seedFakeUsers}
-                            style={{ 
-                                fontSize: '10px', 
-                                opacity: 0.3, 
-                                background: 'none', 
-                                border: '1px solid #666', 
-                                color: '#666',
-                                cursor: 'pointer',
-                                padding: '2px 5px'
-                            }}
-                        >
-                            [DEV] Seed
-                        </button>
-                        <button 
-                            onClick={deleteFakeUsers}
-                            style={{ 
-                                fontSize: '10px', 
-                                opacity: 0.3, 
-                                background: 'none', 
-                                border: '1px solid #ff6b6b', 
-                                color: '#ff6b6b',
-                                cursor: 'pointer',
-                                padding: '2px 5px'
-                            }}
-                        >
-                            [DEV] Delete Fake
-                        </button>
-                    </div>
-                )}
-            </footer>
+
 
             {showCoinShop && (
                 <CoinShopModal
@@ -619,6 +585,82 @@ const LandingPage: React.FC = () => {
                     </p>
                 </div>
             </details>
+
+            <footer className="landing-footer" style={{ 
+                width: '100%', 
+                backgroundColor: '#f9fafb', 
+                padding: '2.5rem 1.5rem', 
+                borderTop: '1px solid #f1f5f9',
+                textAlign: 'left',
+                marginTop: '3rem'
+            }}>
+                <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+                    <div style={{ fontWeight: 700, color: '#334155', marginBottom: '0.75rem', fontSize: '0.85rem' }}>
+                        Copyright © 투믹스소프트(ToMixSoft). All Rights Reserved
+                    </div>
+                    <div style={{ 
+                        color: '#64748b', 
+                        fontSize: '0.7rem', 
+                        lineHeight: '1.6', 
+                        marginBottom: '1.5rem',
+                        wordBreak: 'keep-all',
+                        letterSpacing: '-0.2px'
+                    }}>
+                        <span style={{ whiteSpace: 'nowrap', marginRight: '4px' }}>사업자등록번호 574-14-01507 <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
+                        <span style={{ whiteSpace: 'nowrap', marginRight: '4px' }}>통신판매신고 제2024-서울관악-1874호 <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
+                        <span style={{ whiteSpace: 'nowrap' }}>대표: 김도균</span>
+                        <br/>
+                        <span style={{ wordBreak: 'keep-all', marginRight: '4px' }}>사업장 주소 (08799) 서울특별시 관악구 낙성대역8길 49-11, **호 <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
+                        <span style={{ whiteSpace: 'nowrap' }}>고객센터: 070-8984-4679</span>
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#475569', fontWeight: 600, fontSize: '0.8rem', margin: '1rem 0', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '0.6rem' }}>▲</span> 
+                        투믹스소프트 기본약관
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1.25rem', color: '#64748b', fontSize: '0.75rem', fontWeight: 500, flexWrap: 'wrap' }}>
+                        <span style={{ cursor: 'pointer' }}>서비스 이용약관</span>
+                        <span style={{ cursor: 'pointer', fontWeight: 700, color: '#334155' }}>개인정보 처리방침</span>
+                        <span style={{ cursor: 'pointer' }}>전자금융거래 기본약관</span>
+                    </div>
+
+                    {import.meta.env.DEV && (
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-start', marginTop: '2rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem' }}>
+                            <button 
+                                onClick={seedFakeUsers}
+                                style={{ 
+                                    fontSize: '10px', 
+                                    opacity: 0.5, 
+                                    background: 'none', 
+                                    border: '1px solid #64748b', 
+                                    color: '#64748b',
+                                    cursor: 'pointer',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px'
+                                }}
+                            >
+                                [DEV] Seed
+                            </button>
+                            <button 
+                                onClick={deleteFakeUsers}
+                                style={{ 
+                                    fontSize: '10px', 
+                                    opacity: 0.5, 
+                                    background: 'none', 
+                                    border: '1px solid #ef4444', 
+                                    color: '#ef4444',
+                                    cursor: 'pointer',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px'
+                                }}
+                            >
+                                [DEV] Delete Fake
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </footer>
 
         </div>
         </>
