@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Play, Download, LogIn, LogOut, Share2 } from 'lucide-react';
+import { Play, Download, LogIn, LogOut, Share2, ShoppingBag } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { usePWAInstall } from '../hooks/usePWAInstall';
@@ -10,6 +10,7 @@ import LoginModal from './LoginModal';
 import CoinDisplay from './CoinDisplay';
 import CoinShopModal from './CoinShopModal';
 import ProfileModal, { getAvatarUrl } from './ProfileModal';
+import TermsModal, { type TermsType } from './TermsModal';
 import { db } from '../../firebase';
 import { doc, writeBatch, collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { CHALLENGE_MAP, ALL_CHALLENGES } from '../../data/challenges';
@@ -43,6 +44,7 @@ const LandingPage: React.FC = () => {
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
     const [showCoinShop, setShowCoinShop] = useState(false);
     const [activeTitle, setActiveTitle] = useState<string | null>(null);
+    const [termsModal, setTermsModal] = useState<TermsType | null>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -227,72 +229,16 @@ const LandingPage: React.FC = () => {
             )}
 
             <header className="landing-header" style={{ width: '100%' }}>
-                {/* 상단 코인 & 로그인 버튼 (위로 뺌) */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    width: '100%',
-                    marginBottom: '0.5rem',
-                    padding: '0 0.25rem'
-                }}>
-                    <CoinDisplay onClick={() => setShowCoinShop(true)} />
-
-                    {currentUser && !isGuest ? (
-                        <button
-                            onClick={handleSignOut}
-                            title="로그아웃"
-                            style={{
-                                padding: '0.5rem',
-                                borderRadius: '50%',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                backgroundColor: 'rgba(255,255,255,0.1)',
-                                color: '#fff',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            <LogOut size={16} />
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => setShowLoginModal(true)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.3rem',
-                                padding: '0.35rem 0.8rem',
-                                borderRadius: '8px',
-                                border: 'none',
-                                backgroundColor: '#4a90e2',
-                                color: 'white',
-                                fontWeight: 700,
-                                fontSize: '0.78rem',
-                                cursor: 'pointer',
-                                boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            <LogIn size={15} />
-                            로그인
-                        </button>
-                    )}
-                </div>
-
-                {/* 상단 프로필 다크 바 영역 (코인 제외) */}
+                {/* 프로필 다크 바 */}
                 <div style={{
                     display: 'flex',
                     justifyContent: 'flex-start',
                     alignItems: 'center',
                     width: '100%',
-                    marginBottom: '1rem',
+                    marginBottom: '0.35rem',
                     padding: '0.5rem 0.75rem',
-                    backgroundColor: '#334155', // slightly lighter dark bar
-                    borderRadius: '16px', // Rounded square shape instead of pill
+                    backgroundColor: '#334155',
+                    borderRadius: '16px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                 }}>
                     {/* Left: Avatar & Info */}
@@ -372,11 +318,82 @@ const LandingPage: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Right: Coins and Logout/Login moved up */}
                 </div>
 
-                {/* <img src="/puzzle_garden_logo.png" alt="퍼즐 가든" style={{ maxWidth: '400px', width: '90%', height: 'auto', marginBottom: '1rem' }} /> */}
-                <p>두뇌를 깨우는 즐거운 퍼즐의 세계</p>
+                {/* 코인 & 로그인/로그아웃 — 프로필 바 아래 오른쪽 */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    width: '100%',
+                    marginBottom: '0.75rem',
+                    padding: '0 0.25rem',
+                }}>
+                    <CoinDisplay onClick={() => setShowCoinShop(true)} />
+                    <button
+                        onClick={() => setShowCoinShop(true)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            padding: '0.35rem 0.7rem',
+                            borderRadius: '8px',
+                            border: 'none',
+                            backgroundColor: '#f59e0b',
+                            color: 'white',
+                            fontWeight: 700,
+                            fontSize: '0.78rem',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 4px rgba(245,158,11,0.3)',
+                        }}
+                    >
+                        <ShoppingBag size={14} />
+                        상점
+                    </button>
+                    {currentUser && !isGuest ? (
+                        <button
+                            onClick={handleSignOut}
+                            title="로그아웃"
+                            style={{
+                                padding: '0.5rem',
+                                borderRadius: '50%',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                backgroundColor: 'rgba(255,255,255,0.1)',
+                                color: '#fff',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            <LogOut size={16} />
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setShowLoginModal(true)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                padding: '0.35rem 0.8rem',
+                                borderRadius: '8px',
+                                border: 'none',
+                                backgroundColor: '#4a90e2',
+                                color: 'white',
+                                fontWeight: 700,
+                                fontSize: '0.78rem',
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <LogIn size={15} />
+                            로그인
+                        </button>
+                    )}
+                </div>
 
                 <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
                         <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', letterSpacing: '0.02em' }}>
@@ -505,6 +522,13 @@ const LandingPage: React.FC = () => {
 
 
 
+            {termsModal && (
+                <TermsModal
+                    type={termsModal}
+                    onClose={() => setTermsModal(null)}
+                />
+            )}
+
             {showCoinShop && (
                 <CoinShopModal
                     onClose={() => setShowCoinShop(false)}
@@ -620,9 +644,9 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     <div style={{ display: 'flex', gap: '1.25rem', color: '#64748b', fontSize: '0.75rem', fontWeight: 500, flexWrap: 'wrap' }}>
-                        <span style={{ cursor: 'pointer' }}>서비스 이용약관</span>
-                        <span style={{ cursor: 'pointer', fontWeight: 700, color: '#334155' }}>개인정보 처리방침</span>
-                        <span style={{ cursor: 'pointer' }}>전자금융거래 기본약관</span>
+                        <span style={{ cursor: 'pointer' }} onClick={() => setTermsModal('service')}>서비스 이용약관</span>
+                        <span style={{ cursor: 'pointer', fontWeight: 700, color: '#334155' }} onClick={() => setTermsModal('privacy')}>개인정보 처리방침</span>
+                        <span style={{ cursor: 'pointer' }} onClick={() => setTermsModal('finance')}>전자금융거래 기본약관</span>
                     </div>
 
                     {import.meta.env.DEV && (

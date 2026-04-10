@@ -1,7 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Play } from 'lucide-react';
+import * as PortOne from '@portone/browser-sdk/v2';
 const CoinImg = ({ size = 16 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { useCoins } from '../../context/CoinContext';
+import { auth } from '../../firebase';
+
+const PORTONE_STORE_ID = 'store-5fe3aecd-4b34-4afd-8010-c04757231e1a';
+const PORTONE_CHANNEL_KEY = 'channel-key-8112f1af-1321-4f01-9a04-abdf11417a32';
+
+const COIN_PACKAGES = [
+    { coins: 500,   price: '₩2,200',  amount: 2200,  label: null,     img: '/500coin.png' },
+    { coins: 1200,  price: '₩4,400',  amount: 4400,  label: '베스트', img: '/1200coin.png' },
+    { coins: 3500,  price: '₩11,000', amount: 11000, label: null,     img: '/3500coin.png' },
+    { coins: 10000, price: '₩25,000', amount: 25000, label: null,     img: '/10000coin.png' },
+] as const;
 
 const AD_COOLDOWN_MS = 30 * 60 * 1000; // 30분
 const AD_STORAGE_KEY = 'lastAdWatchTime';
@@ -88,7 +100,44 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
         if (pendingShowAd) pendingShowAd();
     };
 
-    const canWatchAd = adCooldownLeft === 0 && !adWatching && !pendingShowAd;
+    const [purchasing, setPurchasing] = useState(false);
+
+    const handlePurchase = async (pkg: typeof COIN_PACKAGES[number]) => {
+        if (purchasing) return;
+        setPurchasing(true);
+        try {
+            const uid = auth.currentUser?.uid ?? 'guest';
+            const customerId = uid.slice(0, 20);
+
+            const response = await PortOne.requestPayment({
+                storeId: PORTONE_STORE_ID,
+                channelKey: PORTONE_CHANNEL_KEY,
+                paymentId: `coin-${pkg.coins}-${Date.now()}`,
+                orderName: `퍼즐가든 코인 ${pkg.coins.toLocaleString()}개`,
+                totalAmount: pkg.amount,
+                currency: 'CURRENCY_KRW',
+                payMethod: 'CARD',
+                customer: { customerId },
+            });
+
+            if (!response || response.code) {
+                showToast(response?.message || '결제가 취소되었습니다.');
+                return;
+            }
+
+            // 결제 성공 → 코인 지급
+            // TODO: 실서비스에서는 서버에서 response.paymentId 검증 후 지급
+            await addCoins(pkg.coins);
+            showToast(`🪙 ${pkg.coins.toLocaleString()} 코인이 지급되었습니다!`);
+            onClose();
+        } catch (e) {
+            console.error('Payment error:', e);
+            showToast('결제 중 오류가 발생했습니다.');
+        } finally {
+            setPurchasing(false);
+        }
+    };
+
 
     return (
         <div
@@ -151,6 +200,83 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <CoinImg size={16} />
                             <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    {/* 코인 구매 */}
+                    <div style={{
+                        padding: '1rem',
+                        backgroundColor: '#1e293b',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                    }}>
+                        <div style={{ color: '#e2e8f0', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.75rem' }}>코인 구매</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+                            {COIN_PACKAGES.map(pkg => (
+                                <button
+                                    key={pkg.coins}
+                                    onClick={() => handlePurchase(pkg)}
+                                    disabled={purchasing}
+                                    style={{
+                                        position: 'relative',
+                                        display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                        padding: '0.6rem 0.5rem 0.6rem',
+                                        borderRadius: '14px',
+                                        border: pkg.label ? '2px solid #f59e0b' : '2px solid #2d4a7a',
+                                        background: pkg.label
+                                            ? 'linear-gradient(160deg, #1e3a5f, #2a5298)'
+                                            : 'linear-gradient(160deg, #1a3158, #1e4080)',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        boxShadow: pkg.label
+                                            ? '0 4px 16px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                                            : '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+                                        overflow: 'visible',
+                                        gap: '0.3rem',
+                                    }}
+                                >
+                                    {/* HOT 뱃지 */}
+                                    {pkg.label && (
+                                        <div style={{
+                                            position: 'absolute', top: '-8px', right: '-8px',
+                                            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                                            color: 'white', fontSize: '0.6rem', fontWeight: 900,
+                                            borderRadius: '50%', width: 38, height: 38,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
+                                            border: '2px solid white',
+                                            zIndex: 2,
+                                        }}>BEST</div>
+                                    )}
+                                    {/* 코인 수량 */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                        <CoinImg size={12} />
+                                        <span style={{ color: 'white', fontWeight: 800, fontSize: '0.85rem', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                                            {pkg.coins.toLocaleString()}
+                                        </span>
+                                    </div>
+                                    {/* 코인 이미지 */}
+                                    <img
+                                        src={pkg.img}
+                                        alt={`${pkg.coins} coins`}
+                                        style={{
+                                            width: '85%', height: 'auto', objectFit: 'contain',
+                                            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+                                        }}
+                                    />
+                                    {/* 가격 버튼 */}
+                                    <div style={{
+                                        background: 'linear-gradient(to bottom, #5ecb3a, #3a9e1e)',
+                                        borderRadius: '20px',
+                                        padding: '0.3rem 0.8rem',
+                                        width: '100%',
+                                        textAlign: 'center',
+                                        boxShadow: '0 3px 0 #2a7a10, inset 0 1px 0 rgba(255,255,255,0.3)',
+                                        color: 'white', fontWeight: 800, fontSize: '0.9rem',
+                                        textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+                                    }}>{pkg.price}</div>
+                                </button>
+                            ))}
                         </div>
                     </div>
 
