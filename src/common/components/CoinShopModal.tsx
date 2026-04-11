@@ -125,10 +125,10 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                 return;
             }
 
-            // 결제 성공 → 코인 지급
+            // 결제 성공 → 코인 지급 (테스트 중 비활성화)
             // TODO: 실서비스에서는 서버에서 response.paymentId 검증 후 지급
-            await addCoins(pkg.coins);
-            showToast(`🪙 ${pkg.coins.toLocaleString()} 코인이 지급되었습니다!`);
+            // await addCoins(pkg.coins);
+            showToast(`결제 완료 (테스트 모드 — 코인 미지급)`);
             onClose();
         } catch (e) {
             console.error('Payment error:', e);
