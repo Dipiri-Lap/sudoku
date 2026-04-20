@@ -10,6 +10,7 @@ import WordSortGame from './features/word-sort/components/WordSortGame';
 import WordSortModeSelect from './features/word-sort/components/WordSortModeSelect';
 import TileMatchGame from './features/tile-match/components/TileMatchGame';
 import SnapSpotGame from './features/snapspot/components/SnapSpotGame';
+// import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
@@ -89,6 +90,9 @@ const AppContent: React.FC = () => {
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
           <Route path="/snapspot" element={<SnapSpotGame />} />
+          {/* {window.location.hostname === 'localhost' && (
+            <Route path="/admin" element={<AdminPage />} />
+          )} */}
         </Routes>
       </CardBackProvider>
       </WordSortProgressProvider>
@@ -99,6 +103,17 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    const isKakao = /KAKAOTALK/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
+    if (isKakao && isAndroid) {
+      const url = window.location.href.replace(/^https?:\/\//, '');
+      window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
+      return;
+    }
+  }, []);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {

@@ -36,6 +36,8 @@ const LandingPage: React.FC = () => {
     });
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showKakaoGuide, setShowKakaoGuide] = useState(false);
+    const [kakaoLinkCopied, setKakaoLinkCopied] = useState(false);
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
     const [nickname, setNickname] = useState<string>('');
     const [puzzlePower, setPuzzlePower] = useState<number>(0);
@@ -105,6 +107,25 @@ const LandingPage: React.FC = () => {
 
     const isGuest = currentUser?.isAnonymous;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isKakaoIOS = /KAKAOTALK/i.test(navigator.userAgent) && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    const handleLoginClick = () => {
+        if (isKakaoIOS) {
+            setShowKakaoGuide(true);
+        } else {
+            setShowLoginModal(true);
+        }
+    };
+
+    const handleKakaoCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            setKakaoLinkCopied(true);
+            setTimeout(() => setKakaoLinkCopied(false), 2500);
+        } catch {
+            prompt('아래 주소를 복사하세요:', window.location.href);
+        }
+    };
 
     const handleShare = async () => {
         const url = window.location.origin;
@@ -372,7 +393,7 @@ const LandingPage: React.FC = () => {
                         </button>
                     ) : (
                         <button
-                            onClick={() => setShowLoginModal(true)}
+                            onClick={handleLoginClick}
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -541,6 +562,57 @@ const LandingPage: React.FC = () => {
                     onClose={() => setShowLoginModal(false)}
                     onSuccess={handleLoginSuccess}
                 />
+            )}
+
+            {showKakaoGuide && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 3000, padding: '1.5rem',
+                }} onClick={() => setShowKakaoGuide(false)}>
+                    <div style={{
+                        background: '#fff', borderRadius: '20px', padding: '2rem 1.5rem',
+                        maxWidth: '340px', width: '100%', textAlign: 'center',
+                        display: 'flex', flexDirection: 'column', gap: '1rem',
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ fontSize: '2.5rem' }}>🌐</div>
+                        <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>
+                            Safari에서 로그인해주세요
+                        </h2>
+                        <p style={{ margin: 0, color: '#555', fontSize: '0.88rem', lineHeight: 1.65 }}>
+                            카카오톡 내부 브라우저는 보안 정책상<br />
+                            <strong>구글 로그인을 지원하지 않아요.</strong><br /><br />
+                            아래 링크를 복사해 Safari 주소창에 붙여넣으면<br />
+                            정상적으로 로그인할 수 있어요.
+                        </p>
+                        <div style={{
+                            background: '#f5f5f5', borderRadius: '8px',
+                            padding: '0.65rem 0.9rem', fontSize: '0.75rem',
+                            color: '#333', wordBreak: 'break-all', textAlign: 'left',
+                        }}>
+                            {window.location.href}
+                        </div>
+                        <button
+                            onClick={handleKakaoCopy}
+                            style={{
+                                background: '#FEE500', border: 'none', borderRadius: '12px',
+                                padding: '0.8rem', fontSize: '1rem', fontWeight: 700,
+                                cursor: 'pointer',
+                            }}
+                        >
+                            {kakaoLinkCopied ? '✅ 복사 완료!' : '🔗 링크 복사하기'}
+                        </button>
+                        <button
+                            onClick={() => setShowKakaoGuide(false)}
+                            style={{
+                                background: 'none', border: 'none', color: '#999',
+                                fontSize: '0.85rem', cursor: 'pointer',
+                            }}
+                        >
+                            닫기
+                        </button>
+                    </div>
+                </div>
             )}
 
             {showProfileModal && currentUser && (
