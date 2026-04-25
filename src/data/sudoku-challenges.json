@@ -165,6 +165,21 @@
     }
   },
   {
+    "id": "stage_1000",
+    "type": "STAGE",
+    "game": "sudoku",
+    "title": "🏆 스도쿠 마스터",
+    "condition": "스테이지 1000 클리어",
+    "progressConfig": {
+      "source": "regular_stage",
+      "target": 1000
+    },
+    "reward": {
+      "puzzle_power": 500,
+      "coin": 500
+    }
+  },
+  {
     "id": "ta_easy",
     "type": "TIME_ATTACK",
     "game": "sudoku",
