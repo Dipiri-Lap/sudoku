@@ -123,7 +123,7 @@
     "id": "stage_300",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "🌟 스도쿠 매니아",
+    "title": "🌟 스도쿠 고수",
     "condition": "스테이지 300 클리어",
     "progressConfig": {
       "source": "regular_stage",
@@ -138,7 +138,7 @@
     "id": "stage_400",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "🌌 스도쿠 지배자",
+    "title": "🌌 스도쿠 달인",
     "condition": "스테이지 400 클리어",
     "progressConfig": {
       "source": "regular_stage",
@@ -153,7 +153,7 @@
     "id": "stage_500",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "👑 스도쿠 제왕",
+    "title": "👑 스도쿠 매니아",
     "condition": "스테이지 500 클리어",
     "progressConfig": {
       "source": "regular_stage",
@@ -168,7 +168,7 @@
     "id": "stage_1000",
     "type": "STAGE",
     "game": "sudoku",
-    "title": "🏆 스도쿠 마스터",
+    "title": "🏆 스도쿠 킹",
     "condition": "스테이지 1000 클리어",
     "progressConfig": {
       "source": "regular_stage",
