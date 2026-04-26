@@ -60,6 +60,9 @@ interface WordSortUIContextType {
     setBgmVolume: (v: number) => void;
     sfxVolume: number;
     setSfxVolume: (v: number) => void;
+    // Text Size
+    textSizeMultiplier: number;
+    setTextSizeMultiplier: (v: number) => void;
     // Refs
     stackRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
     slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;

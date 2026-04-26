@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Volume2, Music } from 'lucide-react';
+import { X, Volume2, Music, Type } from 'lucide-react';
 import { useWordSortUI } from '../context/WordSortUIContext';
 
 interface WordSortSettingsModalProps {
@@ -7,7 +7,10 @@ interface WordSortSettingsModalProps {
 }
 
 const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }) => {
-    const { bgmVolume, setBgmVolume, sfxVolume, setSfxVolume } = useWordSortUI();
+    const { bgmVolume, setBgmVolume, sfxVolume, setSfxVolume, textSizeMultiplier, setTextSizeMultiplier } = useWordSortUI();
+
+    const TEXT_SIZE_STEPS = [0.8, 0.9, 1.0, 1.1, 1.2];
+    const TEXT_SIZE_LABELS = ['가', '가', '가', '가', '가'];
 
     return (
         <div style={{
@@ -139,6 +142,54 @@ const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }
                                 accentColor: '#84fab0'
                             }}
                         />
+                    </div>
+
+                    {/* Text Size */}
+                    <div style={{
+                        background: 'rgba(0, 0, 0, 0.2)',
+                        borderRadius: '12px',
+                        padding: '1.25rem',
+                        border: '1px solid rgba(255, 255, 255, 0.05)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                            <div style={{
+                                width: '32px', height: '32px', borderRadius: '8px',
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                                <Type size={18} color="#a78bfa" />
+                            </div>
+                            <span style={{ fontWeight: '600', fontSize: '1.05rem' }}>텍스트 크기</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'space-between' }}>
+                            {TEXT_SIZE_STEPS.map((step, i) => {
+                                const isActive = Math.abs(textSizeMultiplier - step) < 0.01;
+                                const labelSize = `${0.75 + i * 0.15}rem`;
+                                return (
+                                    <button
+                                        key={step}
+                                        onClick={() => setTextSizeMultiplier(step)}
+                                        style={{
+                                            flex: 1,
+                                            height: '48px',
+                                            borderRadius: '10px',
+                                            border: isActive ? '2px solid #a78bfa' : '2px solid rgba(255,255,255,0.1)',
+                                            background: isActive ? 'rgba(167,139,250,0.2)' : 'rgba(255,255,255,0.05)',
+                                            color: isActive ? '#a78bfa' : 'rgba(255,255,255,0.6)',
+                                            fontSize: labelSize,
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        {TEXT_SIZE_LABELS[i]}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
                 </div>

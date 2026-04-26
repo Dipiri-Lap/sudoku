@@ -97,9 +97,11 @@ const WordSortGame: React.FC = () => {
 
     const [bgmVolume, setBgmVolume] = useState(() => parseFloat(localStorage.getItem('wordSort_bgmVolume') || '0.1'));
     const [sfxVolume, setSfxVolume] = useState(() => parseFloat(localStorage.getItem('wordSort_sfxVolume') || '0.5'));
+    const [textSizeMultiplier, setTextSizeMultiplier] = useState(() => parseFloat(localStorage.getItem('wordSort_textSize') || '1'));
 
     useEffect(() => { localStorage.setItem('wordSort_bgmVolume', bgmVolume.toString()); }, [bgmVolume]);
     useEffect(() => { localStorage.setItem('wordSort_sfxVolume', sfxVolume.toString()); }, [sfxVolume]);
+    useEffect(() => { localStorage.setItem('wordSort_textSize', textSizeMultiplier.toString()); }, [textSizeMultiplier]);
 
     const { selectedBackId } = useCardBacks();
     const currentCardBack = cardBackDesigns.find((cb: any) => cb.id === selectedBackId) || cardBackDesigns[0];
@@ -133,7 +135,7 @@ const WordSortGame: React.FC = () => {
     const finalCardWidth = Math.min(110, Math.max(36, cardWidth));
     const cardHeight = Math.round(finalCardWidth * 1.4);
     // Proportional font sizes that scale with card width (36–110px range)
-    const cardTextSize = Math.max(0.5, Math.min(0.92, finalCardWidth * 0.007 + 0.38));
+    const cardTextSize = Math.max(0.5, Math.min(0.92, finalCardWidth * 0.007 + 0.38)) * textSizeMultiplier;
     const cardBadgeSize = `${(cardTextSize * 0.70).toFixed(2)}rem`;
     const cardNameSize  = `${(cardTextSize * 0.83).toFixed(2)}rem`;
     const cardWordSize  = `${(cardTextSize * (activeSlotCount >= 5 ? 0.95 : 1.15)).toFixed(2)}rem`;
@@ -586,6 +588,8 @@ const WordSortGame: React.FC = () => {
             setBgmVolume,
             sfxVolume,
             setSfxVolume,
+            textSizeMultiplier,
+            setTextSizeMultiplier,
             draggingGroup,
             setDraggingGroup,
             dragGhostPos,
