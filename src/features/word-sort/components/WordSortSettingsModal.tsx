@@ -9,7 +9,7 @@ interface WordSortSettingsModalProps {
 const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }) => {
     const { bgmVolume, setBgmVolume, sfxVolume, setSfxVolume, textSizeMultiplier, setTextSizeMultiplier } = useWordSortUI();
 
-    const TEXT_SIZE_STEPS = [0.8, 0.9, 1.0, 1.1, 1.2];
+    const TEXT_SIZE_STEPS = [0.8, 0.95, 1.1, 1.25, 1.4];
     const TEXT_SIZE_LABELS = ['가', '가', '가', '가', '가'];
 
     return (
