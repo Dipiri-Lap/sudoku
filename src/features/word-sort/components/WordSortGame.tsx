@@ -203,17 +203,18 @@ const WordSortGame: React.FC = () => {
     }, [state.isWinner]);
 
     const splitText = (value: string) => {
+        if (textSizeMultiplier > 1) {
+            if (value.length <= 3) return <>{value}</>;
+            if (value.length <= 6) {
+                const mid = Math.ceil(value.length / 2);
+                return <>{value.slice(0, mid)}<br />{value.slice(mid)}</>;
+            }
+            const third = Math.ceil(value.length / 3);
+            return <>{value.slice(0, third)}<br />{value.slice(third, third * 2)}<br />{value.slice(third * 2)}</>;
+        }
         if (value.length < 5) return <>{value}</>;
         const firstLine = Math.ceil(value.length / 2);
         return <>{value.slice(0, firstLine)}<br />{value.slice(firstLine)}</>;
-    };
-
-    const getWordFontSize = (word: string, baseSizeRem: number): string => {
-        const effectiveLen = word.length >= 5 ? Math.ceil(word.length / 2) : word.length;
-        const available = finalCardWidth - 10;
-        const estimated = effectiveLen * baseSizeRem * 16 * 1.0;
-        const scale = estimated > available ? available / estimated : 1;
-        return `${(baseSizeRem * scale).toFixed(2)}rem`;
     };
 
     const triggerDealing = (totalCards: number) => {
@@ -542,13 +543,17 @@ const WordSortGame: React.FC = () => {
         }
     }, [state.isGameOver, completingSlot, gatheringCat]);
 
+    const [deckCooldown, setDeckCooldown] = useState(false);
     const drawDeck = () => {
         if (isRemoveMode) return;
         if (tutorialStep === 2 || tutorialStep === 4 || tutorialStep === 5 || tutorialStep === 6) return;
+        if (deckCooldown) return;
         const sfx = new Audio('/assets/word-sort/sounds/cardsfx2.wav');
         sfx.volume = sfxVolume;
         sfx.play().catch(() => {});
         dispatch({ type: 'DRAW_DECK' });
+        setDeckCooldown(true);
+        setTimeout(() => setDeckCooldown(false), 1000);
     };
 
     const cardBaseStyle: React.CSSProperties = {
@@ -653,7 +658,6 @@ const WordSortGame: React.FC = () => {
             deckCardRef,
             drawDeck,
             splitText,
-            getWordFontSize,
             setUnlockConfirm,
             setShowMoveConfirm,
             setShowUndoConfirm,
