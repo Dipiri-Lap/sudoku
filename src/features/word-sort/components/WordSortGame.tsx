@@ -177,6 +177,19 @@ const WordSortGame: React.FC = () => {
         }
     }, [bgmVolume]);
 
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (!bgmRef.current) return;
+            if (document.hidden) {
+                bgmRef.current.pause();
+            } else if (bgmVolume > 0) {
+                bgmRef.current.play().catch(() => {});
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [bgmVolume]);
+
     // Prevent body scroll while game is active
     useEffect(() => {
         const prev = document.body.style.overflow;
@@ -198,7 +211,7 @@ const WordSortGame: React.FC = () => {
     const getWordFontSize = (word: string, baseSizeRem: number): string => {
         const effectiveLen = word.length >= 5 ? Math.ceil(word.length / 2) : word.length;
         const available = finalCardWidth - 10;
-        const estimated = effectiveLen * baseSizeRem * 16 * 0.65;
+        const estimated = effectiveLen * baseSizeRem * 16 * 1.0;
         const scale = estimated > available ? available / estimated : 1;
         return `${(baseSizeRem * scale).toFixed(2)}rem`;
     };
