@@ -70,6 +70,7 @@ interface WordSortUIContextType {
     // Handlers
     drawDeck: () => void;
     splitText: (value: string) => React.ReactNode;
+    getWordFontSize: (word: string, baseSizeRem: number) => string;
     setUnlockConfirm: (v: 'stack' | 'slot' | null) => void;
     setShowMoveConfirm: (v: boolean) => void;
     setShowUndoConfirm: (v: boolean) => void;

@@ -36,6 +36,7 @@ export const StackArea: React.FC = () => {
         stackStartIndices,
         stackRefs,
         splitText,
+        getWordFontSize,
         handleRemoveClick,
         nearestTarget,
         setNearestTarget,
@@ -235,7 +236,7 @@ export const StackArea: React.FC = () => {
                                                 })()}
                                                 <span style={{
                                                     fontWeight: '900',
-                                                    fontSize: `${cardTextSize}rem`,
+                                                    fontSize: getWordFontSize(card.value, cardTextSize),
                                                     lineHeight: '1.2',
                                                     zIndex: 2,
                                                     textAlign: 'center',

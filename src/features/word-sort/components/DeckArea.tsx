@@ -34,6 +34,7 @@ export const DeckArea: React.FC = () => {
         deckCardRef,
         drawDeck,
         splitText,
+        getWordFontSize,
         setShowMoveConfirm,
         coins,
         setNearestTarget,
@@ -168,7 +169,7 @@ export const DeckArea: React.FC = () => {
                                     }}>
                                         <span style={{
                                             fontWeight: '900',
-                                            fontSize: `${cardTextSize}rem`,
+                                            fontSize: isTop ? getWordFontSize(card.value, cardTextSize) : `${cardTextSize}rem`,
                                             lineHeight: '1.2',
                                             zIndex: 2,
                                             ...(!isTop ? {

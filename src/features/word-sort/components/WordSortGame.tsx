@@ -195,6 +195,14 @@ const WordSortGame: React.FC = () => {
         return <>{value.slice(0, firstLine)}<br />{value.slice(firstLine)}</>;
     };
 
+    const getWordFontSize = (word: string, baseSizeRem: number): string => {
+        const effectiveLen = word.length >= 5 ? Math.ceil(word.length / 2) : word.length;
+        const available = finalCardWidth - 10;
+        const estimated = effectiveLen * baseSizeRem * 16 * 0.65;
+        const scale = estimated > available ? available / estimated : 1;
+        return `${(baseSizeRem * scale).toFixed(2)}rem`;
+    };
+
     const triggerDealing = (totalCards: number) => {
         if (dealingTimerRef.current) clearInterval(dealingTimerRef.current);
         setIsDealingAnimation(true);
@@ -632,6 +640,7 @@ const WordSortGame: React.FC = () => {
             deckCardRef,
             drawDeck,
             splitText,
+            getWordFontSize,
             setUnlockConfirm,
             setShowMoveConfirm,
             setShowUndoConfirm,
