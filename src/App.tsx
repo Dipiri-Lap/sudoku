@@ -90,9 +90,9 @@ const AppContent: React.FC = () => {
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
           <Route path="/snapspot" element={<SnapSpotGame />} />
-          {window.location.hostname === 'localhost' && (
+          {/* {window.location.hostname === 'localhost' && (
             <Route path="/admin" element={<AdminPage />} />
-          )}
+          )} */}
         </Routes>
       </CardBackProvider>
       </WordSortProgressProvider>
