@@ -21,7 +21,7 @@ import { useWordSortProgress } from '../../context/WordSortProgressContext';
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
 const LandingPage: React.FC = () => {
-    const { isInstallable, promptToInstall } = usePWAInstall();
+    const { isInstalled, promptToInstall } = usePWAInstall();
     const challenges = useChallenges();
     const { stageProgress, beginnerProgress } = useSudokuProgress();
     const { wordSortProgress } = useWordSortProgress();
@@ -442,30 +442,31 @@ const LandingPage: React.FC = () => {
                         </button>
                     </div>
 
-                {isInstallable && (
-                    <button
-                        onClick={promptToInstall}
-                        className="install-button animate-fade-in"
-                        style={{
-                            marginTop: '1rem',
-                            padding: '0.75rem 1.5rem',
-                            borderRadius: '2rem',
-                            border: 'none',
-                            backgroundColor: '#4a90e2',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            margin: '1rem auto 0 auto',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        <Download size={18} />
-                        {isMobile ? '홈화면에 바로가기 만들기' : '바탕화면에 바로가기 만들기'}
-                    </button>
-                )}
+                <button
+                    onClick={isInstalled ? undefined : promptToInstall}
+                    className="install-button animate-fade-in"
+                    style={{
+                        marginTop: '1rem',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '2rem',
+                        border: 'none',
+                        backgroundColor: isInstalled ? '#6b7280' : '#4a90e2',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        cursor: isInstalled ? 'default' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        margin: '1rem auto 0 auto',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                    }}
+                >
+                    {isInstalled ? (
+                        <>✅ 이미 설치되었습니다</>
+                    ) : (
+                        <><Download size={18} />{isMobile ? '홈화면에 바로가기 만들기' : '바탕화면에 바로가기 만들기'}</>
+                    )}
+                </button>
             </header>
 
             <div className="game-grid">
