@@ -63,6 +63,9 @@ interface WordSortUIContextType {
     // Text Size
     textSizeMultiplier: number;
     setTextSizeMultiplier: (v: number) => void;
+    // Language
+    language: 'ko' | 'en';
+    setLanguage: (l: 'ko' | 'en') => void;
     // Refs
     stackRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
     slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;

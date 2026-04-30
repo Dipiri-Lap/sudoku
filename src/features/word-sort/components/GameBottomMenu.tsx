@@ -2,7 +2,9 @@ import React from 'react';
 import { RotateCcw, Undo2, Layers as LayersIcon } from 'lucide-react';
 import { useWordSort } from '../context/WordSortContext';
 import { useWordSortUI } from '../context/WordSortUIContext';
-import levels from '../data/levels.json';
+import levelsKo from '../data/levels.json';
+import levelsEn from '../data/levels_en.json';
+import { i18n } from '../data/i18n';
 
 interface GameBottomMenuProps {
     triggerDealing: (n: number) => void;
@@ -20,7 +22,11 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
         tutorialStep,
         setShowUndoConfirm,
         setShowRemoveConfirm,
+        language,
     } = useWordSortUI();
+
+    const t = i18n[language];
+    const levels = language === 'en' ? levelsEn : levelsKo;
 
     if (tutorialStep !== null) return null;
 
@@ -37,7 +43,7 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
                     dispatch({ type: 'START_LEVEL', levelData: currentLevelData });
                     triggerDealing(levelStackTotal(currentLevelData));
                 }} />
-                <div style={{ fontSize: '0.7rem' }}>재시작</div>
+                <div style={{ fontSize: '0.7rem' }}>{t.retry}</div>
             </div>
             <div
                 style={{
@@ -52,7 +58,7 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
                 }}
             >
                 <Undo2 size={24} style={{ margin: '0 auto' }} />
-                <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>철회</div>
+                <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>{language === 'ko' ? '철회' : 'Undo'}</div>
                 <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 10</div>
             </div>
             <div
@@ -71,7 +77,7 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
                 }}
             >
                 <LayersIcon size={24} style={{ margin: '0 auto' }} />
-                <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>{isRemoveMode ? '취소' : '제거'}</div>
+                <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>{isRemoveMode ? t.cancel : (language === 'ko' ? '제거' : 'Remove')}</div>
                 {!isRemoveMode && <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 50</div>}
             </div>
         </div>

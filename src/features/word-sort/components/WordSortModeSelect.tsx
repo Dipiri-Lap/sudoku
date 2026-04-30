@@ -4,12 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Layers } from 'lucide-react';
 import { useWordSortProgress } from '../../../context/WordSortProgressContext';
 import { useWordSort } from '../context/WordSortContext';
-import levels from '../data/levels.json';
+import levelsKo from '../data/levels.json';
+import levelsEn from '../data/levels_en.json';
+import { i18n } from '../data/i18n';
 
 const WordSortModeSelect: React.FC = () => {
     const navigate = useNavigate();
     const { wordSortProgress, isSynced } = useWordSortProgress();
-    const { dispatch } = useWordSort();
+    const { state, dispatch } = useWordSort();
+    const { language } = state;
+    const t = i18n[language];
+    const levels = language === 'en' ? levelsEn : levelsKo;
 
     const handlePlay = () => {
         if (!isSynced) return;
@@ -77,7 +82,7 @@ const WordSortModeSelect: React.FC = () => {
                 <button className="back-btn" onClick={() => navigate('/')}>
                     <ChevronLeft size={24} />
                 </button>
-                <h1>단어정렬 모드 선택</h1>
+                <h1>{language === 'ko' ? '단어정렬 모드 선택' : 'Select Game Mode'}</h1>
             </header>
 
             <div className="mode-grid">
@@ -90,15 +95,15 @@ const WordSortModeSelect: React.FC = () => {
                         <Layers size={40} />
                     </div>
                     <div className="game-card-content">
-                        <h3>스테이지 모드</h3>
-                        <p>단어 카드를 같은 카테고리끼리 정렬해 스테이지를 클리어하세요.</p>
+                        <h3>{language === 'ko' ? '스테이지 모드' : 'Stage Mode'}</h3>
+                        <p>{language === 'ko' ? '단어 카드를 같은 카테고리끼리 정렬해 스테이지를 클리어하세요.' : 'Sort word cards into matching categories to clear stages.'}</p>
                         <div className="game-card-footer">
                             <span className="play-now">
                                 {!isSynced
-                                    ? '로딩 중...'
+                                    ? (language === 'ko' ? '로딩 중...' : 'Loading...')
                                     : wordSortProgress > 0
-                                        ? `Level ${wordSortProgress + 1} 이어하기`
-                                        : 'Level 1 시작하기'}
+                                        ? `Level ${wordSortProgress + 1} ${language === 'ko' ? '이어하기' : 'Resume'}`
+                                        : `Level 1 ${language === 'ko' ? '시작하기' : 'Start'}`}
                             </span>
                         </div>
                     </div>

@@ -36,6 +36,7 @@ export interface WordSolitaireState {
     lockedSlots: number;
     lastCompletedSlot: number | null; // slot index that just completed, for animation trigger
     history: Omit<WordSolitaireState, 'history'>[]; // state snapshots for Undo
+    language: 'ko' | 'en';
 }
 
 export type WordSolitaireAction =
@@ -48,7 +49,8 @@ export type WordSolitaireAction =
     | { type: 'REMOVE_CATEGORY'; catId: string }
     | { type: 'ADD_STEPS'; count: number }
     | { type: 'RESTORE_GAME'; savedState: WordSolitaireState }
-    | { type: 'UNDO_ACTION' };
+    | { type: 'UNDO_ACTION' }
+    | { type: 'SET_LANGUAGE'; language: 'ko' | 'en'; newLevelData?: any };
 
 const initialState: WordSolitaireState = {
     level: 1,
@@ -67,6 +69,7 @@ const initialState: WordSolitaireState = {
     lockedSlots: 1,
     lastCompletedSlot: null,
     history: [],
+    language: (localStorage.getItem('wordSort_language') as 'ko' | 'en') || 'ko',
 };
 
 function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAction): WordSolitaireState {
@@ -175,6 +178,76 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                 lockedStacks: 1,
                 lockedSlots: 1,
                 isStepsPurchased: false,
+                language: state.language,
+            };
+        }
+
+        case 'SET_LANGUAGE': {
+            localStorage.setItem('wordSort_language', action.language);
+            
+            if (!action.newLevelData || state.stacks.length === 0) {
+                return {
+                    ...state,
+                    language: action.language
+                };
+            }
+
+            const oldCategories = state.categories || [];
+            const newCategories = action.newLevelData.categories || [];
+            
+            const translateCard = (card: Card): Card => {
+                const oldCat = oldCategories.find((c: any) => c.id === card.cat);
+                const newCat = newCategories.find((c: any) => c.id === card.cat);
+                if (!oldCat || !newCat) return card;
+
+                if (card.type === 'category') {
+                    return { ...card, value: newCat.name };
+                } else if (card.type === 'word') {
+                    const wordIndex = oldCat.words.indexOf(card.value);
+                    if (wordIndex !== -1 && newCat.words[wordIndex]) {
+                        return { ...card, value: newCat.words[wordIndex] };
+                    }
+                }
+                return card;
+            };
+
+            const translateActiveSlot = (slot: ActiveSlot | null): ActiveSlot | null => {
+                if (!slot) return null;
+                const oldCat = oldCategories.find((c: any) => c.id === slot.catId);
+                const newCat = newCategories.find((c: any) => c.id === slot.catId);
+                if (!oldCat || !newCat) return slot;
+
+                return {
+                    ...slot,
+                    name: newCat.name,
+                    collected: slot.collected.map(word => {
+                        const wordIndex = oldCat.words.indexOf(word);
+                        return wordIndex !== -1 && newCat.words[wordIndex] ? newCat.words[wordIndex] : word;
+                    })
+                };
+            };
+
+            return {
+                ...state,
+                language: action.language,
+                categories: newCategories,
+                stacks: state.stacks.map(stack => stack.map(translateCard)),
+                deck: state.deck.map(translateCard),
+                revealedDeck: state.revealedDeck.map(translateCard),
+                activeSlots: Object.fromEntries(
+                    Object.entries(state.activeSlots).map(([k, v]) => [k, translateActiveSlot(v as ActiveSlot | null)])
+                ),
+                history: state.history.map(h => ({
+                    ...h,
+                    language: action.language,
+                    categories: newCategories,
+                    stacks: h.stacks.map(stack => stack.map(translateCard)),
+                    deck: h.deck.map(translateCard),
+                    revealedDeck: h.revealedDeck.map(translateCard),
+                    activeSlots: Object.fromEntries(
+                        Object.entries(h.activeSlots).map(([k, v]) => [k, translateActiveSlot(v as ActiveSlot | null)])
+                    ),
+                }))
             };
         }
 

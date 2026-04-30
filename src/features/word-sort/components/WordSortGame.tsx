@@ -3,8 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { logEvent } from '../../../firebase';
 import { ChevronLeft, ShoppingCart, Settings } from 'lucide-react';
 import { useWordSort, WORDSORT_SAVE_KEY } from '../context/WordSortContext';
-import levels from '../data/levels.json';
-import tutorialLevel from '../data/tutorial-level.json';
+import levelsKo from '../data/levels.json';
+import tutorialLevelKo from '../data/tutorial-level.json';
+import levelsEn from '../data/levels_en.json';
+import tutorialLevelEn from '../data/tutorial-level_en.json';
 import { useCoins } from '../../../context/CoinContext';
 import { useWordSortProgress } from '../../../context/WordSortProgressContext';
 import { useCardBacks, cardBackDesigns } from '../context/CardBackContext';
@@ -22,12 +24,18 @@ import { GameOverlays } from './GameOverlays';
 import { DeckArea } from './DeckArea';
 import { SlotArea } from './SlotArea';
 import { StackArea } from './StackArea';
+import { i18n } from '../data/i18n';
 
 
 
 const WordSortGame: React.FC = () => {
-
     const { state, dispatch } = useWordSort();
+    const { language } = state;
+    const t = i18n[language];
+
+    const levels = language === 'en' ? levelsEn : levelsKo;
+    const tutorialLevel = language === 'en' ? tutorialLevelEn : tutorialLevelKo;
+
     const location = useLocation();
     const navigate = useNavigate();
     const { addCoins, spendCoins, coins } = useCoins();
@@ -203,6 +211,26 @@ const WordSortGame: React.FC = () => {
     }, [state.isWinner]);
 
     const splitText = (value: string) => {
+        if (state.language === 'en') {
+            const scale = (value.length > 6 && !value.includes(' ')) ? Math.max(0.55, 6.5 / value.length) : 1;
+            const content = value.includes(' ') 
+                ? <>{value.split(' ').map((word, i) => <React.Fragment key={i}>{word}<br/></React.Fragment>)}</>
+                : <>{value}</>;
+
+            return (
+                <span style={{ 
+                    display: 'inline-block',
+                    transform: `scale(${scale})`, 
+                    transformOrigin: 'center center',
+                    wordBreak: 'break-word',
+                    hyphens: 'auto',
+                    width: '100%'
+                }}>
+                    {content}
+                </span>
+            );
+        }
+
         if (textSizeMultiplier > 1) {
             if (value.length <= 3) return <>{value}</>;
             if (value.length <= 6) {
@@ -667,6 +695,16 @@ const WordSortGame: React.FC = () => {
             lastDrawnId,
             stackStartIndices,
             triggerDealing,
+            language: state.language,
+            setLanguage: (l: 'ko' | 'en') => {
+                const targetLevels = l === 'en' ? levelsEn : levelsKo;
+                const targetTutorial = l === 'en' ? tutorialLevelEn : tutorialLevelKo;
+                const newLevelData = state.isTutorial 
+                    ? targetTutorial 
+                    : targetLevels.find((lvl: any) => lvl.id === state.level) || targetLevels[0];
+                
+                dispatch({ type: 'SET_LANGUAGE', language: l, newLevelData });
+            },
         }}>
         <div
             ref={gameContainerRef}
@@ -698,7 +736,7 @@ const WordSortGame: React.FC = () => {
                     </button>
                     {tutorialStep === null && (
                         <span style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.08em', opacity: 0.7, color: 'white' }}>
-                            LEVEL {state.level}
+                            {t.level.toUpperCase()} {state.level}
                         </span>
                     )}
                 </div>

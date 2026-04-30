@@ -1,13 +1,21 @@
 import React from 'react';
 import { X, Volume2, Music, Type } from 'lucide-react';
 import { useWordSortUI } from '../context/WordSortUIContext';
+import { i18n } from '../data/i18n';
 
 interface WordSortSettingsModalProps {
     onClose: () => void;
 }
 
 const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }) => {
-    const { bgmVolume, setBgmVolume, sfxVolume, setSfxVolume, textSizeMultiplier, setTextSizeMultiplier } = useWordSortUI();
+    const { 
+        bgmVolume, setBgmVolume, 
+        sfxVolume, setSfxVolume, 
+        textSizeMultiplier, setTextSizeMultiplier,
+        language, setLanguage
+    } = useWordSortUI();
+
+    const t = i18n[language];
 
     const TEXT_SIZE_STEPS = [0.8, 0.95, 1.1, 1.25, 1.4];
     const TEXT_SIZE_LABELS = ['가', '가', '가', '가', '가'];
@@ -63,8 +71,8 @@ const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }
                 </button>
 
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.4rem', fontWeight: 'bold' }}>설정</h2>
-                    <p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>게임 환경을 내 취향에 맞게 조절하세요</p>
+                    <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.4rem', fontWeight: 'bold' }}>{t.settings}</h2>
+                    <p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>{t.settingsDesc}</p>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -84,7 +92,7 @@ const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }
                             }}>
                                 <Music size={18} color="#f6d365" />
                             </div>
-                            <span style={{ fontWeight: '600', fontSize: '1.05rem' }}>배경음악 (BGM)</span>
+                            <span style={{ fontWeight: '600', fontSize: '1.05rem' }}>{t.bgm}</span>
                             <span style={{ marginLeft: 'auto', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums' }}>
                                 {Math.round(bgmVolume * 100)}%
                             </span>
@@ -117,7 +125,7 @@ const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }
                             }}>
                                 <Volume2 size={18} color="#84fab0" />
                             </div>
-                            <span style={{ fontWeight: '600', fontSize: '1.05rem' }}>효과음 (SFX)</span>
+                            <span style={{ fontWeight: '600', fontSize: '1.05rem' }}>{t.sfx}</span>
                             <span style={{ marginLeft: 'auto', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums' }}>
                                 {Math.round(sfxVolume * 100)}%
                             </span>
@@ -159,7 +167,7 @@ const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }
                             }}>
                                 <Type size={18} color="#a78bfa" />
                             </div>
-                            <span style={{ fontWeight: '600', fontSize: '1.05rem' }}>텍스트 크기</span>
+                            <span style={{ fontWeight: '600', fontSize: '1.05rem' }}>{t.textSize}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'space-between' }}>
                             {TEXT_SIZE_STEPS.map((step, i) => {
@@ -189,6 +197,54 @@ const WordSortSettingsModal: React.FC<WordSortSettingsModalProps> = ({ onClose }
                                     </button>
                                 );
                             })}
+                        </div>
+                    </div>
+                    {/* Language Selection */}
+                    <div style={{
+                        background: 'rgba(0, 0, 0, 0.2)',
+                        borderRadius: '12px',
+                        padding: '1.25rem',
+                        border: '1px solid rgba(255, 255, 255, 0.05)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                            <div style={{
+                                width: '32px', height: '32px', borderRadius: '8px',
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                                <Type size={18} color="#fda085" />
+                            </div>
+                            <span style={{ fontWeight: '600', fontSize: '1.05rem' }}>{t.language}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => setLanguage('ko')}
+                                style={{
+                                    flex: 1,
+                                    height: '40px',
+                                    borderRadius: '10px',
+                                    border: language === 'ko' ? '2px solid #fda085' : '2px solid rgba(255,255,255,0.1)',
+                                    background: language === 'ko' ? 'rgba(253,160,133,0.2)' : 'rgba(255,255,255,0.05)',
+                                    color: language === 'ko' ? '#fda085' : 'rgba(255,255,255,0.6)',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s'
+                                }}
+                            >한국어</button>
+                            <button
+                                onClick={() => setLanguage('en')}
+                                style={{
+                                    flex: 1,
+                                    height: '40px',
+                                    borderRadius: '10px',
+                                    border: language === 'en' ? '2px solid #fda085' : '2px solid rgba(255,255,255,0.1)',
+                                    background: language === 'en' ? 'rgba(253,160,133,0.2)' : 'rgba(255,255,255,0.05)',
+                                    color: language === 'en' ? '#fda085' : 'rgba(255,255,255,0.6)',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s'
+                                }}
+                            >English</button>
                         </div>
                     </div>
 
