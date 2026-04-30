@@ -5,7 +5,7 @@ import type { WordSolitaireState } from '../context/WordSortContext';
 interface UseGatherAnimationParams {
     state: WordSolitaireState;
     dispatch: React.Dispatch<any>;
-    slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+    slotRefs: React.MutableRefObject<Record<number, HTMLDivElement | null>>;
     stackRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
     setCompletingSlot: React.Dispatch<React.SetStateAction<number | null>>;
     addCoins: (n: number) => void;

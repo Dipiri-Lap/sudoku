@@ -68,7 +68,7 @@ interface WordSortUIContextType {
     setLanguage: (l: 'ko' | 'en') => void;
     // Refs
     stackRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
-    slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+    slotRefs: React.MutableRefObject<Record<number, HTMLDivElement | null>>;
     deckCardRef: React.MutableRefObject<HTMLDivElement | null>;
     // Handlers
     drawDeck: () => void;

@@ -152,7 +152,7 @@ const WordSortGame: React.FC = () => {
     const [lastDrawnId, setLastDrawnId] = useState<string | null>(null);
     const [prevRevealedCount, setPrevRevealedCount] = useState(0);
 
-    const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const slotRefs = useRef<Record<number, HTMLDivElement | null>>({});
     const stackRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [completingSlot, setCompletingSlot] = useState<number | null>(null);
     const [showGameOverOverlay, setShowGameOverOverlay] = useState(false);

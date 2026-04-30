@@ -7,7 +7,7 @@ interface UseWordSortDragParams {
     tutorialStep: number | null;
     gatheringCat: string | null;
     stackRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
-    slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+    slotRefs: React.MutableRefObject<Record<number, HTMLDivElement | null>>;
     finalCardWidth: number;
     cardHeight: number;
     visibleHeight: number;
@@ -172,12 +172,12 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         let bestTarget: { type: 'slot' | 'stack'; index: number } | null = null;
         let bestOverlap = 0;
 
-        for (let i = 0; i < slotRefs.current.length; i++) {
-            const ref = slotRefs.current[i];
+        for (const slotKey of Object.keys(state.activeSlots).map(Number)) {
+            const ref = slotRefs.current[slotKey];
             if (ref) {
                 const r = ref.getBoundingClientRect();
                 const overlap = getOverlapArea(dragRect, { left: r.left, top: r.top + 25, right: r.right, bottom: r.bottom });
-                if (overlap > bestOverlap) { bestOverlap = overlap; bestTarget = { type: 'slot', index: i }; }
+                if (overlap > bestOverlap) { bestOverlap = overlap; bestTarget = { type: 'slot', index: slotKey }; }
             }
         }
 
@@ -256,15 +256,15 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         let bestTarget: { type: 'slot' | 'stack', index: number } | null = null;
         let bestOverlap = 0;
 
-        for (let i = 0; i < slotRefs.current.length; i++) {
-            const ref = slotRefs.current[i];
+        for (const slotKey of Object.keys(state.activeSlots).map(Number)) {
+            const ref = slotRefs.current[slotKey];
             if (ref) {
                 const r = ref.getBoundingClientRect();
                 const slotCardRect = { left: r.left, top: r.top + 25, right: r.right, bottom: r.bottom };
                 const overlap = getOverlapArea(dragRect, slotCardRect);
                 if (overlap > bestOverlap) {
                     bestOverlap = overlap;
-                    bestTarget = { type: 'slot', index: i };
+                    bestTarget = { type: 'slot', index: slotKey };
                 }
             }
         }
