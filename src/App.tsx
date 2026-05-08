@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import LandingPage from './common/components/LandingPage';
 import SudokuModeSelect from './features/sudoku/components/SudokuModeSelect';
@@ -95,6 +95,7 @@ const AppContent: React.FC = () => {
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
           <Route path="/snapspot" element={<SnapSpotGame />} />
+          <Route path="/queen" element={<Navigate to="/queens" replace />} />
           <Route path="/queens" element={<QueensModeSelect />} />
           <Route path="/queens/play" element={<QueensGame />} />
 
