@@ -10,7 +10,7 @@ import WordSortGame from './features/word-sort/components/WordSortGame';
 import WordSortModeSelect from './features/word-sort/components/WordSortModeSelect';
 import TileMatchGame from './features/tile-match/components/TileMatchGame';
 import SnapSpotGame from './features/snapspot/components/SnapSpotGame';
-// import AdminPage from './features/admin/AdminPage';
+import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
@@ -90,6 +90,9 @@ const AppContent: React.FC = () => {
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
           <Route path="/snapspot" element={<SnapSpotGame />} />
+          {window.location.hostname === 'localhost' && (
+            <Route path="/admin" element={<AdminPage />} />
+          )}
         </Routes>
       </CardBackProvider>
       </WordSortProgressProvider>
