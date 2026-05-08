@@ -507,8 +507,30 @@ const LandingPage: React.FC = () => {
                     </div>
                 </a>
 
+                <a href="/queens" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
+                    <div style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        backgroundColor: '#4a90e2', color: 'white',
+                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
+                        padding: '2px 7px', borderRadius: '999px',
+                        boxShadow: '0 2px 6px rgba(74,144,226,0.5)'
+                    }}>NEW</div>
+                    <div className="game-card-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
+                        <img src="/crownquest_logo.png" alt="크라운 퀘스트" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                    </div>
+                    <div className="game-card-content">
+                        <h3>크라운 퀘스트</h3>
+                        <p>색상 영역마다 퀸을 하나씩 배치하는 논리 퍼즐</p>
+                        <div className="game-card-footer">
+                            <span className="play-now">
+                                <Play size={16} fill="currentColor" /> 플레이하기
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
                 {window.location.hostname === 'localhost' && (
-                    <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit' } as any}>
+                    <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             🧩
                         </div>
@@ -525,7 +547,7 @@ const LandingPage: React.FC = () => {
                 )}
 
                 {window.location.hostname === 'localhost' && (
-                    <a href="/snapspot" className="game-card animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', color: 'inherit' } as any}>
+                    <a href="/snapspot" className="game-card animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             🔍
                         </div>

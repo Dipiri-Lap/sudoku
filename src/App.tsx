@@ -10,12 +10,16 @@ import WordSortGame from './features/word-sort/components/WordSortGame';
 import WordSortModeSelect from './features/word-sort/components/WordSortModeSelect';
 import TileMatchGame from './features/tile-match/components/TileMatchGame';
 import SnapSpotGame from './features/snapspot/components/SnapSpotGame';
+import QueensGame from './features/queens/components/QueensGame';
+import QueensModeSelect from './features/queens/components/QueensModeSelect';
+
 import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
 import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
 import { SudokuProgressProvider } from './context/SudokuProgressContext';
 import { WordSortProgressProvider } from './context/WordSortProgressContext';
+import { QueensProgressProvider } from './context/QueensProgressContext';
 import { ChallengeProvider } from './context/ChallengeContext';
 import { UserInitProvider, useUserInit } from './context/UserInitContext';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -60,6 +64,7 @@ const AppContent: React.FC = () => {
       <ChallengeProvider>
       <SudokuProgressProvider>
       <WordSortProgressProvider>
+      <QueensProgressProvider>
       <CardBackProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -90,11 +95,15 @@ const AppContent: React.FC = () => {
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
           <Route path="/snapspot" element={<SnapSpotGame />} />
+          <Route path="/queens" element={<QueensModeSelect />} />
+          <Route path="/queens/play" element={<QueensGame />} />
+
           {window.location.hostname === 'localhost' && (
             <Route path="/admin" element={<AdminPage />} />
           )}
         </Routes>
       </CardBackProvider>
+      </QueensProgressProvider>
       </WordSortProgressProvider>
       </SudokuProgressProvider>
       </ChallengeProvider>

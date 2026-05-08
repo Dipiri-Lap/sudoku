@@ -9,6 +9,7 @@ import { useChallenges } from '../../context/ChallengeContext';
 import { ALL_CHALLENGES, CHALLENGE_MAP, type Challenge } from '../../data/challenges';
 import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
+import { useQueensProgress } from '../../context/QueensProgressContext';
 
 interface ProfileModalProps {
     uid: string;
@@ -49,6 +50,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const challenges = useChallenges();
     const { stageProgress, beginnerProgress } = useSudokuProgress();
     const { wordSortProgress } = useWordSortProgress();
+    const { queensProgress } = useQueensProgress();
 
     /** Returns { current, target } for the challenge's progress bar */
     const getProgress = (challenge: Challenge): { current: number; target: number } => {
@@ -60,6 +62,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 return { current: Math.min(beginnerProgress, target), target };
             case 'word_sort_stage':
                 return { current: Math.min(wordSortProgress, target), target };
+            case 'queens_stage':
+                return { current: Math.min(queensProgress, target), target };
             case 'time_attack': {
                 const cleared = challenges.isChallengeCleared(challenge.id) || challenges.isChallengeCompleted(challenge.id);
                 return { current: cleared ? 1 : 0, target: 1 };

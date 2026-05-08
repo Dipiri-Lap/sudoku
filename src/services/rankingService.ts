@@ -163,6 +163,34 @@ export const getTopRankings = async (limitCount: number = 100): Promise<UserProf
     }
 };
 
+// Queens progress: save cleared level number
+export const saveQueensProgress = async (uid: string, clearedLevel: number): Promise<void> => {
+    try {
+        const progressRef = doc(db, 'users', uid, 'queensProgress', 'data');
+        const snap = await getDoc(progressRef);
+        const currentCleared = snap.exists() ? (snap.data().clearedLevel ?? 0) : 0;
+        if (clearedLevel > currentCleared) {
+            await setDoc(progressRef, { clearedLevel }, { merge: true });
+        }
+    } catch (e) {
+        console.error('Failed to save queens progress:', e);
+    }
+};
+
+// Queens progress: get the last cleared level (0 = none cleared)
+export const getQueensProgress = async (uid: string): Promise<number> => {
+    try {
+        const progressRef = doc(db, 'users', uid, 'queensProgress', 'data');
+        const snap = await getDoc(progressRef);
+        if (snap.exists()) {
+            return snap.data().clearedLevel ?? 0;
+        }
+    } catch (e) {
+        console.error('Failed to get queens progress:', e);
+    }
+    return 0;
+};
+
 // Word Sort progress: save cleared level number
 export const saveWordSortProgress = async (uid: string, clearedLevel: number): Promise<void> => {
     try {

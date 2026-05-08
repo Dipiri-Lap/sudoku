@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "generate-stages": "tsx scripts/generate-stages.ts"
+    "generate-stages": "tsx scripts/generate-stages.ts",
+    "generate-queens": "tsx scripts/generate-queens.ts"
   },
   "dependencies": {
     "@portone/browser-sdk": "^0.1.3",
