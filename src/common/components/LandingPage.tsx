@@ -507,7 +507,7 @@ const LandingPage: React.FC = () => {
                     </div>
                 </a>
 
-                <a href="/queens" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
+                {window.location.hostname === 'localhost' && <a href="/queens" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
                         backgroundColor: '#4a90e2', color: 'white',
@@ -527,7 +527,7 @@ const LandingPage: React.FC = () => {
                             </span>
                         </div>
                     </div>
-                </a>
+                </a>}
 
                 {window.location.hostname === 'localhost' && (
                     <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', color: 'inherit' } as any}>
