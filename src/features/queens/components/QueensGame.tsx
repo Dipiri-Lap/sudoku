@@ -257,9 +257,13 @@ const QueensGame: React.FC = () => {
   const queensRef = useRef(queens);
   const marksRef = useRef(marks);
   const memoQueensRef = useRef(memoQueens);
+  const memoMarksRef = useRef(memoMarks);
+  const isMemoModeRef = useRef(isMemoMode);
   useEffect(() => { queensRef.current = queens; }, [queens]);
   useEffect(() => { marksRef.current = marks; }, [marks]);
   useEffect(() => { memoQueensRef.current = memoQueens; }, [memoQueens]);
+  useEffect(() => { memoMarksRef.current = memoMarks; }, [memoMarks]);
+  useEffect(() => { isMemoModeRef.current = isMemoMode; }, [isMemoMode]);
 
   const lastClickRef = useRef<{ row: number; col: number; time: number } | null>(null);
   const singleClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -476,7 +480,17 @@ const QueensGame: React.FC = () => {
     if (q?.row === row && q?.col === col) return;
     dragCellsRef.current.add(key);
     if (isMemoMode) {
-      setMemoMarks(prev => { const s = new Set(prev); if (dragModeRef.current === 'add') s.add(key); else s.delete(key); return s; });
+      if (dragModeRef.current === 'add') {
+        setMemoMarks(prev => { const s = new Set(prev); s.add(key); return s; });
+      } else {
+        setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+        setMemoQueens(prev => {
+          if (prev[colorIdx]?.row === row && prev[colorIdx]?.col === col) {
+            const next = [...prev]; next[colorIdx] = null; return next;
+          }
+          return prev;
+        });
+      }
     } else if (dragModeRef.current === 'add') {
       setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
       setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
@@ -518,12 +532,19 @@ const QueensGame: React.FC = () => {
       isDraggingRef.current = true;
       dragCellsRef.current = new Set();
       const startKey = `${start.row},${start.col}`;
-      dragModeRef.current = marksRef.current.has(startKey) ? 'remove' : 'add';
+      if (isMemoModeRef.current) {
+        const ci = currentGrid[start.row][start.col];
+        const hasMemoMark = memoMarksRef.current.has(startKey);
+        const hasMemoQueen = memoQueensRef.current[ci]?.row === start.row && memoQueensRef.current[ci]?.col === start.col;
+        dragModeRef.current = (hasMemoMark || hasMemoQueen) ? 'remove' : 'add';
+      } else {
+        dragModeRef.current = marksRef.current.has(startKey) ? 'remove' : 'add';
+      }
       applyMarkToCell(start.row, start.col);
     }
     const cell = getCellFromPoint(e.clientX, e.clientY);
     if (cell) applyMarkToCell(cell.row, cell.col);
-  }, [applyMarkToCell]);
+  }, [applyMarkToCell, currentGrid]);
 
   const handleBoardPointerUp = useCallback(() => {
     if (isDraggingRef.current) wasDragRef.current = true;
