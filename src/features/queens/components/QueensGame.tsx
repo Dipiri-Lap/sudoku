@@ -35,7 +35,7 @@ type TutStep = {
 
 const LEVELS = levelsData as LevelData[];
 const MAX_HEARTS = 1;
-const DOUBLE_CLICK_MS = 150;
+const DOUBLE_CLICK_MS = 250;
 const DRAG_THRESHOLD = 8;
 
 // 4×4 tutorial grid (id=0):
