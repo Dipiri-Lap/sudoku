@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
+import { solveLevel } from '../utils/solver';
 import '../styles/QueensGame.css';
 
 type LevelData = {
@@ -225,6 +226,9 @@ const QueensGame: React.FC = () => {
     [level.grid, rotationTimes]
   );
 
+  // Correct answer for the current (possibly rotated) grid
+  const solution = useMemo(() => solveLevel(currentGrid, n), [currentGrid, n]);
+
   const [queens, setQueens] = useState<(Queen | null)[]>(Array(n).fill(null));
   const [marks, setMarks] = useState<Set<string>>(new Set());
   const [hearts, setHearts] = useState(MAX_HEARTS);
@@ -392,9 +396,12 @@ const QueensGame: React.FC = () => {
       setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
       const newQ = [...queensRef.current];
       newQ[colorIdx] = { row, col };
-      const newConflicts = getConflicts(newQ);
       setQueens(newQ);
-      if (newConflicts.has(key)) {
+
+      // Check against the unique solution — wrong position loses a heart
+      const correct = solution?.[colorIdx];
+      const isWrong = !correct || correct[0] !== row || correct[1] !== col;
+      if (isWrong) {
         setHearts(h => Math.max(0, h - 1));
         setTimeout(() => {
           setQueens(q => { const next = [...q]; next[colorIdx] = null; return next; });
