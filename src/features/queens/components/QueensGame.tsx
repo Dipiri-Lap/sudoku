@@ -237,6 +237,7 @@ const QueensGame: React.FC = () => {
   const [animPhase, setAnimPhase] = useState<'idle' | 'out' | 'in'>('idle');
   const [isRippling, setIsRippling] = useState(true);
   const rippleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [recentlyPlaced, setRecentlyPlaced] = useState<Set<string>>(new Set());
 
   const queensRef = useRef(queens);
   const marksRef = useRef(marks);
@@ -421,6 +422,8 @@ const QueensGame: React.FC = () => {
         const newQ = [...queensRef.current];
         newQ[colorIdx] = { row, col };
         setQueens(newQ);
+        setRecentlyPlaced(prev => new Set([...prev, key]));
+        setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
       }
     } else {
       if (singleClickTimerRef.current) {
@@ -506,7 +509,7 @@ const QueensGame: React.FC = () => {
                   key={key}
                   data-row={r}
                   data-col={c}
-                  className={`queens-cell${isConflict ? ' conflict' : ''}${tutClass ? ` ${tutClass}` : ''}${isRippling ? ' rippling' : ''}`}
+                  className={`queens-cell${isConflict ? ' conflict' : ''}${tutClass ? ` ${tutClass}` : ''}${isRippling ? ' rippling' : ''}${recentlyPlaced.has(key) ? ' cell-flipping' : ''}`}
                   style={{
                     backgroundColor: colors[colorIdx],
                     ...(isRippling && { '--ripple-delay': `${(r + c) * 45}ms` }),
