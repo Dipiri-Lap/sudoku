@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X as XIcon } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
 import { solveLevel } from '../utils/solver';
@@ -241,6 +242,9 @@ const QueensGame: React.FC = () => {
   const [recentlyPlaced, setRecentlyPlaced] = useState<Set<string>>(new Set());
   const [isShaking, setIsShaking] = useState(false);
   const [removingMarks, setRemovingMarks] = useState<Set<string>>(new Set());
+  const [isMemoMode, setIsMemoMode] = useState(false);
+  const [memoMarks, setMemoMarks] = useState<Set<string>>(new Set());
+  const [memoQueens, setMemoQueens] = useState<(Queen | null)[]>(Array(n).fill(null));
 
   const queensRef = useRef(queens);
   const marksRef = useRef(marks);
@@ -287,6 +291,16 @@ const QueensGame: React.FC = () => {
         if (!isTutorial) {
           saveQueensProgress(level.id).catch(console.error);
         }
+        // 폭죽 연출
+        const end = Date.now() + 2800;
+        const fire = (opts: confetti.Options) => confetti({ startVelocity: 30, spread: 70, ticks: 60, zIndex: 300, ...opts });
+        const frame = () => {
+          fire({ particleCount: 4, angle: 60,  origin: { x: 0,    y: 0.65 } });
+          fire({ particleCount: 4, angle: 120, origin: { x: 1,    y: 0.65 } });
+          fire({ particleCount: 3, angle: 90,  origin: { x: 0.5,  y: 0.7  } });
+          if (Date.now() < end) requestAnimationFrame(frame);
+        };
+        frame();
       }, 350);
       return () => clearTimeout(t);
     }
@@ -316,6 +330,8 @@ const QueensGame: React.FC = () => {
     setQueens(Array(newN).fill(null));
     setMarks(new Set());
     setRemovingMarks(new Set());
+    setMemoMarks(new Set());
+    setMemoQueens(Array(newN).fill(null));
     setHearts(MAX_HEARTS);
     setWon(false);
     setGameOver(false);
@@ -392,12 +408,14 @@ const QueensGame: React.FC = () => {
     const q = queensRef.current[colorIdx];
     if (q?.row === row && q?.col === col) return;
     dragCellsRef.current.add(key);
-    if (dragModeRef.current === 'add') {
+    if (isMemoMode) {
+      setMemoMarks(prev => { const s = new Set(prev); if (dragModeRef.current === 'add') s.add(key); else s.delete(key); return s; });
+    } else if (dragModeRef.current === 'add') {
       setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
     } else {
       removeMarkAnimated(key);
     }
-  }, [currentGrid, removeMarkAnimated]);
+  }, [currentGrid, removeMarkAnimated, isMemoMode]);
 
   const getCellFromPoint = (x: number, y: number) => {
     const el = document.elementFromPoint(x, y) as HTMLElement | null;
@@ -447,30 +465,42 @@ const QueensGame: React.FC = () => {
     const last = lastClickRef.current;
     const isDoubleClick = last && last.row === row && last.col === col && now - last.time < DOUBLE_CLICK_MS;
 
+    const key = `${row},${col}`;
+    const colorIdx = currentGrid[row][col];
+    const hasRealQueen = queens[colorIdx]?.row === row && queens[colorIdx]?.col === col;
+
     if (isDoubleClick) {
       if (singleClickTimerRef.current) {
         clearTimeout(singleClickTimerRef.current);
         singleClickTimerRef.current = null;
       }
       lastClickRef.current = null;
-      const key = `${row},${col}`;
-      const colorIdx = currentGrid[row][col];
+      if (hasRealQueen) return;
 
-      const correct = solution?.[colorIdx];
-      const isWrong = !correct || correct[0] !== row || correct[1] !== col;
-
-      if (isWrong) {
-        setHearts(h => Math.max(0, h - 1));
+      if (isMemoMode) {
+        setMemoQueens(prev => {
+          const next = [...prev];
+          next[colorIdx] = (next[colorIdx]?.row === row && next[colorIdx]?.col === col) ? null : { row, col };
+          return next;
+        });
       } else {
-        setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
-        const newQ = [...queensRef.current];
-        newQ[colorIdx] = { row, col };
-        setQueens(newQ);
-        setRecentlyPlaced(prev => new Set([...prev, key]));
-        setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
-        setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 400);
-        setTimeout(() => spawnParticles(row, col), 20);
+        const correct = solution?.[colorIdx];
+        const isWrong = !correct || correct[0] !== row || correct[1] !== col;
+        if (isWrong) {
+          setHearts(h => Math.max(0, h - 1));
+        } else {
+          setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+          setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+          setMemoQueens(prev => { const next = [...prev]; next[colorIdx] = null; return next; });
+          const newQ = [...queensRef.current];
+          newQ[colorIdx] = { row, col };
+          setQueens(newQ);
+          setRecentlyPlaced(prev => new Set([...prev, key]));
+          setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
+          setIsShaking(true);
+          setTimeout(() => setIsShaking(false), 400);
+          setTimeout(() => spawnParticles(row, col), 20);
+        }
       }
     } else {
       if (singleClickTimerRef.current) {
@@ -478,11 +508,13 @@ const QueensGame: React.FC = () => {
         singleClickTimerRef.current = null;
       }
       lastClickRef.current = { row, col, time: now };
-      const key = `${row},${col}`;
-      const colorIdx = currentGrid[row][col];
-      const q = queens[colorIdx];
-      if (q?.row === row && q?.col === col) {
-        return;
+      if (hasRealQueen) return;
+
+      if (isMemoMode) {
+        singleClickTimerRef.current = setTimeout(() => {
+          singleClickTimerRef.current = null;
+          setMemoMarks(prev => { const s = new Set(prev); if (s.has(key)) s.delete(key); else s.add(key); return s; });
+        }, DOUBLE_CLICK_MS);
       } else {
         singleClickTimerRef.current = setTimeout(() => {
           singleClickTimerRef.current = null;
@@ -494,7 +526,7 @@ const QueensGame: React.FC = () => {
         }, DOUBLE_CLICK_MS);
       }
     }
-  }, [won, gameOver, isBlocked, currentGrid, queens]);
+  }, [won, gameOver, isBlocked, currentGrid, queens, isMemoMode, solution, spawnParticles, removeMarkAnimated]);
 
   const currentTutStep = tutorialStep !== null ? TUTORIAL_STEPS[tutorialStep] : null;
   const isInteractiveStep = tutorialStep !== null && tutorialStep >= 5;
@@ -508,6 +540,9 @@ const QueensGame: React.FC = () => {
       <div className="queens-header">
         <button className="queens-back-btn" onClick={() => navigate('/queens')}>←</button>
         <span className="queens-level-name">{level.name}</span>
+        <button className={`queens-memo-btn${isMemoMode ? ' active' : ''}`} onClick={() => setIsMemoMode(m => !m)}>
+          📝 메모
+        </button>
         <button className="queens-reset-btn" onClick={handleReset}>초기화</button>
       </div>
 
@@ -564,8 +599,14 @@ const QueensGame: React.FC = () => {
                   onClick={() => handleCellClick(r, c)}
                 >
                   {hasQueenHere && <span className={`cell-queen${isConflict ? ' conflict' : ''}`}>👑</span>}
+                  {!hasQueenHere && memoQueens[colorIdx]?.row === r && memoQueens[colorIdx]?.col === c && (
+                    <span className="cell-queen cell-queen-memo">👑</span>
+                  )}
                   {(isMarked || removingMarks.has(key)) && !hasQueenHere && (
                     <XIcon className={`cell-mark${removingMarks.has(key) ? ' cell-mark-out' : ''}`} strokeWidth={3} />
+                  )}
+                  {memoMarks.has(key) && !hasQueenHere && !isMarked && (
+                    <XIcon className="cell-mark cell-mark-memo" strokeWidth={2} />
                   )}
                   {showGhost && !hasQueenHere && <span className="cell-ghost-queen">👑</span>}
                   {showForbidden && !hasQueenHere && <span className="cell-forbidden-mark">✕</span>}
