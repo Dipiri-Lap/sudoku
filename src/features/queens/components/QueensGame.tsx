@@ -341,6 +341,38 @@ const QueensGame: React.FC = () => {
     doReset(0, nextLevel.colors.length, nextLevel.id === 0);
   }, [levelIdx]);
 
+  const spawnParticles = useCallback((row: number, col: number) => {
+    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`) as HTMLElement | null;
+    if (!cell) return;
+    const rect = cell.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const palette = ['#fbbf24', '#f59e0b', '#fde68a', '#fff', '#fcd34d', '#facc15'];
+    const total = 14;
+    for (let i = 0; i < total; i++) {
+      const isStar = i % 2 === 0;
+      const angle = (i / total) * 360 + Math.random() * 15;
+      const dist = 38 + Math.random() * 32;
+      const size = isStar ? 10 + Math.random() * 6 : 5 + Math.random() * 4;
+      const color = palette[Math.floor(Math.random() * palette.length)];
+      const dx = Math.cos((angle * Math.PI) / 180) * dist;
+      const dy = Math.sin((angle * Math.PI) / 180) * dist;
+      const el = document.createElement('span');
+      el.textContent = isStar ? '★' : '●';
+      el.style.cssText = `
+        position:fixed; left:${cx}px; top:${cy}px;
+        font-size:${size}px; color:${color};
+        pointer-events:none; z-index:9999;
+        transform:translate(-50%,-50%);
+        animation:particle-fly 0.62s ease-out forwards;
+        --dx:${dx}px; --dy:${dy}px;
+        text-shadow: 0 0 4px ${color};
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 680);
+    }
+  }, []);
+
   const applyMarkToCell = useCallback((row: number, col: number) => {
     const key = `${row},${col}`;
     if (dragCellsRef.current.has(key)) return;
@@ -424,6 +456,7 @@ const QueensGame: React.FC = () => {
         setQueens(newQ);
         setRecentlyPlaced(prev => new Set([...prev, key]));
         setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
+        setTimeout(() => spawnParticles(row, col), 20);
       }
     } else {
       if (singleClickTimerRef.current) {
