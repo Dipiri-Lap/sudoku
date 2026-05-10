@@ -238,6 +238,7 @@ const QueensGame: React.FC = () => {
   const [isRippling, setIsRippling] = useState(true);
   const rippleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [recentlyPlaced, setRecentlyPlaced] = useState<Set<string>>(new Set());
+  const [isShaking, setIsShaking] = useState(false);
 
   const queensRef = useRef(queens);
   const marksRef = useRef(marks);
@@ -456,6 +457,8 @@ const QueensGame: React.FC = () => {
         setQueens(newQ);
         setRecentlyPlaced(prev => new Set([...prev, key]));
         setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 400);
         setTimeout(() => spawnParticles(row, col), 20);
       }
     } else {
@@ -484,7 +487,7 @@ const QueensGame: React.FC = () => {
 
   const currentTutStep = tutorialStep !== null ? TUTORIAL_STEPS[tutorialStep] : null;
   const isInteractiveStep = tutorialStep !== null && tutorialStep >= 5;
-  const boardClass = ['queens-board-container', animPhase !== 'idle' ? `board-${animPhase}` : ''].filter(Boolean).join(' ');
+  const boardClass = ['queens-board-container', animPhase !== 'idle' ? `board-${animPhase}` : '', isShaking ? 'board-shaking' : ''].filter(Boolean).join(' ');
 
   // Label shown in interactive banner (e.g. "3 / 7")
   const interactiveIndex = tutorialStep !== null ? tutorialStep - 4 : 0; // 5→1, 6→2, ... 11→7
