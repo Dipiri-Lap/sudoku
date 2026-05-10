@@ -252,8 +252,6 @@ const QueensGame: React.FC = () => {
 
   const placed = queens.filter((q): q is Queen => q !== null);
   const conflicts = getConflicts(queens);
-  const centerR = (size - 1) / 2;
-  const centerC = (size - 1) / 2;
 
   // Tutorial auto-advance on mark
   useEffect(() => {
@@ -499,7 +497,7 @@ const QueensGame: React.FC = () => {
                   className={`queens-cell${isConflict ? ' conflict' : ''}${tutClass ? ` ${tutClass}` : ''}${isRippling ? ' rippling' : ''}`}
                   style={{
                     backgroundColor: colors[colorIdx],
-                    ...(isRippling && { '--ripple-delay': `${Math.round(Math.sqrt((r - centerR) ** 2 + (c - centerC) ** 2) * 55)}ms` }),
+                    ...(isRippling && { '--ripple-delay': `${(r + c) * 45}ms` }),
                   } as React.CSSProperties}
                   onClick={() => handleCellClick(r, c)}
                 >
