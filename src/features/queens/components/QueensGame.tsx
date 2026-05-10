@@ -413,6 +413,13 @@ const QueensGame: React.FC = () => {
       setMemoMarks(prev => { const s = new Set(prev); if (dragModeRef.current === 'add') s.add(key); else s.delete(key); return s; });
     } else if (dragModeRef.current === 'add') {
       setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
+      setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+      setMemoQueens(prev => {
+        if (prev[colorIdx]?.row === row && prev[colorIdx]?.col === col) {
+          const next = [...prev]; next[colorIdx] = null; return next;
+        }
+        return prev;
+      });
     } else {
       removeMarkAnimated(key);
     }
@@ -523,6 +530,13 @@ const QueensGame: React.FC = () => {
             removeMarkAnimated(key);
           } else {
             setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
+            setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+            setMemoQueens(prev => {
+              if (prev[colorIdx]?.row === row && prev[colorIdx]?.col === col) {
+                const next = [...prev]; next[colorIdx] = null; return next;
+              }
+              return prev;
+            });
           }
         }, DOUBLE_CLICK_MS);
       }
