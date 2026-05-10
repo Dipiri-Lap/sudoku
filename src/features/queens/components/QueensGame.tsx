@@ -6,6 +6,7 @@ import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
 import { useCoins } from '../../../context/CoinContext';
 import { triggerAdByPopup } from '../../../utils/adTrigger';
+import { auth } from '../../../firebase';
 import { solveLevel } from '../utils/solver';
 import '../styles/QueensGame.css';
 
@@ -207,7 +208,8 @@ function getCellTutClass(r: number, c: number, colorIdx: number, step: TutStep |
 const QueensGame: React.FC = () => {
   const navigate = useNavigate();
   const { queensProgress, saveQueensProgress } = useQueensProgress();
-  const { coins, spendCoins } = useCoins();
+  const { coins, spendCoins, addCoins } = useCoins();
+  const hasAwardedCoins = useRef(false);
 
   const [levelIdx, setLevelIdx] = useState(() => {
     // Start from next uncleared level; skip tutorial if already cleared
@@ -314,6 +316,19 @@ const QueensGame: React.FC = () => {
     }
   }, [queens]);
 
+  // Coin & puzzle power reward on win
+  useEffect(() => {
+    if (won && !isTutorial && !hasAwardedCoins.current) {
+      hasAwardedCoins.current = true;
+      addCoins(10);
+      if (auth.currentUser) {
+        import('../../../services/rankingService')
+          .then(m => m.incrementPuzzlePower(auth.currentUser!.uid))
+          .catch(console.error);
+      }
+    }
+  }, [won, isTutorial, addCoins]);
+
   // Game over detection
   useEffect(() => {
     if (hearts === 0 && !won) {
@@ -342,6 +357,7 @@ const QueensGame: React.FC = () => {
     setMemoQueens(Array(newN).fill(null));
     setQueenHintUsed(false);
     setShowAdModal(false);
+    hasAwardedCoins.current = false;
     setRippleKey(k => k + 1);
     setHearts(MAX_HEARTS);
     setWon(false);
@@ -798,11 +814,20 @@ const QueensGame: React.FC = () => {
         <div className="queens-win-overlay">
           <div className="queens-win-modal">
             <div style={{ fontSize: '4rem', lineHeight: 1 }}>👑</div>
-            <h2>정답!</h2>
-            <p>모든 퀸을 올바르게 배치했습니다!</p>
+            <h2>레벨 클리어</h2>
+            {!isTutorial && (
+              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center', margin: '0.4rem 0 0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fef9e7', border: '1px solid #f4c430', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#b8860b', fontSize: '0.95rem' }}>
+                  🪙 +10
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
+                  ⚡ 퍼즐력 +1
+                </div>
+              </div>
+            )}
             {levelIdx < LEVELS.length - 1 && (
               <button className="queens-win-btn" onClick={handleNextLevel}>
-                다음 스테이지 →
+                다음 레벨 →
               </button>
             )}
             <button
