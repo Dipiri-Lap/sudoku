@@ -145,7 +145,7 @@
   max-width: 460px;
   aspect-ratio: 1 / 1;
   background: #334155;
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 3px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   flex-shrink: 0;
@@ -167,7 +167,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 1px;
+  border-radius: 3px;
   overflow: hidden;
   transition: filter 0.1s;
   user-select: none;
