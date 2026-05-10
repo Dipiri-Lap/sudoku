@@ -275,6 +275,16 @@
   100% { transform: scale(1);    opacity: 1; }
 }
 
+.cell-mark-out {
+  animation: mark-boing-out 0.24s ease-in both !important;
+}
+
+@keyframes mark-boing-out {
+  0%   { transform: scale(1);    opacity: 1; }
+  30%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0);    opacity: 0; }
+}
+
 @keyframes conflict-pulse {
   0%, 100% { transform: scale(1); }
   40% { transform: scale(0.94); }

@@ -35,7 +35,7 @@ type TutStep = {
 
 const LEVELS = levelsData as LevelData[];
 const MAX_HEARTS = 1;
-const DOUBLE_CLICK_MS = 300;
+const DOUBLE_CLICK_MS = 150;
 const DRAG_THRESHOLD = 8;
 
 // 4×4 tutorial grid (id=0):
@@ -240,6 +240,7 @@ const QueensGame: React.FC = () => {
   const rippleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [recentlyPlaced, setRecentlyPlaced] = useState<Set<string>>(new Set());
   const [isShaking, setIsShaking] = useState(false);
+  const [removingMarks, setRemovingMarks] = useState<Set<string>>(new Set());
 
   const queensRef = useRef(queens);
   const marksRef = useRef(marks);
@@ -314,6 +315,7 @@ const QueensGame: React.FC = () => {
     setRotationTimes(newRot);
     setQueens(Array(newN).fill(null));
     setMarks(new Set());
+    setRemovingMarks(new Set());
     setHearts(MAX_HEARTS);
     setWon(false);
     setGameOver(false);
@@ -342,6 +344,14 @@ const QueensGame: React.FC = () => {
     setLevelIdx(nextIdx);
     doReset(0, nextLevel.colors.length, nextLevel.id === 0);
   }, [levelIdx]);
+
+  const removeMarkAnimated = useCallback((key: string) => {
+    setRemovingMarks(prev => new Set([...prev, key]));
+    setTimeout(() => {
+      setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+      setRemovingMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+    }, 260);
+  }, []);
 
   const spawnParticles = useCallback((row: number, col: number) => {
     const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`) as HTMLElement | null;
@@ -476,11 +486,11 @@ const QueensGame: React.FC = () => {
       } else {
         singleClickTimerRef.current = setTimeout(() => {
           singleClickTimerRef.current = null;
-          setMarks(prev => {
-            const s = new Set(prev);
-            if (s.has(key)) s.delete(key); else s.add(key);
-            return s;
-          });
+          if (marksRef.current.has(key)) {
+            removeMarkAnimated(key);
+          } else {
+            setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
+          }
         }, DOUBLE_CLICK_MS);
       }
     }
@@ -554,7 +564,9 @@ const QueensGame: React.FC = () => {
                   onClick={() => handleCellClick(r, c)}
                 >
                   {hasQueenHere && <span className={`cell-queen${isConflict ? ' conflict' : ''}`}>👑</span>}
-                  {isMarked && !hasQueenHere && <XIcon className="cell-mark" strokeWidth={3} />}
+                  {(isMarked || removingMarks.has(key)) && !hasQueenHere && (
+                    <XIcon className={`cell-mark${removingMarks.has(key) ? ' cell-mark-out' : ''}`} strokeWidth={3} />
+                  )}
                   {showGhost && !hasQueenHere && <span className="cell-ghost-queen">👑</span>}
                   {showForbidden && !hasQueenHere && <span className="cell-forbidden-mark">✕</span>}
                 </div>
