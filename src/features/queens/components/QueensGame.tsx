@@ -235,6 +235,8 @@ const QueensGame: React.FC = () => {
   const [won, setWon] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [animPhase, setAnimPhase] = useState<'idle' | 'out' | 'in'>('idle');
+  const [isRippling, setIsRippling] = useState(true);
+  const rippleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const queensRef = useRef(queens);
   const marksRef = useRef(marks);
@@ -250,6 +252,8 @@ const QueensGame: React.FC = () => {
 
   const placed = queens.filter((q): q is Queen => q !== null);
   const conflicts = getConflicts(queens);
+  const centerR = (size - 1) / 2;
+  const centerC = (size - 1) / 2;
 
   // Tutorial auto-advance on mark
   useEffect(() => {
@@ -292,6 +296,16 @@ const QueensGame: React.FC = () => {
       return () => clearTimeout(t);
     }
   }, [hearts, won]);
+
+  // Board ripple entrance animation — triggers on mount and level change
+  useEffect(() => {
+    setIsRippling(true);
+    const maxDist = Math.sqrt(2) * (size - 1) / 2;
+    const totalMs = Math.round(maxDist * 55) + 450;
+    if (rippleTimerRef.current) clearTimeout(rippleTimerRef.current);
+    rippleTimerRef.current = setTimeout(() => setIsRippling(false), totalMs);
+    return () => { if (rippleTimerRef.current) clearTimeout(rippleTimerRef.current); };
+  }, [levelIdx]);
 
   const doReset = (newRot: number, newN: number, newIsTutorial: boolean) => {
     rotationTimesRef.current = newRot;
@@ -482,13 +496,16 @@ const QueensGame: React.FC = () => {
                   key={key}
                   data-row={r}
                   data-col={c}
-                  className={`queens-cell${isConflict ? ' conflict' : ''}${tutClass ? ` ${tutClass}` : ''}`}
-                  style={{ backgroundColor: colors[colorIdx] }}
+                  className={`queens-cell${isConflict ? ' conflict' : ''}${tutClass ? ` ${tutClass}` : ''}${isRippling ? ' rippling' : ''}`}
+                  style={{
+                    backgroundColor: colors[colorIdx],
+                    ...(isRippling && { '--ripple-delay': `${Math.round(Math.sqrt((r - centerR) ** 2 + (c - centerC) ** 2) * 55)}ms` }),
+                  } as React.CSSProperties}
                   onClick={() => handleCellClick(r, c)}
                 >
-                  {hasQueenHere && <span className={`cell-queen${isConflict ? ' conflict' : ''}`}>♛</span>}
+                  {hasQueenHere && <span className={`cell-queen${isConflict ? ' conflict' : ''}`}>👑</span>}
                   {isMarked && !hasQueenHere && <span className="cell-mark">✕</span>}
-                  {showGhost && !hasQueenHere && <span className="cell-ghost-queen">♛</span>}
+                  {showGhost && !hasQueenHere && <span className="cell-ghost-queen">👑</span>}
                   {showForbidden && !hasQueenHere && <span className="cell-forbidden-mark">✕</span>}
                 </div>
               );
@@ -507,7 +524,7 @@ const QueensGame: React.FC = () => {
       {tutorialStep === 0 && (
         <div className="tut-intro-overlay">
           <div className="tut-intro-card">
-            <div className="tut-intro-crown">♛</div>
+            <div className="tut-intro-crown">👑</div>
             <h1 className="tut-intro-title">퀸즈</h1>
             <p className="tut-intro-sub">4×4 보드에 퀸 4개를 올바르게 배치하는 퍼즐이에요.</p>
             <button className="tut-start-btn" onClick={() => setTutorialStep(1)}>
