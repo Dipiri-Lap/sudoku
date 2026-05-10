@@ -366,6 +366,7 @@ const QueensGame: React.FC = () => {
     setRemovingMarks(prev => new Set([...prev, key]));
     setTimeout(() => {
       setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+      setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
       setRemovingMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
     }, 260);
   }, []);
