@@ -392,12 +392,12 @@ const QueensGame: React.FC = () => {
     const q = queensRef.current[colorIdx];
     if (q?.row === row && q?.col === col) return;
     dragCellsRef.current.add(key);
-    setMarks(prev => {
-      const s = new Set(prev);
-      if (dragModeRef.current === 'add') s.add(key); else s.delete(key);
-      return s;
-    });
-  }, [currentGrid]);
+    if (dragModeRef.current === 'add') {
+      setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
+    } else {
+      removeMarkAnimated(key);
+    }
+  }, [currentGrid, removeMarkAnimated]);
 
   const getCellFromPoint = (x: number, y: number) => {
     const el = document.elementFromPoint(x, y) as HTMLElement | null;
