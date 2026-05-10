@@ -393,19 +393,17 @@ const QueensGame: React.FC = () => {
       lastClickRef.current = null;
       const key = `${row},${col}`;
       const colorIdx = currentGrid[row][col];
-      setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
-      const newQ = [...queensRef.current];
-      newQ[colorIdx] = { row, col };
-      setQueens(newQ);
 
-      // Check against the unique solution — wrong position loses a heart
       const correct = solution?.[colorIdx];
       const isWrong = !correct || correct[0] !== row || correct[1] !== col;
+
       if (isWrong) {
         setHearts(h => Math.max(0, h - 1));
-        setTimeout(() => {
-          setQueens(q => { const next = [...q]; next[colorIdx] = null; return next; });
-        }, 500);
+      } else {
+        setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+        const newQ = [...queensRef.current];
+        newQ[colorIdx] = { row, col };
+        setQueens(newQ);
       }
     } else {
       lastClickRef.current = { row, col, time: now };
