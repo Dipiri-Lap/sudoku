@@ -227,11 +227,11 @@
 }
 
 @keyframes crown-slam {
-  0%   { transform: scale(3.2) translateY(-8px); opacity: 1; }
-  38%  { transform: scale(0.78) translateY(0);   opacity: 1; }
-  58%  { transform: scale(1.14) translateY(0); }
-  78%  { transform: scale(0.95) translateY(0); }
-  100% { transform: scale(1)    translateY(0); }
+  0%   { transform: translateY(calc(-8% - 30px)) scale(3.2); opacity: 1; }
+  38%  { transform: translateY(-8%) scale(0.78); opacity: 1; }
+  58%  { transform: translateY(-8%) scale(1.14); }
+  78%  { transform: translateY(-8%) scale(0.95); }
+  100% { transform: translateY(-8%) scale(1); }
 }
 
 @keyframes board-shake {
@@ -288,14 +288,14 @@
 .cell-mark-memo {
   width: clamp(0.7rem, 3vw, 1.1rem) !important;
   height: clamp(0.7rem, 3vw, 1.1rem) !important;
-  color: rgba(200, 200, 200, 0.6) !important;
+  color: rgba(0, 0, 0, 0.55) !important;
   animation: none !important;
 }
 
 .cell-queen-memo {
   font-size: clamp(0.8rem, 3.25vw, 1.3rem) !important;
-  opacity: 0.45;
   animation: none !important;
+  transform: translateY(-8%) !important;
 }
 
 @keyframes mark-boing {
