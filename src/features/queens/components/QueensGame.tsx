@@ -4,6 +4,8 @@ import { X as XIcon } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
+import { useCoins } from '../../../context/CoinContext';
+import { triggerAdByPopup } from '../../../utils/adTrigger';
 import { solveLevel } from '../utils/solver';
 import '../styles/QueensGame.css';
 
@@ -205,6 +207,7 @@ function getCellTutClass(r: number, c: number, colorIdx: number, step: TutStep |
 const QueensGame: React.FC = () => {
   const navigate = useNavigate();
   const { queensProgress, saveQueensProgress } = useQueensProgress();
+  const { coins, spendCoins } = useCoins();
 
   const [levelIdx, setLevelIdx] = useState(() => {
     // Start from next uncleared level; skip tutorial if already cleared
@@ -246,11 +249,15 @@ const QueensGame: React.FC = () => {
   const [isMemoMode, setIsMemoMode] = useState(false);
   const [memoMarks, setMemoMarks] = useState<Set<string>>(new Set());
   const [memoQueens, setMemoQueens] = useState<(Queen | null)[]>(Array(n).fill(null));
+  const [queenHintUsed, setQueenHintUsed] = useState(false);
+  const [showAdModal, setShowAdModal] = useState(false);
 
   const queensRef = useRef(queens);
   const marksRef = useRef(marks);
+  const memoQueensRef = useRef(memoQueens);
   useEffect(() => { queensRef.current = queens; }, [queens]);
   useEffect(() => { marksRef.current = marks; }, [marks]);
+  useEffect(() => { memoQueensRef.current = memoQueens; }, [memoQueens]);
 
   const lastClickRef = useRef<{ row: number; col: number; time: number } | null>(null);
   const singleClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -333,6 +340,8 @@ const QueensGame: React.FC = () => {
     setRemovingMarks(new Set());
     setMemoMarks(new Set());
     setMemoQueens(Array(newN).fill(null));
+    setQueenHintUsed(false);
+    setShowAdModal(false);
     setRippleKey(k => k + 1);
     setHearts(MAX_HEARTS);
     setWon(false);
@@ -402,6 +411,46 @@ const QueensGame: React.FC = () => {
       setTimeout(() => el.remove(), 680);
     }
   }, []);
+
+  const placeHintQueen = useCallback(() => {
+    if (!solution) return;
+    const unplaced = solution
+      .map((pos, ci) => (pos ? { ci, row: pos[0], col: pos[1] } : null))
+      .filter((x): x is { ci: number; row: number; col: number } => {
+        if (!x) return false;
+        const q = queens[x.ci];
+        return !(q?.row === x.row && q?.col === x.col);
+      });
+    if (unplaced.length === 0) return;
+    const pick = unplaced[Math.floor(Math.random() * unplaced.length)];
+    const { ci, row, col } = pick;
+    const key = `${row},${col}`;
+    setQueens(prev => { const next = [...prev]; next[ci] = { row, col }; return next; });
+    setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+    setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
+    setMemoQueens(prev => { const next = [...prev]; next[ci] = null; return next; });
+    setRecentlyPlaced(prev => new Set([...prev, key]));
+    setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 400);
+    setTimeout(() => spawnParticles(row, col), 20);
+    setQueenHintUsed(true);
+  }, [solution, queens, spawnParticles]);
+
+  const handleQueenHint = useCallback(async () => {
+    if (queenHintUsed || won || gameOver) return;
+    if (coins >= 50) {
+      const ok = await spendCoins(50);
+      if (ok) placeHintQueen();
+    } else {
+      setShowAdModal(true);
+    }
+  }, [queenHintUsed, won, gameOver, coins, spendCoins, placeHintQueen]);
+
+  const handleWatchAd = useCallback(() => {
+    setShowAdModal(false);
+    triggerAdByPopup(() => placeHintQueen());
+  }, [placeHintQueen]);
 
   const applyMarkToCell = useCallback((row: number, col: number) => {
     const key = `${row},${col}`;
@@ -522,7 +571,11 @@ const QueensGame: React.FC = () => {
       if (isMemoMode) {
         singleClickTimerRef.current = setTimeout(() => {
           singleClickTimerRef.current = null;
-          setMemoMarks(prev => { const s = new Set(prev); if (s.has(key)) s.delete(key); else s.add(key); return s; });
+          if (memoQueensRef.current[colorIdx]?.row === row && memoQueensRef.current[colorIdx]?.col === col) {
+            setMemoQueens(prev => { const next = [...prev]; next[colorIdx] = null; return next; });
+          } else {
+            setMemoMarks(prev => { const s = new Set(prev); if (s.has(key)) s.delete(key); else s.add(key); return s; });
+          }
         }, DOUBLE_CLICK_MS);
       } else {
         singleClickTimerRef.current = setTimeout(() => {
@@ -635,7 +688,19 @@ const QueensGame: React.FC = () => {
           <button className={`queens-memo-btn${isMemoMode ? ' active' : ''}`} onClick={() => setIsMemoMode(m => !m)}>
             📝 메모
           </button>
-          탭: ✕ 표시 &nbsp;|&nbsp; 빠르게 두 번 탭: 👑 배치 &nbsp;|&nbsp; 드래그: 연속 표시
+          <span className="queens-hint-text">
+            탭: ✕ &nbsp;|&nbsp; 두 번 탭: 👑 &nbsp;|&nbsp; 드래그: 연속
+          </span>
+          <button
+            className={`queens-queen-hint-btn${queenHintUsed ? ' used' : ''}`}
+            onClick={handleQueenHint}
+            disabled={queenHintUsed || won || gameOver}
+          >
+            {queenHintUsed
+              ? '사용됨'
+              : <><span>👑</span><img src="/coin_Icon.png" alt="coin" style={{ width: 13, height: 13, verticalAlign: 'middle', margin: '0 1px' }} /><span>50</span></>
+            }
+          </button>
         </div>
       )}
 
@@ -709,6 +774,22 @@ const QueensGame: React.FC = () => {
             {currentTutStep.desc.split('\n').map((line, i, arr) => (
               <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {showAdModal && (
+        <div className="queens-ad-overlay" onClick={() => setShowAdModal(false)}>
+          <div className="queens-ad-modal" onClick={e => e.stopPropagation()}>
+            <div className="queens-ad-icon">💰</div>
+            <div className="queens-ad-title">코인이 부족해요</div>
+            <div className="queens-ad-desc">
+              보유 코인: {coins} / 필요: 50
+              <br />
+              광고를 시청하고 무료로 왕관을 배치하세요.
+            </div>
+            <button className="queens-ad-btn-primary" onClick={handleWatchAd}>광고 보기</button>
+            <button className="queens-ad-btn-secondary" onClick={() => setShowAdModal(false)}>취소</button>
           </div>
         </div>
       )}

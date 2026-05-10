@@ -409,6 +409,124 @@
   max-width: 460px;
 }
 
+.queens-hint-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queens-queen-hint-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+}
+
+.queens-queen-hint-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.45);
+}
+
+.queens-queen-hint-btn.used,
+.queens-queen-hint-btn:disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.queens-ad-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+}
+
+.queens-ad-modal {
+  background: white;
+  border-radius: 18px;
+  padding: 1.75rem 1.5rem 1.5rem;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  animation: scale-in 0.18s ease;
+}
+
+.queens-ad-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.4rem;
+  line-height: 1;
+}
+
+.queens-ad-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.queens-ad-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.queens-ad-btn-primary {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: opacity 0.15s;
+}
+
+.queens-ad-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.queens-ad-btn-secondary {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.queens-ad-btn-secondary:hover {
+  background: #f8fafc;
+}
+
 .queens-home-btn {
   background: none;
   color: #64748b;
