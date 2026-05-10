@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { X as XIcon } from 'lucide-react';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
 import { solveLevel } from '../utils/solver';
@@ -471,7 +472,7 @@ const QueensGame: React.FC = () => {
       const colorIdx = currentGrid[row][col];
       const q = queens[colorIdx];
       if (q?.row === row && q?.col === col) {
-        setQueens(prev => { const next = [...prev]; next[colorIdx] = null; return next; });
+        return;
       } else {
         singleClickTimerRef.current = setTimeout(() => {
           singleClickTimerRef.current = null;
@@ -553,7 +554,7 @@ const QueensGame: React.FC = () => {
                   onClick={() => handleCellClick(r, c)}
                 >
                   {hasQueenHere && <span className={`cell-queen${isConflict ? ' conflict' : ''}`}>👑</span>}
-                  {isMarked && !hasQueenHere && <span className="cell-mark">✕</span>}
+                  {isMarked && !hasQueenHere && <XIcon className="cell-mark" strokeWidth={3} />}
                   {showGhost && !hasQueenHere && <span className="cell-ghost-queen">👑</span>}
                   {showForbidden && !hasQueenHere && <span className="cell-forbidden-mark">✕</span>}
                 </div>
