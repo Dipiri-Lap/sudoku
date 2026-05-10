@@ -238,6 +238,7 @@ const QueensGame: React.FC = () => {
   const [gameOver, setGameOver] = useState(false);
   const [animPhase, setAnimPhase] = useState<'idle' | 'out' | 'in'>('idle');
   const [isRippling, setIsRippling] = useState(true);
+  const [rippleKey, setRippleKey] = useState(0);
   const rippleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [recentlyPlaced, setRecentlyPlaced] = useState<Set<string>>(new Set());
   const [isShaking, setIsShaking] = useState(false);
@@ -322,7 +323,7 @@ const QueensGame: React.FC = () => {
     if (rippleTimerRef.current) clearTimeout(rippleTimerRef.current);
     rippleTimerRef.current = setTimeout(() => setIsRippling(false), totalMs);
     return () => { if (rippleTimerRef.current) clearTimeout(rippleTimerRef.current); };
-  }, [levelIdx]);
+  }, [levelIdx, rippleKey]);
 
   const doReset = (newRot: number, newN: number, newIsTutorial: boolean) => {
     rotationTimesRef.current = newRot;
@@ -332,6 +333,7 @@ const QueensGame: React.FC = () => {
     setRemovingMarks(new Set());
     setMemoMarks(new Set());
     setMemoQueens(Array(newN).fill(null));
+    setRippleKey(k => k + 1);
     setHearts(MAX_HEARTS);
     setWon(false);
     setGameOver(false);
@@ -348,9 +350,8 @@ const QueensGame: React.FC = () => {
     setTimeout(() => {
       const newRot = isTutorial ? 0 : (rotationTimesRef.current + Math.floor(Math.random() * 3) + 1) % 4;
       doReset(newRot, n, isTutorial);
-      setAnimPhase('in');
-      setTimeout(() => setAnimPhase('idle'), 280);
-    }, 220);
+      setAnimPhase('idle');
+    }, 200);
   }, [animPhase, isTutorial, n]);
 
   const handleNextLevel = useCallback(() => {
@@ -540,9 +541,6 @@ const QueensGame: React.FC = () => {
       <div className="queens-header">
         <button className="queens-back-btn" onClick={() => navigate('/queens')}>←</button>
         <span className="queens-level-name">{level.name}</span>
-        <button className={`queens-memo-btn${isMemoMode ? ' active' : ''}`} onClick={() => setIsMemoMode(m => !m)}>
-          📝 메모
-        </button>
         <button className="queens-reset-btn" onClick={handleReset}>초기화</button>
       </div>
 
@@ -619,6 +617,9 @@ const QueensGame: React.FC = () => {
 
       {!isTutorial && (
         <div className="queens-hint">
+          <button className={`queens-memo-btn${isMemoMode ? ' active' : ''}`} onClick={() => setIsMemoMode(m => !m)}>
+            📝 메모
+          </button>
           탭: ✕ 표시 &nbsp;|&nbsp; 빠르게 두 번 탭: 👑 배치 &nbsp;|&nbsp; 드래그: 연속 표시
         </div>
       )}

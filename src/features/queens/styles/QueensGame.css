@@ -321,21 +321,12 @@
 }
 
 @keyframes board-out {
-  from { transform: scale(1) rotate(0deg); opacity: 1; }
-  to   { transform: scale(0.15) rotate(60deg); opacity: 0; }
-}
-
-@keyframes board-in {
-  from { transform: scale(0.15) rotate(-60deg); opacity: 0; }
-  to   { transform: scale(1) rotate(0deg); opacity: 1; }
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 
 .queens-board-container.board-out {
-  animation: board-out 0.22s ease-in forwards;
-}
-
-.queens-board-container.board-in {
-  animation: board-in 0.28s ease-out forwards;
+  animation: board-out 0.18s ease-in forwards;
 }
 
 .queens-board-container.board-shaking {
@@ -411,7 +402,11 @@
   margin-top: 1rem;
   font-size: 0.78rem;
   color: #94a3b8;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 460px;
 }
 
 .queens-home-btn {
