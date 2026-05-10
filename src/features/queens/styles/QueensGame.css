@@ -163,8 +163,8 @@
 
 @keyframes cell-ripple-in {
   0%   { transform: scale(0);    opacity: 0; }
-  55%  { transform: scale(1.22); opacity: 1; }
-  75%  { transform: scale(0.92); }
+  55%  { transform: scale(1.10); opacity: 1; }
+  75%  { transform: scale(0.96); }
   100% { transform: scale(1);    opacity: 1; }
 }
 

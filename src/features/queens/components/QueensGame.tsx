@@ -244,6 +244,7 @@ const QueensGame: React.FC = () => {
   useEffect(() => { marksRef.current = marks; }, [marks]);
 
   const lastClickRef = useRef<{ row: number; col: number; time: number } | null>(null);
+  const singleClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pointerDownRef = useRef<{ row: number; col: number; x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
   const dragModeRef = useRef<'add' | 'remove'>('add');
@@ -402,6 +403,10 @@ const QueensGame: React.FC = () => {
     const isDoubleClick = last && last.row === row && last.col === col && now - last.time < DOUBLE_CLICK_MS;
 
     if (isDoubleClick) {
+      if (singleClickTimerRef.current) {
+        clearTimeout(singleClickTimerRef.current);
+        singleClickTimerRef.current = null;
+      }
       lastClickRef.current = null;
       const key = `${row},${col}`;
       const colorIdx = currentGrid[row][col];
@@ -418,6 +423,10 @@ const QueensGame: React.FC = () => {
         setQueens(newQ);
       }
     } else {
+      if (singleClickTimerRef.current) {
+        clearTimeout(singleClickTimerRef.current);
+        singleClickTimerRef.current = null;
+      }
       lastClickRef.current = { row, col, time: now };
       const key = `${row},${col}`;
       const colorIdx = currentGrid[row][col];
@@ -425,11 +434,14 @@ const QueensGame: React.FC = () => {
       if (q?.row === row && q?.col === col) {
         setQueens(prev => { const next = [...prev]; next[colorIdx] = null; return next; });
       } else {
-        setMarks(prev => {
-          const s = new Set(prev);
-          if (s.has(key)) s.delete(key); else s.add(key);
-          return s;
-        });
+        singleClickTimerRef.current = setTimeout(() => {
+          singleClickTimerRef.current = null;
+          setMarks(prev => {
+            const s = new Set(prev);
+            if (s.has(key)) s.delete(key); else s.add(key);
+            return s;
+          });
+        }, DOUBLE_CLICK_MS);
       }
     }
   }, [won, gameOver, isBlocked, currentGrid, queens]);
