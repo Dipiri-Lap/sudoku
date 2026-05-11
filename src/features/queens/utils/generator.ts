@@ -19,6 +19,7 @@ export const COLOR_PALETTE = [
   '#2DD4BF', // teal
   '#FB923C', // amber
   '#818CF8', // indigo
+  '#34D399', // emerald
 ];
 
 const DIRS = [[0, 1], [0, -1], [1, 0], [-1, 0]] as const;

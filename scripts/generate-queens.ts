@@ -33,6 +33,7 @@ const MAX_ATTEMPTS: Record<number, number> = {
   8: 1500,
   9: 3000,
   10: 5000,
+  11: 8000,
 };
 
 interface Level {
@@ -43,6 +44,10 @@ interface Level {
   colors: string[];
 }
 
+// Milestone positions within each 100-level block get a level one size
+// larger than the block's normal maximum (positions 25, 50, 75).
+const MILESTONE_OFFSETS = new Set([24, 49, 74]); // 0-based within each block
+
 function buildSizePlan(): number[] {
   const plan: number[] = [];
 
@@ -52,21 +57,30 @@ function buildSizePlan(): number[] {
   // 4–5: 5×5
   for (let i = 0; i < 2; i++) plan.push(5);
 
-  // 6–100: 95 levels
+  // 6–100: 95 levels (block 1, normal max 7×7, milestone → 8×8)
   const p1 = [5, 5, 6, 6, 7];
-  for (let i = 0; i < 95; i++) plan.push(p1[i % p1.length]);
+  for (let i = 0; i < 95; i++) {
+    const offset = i + 5; // position within block 1 (0-based, levels 6–100)
+    plan.push(MILESTONE_OFFSETS.has(offset) ? 8 : p1[i % p1.length]);
+  }
 
-  // 101–200: 100 levels
+  // 101–200: 100 levels (block 2, normal max 8×8, milestone → 9×9)
   const p2 = [5, 6, 7, 7, 8];
-  for (let i = 0; i < 100; i++) plan.push(p2[i % p2.length]);
+  for (let i = 0; i < 100; i++) {
+    plan.push(MILESTONE_OFFSETS.has(i) ? 9 : p2[i % p2.length]);
+  }
 
-  // 201–300: 100 levels
+  // 201–300: 100 levels (block 3, normal max 9×9, milestone → 10×10)
   const p3 = [6, 7, 8, 8, 9];
-  for (let i = 0; i < 100; i++) plan.push(p3[i % p3.length]);
+  for (let i = 0; i < 100; i++) {
+    plan.push(MILESTONE_OFFSETS.has(i) ? 10 : p3[i % p3.length]);
+  }
 
-  // 301–400: 100 levels
+  // 301–400: 100 levels (block 4, normal max 10×10, milestone → 11×11)
   const p4 = [7, 8, 9, 9, 10];
-  for (let i = 0; i < 100; i++) plan.push(p4[i % p4.length]);
+  for (let i = 0; i < 100; i++) {
+    plan.push(MILESTONE_OFFSETS.has(i) ? 11 : p4[i % p4.length]);
+  }
 
   return plan; // 400 total
 }
