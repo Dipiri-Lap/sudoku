@@ -374,9 +374,8 @@ function generateDoubleRegions(n: number, pairs: [number, number][][], minSize =
     }
     if (frontier.length === 0) break;
     const cell = frontier[Math.floor(Math.random() * frontier.length)];
-    // 70% chance: pick the adjacent color with the smallest region
-    const uniq = [...new Set(cell.adjColors)].sort((a, b) => regionSizes[a] - regionSizes[b]);
-    const color = Math.random() < 0.7 ? uniq[0] : uniq[Math.floor(Math.random() * uniq.length)];
+    const uniq = [...new Set(cell.adjColors)];
+    const color = uniq[Math.floor(Math.random() * uniq.length)];
     grid[cell.row][cell.col] = color;
     regionSizes[color]++;
     unassigned--;
