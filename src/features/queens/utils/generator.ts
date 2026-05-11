@@ -4,7 +4,8 @@ export type GeneratedLevel = {
   size: number;
   grid: number[][];
   colors: string[];
-  solution: [number, number][]; // [row, col] per colorIndex
+  solution: [number, number][]; // flat: [row,col] per slot; for double mode, [2i]/[2i+1] = color i
+  queensPerColor?: number;
 };
 
 export const COLOR_PALETTE = [
@@ -283,6 +284,168 @@ function countSolutions(n: number, grid: number[][], limit = 2): number {
   solve(0);
   return count;
 }
+
+// ─── Double mode helpers ──────────────────────────────────────────────────────
+
+// Place 2n queens: exactly 2 per row, 2 per column, no two adjacent (8-dir).
+function findDoubleQueenPlacements(n: number): [number, number][] | null {
+  const result: [number, number][] = [];
+  const colCount = new Array(n).fill(0);
+
+  function solve(row: number): boolean {
+    if (row === n) return true;
+    const prevQueens = result.slice(-2).filter(([r]) => r === row - 1);
+    const cols = shuffle(Array.from({ length: n }, (_, i) => i));
+    for (let i = 0; i < cols.length - 1; i++) {
+      const c1 = cols[i];
+      if (colCount[c1] >= 2 || prevQueens.some(([, c]) => Math.abs(c - c1) <= 1)) continue;
+      for (let j = i + 1; j < cols.length; j++) {
+        const c2 = cols[j];
+        if (colCount[c2] >= 2 || prevQueens.some(([, c]) => Math.abs(c - c2) <= 1)) continue;
+        if (Math.abs(c1 - c2) <= 1) continue;
+        result.push([row, c1], [row, c2]);
+        colCount[c1]++; colCount[c2]++;
+        if (solve(row + 1)) return true;
+        result.pop(); result.pop();
+        colCount[c1]--; colCount[c2]--;
+      }
+    }
+    return false;
+  }
+  return solve(0) ? result : null;
+}
+
+// Greedily pair 2n queens into n pairs by nearest-neighbor distance.
+function pairQueensGreedy(queens: [number, number][]): [number, number][][] {
+  const used = new Array(queens.length).fill(false);
+  const pairs: [number, number][][] = [];
+  for (let i = 0; i < queens.length; i++) {
+    if (used[i]) continue;
+    used[i] = true;
+    let bestJ = -1, bestDist = Infinity;
+    for (let j = i + 1; j < queens.length; j++) {
+      if (used[j]) continue;
+      const d = Math.abs(queens[i][0] - queens[j][0]) + Math.abs(queens[i][1] - queens[j][1]);
+      if (d < bestDist) { bestDist = d; bestJ = j; }
+    }
+    if (bestJ === -1) return [];
+    used[bestJ] = true;
+    pairs.push([queens[i], queens[bestJ]]);
+  }
+  return pairs;
+}
+
+// Grow connected regions starting from 2 seed cells per color.
+function generateDoubleRegions(n: number, pairs: [number, number][][]): number[][] {
+  const grid: number[][] = Array.from({ length: n }, () => Array(n).fill(-1));
+  for (let i = 0; i < pairs.length; i++) {
+    const [[r1, c1], [r2, c2]] = pairs[i];
+    grid[r1][c1] = i;
+    grid[r2][c2] = i;
+  }
+  let unassigned = n * n - 2 * n;
+  while (unassigned > 0) {
+    const frontier: Array<{ row: number; col: number; adjColors: number[] }> = [];
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (grid[r][c] !== -1) continue;
+        const adjColors: number[] = [];
+        for (const [dr, dc] of DIRS) {
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc] !== -1)
+            adjColors.push(grid[nr][nc]);
+        }
+        if (adjColors.length > 0) frontier.push({ row: r, col: c, adjColors });
+      }
+    }
+    if (frontier.length === 0) break;
+    const cell = frontier[Math.floor(Math.random() * frontier.length)];
+    grid[cell.row][cell.col] = cell.adjColors[Math.floor(Math.random() * cell.adjColors.length)];
+    unassigned--;
+  }
+  return grid;
+}
+
+// Find up to `limit` double-mode solutions (2 queens per color/row/col, no adjacent).
+function findDoubleSolutions(n: number, grid: number[][], limit = 2): [number, number][][] {
+  const colorCells: [number, number][][] = Array.from({ length: n }, () => []);
+  for (let r = 0; r < n; r++)
+    for (let c = 0; c < n; c++)
+      colorCells[grid[r][c]].push([r, c]);
+
+  const rowCount = new Array(n).fill(0);
+  const colCount = new Array(n).fill(0);
+  const placed: ([number, number] | null)[] = Array(n * 2).fill(null);
+  const solutions: [number, number][][] = [];
+
+  function canPlace(row: number, col: number): boolean {
+    if (rowCount[row] >= 2 || colCount[col] >= 2) return false;
+    for (const p of placed) {
+      if (p && Math.abs(p[0] - row) <= 1 && Math.abs(p[1] - col) <= 1) return false;
+    }
+    return true;
+  }
+
+  function solve(ci: number): void {
+    if (solutions.length >= limit) return;
+    if (ci === n) {
+      solutions.push(placed.map(p => [p![0], p![1]] as [number, number]));
+      return;
+    }
+    const cells = colorCells[ci];
+    for (let i = 0; i < cells.length; i++) {
+      if (solutions.length >= limit) return;
+      const [r1, c1] = cells[i];
+      if (!canPlace(r1, c1)) continue;
+      rowCount[r1]++; colCount[c1]++;
+      placed[ci * 2] = [r1, c1];
+      for (let j = i + 1; j < cells.length; j++) {
+        if (solutions.length >= limit) break;
+        const [r2, c2] = cells[j];
+        if (!canPlace(r2, c2)) continue;
+        rowCount[r2]++; colCount[c2]++;
+        placed[ci * 2 + 1] = [r2, c2];
+        solve(ci + 1);
+        rowCount[r2]--; colCount[c2]--;
+        placed[ci * 2 + 1] = null;
+      }
+      rowCount[r1]--; colCount[c1]--;
+      placed[ci * 2] = null;
+    }
+  }
+
+  solve(0);
+  return solutions;
+}
+
+export function generateDoubleLevel(n: number, maxAttempts = 600): GeneratedLevel | null {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const allQueens = findDoubleQueenPlacements(n);
+    if (!allQueens || allQueens.length !== 2 * n) continue;
+
+    const pairs = pairQueensGreedy(allQueens);
+    if (pairs.length !== n) continue;
+
+    const grid = generateDoubleRegions(n, pairs);
+    if (grid.some(row => row.some(v => v === -1))) continue;
+
+    const solutions = findDoubleSolutions(n, grid, 2);
+    if (solutions.length === 1) {
+      return {
+        id: Date.now(),
+        name: `레벨 ? - 더블`,
+        size: n,
+        grid,
+        colors: COLOR_PALETTE.slice(0, n),
+        solution: solutions[0],
+        queensPerColor: 2,
+      };
+    }
+  }
+  return null;
+}
+
+// ─── Single mode (original) ───────────────────────────────────────────────────
 
 export function generateLevel(n: number, maxAttempts = 300): GeneratedLevel | null {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {

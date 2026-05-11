@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { generateLevel, type GeneratedLevel } from '../utils/generator';
+import { generateLevel, generateDoubleLevel, type GeneratedLevel } from '../utils/generator';
 import '../styles/QueensGame.css';
 import '../styles/QueensGenerator.css';
 
@@ -9,6 +9,7 @@ type Status = 'idle' | 'generating' | 'done' | 'failed';
 const QueensGenerator: React.FC = () => {
   const navigate = useNavigate();
   const [size, setSize] = useState(7);
+  const [isDouble, setIsDouble] = useState(false);
   const [status, setStatus] = useState<Status>('idle');
   const [result, setResult] = useState<GeneratedLevel | null>(null);
   const [showSolution, setShowSolution] = useState(false);
@@ -20,9 +21,8 @@ const QueensGenerator: React.FC = () => {
     setResult(null);
     setShowSolution(false);
     setLevelName('');
-    // Let React render the loading state before blocking
     await new Promise(r => setTimeout(r, 30));
-    const level = generateLevel(size);
+    const level = isDouble ? generateDoubleLevel(size) : generateLevel(size);
     if (level) {
       setResult(level);
       setStatus('done');
@@ -37,6 +37,7 @@ const QueensGenerator: React.FC = () => {
         id: result.id,
         name: levelName || result.name,
         size: result.size,
+        ...(result.queensPerColor && result.queensPerColor > 1 ? { queensPerColor: result.queensPerColor } : {}),
         grid: result.grid,
         colors: result.colors,
       }, null, 2)
@@ -69,6 +70,22 @@ const QueensGenerator: React.FC = () => {
           ))}
         </div>
 
+        <div className="qgen-size-row">
+          <span>모드</span>
+          <button
+            className={`qgen-size-btn${!isDouble ? ' active' : ''}`}
+            onClick={() => setIsDouble(false)}
+          >
+            일반
+          </button>
+          <button
+            className={`qgen-size-btn${isDouble ? ' active' : ''}`}
+            onClick={() => setIsDouble(true)}
+          >
+            더블
+          </button>
+        </div>
+
         <button
           className="qgen-generate-btn"
           onClick={handleGenerate}
@@ -92,7 +109,9 @@ const QueensGenerator: React.FC = () => {
         <div className="qgen-result">
 
           <div className="qgen-stats">
-            {result.size}×{result.size} · 색상 {result.size}개 · 유일 해 검증 완료
+            {result.size}×{result.size} · 색상 {result.size}개
+            {result.queensPerColor && result.queensPerColor > 1 ? ` · 색상당 퀸 ${result.queensPerColor}개 (더블)` : ''}
+            {' · '}유일 해 검증 완료
           </div>
 
           <div className="qgen-board-wrapper">
@@ -113,8 +132,9 @@ const QueensGenerator: React.FC = () => {
               >
                 {result.grid.map((row, r) =>
                   row.map((colorIdx, c) => {
-                    const sol = result.solution[colorIdx];
-                    const isQueen = showSolution && sol[0] === r && sol[1] === c;
+                    const k = result.queensPerColor ?? 1;
+                    const isQueen = showSolution && Array.from({ length: k }, (_, s) => result.solution[colorIdx * k + s])
+                      .some(pos => pos && pos[0] === r && pos[1] === c);
                     return (
                       <div
                         key={`${r}-${c}`}

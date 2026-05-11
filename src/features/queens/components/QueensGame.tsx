@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { X as XIcon } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import levelsData from '../data/levels.json';
@@ -7,7 +7,7 @@ import { useQueensProgress } from '../../../context/QueensProgressContext';
 import { useCoins } from '../../../context/CoinContext';
 import { triggerAdByPopup } from '../../../utils/adTrigger';
 import { auth } from '../../../firebase';
-import { solveLevel } from '../utils/solver';
+import { solveLevel, solveDoubleLevel } from '../utils/solver';
 import '../styles/QueensGame.css';
 
 type LevelData = {
@@ -16,6 +16,7 @@ type LevelData = {
   size: number;
   grid: number[][];
   colors: string[];
+  queensPerColor?: number;
 };
 
 type Queen = { row: number; col: number };
@@ -163,23 +164,52 @@ function rotateGrid(grid: number[][], times: number): number[][] {
   return result;
 }
 
-function getConflicts(queens: (Queen | null)[]): Set<string> {
+// k = queens allowed per row/col (1 for standard, 2 for double mode)
+function getConflicts(queens: (Queen | null)[], k: number): Set<string> {
   const placed = queens.filter((q): q is Queen => q !== null);
   const conflicted = new Set<string>();
+  const rowMap = new Map<number, Queen[]>();
+  const colMap = new Map<number, Queen[]>();
+  for (const q of placed) {
+    if (!rowMap.has(q.row)) rowMap.set(q.row, []);
+    rowMap.get(q.row)!.push(q);
+    if (!colMap.has(q.col)) colMap.set(q.col, []);
+    colMap.get(q.col)!.push(q);
+  }
+  for (const [, qs] of rowMap) if (qs.length > k) qs.forEach(q => conflicted.add(`${q.row},${q.col}`));
+  for (const [, qs] of colMap) if (qs.length > k) qs.forEach(q => conflicted.add(`${q.row},${q.col}`));
   for (let i = 0; i < placed.length; i++) {
     for (let j = i + 1; j < placed.length; j++) {
       const a = placed[i], b = placed[j];
-      if (
-        a.row === b.row ||
-        a.col === b.col ||
-        (Math.abs(a.row - b.row) <= 1 && Math.abs(a.col - b.col) <= 1)
-      ) {
+      if (Math.abs(a.row - b.row) <= 1 && Math.abs(a.col - b.col) <= 1) {
         conflicted.add(`${a.row},${a.col}`);
         conflicted.add(`${b.row},${b.col}`);
       }
     }
   }
   return conflicted;
+}
+
+// Helpers for k-queens-per-color indexing (slot index = colorIdx * k + s)
+function hasQueenAt(qArr: (Queen | null)[], ci: number, row: number, col: number, k: number): boolean {
+  for (let s = 0; s < k; s++) {
+    if (qArr[ci * k + s]?.row === row && qArr[ci * k + s]?.col === col) return true;
+  }
+  return false;
+}
+function placeInSlot(prev: (Queen | null)[], ci: number, row: number, col: number, k: number): (Queen | null)[] | null {
+  const next = [...prev];
+  for (let s = 0; s < k; s++) {
+    if (!next[ci * k + s]) { next[ci * k + s] = { row, col }; return next; }
+  }
+  return null;
+}
+function removeFromSlot(prev: (Queen | null)[], ci: number, row: number, col: number, k: number): (Queen | null)[] {
+  const next = [...prev];
+  for (let s = 0; s < k; s++) {
+    if (next[ci * k + s]?.row === row && next[ci * k + s]?.col === col) { next[ci * k + s] = null; return next; }
+  }
+  return prev;
 }
 
 function getCellTutClass(r: number, c: number, colorIdx: number, step: TutStep | null): string {
@@ -207,13 +237,19 @@ function getCellTutClass(r: number, c: number, colorIdx: number, step: TutStep |
 
 const QueensGame: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { queensProgress, saveQueensProgress } = useQueensProgress();
   const { coins, spendCoins, addCoins } = useCoins();
   const hasAwardedCoins = useRef(false);
 
   const [levelIdx, setLevelIdx] = useState(() => {
+    const startId = searchParams.get('levelId');
+    if (startId !== null) {
+      const idx = LEVELS.findIndex(l => l.id === Number(startId));
+      if (idx >= 0) return idx;
+    }
     // Start from next uncleared level; skip tutorial if already cleared
-    if (queensProgress <= 0) return 0; // show tutorial
+    if (queensProgress <= 0) return 0;
     const nextId = queensProgress + 1;
     const idx = LEVELS.findIndex(l => l.id === nextId);
     return idx >= 0 ? idx : LEVELS.length - 1;
@@ -222,6 +258,7 @@ const QueensGame: React.FC = () => {
   const { size, colors } = level;
   const isTutorial = level.id === 0;
   const n = colors.length;
+  const k = level.queensPerColor ?? 1;
 
   const [tutorialStep, setTutorialStep] = useState<number | null>(isTutorial ? 0 : null);
 
@@ -234,9 +271,12 @@ const QueensGame: React.FC = () => {
   );
 
   // Correct answer for the current (possibly rotated) grid
-  const solution = useMemo(() => solveLevel(currentGrid, n), [currentGrid, n]);
+  const solution = useMemo(
+    () => k === 1 ? solveLevel(currentGrid, n) : solveDoubleLevel(currentGrid, n),
+    [currentGrid, n, k]
+  );
 
-  const [queens, setQueens] = useState<(Queen | null)[]>(Array(n).fill(null));
+  const [queens, setQueens] = useState<(Queen | null)[]>(Array(n * k).fill(null));
   const [marks, setMarks] = useState<Set<string>>(new Set());
   const [hearts, setHearts] = useState(MAX_HEARTS);
   const [won, setWon] = useState(false);
@@ -250,7 +290,7 @@ const QueensGame: React.FC = () => {
   const [removingMarks, setRemovingMarks] = useState<Set<string>>(new Set());
   const [isMemoMode, setIsMemoMode] = useState(false);
   const [memoMarks, setMemoMarks] = useState<Set<string>>(new Set());
-  const [memoQueens, setMemoQueens] = useState<(Queen | null)[]>(Array(n).fill(null));
+  const [memoQueens, setMemoQueens] = useState<(Queen | null)[]>(Array(n * k).fill(null));
   const [queenHintUsed, setQueenHintUsed] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
 
@@ -274,7 +314,7 @@ const QueensGame: React.FC = () => {
   const wasDragRef = useRef(false);
 
   const placed = queens.filter((q): q is Queen => q !== null);
-  const conflicts = getConflicts(queens);
+  const conflicts = getConflicts(queens, k);
 
   // Tutorial auto-advance on mark
   useEffect(() => {
@@ -299,7 +339,7 @@ const QueensGame: React.FC = () => {
 
   // Win detection
   useEffect(() => {
-    if (placed.length === n && conflicts.size === 0 && !gameOver) {
+    if (placed.length === n * k && conflicts.size === 0 && !gameOver) {
       const t = setTimeout(() => {
         setWon(true);
         if (!isTutorial) {
@@ -351,14 +391,14 @@ const QueensGame: React.FC = () => {
     return () => { if (rippleTimerRef.current) clearTimeout(rippleTimerRef.current); };
   }, [levelIdx, rippleKey]);
 
-  const doReset = (newRot: number, newN: number, newIsTutorial: boolean) => {
+  const doReset = (newRot: number, newN: number, newK: number, newIsTutorial: boolean) => {
     rotationTimesRef.current = newRot;
     setRotationTimes(newRot);
-    setQueens(Array(newN).fill(null));
+    setQueens(Array(newN * newK).fill(null));
     setMarks(new Set());
     setRemovingMarks(new Set());
     setMemoMarks(new Set());
-    setMemoQueens(Array(newN).fill(null));
+    setMemoQueens(Array(newN * newK).fill(null));
     setQueenHintUsed(false);
     setShowAdModal(false);
     hasAwardedCoins.current = false;
@@ -378,17 +418,17 @@ const QueensGame: React.FC = () => {
     setAnimPhase('out');
     setTimeout(() => {
       const newRot = isTutorial ? 0 : (rotationTimesRef.current + Math.floor(Math.random() * 3) + 1) % 4;
-      doReset(newRot, n, isTutorial);
+      doReset(newRot, n, k, isTutorial);
       setAnimPhase('idle');
     }, 200);
-  }, [animPhase, isTutorial, n]);
+  }, [animPhase, isTutorial, n, k]);
 
   const handleNextLevel = useCallback(() => {
     const nextIdx = levelIdx + 1;
     if (nextIdx >= LEVELS.length) return;
     const nextLevel = LEVELS[nextIdx];
     setLevelIdx(nextIdx);
-    doReset(0, nextLevel.colors.length, nextLevel.id === 0);
+    doReset(0, nextLevel.colors.length, nextLevel.queensPerColor ?? 1, nextLevel.id === 0);
   }, [levelIdx]);
 
   const removeMarkAnimated = useCallback((key: string) => {
@@ -435,27 +475,27 @@ const QueensGame: React.FC = () => {
   const placeHintQueen = useCallback(() => {
     if (!solution) return;
     const unplaced = solution
-      .map((pos, ci) => (pos ? { ci, row: pos[0], col: pos[1] } : null))
-      .filter((x): x is { ci: number; row: number; col: number } => {
+      .map((pos, slotIdx) => (pos ? { slotIdx, row: pos[0], col: pos[1] } : null))
+      .filter((x): x is { slotIdx: number; row: number; col: number } => {
         if (!x) return false;
-        const q = queens[x.ci];
-        return !(q?.row === x.row && q?.col === x.col);
+        return !(queens[x.slotIdx]?.row === x.row && queens[x.slotIdx]?.col === x.col);
       });
     if (unplaced.length === 0) return;
     const pick = unplaced[Math.floor(Math.random() * unplaced.length)];
-    const { ci, row, col } = pick;
+    const { slotIdx, row, col } = pick;
+    const ci = Math.floor(slotIdx / k);
     const key = `${row},${col}`;
-    setQueens(prev => { const next = [...prev]; next[ci] = { row, col }; return next; });
+    setQueens(prev => { const next = [...prev]; next[slotIdx] = { row, col }; return next; });
     setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
     setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
-    setMemoQueens(prev => { const next = [...prev]; next[ci] = null; return next; });
+    setMemoQueens(prev => removeFromSlot(prev, ci, row, col, k));
     setRecentlyPlaced(prev => new Set([...prev, key]));
     setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 400);
     setTimeout(() => spawnParticles(row, col), 20);
     setQueenHintUsed(true);
-  }, [solution, queens, spawnParticles]);
+  }, [solution, queens, k, spawnParticles]);
 
   const handleQueenHint = useCallback(async () => {
     if (queenHintUsed || won || gameOver) return;
@@ -476,34 +516,23 @@ const QueensGame: React.FC = () => {
     const key = `${row},${col}`;
     if (dragCellsRef.current.has(key)) return;
     const colorIdx = currentGrid[row][col];
-    const q = queensRef.current[colorIdx];
-    if (q?.row === row && q?.col === col) return;
+    if (hasQueenAt(queensRef.current, colorIdx, row, col, k)) return;
     dragCellsRef.current.add(key);
     if (isMemoMode) {
       if (dragModeRef.current === 'add') {
         setMemoMarks(prev => { const s = new Set(prev); s.add(key); return s; });
       } else {
         setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
-        setMemoQueens(prev => {
-          if (prev[colorIdx]?.row === row && prev[colorIdx]?.col === col) {
-            const next = [...prev]; next[colorIdx] = null; return next;
-          }
-          return prev;
-        });
+        setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
       }
     } else if (dragModeRef.current === 'add') {
       setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
       setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
-      setMemoQueens(prev => {
-        if (prev[colorIdx]?.row === row && prev[colorIdx]?.col === col) {
-          const next = [...prev]; next[colorIdx] = null; return next;
-        }
-        return prev;
-      });
+      setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
     } else {
       removeMarkAnimated(key);
     }
-  }, [currentGrid, removeMarkAnimated, isMemoMode]);
+  }, [currentGrid, removeMarkAnimated, isMemoMode, k]);
 
   const getCellFromPoint = (x: number, y: number) => {
     const el = document.elementFromPoint(x, y) as HTMLElement | null;
@@ -535,7 +564,7 @@ const QueensGame: React.FC = () => {
       if (isMemoModeRef.current) {
         const ci = currentGrid[start.row][start.col];
         const hasMemoMark = memoMarksRef.current.has(startKey);
-        const hasMemoQueen = memoQueensRef.current[ci]?.row === start.row && memoQueensRef.current[ci]?.col === start.col;
+        const hasMemoQueen = hasQueenAt(memoQueensRef.current, ci, start.row, start.col, k);
         dragModeRef.current = (hasMemoMark || hasMemoQueen) ? 'remove' : 'add';
       } else {
         dragModeRef.current = marksRef.current.has(startKey) ? 'remove' : 'add';
@@ -562,7 +591,7 @@ const QueensGame: React.FC = () => {
 
     const key = `${row},${col}`;
     const colorIdx = currentGrid[row][col];
-    const hasRealQueen = queens[colorIdx]?.row === row && queens[colorIdx]?.col === col;
+    const hasRealQueen = hasQueenAt(queens, colorIdx, row, col, k);
 
     if (isDoubleClick) {
       if (singleClickTimerRef.current) {
@@ -574,22 +603,20 @@ const QueensGame: React.FC = () => {
 
       if (isMemoMode) {
         setMemoQueens(prev => {
-          const next = [...prev];
-          next[colorIdx] = (next[colorIdx]?.row === row && next[colorIdx]?.col === col) ? null : { row, col };
-          return next;
+          if (hasQueenAt(prev, colorIdx, row, col, k)) return removeFromSlot(prev, colorIdx, row, col, k);
+          return placeInSlot(prev, colorIdx, row, col, k) ?? prev;
         });
       } else {
-        const correct = solution?.[colorIdx];
-        const isWrong = !correct || correct[0] !== row || correct[1] !== col;
+        const isWrong = !Array.from({ length: k }, (_, s) => solution?.[colorIdx * k + s])
+          .some(pos => pos && pos[0] === row && pos[1] === col);
         if (isWrong) {
           setHearts(h => Math.max(0, h - 1));
         } else {
           setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
           setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
-          setMemoQueens(prev => { const next = [...prev]; next[colorIdx] = null; return next; });
-          const newQ = [...queensRef.current];
-          newQ[colorIdx] = { row, col };
-          setQueens(newQ);
+          setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
+          const newQ = placeInSlot([...queensRef.current], colorIdx, row, col, k);
+          if (newQ) setQueens(newQ);
           setRecentlyPlaced(prev => new Set([...prev, key]));
           setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
           setIsShaking(true);
@@ -608,8 +635,8 @@ const QueensGame: React.FC = () => {
       if (isMemoMode) {
         singleClickTimerRef.current = setTimeout(() => {
           singleClickTimerRef.current = null;
-          if (memoQueensRef.current[colorIdx]?.row === row && memoQueensRef.current[colorIdx]?.col === col) {
-            setMemoQueens(prev => { const next = [...prev]; next[colorIdx] = null; return next; });
+          if (hasQueenAt(memoQueensRef.current, colorIdx, row, col, k)) {
+            setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
           } else {
             setMemoMarks(prev => { const s = new Set(prev); if (s.has(key)) s.delete(key); else s.add(key); return s; });
           }
@@ -622,17 +649,12 @@ const QueensGame: React.FC = () => {
           } else {
             setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
             setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
-            setMemoQueens(prev => {
-              if (prev[colorIdx]?.row === row && prev[colorIdx]?.col === col) {
-                const next = [...prev]; next[colorIdx] = null; return next;
-              }
-              return prev;
-            });
+            setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
           }
         }, DOUBLE_CLICK_MS);
       }
     }
-  }, [won, gameOver, isBlocked, currentGrid, queens, isMemoMode, solution, spawnParticles, removeMarkAnimated]);
+  }, [won, gameOver, isBlocked, currentGrid, queens, isMemoMode, solution, k, spawnParticles, removeMarkAnimated]);
 
   const currentTutStep = tutorialStep !== null ? TUTORIAL_STEPS[tutorialStep] : null;
   const isInteractiveStep = tutorialStep !== null && tutorialStep >= 5;
@@ -658,9 +680,9 @@ const QueensGame: React.FC = () => {
         <div className="queens-progress">
           <span className="queens-crown-icon">👑</span>
           <div className="queens-progress-bar">
-            <div className="queens-progress-fill" style={{ width: `${(placed.length / n) * 100}%` }} />
+            <div className="queens-progress-fill" style={{ width: `${(placed.length / (n * k)) * 100}%` }} />
           </div>
-          <span className="queens-progress-text">{placed.length}/{n}</span>
+          <span className="queens-progress-text">{placed.length}/{n * k}</span>
         </div>
       </div>
 
@@ -682,8 +704,7 @@ const QueensGame: React.FC = () => {
           {currentGrid.map((row, r) =>
             row.map((colorIdx, c) => {
               const key = `${r},${c}`;
-              const q = queens[colorIdx];
-              const hasQueenHere = q?.row === r && q?.col === c;
+              const hasQueenHere = hasQueenAt(queens, colorIdx, r, c, k);
               const isConflict = conflicts.has(key);
               const isMarked = marks.has(key);
               const tutClass = getCellTutClass(r, c, colorIdx, currentTutStep);
@@ -702,7 +723,7 @@ const QueensGame: React.FC = () => {
                   onClick={() => handleCellClick(r, c)}
                 >
                   {hasQueenHere && <span className={`cell-queen${isConflict ? ' conflict' : ''}`}>👑</span>}
-                  {!hasQueenHere && memoQueens[colorIdx]?.row === r && memoQueens[colorIdx]?.col === c && (
+                  {!hasQueenHere && hasQueenAt(memoQueens, colorIdx, r, c, k) && (
                     <span className="cell-queen cell-queen-memo">👑</span>
                   )}
                   {(isMarked || removingMarks.has(key)) && !hasQueenHere && (

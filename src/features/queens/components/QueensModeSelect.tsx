@@ -25,6 +25,17 @@ const QueensModeSelect: React.FC = () => {
           </div>
           <ChevronRight size={20} style={{ marginLeft: 'auto', color: '#94a3b8', flexShrink: 0 }} />
         </div>
+
+        <div className="game-card" onClick={() => navigate('/queens/play?levelId=200')}>
+          <div className="game-card-icon" style={{ fontSize: '2.5rem', lineHeight: 1 }}>
+            👑👑
+          </div>
+          <div className="game-card-content">
+            <h3>더블</h3>
+            <p>색상당 퀸 2개씩 배치하세요.</p>
+          </div>
+          <ChevronRight size={20} style={{ marginLeft: 'auto', color: '#94a3b8', flexShrink: 0 }} />
+        </div>
       </div>
     </div>
   );
