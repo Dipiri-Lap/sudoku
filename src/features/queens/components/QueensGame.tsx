@@ -243,7 +243,7 @@ const QueensGame: React.FC = () => {
   const hasAwardedCoins = useRef(false);
 
   const [levelIdx, setLevelIdx] = useState(() => {
-    const startId = searchParams.get('levelId');
+    const startId = import.meta.env.DEV ? searchParams.get('levelId') : null;
     if (startId !== null) {
       const idx = LEVELS.findIndex(l => l.id === Number(startId));
       if (idx >= 0) return idx;
@@ -696,6 +696,7 @@ const QueensGame: React.FC = () => {
       >
         <div
           className="queens-board"
+          data-n={size}
           style={{
             gridTemplateColumns: `repeat(${size}, 1fr)`,
             gridTemplateRows: `repeat(${size}, 1fr)`,
@@ -710,6 +711,12 @@ const QueensGame: React.FC = () => {
               const tutClass = getCellTutClass(r, c, colorIdx, currentTutStep);
               const showGhost = currentTutStep?.ghostQueen?.row === r && currentTutStep?.ghostQueen?.col === c;
               const showForbidden = currentTutStep?.highlight.type === 'adjacent' && tutClass === 'tut-forbidden';
+              const rb = (dr: number, dc: number) => {
+                const nr = r + dr, nc = c + dc;
+                if (nr < 0 || nr >= n || nc < 0 || nc >= n) return false;
+                return currentGrid[nr][nc] !== colorIdx;
+              };
+              const border = '1.75px solid rgba(30,41,59,0.85)';
               return (
                 <div
                   key={key}
@@ -718,6 +725,10 @@ const QueensGame: React.FC = () => {
                   className={`queens-cell${isConflict ? ' conflict' : ''}${tutClass ? ` ${tutClass}` : ''}${isRippling ? ' rippling' : ''}${recentlyPlaced.has(key) ? ' cell-flipping' : ''}`}
                   style={{
                     backgroundColor: colors[colorIdx],
+                    borderTop:    rb(-1, 0) ? border : undefined,
+                    borderRight:  rb(0,  1) ? border : undefined,
+                    borderBottom: rb(1,  0) ? border : undefined,
+                    borderLeft:   rb(0, -1) ? border : undefined,
                     ...(isRippling && { '--ripple-delay': `${(r + c) * 45}ms` }),
                   } as React.CSSProperties}
                   onClick={() => handleCellClick(r, c)}

@@ -167,11 +167,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
   transition: filter 0.1s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
 }
 
 .queens-cell:active {
@@ -225,6 +226,11 @@
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
   animation: crown-slam 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
+
+[data-n="8"]  .cell-queen { font-size: clamp(1.25rem, 5.2vw, 2.1rem); }
+[data-n="9"]  .cell-queen { font-size: clamp(1.05rem, 4.5vw, 1.8rem); }
+[data-n="10"] .cell-queen { font-size: clamp(0.9rem,  3.8vw, 1.55rem); }
+[data-n="11"] .cell-queen { font-size: clamp(0.78rem, 3.2vw, 1.35rem); }
 
 @keyframes crown-slam {
   0%   { transform: translateY(calc(-8% - 30px)) scale(3.2); opacity: 1; }
@@ -284,6 +290,11 @@
   flex-shrink: 0;
   animation: mark-boing 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
+
+[data-n="8"]  .cell-mark { width: clamp(1.1rem, 4.6vw, 1.85rem); height: clamp(1.1rem, 4.6vw, 1.85rem); }
+[data-n="9"]  .cell-mark { width: clamp(0.95rem, 4vw,  1.6rem);  height: clamp(0.95rem, 4vw,  1.6rem); }
+[data-n="10"] .cell-mark { width: clamp(0.8rem,  3.4vw, 1.4rem);  height: clamp(0.8rem,  3.4vw, 1.4rem); }
+[data-n="11"] .cell-mark { width: clamp(0.7rem,  3vw,   1.2rem);  height: clamp(0.7rem,  3vw,   1.2rem); }
 
 .cell-mark-memo {
   width: clamp(0.7rem, 3vw, 1.1rem) !important;
@@ -600,6 +611,11 @@
   pointer-events: none;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
 }
+
+[data-n="8"]  .cell-ghost-queen { font-size: clamp(1.25rem, 5.2vw, 2.1rem); }
+[data-n="9"]  .cell-ghost-queen { font-size: clamp(1.05rem, 4.5vw, 1.8rem); }
+[data-n="10"] .cell-ghost-queen { font-size: clamp(0.9rem,  3.8vw, 1.55rem); }
+[data-n="11"] .cell-ghost-queen { font-size: clamp(0.78rem, 3.2vw, 1.35rem); }
 
 /* Forbidden mark (illustration for adjacent rule) */
 .cell-forbidden-mark {
