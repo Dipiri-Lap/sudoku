@@ -382,6 +382,9 @@ function generateDoubleRegions(n: number, pairs: [number, number][][], minSize =
     unassigned--;
   }
   if (regionSizes.some(s => s < minSize)) return null;
+  for (let i = 0; i < pairs.length; i++) {
+    if (!isRegionConnected(n, grid, i, pairs[i][0][0], pairs[i][0][1])) return null;
+  }
   return grid;
 }
 
