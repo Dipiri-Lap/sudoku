@@ -315,29 +315,43 @@ function findDoubleQueenPlacements(n: number): [number, number][] | null {
   return solve(0) ? result : null;
 }
 
-// Greedily pair 2n queens into n pairs by nearest-neighbor distance.
-function pairQueensGreedy(queens: [number, number][]): [number, number][][] {
-  const used = new Array(queens.length).fill(false);
+// Pair 2n queens into n cross-row pairs (different rows preferred, nearest distance).
+// Same-row pairing creates boring same-row regions, so we avoid it.
+function pairQueensCrossRow(queens: [number, number][]): [number, number][][] {
+  const shuffled = shuffle([...queens]);
+  const used = new Array(shuffled.length).fill(false);
   const pairs: [number, number][][] = [];
-  for (let i = 0; i < queens.length; i++) {
+
+  for (let i = 0; i < shuffled.length; i++) {
     if (used[i]) continue;
     used[i] = true;
+
+    // Prefer a queen in a different row, closest Manhattan distance
     let bestJ = -1, bestDist = Infinity;
-    for (let j = i + 1; j < queens.length; j++) {
-      if (used[j]) continue;
-      const d = Math.abs(queens[i][0] - queens[j][0]) + Math.abs(queens[i][1] - queens[j][1]);
+    for (let j = 0; j < shuffled.length; j++) {
+      if (used[j] || shuffled[i][0] === shuffled[j][0]) continue;
+      const d = Math.abs(shuffled[i][0] - shuffled[j][0]) + Math.abs(shuffled[i][1] - shuffled[j][1]);
       if (d < bestDist) { bestDist = d; bestJ = j; }
+    }
+    // Fallback: any unpaired queen
+    if (bestJ === -1) {
+      for (let j = 0; j < shuffled.length; j++) {
+        if (!used[j]) { bestJ = j; break; }
+      }
     }
     if (bestJ === -1) return [];
     used[bestJ] = true;
-    pairs.push([queens[i], queens[bestJ]]);
+    pairs.push([shuffled[i], shuffled[bestJ]]);
   }
   return pairs;
 }
 
 // Grow connected regions starting from 2 seed cells per color.
-function generateDoubleRegions(n: number, pairs: [number, number][][]): number[][] {
+// Preferentially expands the smallest region to keep sizes balanced.
+// Returns null if any region ends up smaller than minSize.
+function generateDoubleRegions(n: number, pairs: [number, number][][], minSize = 4): number[][] | null {
   const grid: number[][] = Array.from({ length: n }, () => Array(n).fill(-1));
+  const regionSizes = new Array(pairs.length).fill(2);
   for (let i = 0; i < pairs.length; i++) {
     const [[r1, c1], [r2, c2]] = pairs[i];
     grid[r1][c1] = i;
@@ -360,9 +374,14 @@ function generateDoubleRegions(n: number, pairs: [number, number][][]): number[]
     }
     if (frontier.length === 0) break;
     const cell = frontier[Math.floor(Math.random() * frontier.length)];
-    grid[cell.row][cell.col] = cell.adjColors[Math.floor(Math.random() * cell.adjColors.length)];
+    // 70% chance: pick the adjacent color with the smallest region
+    const uniq = [...new Set(cell.adjColors)].sort((a, b) => regionSizes[a] - regionSizes[b]);
+    const color = Math.random() < 0.7 ? uniq[0] : uniq[Math.floor(Math.random() * uniq.length)];
+    grid[cell.row][cell.col] = color;
+    regionSizes[color]++;
     unassigned--;
   }
+  if (regionSizes.some(s => s < minSize)) return null;
   return grid;
 }
 
@@ -423,11 +442,13 @@ export function generateDoubleLevel(n: number, maxAttempts = 600): GeneratedLeve
     const allQueens = findDoubleQueenPlacements(n);
     if (!allQueens || allQueens.length !== 2 * n) continue;
 
-    const pairs = pairQueensGreedy(allQueens);
+    const pairs = pairQueensCrossRow(allQueens);
     if (pairs.length !== n) continue;
+    // Reject if any pair ended up in the same row (fallback path)
+    if (pairs.some(([q1, q2]) => q1[0] === q2[0])) continue;
 
     const grid = generateDoubleRegions(n, pairs);
-    if (grid.some(row => row.some(v => v === -1))) continue;
+    if (!grid) continue;
 
     const solutions = findDoubleSolutions(n, grid, 2);
     if (solutions.length === 1) {
