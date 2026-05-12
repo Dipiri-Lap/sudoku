@@ -19,6 +19,12 @@ const SudokuGame: React.FC = () => {
     const { addCoins } = useCoins();
     const { stageProgress, saveBeginnerProgress } = useSudokuProgress();
     const hasAwardedCoins = useRef(false);
+
+    const handleNextWithAd = (url: string) => {
+        if (import.meta.env.DEV || !window.adBreak) { navigate(url); return; }
+        window.adBreak({ type: 'next', name: 'level-complete', adBreakDone: () => navigate(url) });
+    };
+
     const [showBeginnerTutorial, setShowBeginnerTutorial] = useState(false);
     const [tutorialBoardSize, setTutorialBoardSize] = useState<6 | 9>(6);
 
@@ -422,31 +428,31 @@ const SudokuGame: React.FC = () => {
                                 <House size={22} />
                             </a>
                             {state.gameMode === 'Stage' ? (
-                                <a
-                                    href={state.currentLevel ? `/sudoku/stage?mode=stage&level=${state.currentLevel + 1}` : '/sudoku'}
+                                <button
+                                    onClick={() => handleNextWithAd(state.currentLevel ? `/sudoku/stage?mode=stage&level=${state.currentLevel + 1}` : '/sudoku')}
                                     className="primary-btn bonus-btn"
-                                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
                                 >
                                     다음 레벨로 <ArrowRight size={20} />
-                                </a>
+                                </button>
                             ) : state.gameMode === 'Beginner' ? (
                                 state.currentLevel !== null && state.currentLevel < 5 ? (
-                                    <a
-                                        href={`/sudoku/beginner?level=${state.currentLevel + 1}`}
+                                    <button
+                                        onClick={() => handleNextWithAd(`/sudoku/beginner?level=${state.currentLevel! + 1}`)}
                                         className="primary-btn bonus-btn"
-                                        style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
+                                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
                                     >
                                         다음 스테이지 <ArrowRight size={20} />
-                                    </a>
+                                    </button>
                                 ) : (
-                                    <a href="/sudoku" className="primary-btn" style={{ textDecoration: 'none', textAlign: 'center', flex: 1 }}>
+                                    <button onClick={() => navigate('/sudoku')} className="primary-btn" style={{ textAlign: 'center', flex: 1 }}>
                                         완료! 홈으로
-                                    </a>
+                                    </button>
                                 )
                             ) : (
-                                <a href="/sudoku/time-attack" className="primary-btn" style={{ textDecoration: 'none', textAlign: 'center', flex: 1 }}>
+                                <button onClick={() => navigate('/sudoku/time-attack')} className="primary-btn" style={{ textAlign: 'center', flex: 1 }}>
                                     확인
-                                </a>
+                                </button>
                             )}
                         </div>
                     </div>

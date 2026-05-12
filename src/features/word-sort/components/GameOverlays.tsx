@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { House, ArrowRight } from 'lucide-react';
 import TutorialOverlay from './TutorialOverlay';
 import { useWordSort } from '../context/WordSortContext';
@@ -14,6 +15,13 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
     handleResumeConfirm,
 }) => {
     const { state } = useWordSort();
+    const navigate = useNavigate();
+
+    const handleNextLevel = () => {
+        const url = `/word-sort/play?level=${state.level + 1}`;
+        if (import.meta.env.DEV || !window.adBreak) { navigate(url); return; }
+        window.adBreak({ type: 'next', name: 'level-complete', adBreakDone: () => navigate(url) });
+    };
     const {
         tutorialStep,
         setTutorialStep,
@@ -105,13 +113,13 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
                                 <a href="/word-sort" className="modal-home-btn" style={{ textDecoration: 'none' }}>
                                     <House size={22} />
                                 </a>
-                                <a
-                                    href={`/word-sort/play?level=${state.level + 1}`}
+                                <button
+                                    onClick={handleNextLevel}
                                     className="primary-btn bonus-btn"
-                                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
                                 >
                                     다음 레벨로 <ArrowRight size={20} />
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
