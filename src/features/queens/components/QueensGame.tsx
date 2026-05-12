@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { X as XIcon } from 'lucide-react';
+import { X as XIcon, Settings } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
@@ -245,6 +245,11 @@ const QueensGame: React.FC = () => {
   const { selectedIcon } = useQueensIcon();
   const hasAwardedCoins = useRef(false);
   const [showIconShop, setShowIconShop] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [sfxEnabled, setSfxEnabled] = useState(() => localStorage.getItem('queens_sfx') !== 'false');
+  const sfxEnabledRef = useRef(sfxEnabled);
+  useEffect(() => { sfxEnabledRef.current = sfxEnabled; }, [sfxEnabled]);
+  const toggleSfx = () => setSfxEnabled(v => { const next = !v; localStorage.setItem('queens_sfx', String(next)); return next; });
 
   const [levelIdx, setLevelIdx] = useState(() => {
     const startId = import.meta.env.DEV ? searchParams.get('levelId') : null;
@@ -292,6 +297,8 @@ const QueensGame: React.FC = () => {
   const rippleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [recentlyPlaced, setRecentlyPlaced] = useState<Set<string>>(new Set());
   const [isShaking, setIsShaking] = useState(false);
+  const [isWrongShaking, setIsWrongShaking] = useState(false);
+  const [isWrongFlash, setIsWrongFlash] = useState(false);
   const [removingMarks, setRemovingMarks] = useState<Set<string>>(new Set());
   const [isMemoMode, setIsMemoMode] = useState(false);
   const [memoMarks, setMemoMarks] = useState<Set<string>>(new Set());
@@ -319,6 +326,24 @@ const QueensGame: React.FC = () => {
   const dragModeRef = useRef<'add' | 'remove'>('add');
   const dragCellsRef = useRef<Set<string>>(new Set());
   const wasDragRef = useRef(false);
+
+  const soundRefs = useRef<{ crown: HTMLAudioElement; x: HTMLAudioElement; remove: HTMLAudioElement; clear: HTMLAudioElement; error: HTMLAudioElement } | null>(null);
+  if (!soundRefs.current) {
+    const make = (src: string) => { const a = new Audio(src); a.volume = 0.3; return a; };
+    soundRefs.current = {
+      crown:  make('/assets/crown-quest/crown-sound/crown.wav'),
+      x:      make('/assets/crown-quest/crown-sound/x.wav'),
+      remove: make('/assets/crown-quest/crown-sound/remove.wav'),
+      clear:  make('/assets/crown-quest/crown-sound/clear.wav'),
+      error:  make('/assets/crown-quest/crown-sound/error.wav'),
+    };
+  }
+  const playSound = useCallback((name: 'crown' | 'x' | 'remove' | 'clear' | 'error') => {
+    if (!sfxEnabledRef.current) return;
+    const a = soundRefs.current![name];
+    a.currentTime = 0;
+    a.play().catch(() => {});
+  }, []);
 
   const placed = queens.filter((q): q is Queen => q !== null);
   const conflicts = getConflicts(queens, k);
@@ -349,6 +374,7 @@ const QueensGame: React.FC = () => {
     if (placed.length === n * k && conflicts.size === 0 && !gameOver) {
       const t = setTimeout(() => {
         setWon(true);
+        playSound('clear');
         if (!isTutorial) {
           saveQueensProgress(level.id).catch(console.error);
         }
@@ -513,6 +539,8 @@ const QueensGame: React.FC = () => {
     setMemoQueens(prev => removeFromSlot(prev, ci, row, col, k));
     setRecentlyPlaced(prev => new Set([...prev, key]));
     setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
+    playSound('crown');
+    navigator.vibrate?.(40);
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 400);
     setTimeout(() => spawnParticles(row, col), 20);
@@ -557,19 +585,23 @@ const QueensGame: React.FC = () => {
     dragCellsRef.current.add(key);
     if (isMemoMode) {
       if (dragModeRef.current === 'add') {
+        playSound('x');
         setMemoMarks(prev => { const s = new Set(prev); s.add(key); return s; });
       } else {
+        playSound('remove');
         setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
         setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
       }
     } else if (dragModeRef.current === 'add') {
+      playSound('x');
       setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
       setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
       setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
     } else {
+      playSound('remove');
       removeMarkAnimated(key);
     }
-  }, [currentGrid, removeMarkAnimated, isMemoMode, k]);
+  }, [currentGrid, removeMarkAnimated, isMemoMode, k, playSound]);
 
   const getCellFromPoint = (x: number, y: number) => {
     const el = document.elementFromPoint(x, y) as HTMLElement | null;
@@ -647,13 +679,20 @@ const QueensGame: React.FC = () => {
         const isWrong = !Array.from({ length: k }, (_, s) => solution?.[colorIdx * k + s])
           .some(pos => pos && pos[0] === row && pos[1] === col);
         if (isWrong) {
+          playSound('error');
           setHearts(h => Math.max(0, h - 1));
+          setIsWrongFlash(true);
+          setTimeout(() => setIsWrongFlash(false), 500);
+          setIsWrongShaking(true);
+          setTimeout(() => setIsWrongShaking(false), 450);
         } else {
           setMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
           setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
           setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
           const newQ = placeInSlot([...queensRef.current], colorIdx, row, col, k);
           if (newQ) setQueens(newQ);
+          playSound('crown');
+          navigator.vibrate?.(40);
           setRecentlyPlaced(prev => new Set([...prev, key]));
           setTimeout(() => setRecentlyPlaced(prev => { const n = new Set(prev); n.delete(key); return n; }), 550);
           setIsShaking(true);
@@ -682,8 +721,10 @@ const QueensGame: React.FC = () => {
         singleClickTimerRef.current = setTimeout(() => {
           singleClickTimerRef.current = null;
           if (marksRef.current.has(key)) {
+            playSound('remove');
             removeMarkAnimated(key);
           } else {
+            playSound('x');
             setMarks(prev => { const s = new Set(prev); s.add(key); return s; });
             setMemoMarks(prev => { const s = new Set(prev); s.delete(key); return s; });
             setMemoQueens(prev => removeFromSlot(prev, colorIdx, row, col, k));
@@ -695,15 +736,19 @@ const QueensGame: React.FC = () => {
 
   const currentTutStep = tutorialStep !== null ? TUTORIAL_STEPS[tutorialStep] : null;
   const isInteractiveStep = tutorialStep !== null && tutorialStep >= 5;
-  const boardClass = ['queens-board-container', animPhase !== 'idle' ? `board-${animPhase}` : '', isShaking ? 'board-shaking' : ''].filter(Boolean).join(' ');
+  const boardClass = ['queens-board-container', animPhase !== 'idle' ? `board-${animPhase}` : '', isShaking ? 'board-shaking' : '', isWrongShaking ? 'board-wrong-shaking' : ''].filter(Boolean).join(' ');
 
   // Label shown in interactive banner (e.g. "3 / 7")
   const interactiveIndex = tutorialStep !== null ? tutorialStep - 4 : 0; // 5→1, 6→2, ... 11→7
 
   return (
     <div className="queens-game">
+      {isWrongFlash && <div className="queens-error-flash" />}
       <div className="queens-header">
-        <button className="queens-back-btn" onClick={() => navigate('/queens')}>←</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <button className="queens-back-btn" onClick={() => navigate('/queens')}>←</button>
+          <button className="queens-reset-btn" onClick={handleReset}>재시작</button>
+        </div>
         <span className="queens-level-name">{k === 2 ? `더블 - ${level.name}` : level.name}</span>
         <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
           <button
@@ -726,7 +771,9 @@ const QueensGame: React.FC = () => {
             <img src={getIconUrl(selectedIcon.id)} alt="crown" style={{ width: 28, height: 28, objectFit: 'contain' }} />
             <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.85)', fontWeight: 700, letterSpacing: '0.02em' }}>변경</span>
           </button>
-          <button className="queens-reset-btn" onClick={handleReset}>초기화</button>
+          <button onClick={() => setShowSettings(true)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0.3rem', display: 'flex', alignItems: 'center' }}>
+            <Settings size={20} />
+          </button>
         </div>
       </div>
 
@@ -944,6 +991,23 @@ const QueensGame: React.FC = () => {
       )}
 
       {showIconShop && <QueensIconShopModal onClose={() => setShowIconShop(false)} />}
+
+      {showSettings && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }} onClick={() => setShowSettings(false)}>
+          <div style={{ background: '#1e293b', borderRadius: '20px', padding: '1.5rem', width: '280px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <span style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>설정</span>
+              <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><XIcon size={20} /></button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 0', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <span style={{ color: '#e2e8f0', fontSize: '0.95rem' }}>🔊 효과음</span>
+              <div onClick={toggleSfx} style={{ width: 48, height: 26, borderRadius: 13, background: sfxEnabled ? '#4ade80' : '#475569', cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', top: 3, left: sfxEnabled ? 25 : 3, width: 20, height: 20, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {doubleIntroStep !== null && (
         <DoubleIntroOverlay
