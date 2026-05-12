@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -89,6 +89,7 @@ const RULES = [
 
 const QueensModeSelect: React.FC = () => {
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="mode-select-page">
@@ -113,18 +114,26 @@ const QueensModeSelect: React.FC = () => {
       </div>
 
       {/* 게임 규칙 안내 */}
-      <details style={{ padding: '0.5rem 1.5rem 3rem', maxWidth: '480px', margin: '0 auto', color: '#555', lineHeight: '1.8' }}>
+      <details
+        style={{ padding: '0.5rem 1.5rem 3rem', maxWidth: '480px', margin: '0 auto', color: '#555', lineHeight: '1.8' }}
+        onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+      >
         <summary style={{
           fontSize: '1.1rem', fontWeight: 700, color: '#444',
           cursor: 'pointer', listStyle: 'none',
           display: 'flex', alignItems: 'center', gap: '0.4rem',
           userSelect: 'none',
         }}>
-          <span style={{ fontSize: '0.75rem', color: '#888' }}>▶</span>
+          <span style={{ fontSize: '0.75rem', color: '#888', transition: 'transform 0.2s', display: 'inline-block', transform: open ? 'rotate(90deg)' : 'none' }}>▶</span>
           크라운 퀘스트 게임이란?
         </summary>
         <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {RULES.map((rule) => (
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: 1.7, padding: '0.75rem 1rem', background: '#f1f5f9', borderRadius: '12px', borderLeft: '3px solid #94a3b8' }}>
+            크라운 퀘스트는 보드의 각 <strong>색상 영역·행·열</strong>에 왕관을 정확히 하나씩 배치하는 논리 퍼즐이에요.
+            왕관끼리는 대각선을 포함해 인접할 수 없으며, 모든 조건을 동시에 만족시켜야 합니다.
+            레벨이 올라갈수록 보드 크기가 커지고 배치 난이도가 높아져요!
+          </p>
+          {RULES.map(rule => (
             <div key={rule.label} style={{
               background: '#f8fafc',
               border: '1px solid #e2e8f0',
