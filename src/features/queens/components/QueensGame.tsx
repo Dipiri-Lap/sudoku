@@ -5,9 +5,11 @@ import confetti from 'canvas-confetti';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
 import { useCoins } from '../../../context/CoinContext';
-import { triggerAdByPopup } from '../../../utils/adTrigger';
 import { auth } from '../../../firebase';
 import { solveLevel, solveDoubleLevel } from '../utils/solver';
+import DoubleIntroOverlay from './DoubleIntroOverlay';
+import QueensIconShopModal from './QueensIconShopModal';
+import { useQueensIcon, getIconUrl } from '../context/QueensIconContext';
 import '../styles/QueensGame.css';
 
 type LevelData = {
@@ -240,7 +242,9 @@ const QueensGame: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { queensProgress, saveQueensProgress } = useQueensProgress();
   const { coins, spendCoins, addCoins } = useCoins();
+  const { selectedIcon } = useQueensIcon();
   const hasAwardedCoins = useRef(false);
+  const [showIconShop, setShowIconShop] = useState(false);
 
   const [levelIdx, setLevelIdx] = useState(() => {
     const startId = import.meta.env.DEV ? searchParams.get('levelId') : null;
@@ -261,6 +265,7 @@ const QueensGame: React.FC = () => {
   const k = level.queensPerColor ?? 1;
 
   const [tutorialStep, setTutorialStep] = useState<number | null>(isTutorial ? 0 : null);
+  const [doubleIntroStep, setDoubleIntroStep] = useState<number | null>(k === 2 ? 0 : null);
 
   const [rotationTimes, setRotationTimes] = useState(0);
   const rotationTimesRef = useRef(0);
@@ -293,6 +298,8 @@ const QueensGame: React.FC = () => {
   const [memoQueens, setMemoQueens] = useState<(Queen | null)[]>(Array(n * k).fill(null));
   const [queenHintUsed, setQueenHintUsed] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
+  const [adWatching, setAdWatching] = useState(false);
+  const [pendingShowAd, setPendingShowAd] = useState<(() => void) | null>(null);
 
   const queensRef = useRef(queens);
   const marksRef = useRef(marks);
@@ -401,6 +408,8 @@ const QueensGame: React.FC = () => {
     setMemoQueens(Array(newN * newK).fill(null));
     setQueenHintUsed(false);
     setShowAdModal(false);
+    setAdWatching(false);
+    setPendingShowAd(null);
     hasAwardedCoins.current = false;
     setRippleKey(k => k + 1);
     setHearts(MAX_HEARTS);
@@ -423,13 +432,26 @@ const QueensGame: React.FC = () => {
     }, 200);
   }, [animPhase, isTutorial, n, k]);
 
-  const handleNextLevel = useCallback(() => {
+  const goToNextLevel = useCallback(() => {
     const nextIdx = levelIdx + 1;
     if (nextIdx >= LEVELS.length) return;
     const nextLevel = LEVELS[nextIdx];
     setLevelIdx(nextIdx);
     doReset(0, nextLevel.colors.length, nextLevel.queensPerColor ?? 1, nextLevel.id === 0);
+    if ((nextLevel.queensPerColor ?? 1) === 2) setDoubleIntroStep(0);
   }, [levelIdx]);
+
+  const handleNextLevel = useCallback(() => {
+    if (import.meta.env.DEV || !window.adBreak) {
+      goToNextLevel();
+      return;
+    }
+    window.adBreak({
+      type: 'next',
+      name: 'level-complete',
+      adBreakDone: () => goToNextLevel(),
+    });
+  }, [goToNextLevel]);
 
   const removeMarkAnimated = useCallback((key: string) => {
     setRemovingMarks(prev => new Set([...prev, key]));
@@ -508,9 +530,24 @@ const QueensGame: React.FC = () => {
   }, [queenHintUsed, won, gameOver, coins, spendCoins, placeHintQueen]);
 
   const handleWatchAd = useCallback(() => {
-    setShowAdModal(false);
-    triggerAdByPopup(() => placeHintQueen());
-  }, [placeHintQueen]);
+    if (adWatching) return;
+    const proceed = () => { setShowAdModal(false); placeHintQueen(); };
+    if (import.meta.env.DEV || !(window as any).adBreak) {
+      setAdWatching(true);
+      setTimeout(() => { proceed(); setAdWatching(false); }, 1000);
+      return;
+    }
+    (window as any).adBreak({
+      type: 'reward',
+      name: 'queen-hint',
+      beforeReward: (showAdFn: () => void) => { setPendingShowAd(() => showAdFn); },
+      beforeAd: () => { setAdWatching(true); setPendingShowAd(null); },
+      afterAd: () => { setAdWatching(false); },
+      adViewed: proceed,
+      adDismissed: () => { alert('광고를 끝까지 시청해야 기능을 사용할 수 있어요.'); },
+      adBreakDone: () => { setAdWatching(false); },
+    });
+  }, [adWatching, placeHintQueen]);
 
   const applyMarkToCell = useCallback((row: number, col: number) => {
     const key = `${row},${col}`;
@@ -667,8 +704,30 @@ const QueensGame: React.FC = () => {
     <div className="queens-game">
       <div className="queens-header">
         <button className="queens-back-btn" onClick={() => navigate('/queens')}>←</button>
-        <span className="queens-level-name">{level.name}</span>
-        <button className="queens-reset-btn" onClick={handleReset}>초기화</button>
+        <span className="queens-level-name">{k === 2 ? `더블 - ${level.name}` : level.name}</span>
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+          <button
+            onClick={() => setShowIconShop(true)}
+            style={{
+              background: 'linear-gradient(135deg, #4a90e2, #7c3aed)',
+              border: '2px solid rgba(255,255,255,0.25)',
+              borderRadius: '10px',
+              padding: '0.35rem 0.65rem',
+              fontSize: '1.4rem',
+              cursor: 'pointer',
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            }}
+            title="퀸 아이콘 변경"
+          >
+            <img src={getIconUrl(selectedIcon.id)} alt="crown" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+            <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.85)', fontWeight: 700, letterSpacing: '0.02em' }}>변경</span>
+          </button>
+          <button className="queens-reset-btn" onClick={handleReset}>초기화</button>
+        </div>
       </div>
 
       <div className="queens-status-row">
@@ -733,9 +792,9 @@ const QueensGame: React.FC = () => {
                   } as React.CSSProperties}
                   onClick={() => handleCellClick(r, c)}
                 >
-                  {hasQueenHere && <span className={`cell-queen${isConflict ? ' conflict' : ''}`}>👑</span>}
+                  {hasQueenHere && <img src={getIconUrl(selectedIcon.id)} alt="crown" className={`cell-queen${isConflict ? ' conflict' : ''}`} />}
                   {!hasQueenHere && hasQueenAt(memoQueens, colorIdx, r, c, k) && (
-                    <span className="cell-queen cell-queen-memo">👑</span>
+                    <img src={getIconUrl(selectedIcon.id)} alt="crown" className="cell-queen cell-queen-memo" />
                   )}
                   {(isMarked || removingMarks.has(key)) && !hasQueenHere && (
                     <XIcon className={`cell-mark${removingMarks.has(key) ? ' cell-mark-out' : ''}`} strokeWidth={3} />
@@ -743,7 +802,7 @@ const QueensGame: React.FC = () => {
                   {memoMarks.has(key) && !hasQueenHere && !isMarked && (
                     <XIcon className="cell-mark cell-mark-memo" strokeWidth={2} />
                   )}
-                  {showGhost && !hasQueenHere && <span className="cell-ghost-queen">👑</span>}
+                  {showGhost && !hasQueenHere && <img src={getIconUrl(selectedIcon.id)} alt="crown" className="cell-ghost-queen" />}
                   {showForbidden && !hasQueenHere && <span className="cell-forbidden-mark">✕</span>}
                 </div>
               );
@@ -751,6 +810,23 @@ const QueensGame: React.FC = () => {
           )}
         </div>
       </div>
+
+      {k === 2 && (
+        <div className="queens-double-rules">
+          <div className="queens-double-rule">
+            <span className="queens-double-rule-icon">🎨</span>
+            <span className="queens-double-rule-label">색상당<br />퀸 2개</span>
+          </div>
+          <div className="queens-double-rule">
+            <span className="queens-double-rule-icon">⊞</span>
+            <span className="queens-double-rule-label">행 &amp; 열당<br />퀸 2개</span>
+          </div>
+          <div className="queens-double-rule">
+            <span className="queens-double-rule-icon">🚫</span>
+            <span className="queens-double-rule-label">퀸은 당을<br />수 없음</span>
+          </div>
+        </div>
+      )}
 
       {!isTutorial && (
         <div className="queens-hint">
@@ -847,20 +923,35 @@ const QueensGame: React.FC = () => {
         </div>
       )}
 
-      {showAdModal && (
-        <div className="queens-ad-overlay" onClick={() => setShowAdModal(false)}>
+      {(showAdModal || pendingShowAd) && (
+        <div className="queens-ad-overlay" onClick={() => { setShowAdModal(false); setPendingShowAd(null); }}>
           <div className="queens-ad-modal" onClick={e => e.stopPropagation()}>
             <div className="queens-ad-icon">💰</div>
-            <div className="queens-ad-title">코인이 부족해요</div>
+            <div className="queens-ad-title">{pendingShowAd ? '광고 준비됨' : '코인이 부족해요'}</div>
             <div className="queens-ad-desc">
-              보유 코인: {coins} / 필요: 50
-              <br />
-              광고를 시청하고 무료로 왕관을 배치하세요.
+              {pendingShowAd
+                ? '아래 버튼을 눌러 광고를 시작하세요.'
+                : <>보유 코인: {coins} / 필요: 50<br />광고를 시청하고 무료로 왕관을 배치하세요.</>
+              }
             </div>
-            <button className="queens-ad-btn-primary" onClick={handleWatchAd}>광고 보기</button>
-            <button className="queens-ad-btn-secondary" onClick={() => setShowAdModal(false)}>취소</button>
+            {pendingShowAd
+              ? <button className="queens-ad-btn-primary" onClick={() => { pendingShowAd(); setPendingShowAd(null); }}>광고 시작하기</button>
+              : <button className="queens-ad-btn-primary" onClick={handleWatchAd}>{adWatching ? '광고 로딩 중...' : '광고 보기'}</button>
+            }
+            <button className="queens-ad-btn-secondary" onClick={() => { setShowAdModal(false); setPendingShowAd(null); }}>취소</button>
           </div>
         </div>
+      )}
+
+      {showIconShop && <QueensIconShopModal onClose={() => setShowIconShop(false)} />}
+
+      {doubleIntroStep !== null && (
+        <DoubleIntroOverlay
+          step={doubleIntroStep}
+          onNext={() => setDoubleIntroStep(s => (s ?? 0) + 1)}
+          onPrev={() => setDoubleIntroStep(s => (s ?? 1) - 1)}
+          onClose={() => setDoubleIntroStep(null)}
+        />
       )}
 
       {won && (

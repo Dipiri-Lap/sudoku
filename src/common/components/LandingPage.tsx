@@ -470,7 +470,29 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
+                <a href="/queens" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
+                    <div style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        backgroundColor: '#4a90e2', color: 'white',
+                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
+                        padding: '2px 7px', borderRadius: '999px',
+                        boxShadow: '0 2px 6px rgba(74,144,226,0.5)'
+                    }}>NEW</div>
+                    <div className="game-card-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
+                        <img src="/crownquest_logo.png" alt="크라운 퀘스트" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                    </div>
+                    <div className="game-card-content">
+                        <h3>크라운 퀘스트</h3>
+                        <p>색상 영역마다 퀸을 하나씩 배치하는 논리 퍼즐</p>
+                        <div className="game-card-footer">
+                            <span className="play-now">
+                                <Play size={16} fill="currentColor" /> 플레이하기
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
                         backgroundColor: '#ef4444', color: 'white',
@@ -492,7 +514,7 @@ const LandingPage: React.FC = () => {
                     </div>
                 </a>
 
-                <a href="/sudoku" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
+                <a href="/sudoku" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit' } as any}>
                     <div className="game-card-icon">
                         <img src="/logo.jpg" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
@@ -506,28 +528,6 @@ const LandingPage: React.FC = () => {
                         </div>
                     </div>
                 </a>
-
-                {window.location.hostname === 'localhost' && <a href="/queens" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
-                    <div style={{
-                        position: 'absolute', top: '10px', right: '10px',
-                        backgroundColor: '#4a90e2', color: 'white',
-                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
-                        padding: '2px 7px', borderRadius: '999px',
-                        boxShadow: '0 2px 6px rgba(74,144,226,0.5)'
-                    }}>NEW</div>
-                    <div className="game-card-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
-                        <img src="/crownquest_logo.png" alt="크라운 퀘스트" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>크라운 퀘스트</h3>
-                        <p>색상 영역마다 퀸을 하나씩 배치하는 논리 퍼즐</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                <Play size={16} fill="currentColor" /> 플레이하기
-                            </span>
-                        </div>
-                    </div>
-                </a>}
 
                 {window.location.hostname === 'localhost' && (
                     <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', color: 'inherit' } as any}>
@@ -694,6 +694,13 @@ const LandingPage: React.FC = () => {
                     <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
                         카드를 드래그해 같은 주제의 단어끼리 분류하는 <strong>단어 카드 게임</strong>.
                         다양한 주제의 레벨이 준비되어 있어 어휘력과 연상 능력을 자연스럽게 키울 수 있습니다.
+                    </p>
+
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>👑 크라운 퀘스트</h3>
+                    <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
+                        색상으로 나뉜 영역마다 퀸을 정확히 하나씩 배치하는 <strong>논리 배치 퍼즐</strong>.
+                        같은 행·열·대각선에 퀸이 겹치지 않도록 규칙을 지키며 풀어야 합니다.
+                        간단한 규칙이지만 깊은 사고가 필요해 체스 퍼즐의 묘미를 느낄 수 있습니다.
                     </p>
 
                     <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>퍼즐 게임의 효과</h3>

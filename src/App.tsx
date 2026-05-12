@@ -20,6 +20,7 @@ import { CoinProvider } from './context/CoinContext';
 import { SudokuProgressProvider } from './context/SudokuProgressContext';
 import { WordSortProgressProvider } from './context/WordSortProgressContext';
 import { QueensProgressProvider } from './context/QueensProgressContext';
+import { QueensIconProvider } from './features/queens/context/QueensIconContext';
 import { ChallengeProvider } from './context/ChallengeContext';
 import { UserInitProvider, useUserInit } from './context/UserInitContext';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -65,6 +66,7 @@ const AppContent: React.FC = () => {
       <SudokuProgressProvider>
       <WordSortProgressProvider>
       <QueensProgressProvider>
+      <QueensIconProvider>
       <CardBackProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -104,6 +106,7 @@ const AppContent: React.FC = () => {
           )}
         </Routes>
       </CardBackProvider>
+      </QueensIconProvider>
       </QueensProgressProvider>
       </WordSortProgressProvider>
       </SudokuProgressProvider>

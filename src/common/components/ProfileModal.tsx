@@ -591,7 +591,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                             >
                                                 <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: expandedGames.has(game) ? 'rotate(0deg)' : 'rotate(-90deg)', flexShrink: 0 }} />
                                                 <span style={{ fontSize: '0.72rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                                    {game === 'sudoku' ? '스도쿠' : 'Word Sort'}
+                                                    {game === 'sudoku' ? '스도쿠' : game === 'queens' ? 'Crown Quest' : 'Word Sort'}
                                                     <span style={{ marginLeft: '5px', fontSize: '0.65rem', color: '#64748b' }}>
                                                         ({list.filter(c => challenges.isChallengeCompleted(c.id)).length}/{list.length})
                                                     </span>
