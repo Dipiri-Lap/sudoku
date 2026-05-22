@@ -21,6 +21,7 @@ import { SudokuProgressProvider } from './context/SudokuProgressContext';
 import { WordSortProgressProvider } from './context/WordSortProgressContext';
 import { QueensProgressProvider } from './context/QueensProgressContext';
 import { QueensIconProvider } from './features/queens/context/QueensIconContext';
+import { SudokuThemeProvider } from './features/sudoku/context/SudokuThemeContext';
 import { ChallengeProvider } from './context/ChallengeContext';
 import { UserInitProvider, useUserInit } from './context/UserInitContext';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -73,6 +74,7 @@ const AppContent: React.FC = () => {
           <Route
             path="/sudoku/*"
             element={
+              <SudokuThemeProvider>
               <SudokuProvider>
                 <Routes>
                   <Route index element={<SudokuModeSelect />} />
@@ -82,6 +84,7 @@ const AppContent: React.FC = () => {
                   <Route path="beginner" element={<SudokuGame />} />
                 </Routes>
               </SudokuProvider>
+              </SudokuThemeProvider>
             }
           />
           <Route

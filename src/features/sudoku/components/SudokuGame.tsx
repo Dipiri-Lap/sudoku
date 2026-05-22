@@ -6,7 +6,9 @@ import Board from './Board';
 import Controls from './Controls';
 import BeginnerTutorialModal from './BeginnerTutorialModal';
 import type { Difficulty } from '../../../engine/generator';
-import { Play, Pause, ChevronLeft, ArrowRight, Trophy, Heart, House } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ArrowRight, Trophy, Heart, House, Palette } from 'lucide-react';
+import { useSudokuTheme, ALL_THEME_CLASSES } from '../context/SudokuThemeContext';
+import SudokuThemeModal from './SudokuThemeModal';
 import { auth } from '../../../firebase';
 import { getUserProfile, saveRecord, updateProfileInfo } from '../../../services/rankingService';
 import { useCoins } from '../../../context/CoinContext';
@@ -19,6 +21,16 @@ const SudokuGame: React.FC = () => {
     const { addCoins } = useCoins();
     const { stageProgress, saveBeginnerProgress } = useSudokuProgress();
     const hasAwardedCoins = useRef(false);
+    const { selectedTheme } = useSudokuTheme();
+    const [showThemeModal, setShowThemeModal] = useState(false);
+
+    useEffect(() => {
+        ALL_THEME_CLASSES.forEach(cls => document.documentElement.classList.remove(cls));
+        if (selectedTheme.cssClass) document.documentElement.classList.add(selectedTheme.cssClass);
+        return () => {
+            ALL_THEME_CLASSES.forEach(cls => document.documentElement.classList.remove(cls));
+        };
+    }, [selectedTheme.cssClass]);
 
     const handleNextWithAd = (url: string) => {
         if (import.meta.env.DEV || !window.adBreak) { navigate(url); return; }
@@ -260,14 +272,11 @@ const SudokuGame: React.FC = () => {
                             <Trophy size={20} />
                         </div> */}
                     </div>
-                    {/* <div className="game-nav-right">
-                        <button className="nav-icon-btn">
-                            <Palette size={20} />
+                    <div className="game-nav-right">
+                        <button className="nav-icon-btn" onClick={() => setShowThemeModal(true)} title="테마 변경">
+                            <Palette size={18} />
                         </button>
-                        <button className="nav-icon-btn">
-                            <Settings size={20} />
-                        </button>
-                    </div> */}
+                    </div>
                 </div>
                 {/* Info bar */}
                 <div className="game-info-bar">
@@ -458,6 +467,8 @@ const SudokuGame: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {showThemeModal && <SudokuThemeModal onClose={() => setShowThemeModal(false)} />}
         </div>
     );
 };
