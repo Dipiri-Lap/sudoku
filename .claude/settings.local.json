@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm install react-helmet-async)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(node add_en_levels_146_150.cjs)"
     ]
   }
 }

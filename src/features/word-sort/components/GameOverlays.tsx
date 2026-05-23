@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { House, ArrowRight } from 'lucide-react';
+import { House, ArrowRight, Construction } from 'lucide-react';
 import TutorialOverlay from './TutorialOverlay';
 import { useWordSort } from '../context/WordSortContext';
 import { useWordSortUI } from '../context/WordSortUIContext';
+import levelsKo from '../data/levels.json';
+import levelsEn from '../data/levels_en.json';
 
 interface GameOverlaysProps {
     showResumeConfirm: boolean;
@@ -16,8 +18,14 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
 }) => {
     const { state } = useWordSort();
     const navigate = useNavigate();
+    const [showComingSoon, setShowComingSoon] = useState(false);
+
+    const levels = state.language === 'en' ? levelsEn : levelsKo;
+    const maxLevelId = (levels as any[]).reduce((max: number, l: any) => Math.max(max, l.id), 0);
+    const isLastLevel = state.level >= maxLevelId;
 
     const handleNextLevel = () => {
+        if (isLastLevel) { setShowComingSoon(true); return; }
         const url = `/word-sort/play?level=${state.level + 1}`;
         if (import.meta.env.DEV || !window.adBreak) { navigate(url); return; }
         window.adBreak({ type: 'next', name: 'level-complete', adBreakDone: () => navigate(url) });
@@ -123,6 +131,30 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
                             </div>
                         </div>
                     </div>
+            )}
+
+            {/* Coming Soon Overlay — shown when user clears the last available level */}
+            {showComingSoon && (
+                <div className="modal-overlay">
+                    <div className="modal-content animate-fade-in" style={{ textAlign: 'center' }}>
+                        <div className="modal-header" style={{ flexDirection: 'column', gap: '0.5rem' }}>
+                            <Construction size={48} color="#f59e0b" />
+                            <h2 style={{ margin: 0 }}>제작 중</h2>
+                        </div>
+                        <div className="modal-body">
+                            <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                                모든 레벨을 클리어했습니다! 🎊<br />
+                                새로운 레벨이 곧 추가될 예정입니다.<br />
+                                조금만 기다려 주세요.
+                            </p>
+                        </div>
+                        <div className="modal-footer">
+                            <a href="/word-sort" className="modal-home-btn" style={{ textDecoration: 'none', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                                <House size={20} /> 홈으로
+                            </a>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Tutorial Overlay */}
