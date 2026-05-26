@@ -16662,5 +16662,532 @@
                 ]
             }
         ]
+    },
+    {
+        "id": 151,
+        "maxMoves": 114,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "insurance",
+                "name": "Insurance",
+                "target": 6,
+                "words": [
+                    "Policy Terms",
+                    "Monthly Premium",
+                    "Claims Filing",
+                    "Maturity Refund",
+                    "Special Clause",
+                    "Insured Person"
+                ]
+            },
+            {
+                "id": "investment",
+                "name": "Investment",
+                "target": 6,
+                "words": [
+                    "Stock Market",
+                    "Portfolio",
+                    "Compound Effect",
+                    "Asset Allocation",
+                    "Return Rate",
+                    "Dividend"
+                ]
+            },
+            {
+                "id": "bicycle",
+                "name": "Bicycle",
+                "target": 6,
+                "words": [
+                    "Chain Oil",
+                    "Pedaling",
+                    "Saddle Adjust",
+                    "Brake Pads",
+                    "Gear Shift",
+                    "Tire Pump"
+                ]
+            },
+            {
+                "id": "olympics",
+                "name": "Olympics",
+                "target": 6,
+                "words": [
+                    "Torch Relay",
+                    "Gold Medal",
+                    "Athletes Village",
+                    "Opening Ceremony",
+                    "World Record",
+                    "Olympic Flag"
+                ]
+            },
+            {
+                "id": "famous_rivers",
+                "name": "Rivers",
+                "target": 6,
+                "words": [
+                    "Amazon River",
+                    "Nile River",
+                    "Mississippi",
+                    "Rhine River",
+                    "Seine River",
+                    "Thames River"
+                ]
+            },
+            {
+                "id": "new_york",
+                "name": "New York",
+                "target": 6,
+                "words": [
+                    "Statue of Liberty",
+                    "Times Square",
+                    "Central Park",
+                    "Broadway",
+                    "Empire State",
+                    "Yellow Taxi"
+                ]
+            },
+            {
+                "id": "book_reading",
+                "name": "Books",
+                "target": 6,
+                "words": [
+                    "Bestseller",
+                    "Bookmark",
+                    "Publisher",
+                    "Library",
+                    "Foreword",
+                    "Table of Contents"
+                ]
+            },
+            {
+                "id": "meditation",
+                "name": "Meditation",
+                "target": 6,
+                "words": [
+                    "Mindfulness",
+                    "Deep Breath",
+                    "Calmness",
+                    "Singing Bowl",
+                    "Lotus Pose",
+                    "White Noise"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 152,
+        "maxMoves": 95,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "country_nation",
+                "name": "Nation",
+                "target": 6,
+                "words": [
+                    "Territory",
+                    "Sovereignty",
+                    "Constitution",
+                    "Diplomacy",
+                    "Border Line",
+                    "Government"
+                ]
+            },
+            {
+                "id": "job_career",
+                "name": "Career",
+                "target": 6,
+                "words": [
+                    "Certification",
+                    "Pay Slip",
+                    "Commute",
+                    "Retirement",
+                    "Performance Review",
+                    "Job Analysis"
+                ]
+            },
+            {
+                "id": "average_stat",
+                "name": "Average",
+                "target": 5,
+                "words": [
+                    "Median",
+                    "Statistics",
+                    "Std Deviation",
+                    "Arithmetic Mean",
+                    "Representative"
+                ]
+            },
+            {
+                "id": "management_control",
+                "name": "Management",
+                "target": 7,
+                "words": [
+                    "Monitoring",
+                    "Maintenance",
+                    "Checklist",
+                    "Permissions",
+                    "Security Check",
+                    "Scheduling",
+                    "Inventory"
+                ]
+            },
+            {
+                "id": "fashion_model",
+                "name": "Fashion Model",
+                "target": 6,
+                "words": [
+                    "Runway Walk",
+                    "Posing",
+                    "Audition Pass",
+                    "Camera Eye",
+                    "Body Shape",
+                    "Outfit Fitting"
+                ]
+            },
+            {
+                "id": "building_structure",
+                "name": "Building",
+                "target": 7,
+                "words": [
+                    "Concrete Wall",
+                    "Elevator",
+                    "Fire Stairs",
+                    "Final Inspection",
+                    "Column Structure",
+                    "Underground Parking",
+                    "Exterior Glass"
+                ]
+            },
+            {
+                "id": "time_machine",
+                "name": "Time Machine",
+                "target": 6,
+                "words": [
+                    "Time Axis",
+                    "Causality Break",
+                    "Wormhole Entry",
+                    "Future Coords",
+                    "Spacetime Warp",
+                    "Past Encounter"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 153,
+        "maxMoves": 85,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "cancer_types",
+                "name": "Cancer",
+                "target": 5,
+                "words": [
+                    "Gastric Cancer",
+                    "Lung Cancer",
+                    "Liver Cancer",
+                    "Colon Cancer",
+                    "Thyroid Cancer"
+                ]
+            },
+            {
+                "id": "vehicle_types",
+                "name": "Vehicles",
+                "target": 6,
+                "words": [
+                    "Sedan",
+                    "SUV",
+                    "Hatchback",
+                    "Coupe",
+                    "Convertible",
+                    "Pickup Truck"
+                ]
+            },
+            {
+                "id": "university_student",
+                "name": "College Life",
+                "target": 6,
+                "words": [
+                    "Course Registration",
+                    "Midterm Exam",
+                    "GPA Management",
+                    "Club Room",
+                    "Scholarship",
+                    "Campus"
+                ]
+            },
+            {
+                "id": "parents",
+                "name": "Parents",
+                "target": 5,
+                "words": [
+                    "Child Support",
+                    "Home Education",
+                    "Dedication",
+                    "Parental Rights",
+                    "Guardian"
+                ]
+            },
+            {
+                "id": "motivation",
+                "name": "Motivation",
+                "target": 5,
+                "words": [
+                    "Goal Setting",
+                    "Self Growth",
+                    "Passion",
+                    "Reward System",
+                    "Role Model"
+                ]
+            },
+            {
+                "id": "business_startup",
+                "name": "Business",
+                "target": 5,
+                "words": [
+                    "Incorporation",
+                    "Fundraising",
+                    "Revenue Model",
+                    "Market Research",
+                    "Marketing"
+                ]
+            },
+            {
+                "id": "license_certification",
+                "name": "Driver's License",
+                "target": 5,
+                "words": [
+                    "Aptitude Test",
+                    "Road Test",
+                    "Written Exam",
+                    "License Renewal",
+                    "ID Verification"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 154,
+        "maxMoves": 115,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "bible_scripture",
+                "name": "Bible",
+                "target": 5,
+                "words": [
+                    "Genesis",
+                    "Ten Commandments",
+                    "Old Testament",
+                    "New Testament",
+                    "Gospels"
+                ]
+            },
+            {
+                "id": "problem_solving",
+                "name": "Problem",
+                "target": 5,
+                "words": [
+                    "Solution",
+                    "Question Error",
+                    "Difficulty",
+                    "Riddle",
+                    "Error Log"
+                ]
+            },
+            {
+                "id": "internal_organs",
+                "name": "Organs",
+                "target": 6,
+                "words": [
+                    "Heart",
+                    "Liver",
+                    "Lungs",
+                    "Stomach",
+                    "Pancreas",
+                    "Kidneys"
+                ]
+            },
+            {
+                "id": "wildflowers",
+                "name": "Wildflowers",
+                "target": 5,
+                "words": [
+                    "Dandelion",
+                    "Pasque Flower",
+                    "Violet",
+                    "Pink",
+                    "Thistle"
+                ]
+            },
+            {
+                "id": "high_mountains",
+                "name": "High Mountains",
+                "target": 5,
+                "words": [
+                    "Everest",
+                    "Kilimanjaro",
+                    "Andes",
+                    "Eternal Snow",
+                    "Thin Air"
+                ]
+            },
+            {
+                "id": "author_writer",
+                "name": "Author",
+                "target": 5,
+                "words": [
+                    "Manuscript",
+                    "Writing Room",
+                    "Bestseller",
+                    "Publishing Deal",
+                    "Pen Name"
+                ]
+            },
+            {
+                "id": "retirement_life",
+                "name": "Retirement",
+                "target": 5,
+                "words": [
+                    "Retirement Ceremony",
+                    "National Pension",
+                    "Old Age Prep",
+                    "Second Act",
+                    "Service Award"
+                ]
+            },
+            {
+                "id": "aging_process",
+                "name": "Aging",
+                "target": 5,
+                "words": [
+                    "Gray Hair",
+                    "Fine Lines",
+                    "Farsightedness",
+                    "Low Energy",
+                    "Bone Density"
+                ]
+            },
+            {
+                "id": "studying_hard",
+                "name": "Studying",
+                "target": 5,
+                "words": [
+                    "Concentration",
+                    "Key Points",
+                    "Online Lecture",
+                    "Study Room",
+                    "Academic Achievement"
+                ]
+            },
+            {
+                "id": "casino_gambling",
+                "name": "Casino",
+                "target": 4,
+                "words": [
+                    "Slot Machine",
+                    "Blackjack",
+                    "Roulette Wheel",
+                    "Betting Chip"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 155,
+        "maxMoves": 94,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "mammal_types",
+                "name": "Mammals",
+                "target": 6,
+                "words": [
+                    "Whale",
+                    "Bat",
+                    "Tiger",
+                    "Kangaroo",
+                    "Platypus",
+                    "Chimpanzee"
+                ]
+            },
+            {
+                "id": "subscription_join",
+                "name": "Sign Up",
+                "target": 5,
+                "words": [
+                    "Terms of Service",
+                    "Identity Verify",
+                    "Welcome Bonus",
+                    "First Month Free",
+                    "Create Account"
+                ]
+            },
+            {
+                "id": "strategy_plan",
+                "name": "Strategy",
+                "target": 6,
+                "words": [
+                    "Master Move",
+                    "Long-term Roadmap",
+                    "Benchmarking",
+                    "Plan B",
+                    "Scenario Analysis",
+                    "Flanking Strike"
+                ]
+            },
+            {
+                "id": "skill_level",
+                "name": "Skill Level",
+                "target": 5,
+                "words": [
+                    "Entry Barrier",
+                    "Building Basics",
+                    "Advanced Course",
+                    "Skill Gap",
+                    "Above Average"
+                ]
+            },
+            {
+                "id": "unique_fruits",
+                "name": "Exotic Fruits",
+                "target": 7,
+                "words": [
+                    "Durian",
+                    "Dragon Fruit",
+                    "Mangosteen",
+                    "Passion Fruit",
+                    "Star Fruit",
+                    "Rambutan",
+                    "Salak"
+                ]
+            },
+            {
+                "id": "banking_service",
+                "name": "Banking",
+                "target": 6,
+                "words": [
+                    "Queue Ticket",
+                    "Rate Benefit",
+                    "Debit Card",
+                    "ATM Machine",
+                    "Loan Review",
+                    "Account Copy"
+                ]
+            },
+            {
+                "id": "human_life",
+                "name": "Life",
+                "target": 6,
+                "words": [
+                    "Story Arc",
+                    "Life Cycle",
+                    "Self-Actualization",
+                    "Four Emotions",
+                    "Turning Point",
+                    "Twilight Years"
+                ]
+            }
+        ]
     }
 ]

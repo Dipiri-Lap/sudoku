@@ -12,6 +12,8 @@ import TileMatchGame from './features/tile-match/components/TileMatchGame';
 import SnapSpotGame from './features/snapspot/components/SnapSpotGame';
 import QueensGame from './features/queens/components/QueensGame';
 import QueensModeSelect from './features/queens/components/QueensModeSelect';
+import ArrowPuzzleGame from './features/arrow-puzzle/components/ArrowPuzzleGame';
+import ArrowLevelEditor from './features/arrow-puzzle/components/ArrowLevelEditor';
 
 import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
@@ -103,6 +105,10 @@ const AppContent: React.FC = () => {
           <Route path="/queen" element={<Navigate to="/queens" replace />} />
           <Route path="/queens" element={<QueensModeSelect />} />
           <Route path="/queens/play" element={<QueensGame />} />
+          <Route path="/arrow-puzzle" element={<ArrowPuzzleGame />} />
+          {window.location.hostname === 'localhost' && (
+            <Route path="/arrow-level-editor" element={<ArrowLevelEditor />} />
+          )}
 
           {window.location.hostname === 'localhost' && (
             <Route path="/admin" element={<AdminPage />} />

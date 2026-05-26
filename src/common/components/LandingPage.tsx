@@ -491,8 +491,7 @@ const LandingPage: React.FC = () => {
                         </div>
                     </div>
                 </a>
-
-                <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
+                 <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
                         backgroundColor: '#ef4444', color: 'white',
@@ -547,7 +546,24 @@ const LandingPage: React.FC = () => {
                 )}
 
                 {window.location.hostname === 'localhost' && (
-                    <a href="/snapspot" className="game-card animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', color: 'inherit' } as any}>
+                    <a href="/arrow-puzzle" className="game-card animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', color: 'inherit' } as any}>
+                        <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
+                            🏹
+                        </div>
+                        <div className="game-card-content">
+                            <h3>화살표 퍼즐</h3>
+                            <p>화살표를 올바른 순서로 탭해서 모두 탈출시키세요</p>
+                            <div className="game-card-footer">
+                                <span className="play-now">
+                                    <Play size={16} fill="currentColor" /> 플레이하기
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                )}
+
+                {window.location.hostname === 'localhost' && (
+                    <a href="/snapspot" className="game-card animate-fade-in" style={{ '--delay': '0.6s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             🔍
                         </div>

@@ -1,0 +1,314 @@
+.ap-page {
+  min-height: 100dvh;
+  background: #0d1526;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff;
+}
+
+.ap-header {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+}
+
+.ap-icon-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ap-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ap-level-badge {
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: #1b2a48;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 0.3rem 1.2rem;
+  letter-spacing: 0.04em;
+}
+
+.ap-board-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  padding: 1rem;
+}
+
+.ap-svg {
+  width: min(calc(100vw - 2rem), 420px);
+  height: auto;
+}
+
+/* ── 피스 공통 ── */
+.ap-piece {
+  transition: opacity 0.08s;
+}
+
+/* ── 방향별 wiggle 애니메이션 (막혔을 때 방향으로 튕김) ── */
+@keyframes wiggle-right {
+  0%   { transform: translateX(0); }
+  30%  { transform: translateX(10px); }
+  65%  { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+@keyframes wiggle-left {
+  0%   { transform: translateX(0); }
+  30%  { transform: translateX(-10px); }
+  65%  { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+@keyframes wiggle-up {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(-10px); }
+  65%  { transform: translateY(5px); }
+  100% { transform: translateY(0); }
+}
+@keyframes wiggle-down {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(10px); }
+  65%  { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+.ap-piece.wiggle-right { animation: wiggle-right 0.42s ease; }
+.ap-piece.wiggle-left  { animation: wiggle-left  0.42s ease; }
+.ap-piece.wiggle-up    { animation: wiggle-up    0.42s ease; }
+.ap-piece.wiggle-down  { animation: wiggle-down  0.42s ease; }
+
+/* ── 클리어 오버레이 ── */
+.ap-clear-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  animation: apFadeIn 0.3s ease;
+}
+
+@keyframes apFadeIn {
+  from { opacity: 0; transform: scale(0.93); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.ap-clear-card {
+  background: #16243e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  padding: 2.5rem 2.2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ap-clear-emoji {
+  font-size: 3.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.ap-clear-card h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.ap-clear-card p {
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.ap-btn-primary {
+  margin-top: 0.8rem;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.8rem 2.2rem;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.ap-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.45);
+}
+.ap-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* ── Header button group ── */
+.ap-header-btns {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+/* ── Difficulty selection screen ── */
+.ap-select-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  padding: 2rem 1.5rem;
+}
+
+.ap-select-title {
+  text-align: center;
+}
+
+.ap-select-title h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ap-select-title p {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.88rem;
+  margin: 0.5rem 0 0;
+}
+
+.ap-diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 360px;
+}
+
+.ap-diff-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 0.85rem;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: transform 0.18s, background 0.18s, border-color 0.18s;
+  text-align: center;
+}
+
+.ap-diff-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--diff-color);
+  box-shadow: 0 0 0 1px var(--diff-color) inset;
+}
+
+.ap-diff-card:active {
+  transform: translateY(-1px);
+}
+
+.ap-diff-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--diff-color);
+}
+
+.ap-diff-grid-size {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.ap-diff-desc {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 0.1rem;
+}
+
+/* ── Generating spinner ── */
+.ap-generating {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.ap-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: apSpin 0.75s linear infinite;
+}
+
+@keyframes apSpin {
+  to { transform: rotate(360deg); }
+}
+
+.ap-generating p {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+}
+
+/* ── Clear overlay buttons ── */
+.ap-clear-btns {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.ap-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ap-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ap-btn-text {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  transition: color 0.15s;
+  margin-top: 0.2rem;
+}
+.ap-btn-text:hover {
+  color: rgba(255, 255, 255, 0.65);
+}
