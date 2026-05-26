@@ -28,7 +28,11 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
         if (isLastLevel) { setShowComingSoon(true); return; }
         const url = `/word-sort/play?level=${state.level + 1}`;
         if (import.meta.env.DEV || !window.adBreak) { navigate(url); return; }
-        window.adBreak({ type: 'next', name: 'level-complete', adBreakDone: () => navigate(url) });
+        try {
+            window.adBreak({ type: 'next', name: 'level-complete', adBreakDone: () => navigate(url) });
+        } catch {
+            navigate(url);
+        }
     };
     const {
         tutorialStep,

@@ -290,15 +290,15 @@ const WordSortGame: React.FC = () => {
         if (state.isWinner && tutorialStep === null && !hasAwardedCoins.current) {
             hasAwardedCoins.current = true;
             addCoins(10);
+            if (!hasSavedLevelProgress.current) {
+                hasSavedLevelProgress.current = true;
+                saveWordSortProgress(state.level).catch(console.error);
+            }
             import('../../../firebase').then(({ auth }) => {
                 if (auth.currentUser) {
                     const uid = auth.currentUser!.uid;
                     import('../../../services/rankingService').then(m => {
                         m.incrementPuzzlePower(uid).catch(console.error);
-                        if (!hasSavedLevelProgress.current) {
-                            hasSavedLevelProgress.current = true;
-                            saveWordSortProgress(state.level).catch(console.error);
-                        }
                     });
                 }
             });
