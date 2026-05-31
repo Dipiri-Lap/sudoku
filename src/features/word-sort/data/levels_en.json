@@ -1,4 +1,4 @@
-[
+﻿[
     {
         "id": 1,
         "maxMoves": 100,
@@ -17186,6 +17186,2691 @@
                     "Four Emotions",
                     "Turning Point",
                     "Twilight Years"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 156,
+        "maxMoves": 114,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "earth_planet",
+                "name": "Earth",
+                "target": 6,
+                "words": [
+                    "Atmosphere",
+                    "Magnetic Field",
+                    "Rotational Axis",
+                    "Tectonic Shift",
+                    "Sea Level",
+                    "Mantle Structure"
+                ]
+            },
+            {
+                "id": "donation_charity",
+                "name": "Charity",
+                "target": 4,
+                "words": [
+                    "Regular Donation",
+                    "Year-End Tax",
+                    "Charitable Organization",
+                    "Anonymous Donation"
+                ]
+            },
+            {
+                "id": "divorce_process",
+                "name": "Divorce",
+                "target": 5,
+                "words": [
+                    "Alimony",
+                    "Custody Rights",
+                    "Asset Division",
+                    "Cooling Period",
+                    "Settlement Agreement"
+                ]
+            },
+            {
+                "id": "subway_transit",
+                "name": "Subway",
+                "target": 7,
+                "words": [
+                    "Screen Door",
+                    "Transfer Station",
+                    "Transit Card",
+                    "Express Train",
+                    "Route Map",
+                    "Train Frequency",
+                    "Platform"
+                ]
+            },
+            {
+                "id": "department_store",
+                "name": "Department Store",
+                "target": 3,
+                "words": [
+                    "VIP Lounge",
+                    "Food Hall",
+                    "Escalator"
+                ]
+            },
+            {
+                "id": "onomatopoeia",
+                "name": "Onomatopoeia",
+                "target": 5,
+                "words": [
+                    "Twinkle Twinkle",
+                    "Rumble",
+                    "Tick Tock",
+                    "Ripple",
+                    "Snooze"
+                ]
+            },
+            {
+                "id": "biotechnology",
+                "name": "Biotechnology",
+                "target": 6,
+                "words": [
+                    "Gene Scissors",
+                    "Stem Cell",
+                    "Cloned Animal",
+                    "Embryo Culture",
+                    "DNA Extraction",
+                    "Tissue Culture"
+                ]
+            },
+            {
+                "id": "physical_shock",
+                "name": "Impact",
+                "target": 4,
+                "words": [
+                    "Shock Absorber",
+                    "Airbag",
+                    "Vibration Absorption",
+                    "Shrapnel Effect"
+                ]
+            },
+            {
+                "id": "legs_anatomy",
+                "name": "Legs",
+                "target": 5,
+                "words": [
+                    "Knee Joint",
+                    "Achilles Tendon",
+                    "Calf",
+                    "Thigh",
+                    "Ankle"
+                ]
+            },
+            {
+                "id": "city_urban",
+                "name": "City",
+                "target": 5,
+                "words": [
+                    "Landmark",
+                    "Population Density",
+                    "Skyscrapers",
+                    "Public Transit",
+                    "Commercial District"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 157,
+        "maxMoves": 98,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "asian_countries",
+                "name": "Asian Countries",
+                "target": 5,
+                "words": [
+                    "South Korea",
+                    "Singapore",
+                    "Indonesia",
+                    "Vietnam",
+                    "Mongolia"
+                ]
+            },
+            {
+                "id": "substance_reality",
+                "name": "Reality",
+                "target": 6,
+                "words": [
+                    "Present Reality",
+                    "Truth Investigation",
+                    "Concrete Evidence",
+                    "Fact Verification",
+                    "Core Understanding",
+                    "Physical Form"
+                ]
+            },
+            {
+                "id": "golf_sports",
+                "name": "Golf",
+                "target": 4,
+                "words": [
+                    "Hole-in-One",
+                    "Sand Trap",
+                    "Caddie Bag",
+                    "Driver Shot"
+                ]
+            },
+            {
+                "id": "density_physics",
+                "name": "Density",
+                "target": 5,
+                "words": [
+                    "Buoyancy",
+                    "Molecular Spacing",
+                    "Hydrometer",
+                    "Mass Volume",
+                    "Concentration Difference"
+                ]
+            },
+            {
+                "id": "zoo_park",
+                "name": "Zoo",
+                "target": 6,
+                "words": [
+                    "Zookeeper",
+                    "Viewing Fence",
+                    "Night Opening",
+                    "Ecology Talk",
+                    "Feeding Experience",
+                    "Artificial Nursery"
+                ]
+            },
+            {
+                "id": "famous_ceos",
+                "name": "Famous CEOs",
+                "target": 5,
+                "words": [
+                    "Elon Musk",
+                    "Steve Jobs",
+                    "Bill Gates",
+                    "Mark Zuckerberg",
+                    "Sam Altman"
+                ]
+            },
+            {
+                "id": "paper_objects",
+                "name": "Paper",
+                "target": 7,
+                "words": [
+                    "Pulp Material",
+                    "Origami",
+                    "A4 Paper",
+                    "Document Printing",
+                    "Cardboard Box",
+                    "Tracing Paper",
+                    "Recycled Paper"
+                ]
+            },
+            {
+                "id": "vip_lounge",
+                "name": "VIP",
+                "target": 4,
+                "words": [
+                    "Exclusive Lounge",
+                    "Valet Parking",
+                    "Premium Member",
+                    "Secret Invitation"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 158,
+        "maxMoves": 96,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "coaching_mind",
+                "name": "Coaching",
+                "target": 5,
+                "words": [
+                    "Goal Setting",
+                    "Self-Esteem Recovery",
+                    "Motivation",
+                    "Feedback",
+                    "Mentoring"
+                ]
+            },
+            {
+                "id": "attack_tactics",
+                "name": "Attack",
+                "target": 6,
+                "words": [
+                    "Sneak Infiltration",
+                    "Full-Scale War",
+                    "Preemptive Strike",
+                    "Charge Order",
+                    "Forward",
+                    "On-Target Shot"
+                ]
+            },
+            {
+                "id": "office_environment",
+                "name": "Office",
+                "target": 6,
+                "words": [
+                    "Dual Monitor",
+                    "Approval Documents",
+                    "Partition",
+                    "Break Room",
+                    "Copier",
+                    "Employee Badge"
+                ]
+            },
+            {
+                "id": "factory_production",
+                "name": "Factory",
+                "target": 6,
+                "words": [
+                    "Assembly Line",
+                    "Conveyor Belt",
+                    "Safety Helmet",
+                    "Quality Inspection",
+                    "Manufacturing Process",
+                    "Raw Materials"
+                ]
+            },
+            {
+                "id": "perfectionism",
+                "name": "Perfection",
+                "target": 5,
+                "words": [
+                    "Flawless",
+                    "Top Standard",
+                    "Zero Error",
+                    "Obsession",
+                    "Successful"
+                ]
+            },
+            {
+                "id": "economy_market",
+                "name": "Economy",
+                "target": 6,
+                "words": [
+                    "Inflation",
+                    "Interest Rate Hike",
+                    "Stock Market",
+                    "Consumer Price",
+                    "Exchange Rate",
+                    "GDP"
+                ]
+            },
+            {
+                "id": "beauty_person",
+                "name": "Beauty",
+                "target": 5,
+                "words": [
+                    "Facial Features",
+                    "Golden Ratio",
+                    "Skin Care",
+                    "Charm",
+                    "Eye-Catching"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 159,
+        "maxMoves": 78,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "cruise_trip",
+                "name": "Cruise",
+                "target": 6,
+                "words": [
+                    "Deck Party",
+                    "Deck Square",
+                    "Large Cabin",
+                    "Lifeboat",
+                    "Port Tour",
+                    "Buffet Restaurant"
+                ]
+            },
+            {
+                "id": "back_alley",
+                "name": "Alley",
+                "target": 6,
+                "words": [
+                    "Mural Street",
+                    "Sidewalk Pavement",
+                    "Stray Cat",
+                    "Streetlamp Light",
+                    "Old Signboard",
+                    "Utility Pole"
+                ]
+            },
+            {
+                "id": "financial_tech",
+                "name": "Investment",
+                "target": 6,
+                "words": [
+                    "Real Estate Investment",
+                    "Stock Trading",
+                    "Savings Maturity",
+                    "Asset Portfolio",
+                    "Cryptocurrency",
+                    "Tax Reduction"
+                ]
+            },
+            {
+                "id": "center_point",
+                "name": "Center",
+                "target": 6,
+                "words": [
+                    "Eye of the Storm",
+                    "Center of Gravity",
+                    "Bullseye",
+                    "Core Value",
+                    "City Plaza",
+                    "Centripetal Force"
+                ]
+            },
+            {
+                "id": "artillery_cannon",
+                "name": "Cannon",
+                "target": 6,
+                "words": [
+                    "Powder Loading",
+                    "Barrel Angle",
+                    "Cannon Sound",
+                    "Shell Ejection",
+                    "Fortress Turret",
+                    "Fuse Ignition"
+                ]
+            },
+            {
+                "id": "sorting_organizing",
+                "name": "Tidying",
+                "target": 6,
+                "words": [
+                    "Recycling Sorting",
+                    "Storage Box",
+                    "Unnecessary Items",
+                    "Document Filing",
+                    "Floor Cleaning",
+                    "Neat State"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 160,
+        "maxMoves": 118,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "home_house",
+                "name": "Home",
+                "target": 6,
+                "words": [
+                    "Front Door",
+                    "Living Room Sofa",
+                    "Bedroom Bed",
+                    "Kitchen Table",
+                    "Balcony Window",
+                    "Bathroom Tub"
+                ]
+            },
+            {
+                "id": "knight_warrior",
+                "name": "Knight",
+                "target": 5,
+                "words": [
+                    "Iron Armor",
+                    "Longsword",
+                    "Shield",
+                    "Chivalry",
+                    "White Horse"
+                ]
+            },
+            {
+                "id": "computer_device",
+                "name": "Computer",
+                "target": 6,
+                "words": [
+                    "Monitor",
+                    "Tower Case",
+                    "Keyboard",
+                    "Mouse Pad",
+                    "Graphics Card",
+                    "Motherboard"
+                ]
+            },
+            {
+                "id": "wind_nature",
+                "name": "Wind",
+                "target": 5,
+                "words": [
+                    "Typhoon",
+                    "Breeze",
+                    "Windmill",
+                    "Gentle Wind",
+                    "Kite Flying"
+                ]
+            },
+            {
+                "id": "night_club",
+                "name": "Night Club",
+                "target": 6,
+                "words": [
+                    "Colorful Lights",
+                    "DJ Booth",
+                    "Large Speakers",
+                    "Dance Floor",
+                    "Entry Wristband",
+                    "Music Beat"
+                ]
+            },
+            {
+                "id": "russia_country",
+                "name": "Russia",
+                "target": 6,
+                "words": [
+                    "Moscow",
+                    "Siberia",
+                    "Lake Baikal",
+                    "Matryoshka",
+                    "Kremlin",
+                    "Red Square"
+                ]
+            },
+            {
+                "id": "bear_animal",
+                "name": "Bear",
+                "target": 5,
+                "words": [
+                    "Hibernation",
+                    "Inside Cave",
+                    "Polar Bear",
+                    "Grizzly Bear",
+                    "Salmon Hunting"
+                ]
+            },
+            {
+                "id": "summer_season",
+                "name": "Summer",
+                "target": 6,
+                "words": [
+                    "Sweltering Heat",
+                    "Beach",
+                    "Watermelon Punch",
+                    "Cicada Sound",
+                    "Rainy Season",
+                    "Ice Cream"
+                ]
+            },
+            {
+                "id": "currency_countries",
+                "name": "Currency",
+                "target": 6,
+                "words": [
+                    "Won",
+                    "Dollar",
+                    "Euro",
+                    "Yen",
+                    "Yuan",
+                    "Pound"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 161,
+        "maxMoves": 96,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "court_law",
+                "name": "Courthouse",
+                "target": 5,
+                "words": [
+                    "Defendant's Seat",
+                    "Judge's Gavel",
+                    "Witness Oath",
+                    "Final Verdict",
+                    "Trial Date"
+                ]
+            },
+            {
+                "id": "famous_painters",
+                "name": "Painters",
+                "target": 5,
+                "words": [
+                    "Van Gogh",
+                    "Picasso",
+                    "Monet",
+                    "Da Vinci",
+                    "Klimt"
+                ]
+            },
+            {
+                "id": "corporation_stock",
+                "name": "Corporation",
+                "target": 6,
+                "words": [
+                    "Board of Directors",
+                    "Annual Shareholders Meeting",
+                    "Corporate Register",
+                    "Rights Issue",
+                    "Outside Director",
+                    "Ex-Dividend"
+                ]
+            },
+            {
+                "id": "novel_literature",
+                "name": "Novel",
+                "target": 5,
+                "words": [
+                    "Characters",
+                    "Plot Resolution",
+                    "Conflict Structure",
+                    "Open Ending",
+                    "Frame Narrative"
+                ]
+            },
+            {
+                "id": "world_landmarks",
+                "name": "Landmarks",
+                "target": 6,
+                "words": [
+                    "Eiffel Tower",
+                    "Statue of Liberty",
+                    "Colosseum",
+                    "Taj Mahal",
+                    "Opera House",
+                    "Leaning Tower of Pisa"
+                ]
+            },
+            {
+                "id": "online_web",
+                "name": "Online",
+                "target": 5,
+                "words": [
+                    "Real-Time Access",
+                    "Cloud Server",
+                    "Domain Address",
+                    "Login Authentication",
+                    "Web Browser"
+                ]
+            },
+            {
+                "id": "theme_park",
+                "name": "Theme Park",
+                "target": 5,
+                "words": [
+                    "Roller Coaster",
+                    "Merry-Go-Round",
+                    "Parade Route",
+                    "All-Day Pass",
+                    "Souvenir Shop"
+                ]
+            },
+            {
+                "id": "press_media",
+                "name": "Media",
+                "target": 5,
+                "words": [
+                    "Exclusive Report",
+                    "Field Reporter",
+                    "Editor-in-Chief",
+                    "Correction Report",
+                    "Press Pass"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 162,
+        "maxMoves": 102,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "mobile_phone",
+                "name": "Mobile Phone",
+                "target": 7,
+                "words": [
+                    "LCD Screen",
+                    "SIM Card",
+                    "iPhone",
+                    "Battery Level",
+                    "Vibration Mode",
+                    "Camera Lens",
+                    "Galaxy"
+                ]
+            },
+            {
+                "id": "web_services",
+                "name": "Web Services",
+                "target": 5,
+                "words": [
+                    "Portal Site",
+                    "Social Media",
+                    "Online Shopping",
+                    "Video Streaming",
+                    "Online Community"
+                ]
+            },
+            {
+                "id": "birthday_party",
+                "name": "Birthday",
+                "target": 4,
+                "words": [
+                    "Seaweed Soup",
+                    "Celebration Cake",
+                    "Gift Box",
+                    "Candle Blowing"
+                ]
+            },
+            {
+                "id": "hardware_tools",
+                "name": "Tools",
+                "target": 6,
+                "words": [
+                    "Phillips Screwdriver",
+                    "Hammer",
+                    "Measuring Tape",
+                    "Nipper",
+                    "Monkey Wrench",
+                    "Awl"
+                ]
+            },
+            {
+                "id": "chinese_food",
+                "name": "Chinese Food",
+                "target": 8,
+                "words": [
+                    "Black Bean Noodles",
+                    "Sweet and Sour Pork",
+                    "Fried Dumplings",
+                    "Mala Tang",
+                    "Shrimp Toast",
+                    "Stir-fried Pepper Beef",
+                    "General Tso's Chicken",
+                    "Pickled Radish"
+                ]
+            },
+            {
+                "id": "science_lab",
+                "name": "Science",
+                "target": 5,
+                "words": [
+                    "Microscope",
+                    "Lab Beaker",
+                    "Hypothesis Testing",
+                    "Chemical Symbol",
+                    "Law of Gravity"
+                ]
+            },
+            {
+                "id": "nutrition_fact",
+                "name": "Nutrition",
+                "target": 6,
+                "words": [
+                    "Vitamin C",
+                    "Protein Content",
+                    "Unsaturated Fat",
+                    "Dietary Fiber",
+                    "Individual Calories",
+                    "Essential Amino Acids"
+                ]
+            },
+            {
+                "id": "music_beat",
+                "name": "Beat",
+                "target": 6,
+                "words": [
+                    "Drumstick",
+                    "Metronome",
+                    "Sense of Rhythm",
+                    "Tempo Control",
+                    "Bassline",
+                    "Syncopation"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 163,
+        "maxMoves": 82,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "chicken_poultry",
+                "name": "Chicken",
+                "target": 5,
+                "words": [
+                    "Comb",
+                    "Egg",
+                    "Nest",
+                    "Feeding",
+                    "Dawn Crow"
+                ]
+            },
+            {
+                "id": "birth_creation",
+                "name": "Birth",
+                "target": 4,
+                "words": [
+                    "Umbilical Cord",
+                    "First Cry",
+                    "Delivery Room",
+                    "Blessing"
+                ]
+            },
+            {
+                "id": "delivery_service",
+                "name": "Delivery",
+                "target": 6,
+                "words": [
+                    "Motorcycle",
+                    "Insulated Box",
+                    "Address",
+                    "Contactless Pickup",
+                    "Doorstep",
+                    "Rider"
+                ]
+            },
+            {
+                "id": "aerobic_exercise",
+                "name": "Cardio",
+                "target": 5,
+                "words": [
+                    "Treadmill",
+                    "Out of Breath",
+                    "Fat Burning",
+                    "Exercise Bike",
+                    "Sweat Drops"
+                ]
+            },
+            {
+                "id": "mushroom_types",
+                "name": "Mushroom",
+                "target": 6,
+                "words": [
+                    "Shiitake",
+                    "Enoki Mushroom",
+                    "Pine Mushroom",
+                    "Oyster Mushroom",
+                    "King Oyster Mushroom",
+                    "Hedgehog Mushroom"
+                ]
+            },
+            {
+                "id": "history_past",
+                "name": "History",
+                "target": 5,
+                "words": [
+                    "Timeline",
+                    "Archaeological Artifact",
+                    "Historical Record",
+                    "Royal Chronicles",
+                    "National History"
+                ]
+            },
+            {
+                "id": "road_path",
+                "name": "Path",
+                "target": 4,
+                "words": [
+                    "Signpost",
+                    "Back Alley",
+                    "Shortcut",
+                    "One Way"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 164,
+        "maxMoves": 98,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "bread_types",
+                "name": "Bread",
+                "target": 6,
+                "words": [
+                    "Baguette",
+                    "Croissant",
+                    "Red Bean Bun",
+                    "White Bread",
+                    "Bagel",
+                    "Ciabatta"
+                ]
+            },
+            {
+                "id": "packaging_wrap",
+                "name": "Packaging",
+                "target": 5,
+                "words": [
+                    "Bubble Wrap",
+                    "Ribbon",
+                    "Box Folding",
+                    "Cushioning",
+                    "Wrapping Paper"
+                ]
+            },
+            {
+                "id": "regulation_rule",
+                "name": "Regulation",
+                "target": 4,
+                "words": [
+                    "Fine",
+                    "No Entry",
+                    "Business Suspension",
+                    "Enforcement Team"
+                ]
+            },
+            {
+                "id": "milk_dairy",
+                "name": "Milk",
+                "target": 5,
+                "words": [
+                    "Low Fat",
+                    "Sterilized Carton",
+                    "Lactose Intolerance",
+                    "Dairy Farm",
+                    "Expiration Date"
+                ]
+            },
+            {
+                "id": "hormone_body",
+                "name": "Hormone",
+                "target": 6,
+                "words": [
+                    "Insulin",
+                    "Adrenaline",
+                    "Melatonin",
+                    "Dopamine",
+                    "Estrogen",
+                    "Serotonin"
+                ]
+            },
+            {
+                "id": "line_geometry",
+                "name": "Line",
+                "target": 7,
+                "words": [
+                    "Point Line Plane",
+                    "Horizon",
+                    "Starting Line",
+                    "Curve Beauty",
+                    "Waterline",
+                    "Guideline",
+                    "Boundary Line"
+                ]
+            },
+            {
+                "id": "trash_can",
+                "name": "Trash Can",
+                "target": 5,
+                "words": [
+                    "Garbage Bag",
+                    "Recycling Bin",
+                    "Foot Pedal",
+                    "Waste Bin",
+                    "Waste Material"
+                ]
+            },
+            {
+                "id": "photography_camera",
+                "name": "Photography",
+                "target": 6,
+                "words": [
+                    "Tripod",
+                    "Camera Lens",
+                    "Flash",
+                    "Shutter Speed",
+                    "Photo Paper",
+                    "Composition"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 165,
+        "maxMoves": 144,
+        "slots": 5,
+        "categories": [
+            {
+                "id": "diet_health",
+                "name": "Diet",
+                "target": 7,
+                "words": [
+                    "Calorie Restriction",
+                    "Body Fat Calculation",
+                    "Meal Journal",
+                    "Cardio Exercise",
+                    "Protein Shake",
+                    "Scale",
+                    "Hydration"
+                ]
+            },
+            {
+                "id": "canned_food",
+                "name": "Canned Food",
+                "target": 5,
+                "words": [
+                    "Easy-Open Can",
+                    "Expiration Date",
+                    "Preservatives",
+                    "Tuna Can",
+                    "Sealed Packaging"
+                ]
+            },
+            {
+                "id": "breakup_sadness",
+                "name": "Farewell",
+                "target": 6,
+                "words": [
+                    "Tear Stains",
+                    "Memory Clearing",
+                    "Moving On",
+                    "Farewell Party",
+                    "Deleting Contact",
+                    "Sad Song"
+                ]
+            },
+            {
+                "id": "steam_engine",
+                "name": "Steam Engine",
+                "target": 8,
+                "words": [
+                    "Coal Fuel",
+                    "Boiler Room",
+                    "Piston Motion",
+                    "Black Smoke",
+                    "Pressure Valve",
+                    "Train Wheels",
+                    "Railway Track",
+                    "Water Tower"
+                ]
+            },
+            {
+                "id": "gathering_meeting",
+                "name": "Gathering",
+                "target": 6,
+                "words": [
+                    "Dinner Venue",
+                    "Attendance Confirmation",
+                    "General Meeting",
+                    "Membership Fee",
+                    "Socializing",
+                    "Group Photo"
+                ]
+            },
+            {
+                "id": "basic_math",
+                "name": "Arithmetic",
+                "target": 7,
+                "words": [
+                    "Addition",
+                    "Multiplication Table",
+                    "Abacus Beads",
+                    "Division Quotient",
+                    "Subtraction Sign",
+                    "Calculation Process",
+                    "Math Workbook"
+                ]
+            },
+            {
+                "id": "box_container",
+                "name": "Box",
+                "target": 6,
+                "words": [
+                    "Cardboard Box",
+                    "Packing Tape",
+                    "Shipping Label",
+                    "Cushioning Material",
+                    "Storage Space",
+                    "Opening Strip"
+                ]
+            },
+            {
+                "id": "curiosity_mind",
+                "name": "Curiosity",
+                "target": 6,
+                "words": [
+                    "Inquisitiveness",
+                    "Asking Questions",
+                    "Riddle",
+                    "Mystery",
+                    "Magnifying Glass",
+                    "Clue Tracking"
+                ]
+            },
+            {
+                "id": "market_place",
+                "name": "Market",
+                "target": 8,
+                "words": [
+                    "Street Stall",
+                    "Discount Coupon",
+                    "Shopping Basket",
+                    "Receipt Printing",
+                    "Early Morning Delivery",
+                    "Direct Trade",
+                    "Points Accumulation",
+                    "Free Tasting"
+                ]
+            },
+            {
+                "id": "salt_mineral",
+                "name": "Salt",
+                "target": 6,
+                "words": [
+                    "Sea Salt",
+                    "Salt Field Floor",
+                    "Seawater Crystal",
+                    "Salty Taste",
+                    "Salinity Level",
+                    "Food Preservation"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 166,
+        "maxMoves": 94,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "sobriety_challenge",
+                "name": "Sobriety",
+                "target": 5,
+                "words": [
+                    "No Alcohol",
+                    "Detox",
+                    "Hangover Relief",
+                    "Willpower",
+                    "Health Record"
+                ]
+            },
+            {
+                "id": "tobacco_smoking",
+                "name": "Cigarette",
+                "target": 6,
+                "words": [
+                    "Nicotine Patch",
+                    "Lighter",
+                    "Smoking Area",
+                    "Ashtray",
+                    "E-Cigarette",
+                    "Herbal Cigarette"
+                ]
+            },
+            {
+                "id": "uniform_clothing",
+                "name": "Uniform",
+                "target": 5,
+                "words": [
+                    "Sense of Belonging",
+                    "Jersey Number",
+                    "Name Tag",
+                    "Team Outfit",
+                    "Uniform Shirt"
+                ]
+            },
+            {
+                "id": "freshness_quality",
+                "name": "Freshness",
+                "target": 4,
+                "words": [
+                    "Same-Day Harvest",
+                    "Farm Direct",
+                    "Refrigerated Storage",
+                    "Crispy"
+                ]
+            },
+            {
+                "id": "cheese_types",
+                "name": "Cheese",
+                "target": 6,
+                "words": [
+                    "Mozzarella",
+                    "Cheddar",
+                    "Gorgonzola",
+                    "Camembert",
+                    "Ricotta",
+                    "Parmesan"
+                ]
+            },
+            {
+                "id": "weekend_break",
+                "name": "Weekend",
+                "target": 5,
+                "words": [
+                    "Sleeping In",
+                    "Saturday",
+                    "Day Trip",
+                    "Family Dining",
+                    "Rest"
+                ]
+            },
+            {
+                "id": "movie_spoiler",
+                "name": "Spoiler",
+                "target": 4,
+                "words": [
+                    "Plot Leak",
+                    "Ending Revealed",
+                    "Comment Warning",
+                    "Spoiler Block"
+                ]
+            },
+            {
+                "id": "testing_phase",
+                "name": "Testing",
+                "target": 5,
+                "words": [
+                    "Beta Version",
+                    "Error Detection",
+                    "Feedback Collection",
+                    "Simulation",
+                    "Performance Review"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 167,
+        "maxMoves": 86,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "action_figure",
+                "name": "Figure",
+                "target": 5,
+                "words": [
+                    "Doll",
+                    "Limited Edition",
+                    "Painting Work",
+                    "Display Cabinet",
+                    "Collection"
+                ]
+            },
+            {
+                "id": "martial_arts",
+                "name": "Martial Arts",
+                "target": 6,
+                "words": [
+                    "Straight Punch",
+                    "Breakfall Training",
+                    "Belt Promotion",
+                    "Belt Knot",
+                    "Opponent",
+                    "Self-Defense"
+                ]
+            },
+            {
+                "id": "car_brands",
+                "name": "Car Brands",
+                "target": 4,
+                "words": [
+                    "Hyundai",
+                    "Mercedes-Benz",
+                    "Toyota",
+                    "Porsche"
+                ]
+            },
+            {
+                "id": "replacement_part",
+                "name": "Replacement",
+                "target": 5,
+                "words": [
+                    "Consumable Management",
+                    "Battery Life",
+                    "Tire Wear",
+                    "New Product Exchange",
+                    "Part Removal"
+                ]
+            },
+            {
+                "id": "roman_mythology",
+                "name": "Roman Mythology",
+                "target": 7,
+                "words": [
+                    "Jupiter",
+                    "Venus Goddess",
+                    "Mars God",
+                    "Neptune",
+                    "Temple Pillar",
+                    "Olympus",
+                    "Prophecy Book"
+                ]
+            },
+            {
+                "id": "superman_hero",
+                "name": "Superman",
+                "target": 6,
+                "words": [
+                    "Red Cape",
+                    "Kryptonite",
+                    "Chest Logo",
+                    "Phone Booth",
+                    "Superpower Flight",
+                    "Earth Defense"
+                ]
+            },
+            {
+                "id": "mortal_enemy",
+                "name": "Mortal Enemy",
+                "target": 4,
+                "words": [
+                    "Victimization",
+                    "Revenge Battle",
+                    "Rivalry",
+                    "Narrow Bridge"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 168,
+        "maxMoves": 108,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "dance_performance",
+                "name": "Dance",
+                "target": 5,
+                "words": [
+                    "Choreographer",
+                    "Dance Floor",
+                    "Sense of Beat",
+                    "Background Dancer",
+                    "Turn Move"
+                ]
+            },
+            {
+                "id": "engineer_job",
+                "name": "Engineer",
+                "target": 6,
+                "words": [
+                    "Design Drawing",
+                    "System Operation",
+                    "Professional License",
+                    "Circuit Board",
+                    "Debugging",
+                    "Measurement Equipment"
+                ]
+            },
+            {
+                "id": "comedy_show",
+                "name": "Comedy",
+                "target": 4,
+                "words": [
+                    "Catchphrase",
+                    "Audience Laughter",
+                    "Comedy Script",
+                    "Slapstick"
+                ]
+            },
+            {
+                "id": "public_release",
+                "name": "Release",
+                "target": 5,
+                "words": [
+                    "Press Release",
+                    "Press Conference",
+                    "Information Release",
+                    "Official Announcement",
+                    "Showcase"
+                ]
+            },
+            {
+                "id": "water_element",
+                "name": "Water",
+                "target": 3,
+                "words": [
+                    "H2O Molecule",
+                    "Thirst Relief",
+                    "Hydration"
+                ]
+            },
+            {
+                "id": "emperor_history",
+                "name": "Emperor",
+                "target": 5,
+                "words": [
+                    "Absolute Monarchy",
+                    "Golden Crown",
+                    "Palace Empire",
+                    "Imperial Decree",
+                    "Throne"
+                ]
+            },
+            {
+                "id": "gateway_pass",
+                "name": "Gateway",
+                "target": 4,
+                "words": [
+                    "Security Checkpoint",
+                    "Entry Gate",
+                    "Final Pass Line",
+                    "Rite of Passage"
+                ]
+            },
+            {
+                "id": "snack_food",
+                "name": "Snacking",
+                "target": 6,
+                "words": [
+                    "Roasted Sweet Potato",
+                    "Tteokbokki Shop",
+                    "Sweet Jelly",
+                    "Potato Chips",
+                    "Lollipop",
+                    "Chocolate Bar"
+                ]
+            },
+            {
+                "id": "octopus_sea",
+                "name": "Octopus",
+                "target": 5,
+                "words": [
+                    "Eight Legs",
+                    "Ink Spray",
+                    "Suction Cup",
+                    "Camouflage",
+                    "Mollusk"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 169,
+        "maxMoves": 96,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "artillery_cannon",
+                "name": "Cannon",
+                "target": 5,
+                "words": [
+                    "Powder Loading",
+                    "Barrel Angle",
+                    "Cannon Sound",
+                    "Shell Ejection",
+                    "Fortress Turret"
+                ]
+            },
+            {
+                "id": "empty_stomach",
+                "name": "Empty Stomach",
+                "target": 4,
+                "words": [
+                    "Rumbling Sound",
+                    "Blood Sugar Drop",
+                    "Before Breakfast",
+                    "Fasted Cardio"
+                ]
+            },
+            {
+                "id": "culture_heritage",
+                "name": "Culture",
+                "target": 6,
+                "words": [
+                    "Traditional Arts",
+                    "Lifestyle",
+                    "Intangible Heritage",
+                    "Tradition",
+                    "Code of Conduct",
+                    "Generational Sentiment"
+                ]
+            },
+            {
+                "id": "frame_up",
+                "name": "Slander",
+                "target": 5,
+                "words": [
+                    "False Information",
+                    "Defamation",
+                    "Malicious Rumor",
+                    "Character Insult",
+                    "Groundless Story"
+                ]
+            },
+            {
+                "id": "taxi_transit",
+                "name": "Taxi",
+                "target": 7,
+                "words": [
+                    "Meter Fare",
+                    "Ride Refusal",
+                    "Hailing App",
+                    "Vacant Light",
+                    "Driver",
+                    "Surge Pricing",
+                    "Taxi Stand"
+                ]
+            },
+            {
+                "id": "taxidermy_specimen",
+                "name": "Taxidermy",
+                "target": 4,
+                "words": [
+                    "Preservation Treatment",
+                    "Animal Specimen",
+                    "Form Preservation",
+                    "Exhibition Hall"
+                ]
+            },
+            {
+                "id": "seafood_shellfish",
+                "name": "Shellfish",
+                "target": 6,
+                "words": [
+                    "Short-neck Clam",
+                    "Pen Shell",
+                    "Oyster Shell",
+                    "Abalone",
+                    "Mussel Soup",
+                    "Grilled Scallop"
+                ]
+            },
+            {
+                "id": "rest_area",
+                "name": "Rest Stop",
+                "target": 5,
+                "words": [
+                    "Highway",
+                    "Baby Potato",
+                    "Walnut Cake",
+                    "Information Center",
+                    "Gas Station"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 170,
+        "maxMoves": 104,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "genetic_inheritance",
+                "name": "Genetics",
+                "target": 6,
+                "words": [
+                    "Chromosome",
+                    "Paternity Test",
+                    "Family Tree",
+                    "Dominant Trait",
+                    "DNA Structure",
+                    "Twins"
+                ]
+            },
+            {
+                "id": "advertising_marketing",
+                "name": "Advertising",
+                "target": 5,
+                "words": [
+                    "TV Commercial",
+                    "Sponsorship",
+                    "Pop-up Window",
+                    "Brand Logo",
+                    "Consumer Psychology"
+                ]
+            },
+            {
+                "id": "professional_chef",
+                "name": "Chef",
+                "target": 7,
+                "words": [
+                    "Michelin Star",
+                    "Chef's Hat",
+                    "Recipe Development",
+                    "Knife Sharpening",
+                    "Course Meal",
+                    "Ingredient Inspection",
+                    "Flame Control"
+                ]
+            },
+            {
+                "id": "potential_probability",
+                "name": "Possibility",
+                "target": 4,
+                "words": [
+                    "Potential",
+                    "Success Rate",
+                    "Future Prospects",
+                    "Achievable"
+                ]
+            },
+            {
+                "id": "personality_trait",
+                "name": "Personality",
+                "target": 6,
+                "words": [
+                    "Extroverted",
+                    "Introverted Tendency",
+                    "Prickly",
+                    "Considerate",
+                    "Perfectionism",
+                    "Indecisive"
+                ]
+            },
+            {
+                "id": "uniqueness_special",
+                "name": "Unique",
+                "target": 5,
+                "words": [
+                    "Limited Edition",
+                    "Custom Made",
+                    "Distinctive Presence",
+                    "Differentiation Strategy",
+                    "Signature"
+                ]
+            },
+            {
+                "id": "competitive_spirit",
+                "name": "Competitive Spirit",
+                "target": 6,
+                "words": [
+                    "Rival Relationship",
+                    "Drive to Win",
+                    "First Place Mentality",
+                    "Score Comparison",
+                    "Performance Pressure",
+                    "Ranking"
+                ]
+            },
+            {
+                "id": "size_dimension",
+                "name": "Size",
+                "target": 6,
+                "words": [
+                    "Oversized",
+                    "Free Size",
+                    "Measuring",
+                    "Waist Circumference",
+                    "Tailored Suit",
+                    "Shoe Size"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 171,
+        "maxMoves": 98,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "system_administrator",
+                "name": "Administrator",
+                "target": 6,
+                "words": [
+                    "Monitoring",
+                    "Password Change",
+                    "Access Rights",
+                    "Log Records",
+                    "Account Block",
+                    "Operating Guidelines"
+                ]
+            },
+            {
+                "id": "economy_market",
+                "name": "Economy",
+                "target": 5,
+                "words": [
+                    "Inflation",
+                    "Interest Rate Hike",
+                    "Consumer Price",
+                    "Exchange Rate",
+                    "GDP"
+                ]
+            },
+            {
+                "id": "requirement_condition",
+                "name": "Conditions",
+                "target": 4,
+                "words": [
+                    "Required Items",
+                    "Qualifications",
+                    "Preferred Conditions",
+                    "Exception Clause"
+                ]
+            },
+            {
+                "id": "butterfly_insect",
+                "name": "Butterfly",
+                "target": 7,
+                "words": [
+                    "Chrysalis",
+                    "Tiger Swallowtail",
+                    "Nectar Collection",
+                    "Antennae",
+                    "Wing Scale Powder",
+                    "Colorful Wings",
+                    "Butterfly Net"
+                ]
+            },
+            {
+                "id": "japan_country",
+                "name": "Japan",
+                "target": 6,
+                "words": [
+                    "Tokyo Tower",
+                    "Mount Fuji",
+                    "Osaka Castle",
+                    "Shinkansen",
+                    "Tatami Room",
+                    "Cherry Blossom Festival"
+                ]
+            },
+            {
+                "id": "lost_property",
+                "name": "Lost Item",
+                "target": 5,
+                "words": [
+                    "Lost and Found",
+                    "Foggy Memory",
+                    "Finding Things",
+                    "Belongings Caution",
+                    "Report Counter"
+                ]
+            },
+            {
+                "id": "oil_petroleum",
+                "name": "Oil",
+                "target": 8,
+                "words": [
+                    "Oil Tanker",
+                    "Fuel Nozzle",
+                    "Gasoline",
+                    "Lubricant",
+                    "Refinery",
+                    "Diesel Vehicle",
+                    "Drum Barrel",
+                    "Crude Oil Price"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 172,
+        "maxMoves": 98,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "possession_property",
+                "name": "Ownership",
+                "target": 6,
+                "words": [
+                    "Mine",
+                    "Property Rights",
+                    "Monopoly Desire",
+                    "Property Register",
+                    "Collection",
+                    "Private Land"
+                ]
+            },
+            {
+                "id": "ten_symbols_longevity",
+                "name": "Ten Longevity Symbols",
+                "target": 7,
+                "words": [
+                    "Crane",
+                    "Turtle",
+                    "Pine Tree",
+                    "Immortality Herb",
+                    "Long-life Mountain",
+                    "Deer",
+                    "Sun and Moon"
+                ]
+            },
+            {
+                "id": "honey_bee",
+                "name": "Honey",
+                "target": 5,
+                "words": [
+                    "Beekeeper",
+                    "Honeycomb",
+                    "Royal Jelly",
+                    "Sweetness",
+                    "Nectar Plant"
+                ]
+            },
+            {
+                "id": "heat_summer",
+                "name": "Heat",
+                "target": 4,
+                "words": [
+                    "Tropical Night",
+                    "Heat Wave Warning",
+                    "Haze",
+                    "Sweat Drops"
+                ]
+            },
+            {
+                "id": "human_relationship",
+                "name": "Relationship",
+                "target": 6,
+                "words": [
+                    "Human Network",
+                    "Interaction",
+                    "Bond",
+                    "Lack of Communication",
+                    "Trust Level",
+                    "Self-Interest"
+                ]
+            },
+            {
+                "id": "ratio_proportion",
+                "name": "Ratio",
+                "target": 5,
+                "words": [
+                    "Golden Ratio",
+                    "Percentage",
+                    "Graph Weight",
+                    "Division Quotient",
+                    "Dilution Concentration"
+                ]
+            },
+            {
+                "id": "insurance_contract",
+                "name": "Insurance",
+                "target": 6,
+                "words": [
+                    "Policy Explanation",
+                    "Medical Reimbursement",
+                    "Monthly Premium",
+                    "Coverage Range",
+                    "Accident Report",
+                    "Insured"
+                ]
+            },
+            {
+                "id": "sense_intuition",
+                "name": "Sense",
+                "target": 5,
+                "words": [
+                    "Reading the Room",
+                    "Quick Response",
+                    "Improvisation",
+                    "Wit",
+                    "Trend Awareness"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 173,
+        "maxMoves": 70,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "water_well",
+                "name": "Well",
+                "target": 5,
+                "words": [
+                    "Bucket",
+                    "Underground Water Vein",
+                    "Stone Wall",
+                    "Deep Abyss",
+                    "Mossy Rock"
+                ]
+            },
+            {
+                "id": "recommendation_system",
+                "name": "Recommendation",
+                "target": 6,
+                "words": [
+                    "Algorithm",
+                    "Preference",
+                    "Review Rating",
+                    "Related Products",
+                    "Curator",
+                    "Popularity Ranking"
+                ]
+            },
+            {
+                "id": "omission_data",
+                "name": "Omission",
+                "target": 5,
+                "words": [
+                    "Data Loss",
+                    "List Exclusion",
+                    "Final Check",
+                    "Review Process",
+                    "Error Message"
+                ]
+            },
+            {
+                "id": "url_address",
+                "name": "URL",
+                "target": 6,
+                "words": [
+                    "Internet Link",
+                    "Domain Address",
+                    "Hypertext",
+                    "Web Browser",
+                    "Redirect",
+                    "Protocol"
+                ]
+            },
+            {
+                "id": "description_text",
+                "name": "Explanation",
+                "target": 7,
+                "words": [
+                    "User Manual",
+                    "Visual Aid",
+                    "Summary",
+                    "Additional Information",
+                    "Aid Understanding",
+                    "Concept Summary",
+                    "Key Lecture"
+                ]
+            },
+            {
+                "id": "freedom_state",
+                "name": "Freedom",
+                "target": 5,
+                "words": [
+                    "Release from Constraint",
+                    "Right to Choose",
+                    "Sense of Liberation",
+                    "Declaration of Independence",
+                    "Wing Flap"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 174,
+        "maxMoves": 102,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "bird_feathers",
+                "name": "Feathers",
+                "target": 6,
+                "words": [
+                    "Bird Flight",
+                    "Down Padding",
+                    "Quill Pen",
+                    "Soft Touch",
+                    "Ostrich Duster",
+                    "Colorful Courtship"
+                ]
+            },
+            {
+                "id": "fountain_pen",
+                "name": "Fountain Pen",
+                "target": 5,
+                "words": [
+                    "Ink Cartridge",
+                    "Metal Nib",
+                    "Cap Closing",
+                    "Premium Fountain Pen",
+                    "Writing Feel"
+                ]
+            },
+            {
+                "id": "stamp_collection",
+                "name": "Stamp",
+                "target": 4,
+                "words": [
+                    "Envelope",
+                    "Commemorative Issue",
+                    "Collection Album",
+                    "Glue Adhesive"
+                ]
+            },
+            {
+                "id": "famous_presidents",
+                "name": "Presidents",
+                "target": 7,
+                "words": [
+                    "Lincoln",
+                    "George Washington",
+                    "Obama",
+                    "John F. Kennedy",
+                    "White House Office",
+                    "Presidential Speech",
+                    "State Management"
+                ]
+            },
+            {
+                "id": "native_american",
+                "name": "Native American",
+                "target": 6,
+                "words": [
+                    "Dream Catcher",
+                    "Chief",
+                    "Totem Pole",
+                    "Arrowhead",
+                    "Tribal Battle",
+                    "Teepee Tent"
+                ]
+            },
+            {
+                "id": "giraffe_animal",
+                "name": "Giraffe",
+                "target": 5,
+                "words": [
+                    "Long Neck",
+                    "African Savanna",
+                    "Eating Leaves",
+                    "Reticulated Pattern",
+                    "High Vantage Point"
+                ]
+            },
+            {
+                "id": "review_inspection",
+                "name": "Review",
+                "target": 8,
+                "words": [
+                    "Document Check",
+                    "Corrections",
+                    "Final Approval",
+                    "Checklist",
+                    "Error Correction",
+                    "Reading Report",
+                    "Re-examination",
+                    "Missing Check"
+                ]
+            },
+            {
+                "id": "problem_solving",
+                "name": "Resolution",
+                "target": 5,
+                "words": [
+                    "Clue Capture",
+                    "Finding the Answer",
+                    "Complaint Handling",
+                    "Conflict Resolution",
+                    "Satisfaction"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 175,
+        "maxMoves": 130,
+        "slots": 5,
+        "categories": [
+            {
+                "id": "typewriter_object",
+                "name": "Typewriter",
+                "target": 8,
+                "words": [
+                    "Ink Ribbon",
+                    "Keyboard Layout",
+                    "Clacking Sound",
+                    "Paper Platen",
+                    "Manual Lever",
+                    "Line Bell",
+                    "Carbon Copy",
+                    "Type Bar"
+                ]
+            },
+            {
+                "id": "baseball_sports",
+                "name": "Baseball",
+                "target": 5,
+                "words": [
+                    "Pitcher's Mound",
+                    "Catcher's Mitt",
+                    "Home Run Line",
+                    "Double Play",
+                    "Stolen Base"
+                ]
+            },
+            {
+                "id": "sns_platforms",
+                "name": "SNS Types",
+                "target": 6,
+                "words": [
+                    "Instagram",
+                    "YouTube",
+                    "TikTok",
+                    "Facebook",
+                    "Pinterest",
+                    "Threads"
+                ]
+            },
+            {
+                "id": "buddhism_religion",
+                "name": "Buddhism",
+                "target": 7,
+                "words": [
+                    "Main Hall",
+                    "Wooden Bell Sound",
+                    "Three Thousand Bows",
+                    "Lantern Offering",
+                    "108 Prayer Beads",
+                    "Meditation Practice",
+                    "Shakyamuni"
+                ]
+            },
+            {
+                "id": "rank_position",
+                "name": "Ranking",
+                "target": 4,
+                "words": [
+                    "Gold Medalist",
+                    "Overall Score",
+                    "Class Standing",
+                    "Ranking Chart"
+                ]
+            },
+            {
+                "id": "report_incident",
+                "name": "Report",
+                "target": 5,
+                "words": [
+                    "Civil Complaint",
+                    "Anonymous Tip",
+                    "Evidence Attached",
+                    "Police Dispatch",
+                    "Complaint Form"
+                ]
+            },
+            {
+                "id": "obsession_mind",
+                "name": "Obsession",
+                "target": 4,
+                "words": [
+                    "Excessive Interest",
+                    "Lingering Feelings",
+                    "Stalking",
+                    "Persistence"
+                ]
+            },
+            {
+                "id": "mobile_digital",
+                "name": "Mobile",
+                "target": 6,
+                "words": [
+                    "Smartphone",
+                    "Push Notification",
+                    "Mobile App",
+                    "Wireless Data",
+                    "Touchscreen",
+                    "Responsive Screen"
+                ]
+            },
+            {
+                "id": "attitude_manner",
+                "name": "Attitude",
+                "target": 5,
+                "words": [
+                    "Arrogant Posture",
+                    "Politeness",
+                    "Critical View",
+                    "Assertiveness",
+                    "Passive Behavior"
+                ]
+            },
+            {
+                "id": "medical_inspection",
+                "name": "Medical Test",
+                "target": 8,
+                "words": [
+                    "Blood Draw",
+                    "Endoscopy",
+                    "Detailed Diagnosis",
+                    "Test Results",
+                    "X-Ray",
+                    "MRI",
+                    "Tissue Test",
+                    "Urine Test"
+                ]
+            },
+            {
+                "id": "fairy_tale",
+                "name": "Fairy Tale",
+                "target": 7,
+                "words": [
+                    "Cinderella",
+                    "Snow White",
+                    "Virtue and Vice",
+                    "Magic Spell",
+                    "Illustration",
+                    "Glass Slipper",
+                    "Happy Ending"
+                ]
+            },
+            {
+                "id": "insight_wisdom",
+                "name": "Insight",
+                "target": 5,
+                "words": [
+                    "Grasping the Essence",
+                    "Wisdom",
+                    "Intuition",
+                    "Penetrating the Core",
+                    "Sharp Insight"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 176,
+        "maxMoves": 94,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "list_inventory",
+                "name": "List",
+                "target": 5,
+                "words": [
+                    "Checklist",
+                    "Table of Contents",
+                    "Personal Details",
+                    "Index",
+                    "Full Roster"
+                ]
+            },
+            {
+                "id": "free_of_charge",
+                "name": "Free",
+                "target": 4,
+                "words": [
+                    "Free Coupon",
+                    "Free Use",
+                    "Freebie",
+                    "Free Repair"
+                ]
+            },
+            {
+                "id": "public_policy",
+                "name": "Policy",
+                "target": 6,
+                "words": [
+                    "Public Hearing",
+                    "Budget Plan",
+                    "Enforcement Order Revision",
+                    "Welfare Benefits",
+                    "Government Regulation",
+                    "Legislative Notice"
+                ]
+            },
+            {
+                "id": "countdown_timer",
+                "name": "Countdown",
+                "target": 5,
+                "words": [
+                    "Final Stage",
+                    "Launch Ready",
+                    "Timer Pause",
+                    "New Year",
+                    "Last Ten Seconds"
+                ]
+            },
+            {
+                "id": "card_item",
+                "name": "Card",
+                "target": 7,
+                "words": [
+                    "Credit Payment",
+                    "Magnetic Strip",
+                    "Installment Months",
+                    "Over Limit",
+                    "Debit Card",
+                    "Transit Card",
+                    "Points Accumulation"
+                ]
+            },
+            {
+                "id": "structure_framework",
+                "name": "Structure",
+                "target": 6,
+                "words": [
+                    "Framework Construction",
+                    "Stability Test",
+                    "Earthquake-Resistant Design",
+                    "Column Layout",
+                    "Load Distribution",
+                    "Architectural Drawing"
+                ]
+            },
+            {
+                "id": "ethics_moral",
+                "name": "Ethics",
+                "target": 5,
+                "words": [
+                    "Moral Standard",
+                    "Code of Conduct",
+                    "Good and Evil",
+                    "Conscience Declaration",
+                    "Fairness"
+                ]
+            },
+            {
+                "id": "cotton_candy",
+                "name": "Cotton Candy",
+                "target": 5,
+                "words": [
+                    "Sugar Crystal",
+                    "Wooden Stick",
+                    "Amusement Park",
+                    "Sweet Taste",
+                    "Spinning Machine"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 177,
+        "maxMoves": 105,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "vegetable_food",
+                "name": "Vegetables",
+                "target": 6,
+                "words": [
+                    "Broccoli",
+                    "Bell Pepper",
+                    "Cabbage",
+                    "Tomato",
+                    "Spinach",
+                    "Carrot"
+                ]
+            },
+            {
+                "id": "bed_furniture",
+                "name": "Bed",
+                "target": 4,
+                "words": [
+                    "Mattress",
+                    "Down Comforter",
+                    "Pillowcase",
+                    "Frame"
+                ]
+            },
+            {
+                "id": "france_country",
+                "name": "France",
+                "target": 5,
+                "words": [
+                    "Eiffel Tower",
+                    "Louvre Museum",
+                    "Baguette",
+                    "Seine River",
+                    "Palace of Versailles"
+                ]
+            },
+            {
+                "id": "five_oceans",
+                "name": "Five Oceans",
+                "target": 5,
+                "words": [
+                    "Pacific Ocean",
+                    "Atlantic Ocean",
+                    "Indian Ocean",
+                    "Southern Ocean",
+                    "Arctic Ocean"
+                ]
+            },
+            {
+                "id": "direction_way",
+                "name": "Direction",
+                "target": 4,
+                "words": [
+                    "North South East West",
+                    "Compass Needle",
+                    "Right Turn",
+                    "Facing Forward"
+                ]
+            },
+            {
+                "id": "leap_jump",
+                "name": "Leap",
+                "target": 5,
+                "words": [
+                    "Takeoff Board",
+                    "High Jump",
+                    "Aerial Spin",
+                    "Trampoline",
+                    "Springboard"
+                ]
+            },
+            {
+                "id": "prison_jail",
+                "name": "Prison",
+                "target": 6,
+                "words": [
+                    "Iron Cell Door",
+                    "Prison Uniform",
+                    "Visitation Room",
+                    "Guard Tower",
+                    "Solitary Confinement",
+                    "Prison Guard"
+                ]
+            },
+            {
+                "id": "korean_traditional_music",
+                "name": "Korean Traditional Music",
+                "target": 5,
+                "words": [
+                    "Gayageum",
+                    "Pansori Singing",
+                    "Samulnori",
+                    "Hat Spinning",
+                    "Taepyeongso"
+                ]
+            },
+            {
+                "id": "letter_mail",
+                "name": "Letter",
+                "target": 5,
+                "words": [
+                    "Stamp",
+                    "Handwriting",
+                    "Envelope",
+                    "Mailbox",
+                    "Reply"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 178,
+        "maxMoves": 74,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "trash",
+                "name": "Garbage",
+                "target": 5,
+                "words": [
+                    "Garbage Bag",
+                    "Recycling Bin",
+                    "Foot Pedal",
+                    "Compressor",
+                    "Waste Material"
+                ]
+            },
+            {
+                "id": "fingernails_care",
+                "name": "Fingernails",
+                "target": 6,
+                "words": [
+                    "Nail Clippers",
+                    "Nail Art",
+                    "Cuticle Oil",
+                    "Nail Polish",
+                    "Nail File",
+                    "Hangnail"
+                ]
+            },
+            {
+                "id": "crackdown_regulation",
+                "name": "Crackdown",
+                "target": 5,
+                "words": [
+                    "Breathalyzer",
+                    "Speeding Violation",
+                    "On-Site Arrest",
+                    "Fine Imposed",
+                    "Enforcement Officer"
+                ]
+            },
+            {
+                "id": "melancholy_sadness",
+                "name": "Melancholy",
+                "target": 4,
+                "words": [
+                    "Cold Rain Sound",
+                    "Tear Drop",
+                    "Sigh Sound",
+                    "Left Alone"
+                ]
+            },
+            {
+                "id": "coupon_discount",
+                "name": "Coupon",
+                "target": 8,
+                "words": [
+                    "Barcode Scan",
+                    "Expiration Date",
+                    "Discount Applied",
+                    "First-Come Download",
+                    "Mobile Verification",
+                    "Multiple Use",
+                    "Mileage",
+                    "Non-Sale Print"
+                ]
+            },
+            {
+                "id": "writing_instruments",
+                "name": "Writing Tools",
+                "target": 6,
+                "words": [
+                    "Highlighter",
+                    "Lead Case",
+                    "Eraser Shavings",
+                    "Ballpoint Spring",
+                    "Writing Grip",
+                    "Fountain Pen Nib"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 179,
+        "maxMoves": 96,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "waiting_expect",
+                "name": "Waiting",
+                "target": 5,
+                "words": [
+                    "Bus Stop",
+                    "Wristwatch",
+                    "Waiting Number",
+                    "Anticipation",
+                    "Train Platform"
+                ]
+            },
+            {
+                "id": "wallpapering_work",
+                "name": "Wallpapering",
+                "target": 6,
+                "words": [
+                    "Paste Board",
+                    "Cutting Scissors",
+                    "Silk Wallpaper",
+                    "Room Adhesive",
+                    "Roller Brush",
+                    "Floor Vinyl"
+                ]
+            },
+            {
+                "id": "button_switch",
+                "name": "Button",
+                "target": 4,
+                "words": [
+                    "Elevator",
+                    "Emergency Stop",
+                    "Keyboard Key",
+                    "Mouse Click"
+                ]
+            },
+            {
+                "id": "mystery_secret",
+                "name": "Mystery",
+                "target": 5,
+                "words": [
+                    "Unsolved Case",
+                    "Secret Passage",
+                    "Clue Tracking",
+                    "Alibi",
+                    "Conspiracy Theory"
+                ]
+            },
+            {
+                "id": "testing_phase",
+                "name": "Testing",
+                "target": 6,
+                "words": [
+                    "Beta Version",
+                    "Error Detection",
+                    "Feedback Collection",
+                    "Simulation",
+                    "Performance Review",
+                    "Lab Investigation"
+                ]
+            },
+            {
+                "id": "hunger_starving",
+                "name": "Hunger",
+                "target": 4,
+                "words": [
+                    "Stomach Rumble",
+                    "Late Night Craving",
+                    "Stomach Contraction",
+                    "Fridge Rummaging"
+                ]
+            },
+            {
+                "id": "jealousy_envy",
+                "name": "Jealousy",
+                "target": 5,
+                "words": [
+                    "Inferiority Complex",
+                    "Cold Stare",
+                    "Sense of Exclusion",
+                    "Competition",
+                    "Envy"
+                ]
+            },
+            {
+                "id": "democracy_system",
+                "name": "Democracy",
+                "target": 7,
+                "words": [
+                    "Voting Stamp",
+                    "Majority Rule",
+                    "Free Election",
+                    "Parliamentary Politics",
+                    "Citizen Rights",
+                    "Constitutional Clause",
+                    "Equal Society"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 180,
+        "maxMoves": 114,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "camel_desert",
+                "name": "Camel",
+                "target": 6,
+                "words": [
+                    "Hump Fat",
+                    "Sandstorm",
+                    "Desert Oasis",
+                    "Eating Cactus",
+                    "Long Eyelashes",
+                    "Caravan"
+                ]
+            },
+            {
+                "id": "united_kingdom",
+                "name": "United Kingdom",
+                "target": 7,
+                "words": [
+                    "Big Ben Clock Tower",
+                    "Tower Bridge",
+                    "Double-Decker Bus",
+                    "Buckingham Palace",
+                    "Milk Tea",
+                    "Thames River",
+                    "Shakespeare"
+                ]
+            },
+            {
+                "id": "cyber_space",
+                "name": "Cyber",
+                "target": 5,
+                "words": [
+                    "Virtual Reality",
+                    "Hacking Defense",
+                    "Metaverse",
+                    "Artificial Intelligence",
+                    "Avatar"
+                ]
+            },
+            {
+                "id": "mountain_summit",
+                "name": "Summit",
+                "target": 4,
+                "words": [
+                    "Perpetual Snow",
+                    "Planting Flag",
+                    "Summit Certification",
+                    "Thin Air"
+                ]
+            },
+            {
+                "id": "relief_resolution",
+                "name": "Relief",
+                "target": 5,
+                "words": [
+                    "Stress Relief",
+                    "Quenching Thirst",
+                    "Fatigue Recovery",
+                    "Question Resolved",
+                    "Relaxation"
+                ]
+            },
+            {
+                "id": "maya_civilization",
+                "name": "Maya",
+                "target": 6,
+                "words": [
+                    "Pyramid Temple",
+                    "Astronomical Calendar",
+                    "Hieroglyphics",
+                    "Jungle Ruins",
+                    "Cacao Bean",
+                    "High Priest"
+                ]
+            },
+            {
+                "id": "mars_planet",
+                "name": "Mars",
+                "target": 8,
+                "words": [
+                    "Red Surface",
+                    "Exploration Rover",
+                    "Olympus Mons",
+                    "Thin Atmosphere",
+                    "Ice Layer",
+                    "Terraforming",
+                    "Space Base",
+                    "Meteorite Crater"
+                ]
+            },
+            {
+                "id": "regression_return",
+                "name": "Return",
+                "target": 5,
+                "words": [
+                    "Salmon Swimming Upstream",
+                    "Hometown Visit",
+                    "Back to Square One",
+                    "Regression Analysis",
+                    "Homing Instinct"
                 ]
             }
         ]

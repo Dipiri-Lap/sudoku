@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 import '../styles/SnapSpotGame.css';
+
+export type SnapSpotMode = 'normal' | 'time-attack';
 
 // Unity Canvas RectTransform: Width=1020, Height=770, Pivot=0.5/0.5, Pos=0/0
 const IMG_DISPLAY_W = 1020;
@@ -39,7 +43,12 @@ function toPercent(pos: { x: number; y: number }, size: { x: number; y: number }
 
 const IS_DEV = import.meta.env.DEV;
 
-const SnapSpotGame: React.FC = () => {
+interface Props {
+  mode: SnapSpotMode;
+}
+
+const SnapSpotGame: React.FC<Props> = ({ mode }) => {
+  const navigate = useNavigate();
   const [levelData, setLevelData] = useState<LevelData | null>(null);
   const [found, setFound] = useState<boolean[]>([]);
   const [wrongFlash, setWrongFlash] = useState<WrongFlash | null>(null);
@@ -338,7 +347,17 @@ const SnapSpotGame: React.FC = () => {
     </Helmet>
     <div className="snapspot-game" ref={gameRef}>
       <div className="snapspot-header">
-        <h2 className="snapspot-title">틀린 그림 찾기</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button
+            onClick={() => navigate('/snapspot')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', color: 'inherit' }}
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <h2 className="snapspot-title">
+            {mode === 'time-attack' ? '타임어택' : '노말'}
+          </h2>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           {IS_DEV && (
             <button

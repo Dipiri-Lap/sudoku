@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm install react-helmet-async)",
       "Bash(npm run build)",
-      "Bash(node add_en_levels_146_150.cjs)"
+      "Bash(node add_en_levels_146_150.cjs)",
+      "PowerShell($json = Get-Content \"c:\\\\Projects\\\\puzzles\\\\src\\\\features\\\\word-sort\\\\data\\\\levels_en.json\" -Raw | ConvertFrom-Json; \"Total levels: $\\($json.Count\\)\"; \"Last level id: $\\($json[-1].id\\)\"; \"Last level categories: $\\($json[-1].categories.Count\\)\")",
+      "PowerShell(Remove-Item \"c:\\\\Projects\\\\puzzles\\\\src\\\\features\\\\word-sort\\\\data\\\\levels_en_new.json\" -Confirm:$false)"
     ]
   }
 }

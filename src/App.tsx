@@ -10,6 +10,7 @@ import WordSortGame from './features/word-sort/components/WordSortGame';
 import WordSortModeSelect from './features/word-sort/components/WordSortModeSelect';
 import TileMatchGame from './features/tile-match/components/TileMatchGame';
 import SnapSpotGame from './features/snapspot/components/SnapSpotGame';
+import SnapSpotModeSelect from './features/snapspot/components/SnapSpotModeSelect';
 import QueensGame from './features/queens/components/QueensGame';
 import QueensModeSelect from './features/queens/components/QueensModeSelect';
 import ArrowPuzzleGame from './features/arrow-puzzle/components/ArrowPuzzleGame';
@@ -101,7 +102,9 @@ const AppContent: React.FC = () => {
             }
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
-          <Route path="/snapspot" element={<SnapSpotGame />} />
+          <Route path="/snapspot" element={<SnapSpotModeSelect />} />
+          <Route path="/snapspot/normal" element={<SnapSpotGame mode="normal" />} />
+          <Route path="/snapspot/time-attack" element={<SnapSpotGame mode="time-attack" />} />
           <Route path="/queen" element={<Navigate to="/queens" replace />} />
           <Route path="/queens" element={<QueensModeSelect />} />
           <Route path="/queens/play" element={<QueensGame />} />
