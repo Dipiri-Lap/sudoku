@@ -96,9 +96,25 @@ const TERMS_CONTENT: Record<TermsType, { title: string; content: React.ReactNode
                     회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다. 단, 이용자의 동의가 있거나 법령에 의한 경우는 예외로 합니다.
                 </Section>
                 <Section title="5. 개인정보 처리 위탁">
-                    <ul>
-                        <li>Google Firebase (데이터베이스, 인증 서비스): 미국 소재</li>
-                    </ul>
+                    <p style={{ marginBottom: '0.5rem' }}>회사는 원활한 서비스 제공을 위하여 아래와 같이 개인정보 처리 업무를 외부에 위탁하고 있습니다.</p>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
+                                <th style={{ textAlign: 'left', padding: '0.3rem 0.5rem', color: '#e2e8f0' }}>수탁업체</th>
+                                <th style={{ textAlign: 'left', padding: '0.3rem 0.5rem', color: '#e2e8f0' }}>위탁 업무 내용</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                                <td style={{ padding: '0.3rem 0.5rem' }}>Google Firebase</td>
+                                <td style={{ padding: '0.3rem 0.5rem' }}>데이터베이스, 인증 서비스 (미국 소재)</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: '0.3rem 0.5rem' }}>코리아포트원(주)</td>
+                                <td style={{ padding: '0.3rem 0.5rem' }}>결제 연동 서비스 제공</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </Section>
                 <Section title="6. 이용자의 권리">
                     이용자는 언제든지 개인정보 열람, 수정, 삭제, 처리정지를 요청할 수 있습니다. 문의는 고객센터(070-8984-4679)로 연락하시기 바랍니다.
