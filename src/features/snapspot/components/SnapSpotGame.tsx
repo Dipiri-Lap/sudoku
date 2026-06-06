@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Heart, Search } from 'lucide-react';
+import { useCoins } from '../../../context/CoinContext';
+import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
+import { auth } from '../../../firebase';
 import '../styles/SnapSpotGame.css';
 
-export type SnapSpotMode = 'normal' | 'time-attack';
+export type SnapSpotMode = 'normal' | 'time-attack' | 'stage';
+
+const MAX_HEARTS = 3;
 
 // Unity Canvas RectTransform: Width=1020, Height=770, Pivot=0.5/0.5, Pos=0/0
 const IMG_DISPLAY_W = 1020;
@@ -42,6 +47,7 @@ function toPercent(pos: { x: number; y: number }, size: { x: number; y: number }
 }
 
 const IS_DEV = import.meta.env.DEV;
+const CDN_BASE = 'https://images.tmhub.co.kr/spot-the-difference/stages/0001-0500';
 
 interface Props {
   mode: SnapSpotMode;
@@ -49,11 +55,18 @@ interface Props {
 
 const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const navigate = useNavigate();
+  const { addCoins } = useCoins();
+  const { snapSpotProgress, saveSnapSpotProgress: saveProgress } = useSnapSpotProgress();
+  const hasAwardedCoins = useRef(false);
   const [levelData, setLevelData] = useState<LevelData | null>(null);
   const [found, setFound] = useState<boolean[]>([]);
   const [wrongFlash, setWrongFlash] = useState<WrongFlash | null>(null);
   const [isWinner, setIsWinner] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
+  const [hearts, setHearts] = useState(mode === 'stage' ? MAX_HEARTS : 0);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [heartShake, setHeartShake] = useState(false);
+  const [stageId, setStageId] = useState(() => mode === 'stage' ? Math.max(1, snapSpotProgress + 1) : 1);
 
   // Zoom / pan state (shared between both images)
   const [zoom, setZoom] = useState(1);
@@ -95,13 +108,35 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   }, []);
 
   useEffect(() => {
-    fetch('/images/snapspot/1.json')
+    hasAwardedCoins.current = false;
+    setLevelData(null);
+    setFound([]);
+    setIsWinner(false);
+    setIsGameOver(false);
+    setWrongFlash(null);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+    if (mode === 'stage') setHearts(MAX_HEARTS);
+    fetch(`${CDN_BASE}/${stageId}.json`)
       .then((r) => r.json())
       .then((data: LevelData) => {
         setLevelData(data);
         setFound(new Array(data.differences.length).fill(false));
       });
-  }, []);
+  }, [stageId, mode]);
+
+  useEffect(() => {
+    if (isWinner && !hasAwardedCoins.current) {
+      hasAwardedCoins.current = true;
+      addCoins(10);
+      if (mode === 'stage') saveProgress(stageId);
+      if (auth.currentUser) {
+        import('../../../services/rankingService').then(m => {
+          m.incrementPuzzlePower(auth.currentUser!.uid).catch(console.error);
+        });
+      }
+    }
+  }, [isWinner, addCoins, mode, stageId, saveProgress]);
 
   const clampPan = useCallback((x: number, y: number, z: number) => {
     if (z <= 1 || !wrapRef.current) return { x: 0, y: 0 };
@@ -117,7 +152,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   // Hit detection — accounts for current zoom/pan transform
   const processHit = useCallback(
     (clientX: number, clientY: number, rect: DOMRect, side: 'orig' | 'mod') => {
-      if (!levelData || isWinner) return;
+      if (!levelData || isWinner || isGameOver) return;
 
       const z = zoomRef.current;
       const p = panRef.current;
@@ -151,8 +186,18 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       }
       setWrongFlash({ x: clientX - rect.left, y: clientY - rect.top, side });
       setTimeout(() => setWrongFlash(null), 600);
+
+      if (mode === 'stage') {
+        setHearts((h) => {
+          const next = h - 1;
+          if (next <= 0) setIsGameOver(true);
+          return Math.max(0, next);
+        });
+        setHeartShake(true);
+        setTimeout(() => setHeartShake(false), 500);
+      }
     },
-    [levelData, found, isWinner],
+    [levelData, found, isWinner, isGameOver, mode],
   );
 
   // ── Touch handlers ──────────────────────────────────────────────────────────
@@ -289,11 +334,11 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const md = mouseDrag.current;
-    if (!md.down || zoomRef.current <= 1) return;
+    if (!md.down) return;
     const dx = e.clientX - md.start.x;
     const dy = e.clientY - md.start.y;
     if (Math.hypot(dx, dy) > TAP_THRESHOLD) md.moved = true;
-    if (md.moved) {
+    if (md.moved && zoomRef.current > 1) {
       const newPan = clampPan(md.panOrigin.x + dx, md.panOrigin.y + dy, zoomRef.current);
       setPan(newPan);
       panRef.current = newPan;
@@ -355,7 +400,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             <ChevronLeft size={22} />
           </button>
           <h2 className="snapspot-title">
-            {mode === 'time-attack' ? '타임어택' : '노말'}
+            {mode === 'time-attack' ? '타임어택' : mode === 'stage' ? '스테이지' : '노말'}
           </h2>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -372,17 +417,9 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
               DEBUG
             </button>
           )}
-          <button
-            className="snapspot-zoom-btn"
-            onClick={() => adjustZoom(-0.5)}
-            disabled={zoom <= 1}
-          >−</button>
+          <button className="snapspot-zoom-btn" onClick={() => adjustZoom(-0.5)} disabled={zoom <= 1}>−</button>
           <span className="snapspot-zoom-label">{zoom.toFixed(1)}×</span>
-          <button
-            className="snapspot-zoom-btn"
-            onClick={() => adjustZoom(0.5)}
-            disabled={zoom >= MAX_ZOOM}
-          >+</button>
+          <button className="snapspot-zoom-btn" onClick={() => adjustZoom(0.5)} disabled={zoom >= MAX_ZOOM}>+</button>
           <span className="snapspot-progress">{foundCount} / {differences.length}</span>
         </div>
       </div>
@@ -402,29 +439,24 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             onMouseLeave={handleMouseUp}
             onClick={(e) => handleClick(e, side)}
           >
-            {/* Inner div carries the zoom/pan transform */}
             <div style={innerStyle}>
               <img
-                src={`/images/snapspot/${imageID}${side === 'mod' ? '_1' : ''}.jpg`}
+                src={`${CDN_BASE}/${imageID}${side === 'mod' ? '_1' : ''}.jpg`}
                 alt={side === 'orig' ? '원본' : '변경본'}
                 draggable={false}
               />
-
-              {/* Found markers */}
               {differences.map((diff, i) => {
                 if (!found[i]) return null;
                 const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
-                const { left, top, width, height } = toPercent(pos, diff.colSize);
+                const { left, top } = toPercent(pos, diff.colSize);
                 return (
                   <div
                     key={i}
                     className="snapspot-found-marker"
-                    style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, height: `${height}%` }}
+                    style={{ left: `${left}%`, top: `${top}%` }}
                   />
                 );
               })}
-
-              {/* Debug hit zones */}
               {IS_DEV && showDebug && differences.map((diff, i) => {
                 const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
                 const { left, top, width, height } = toPercent(pos, diff.colSize);
@@ -448,8 +480,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                 );
               })}
             </div>
-
-            {/* Wrong flash stays in screen space (outside transform) */}
             {wrongFlash?.side === side && (
               <div
                 className="snapspot-wrong-flash"
@@ -460,12 +490,76 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         ))}
       </div>
 
+      {mode === 'stage' && (
+        <div className="snapspot-hud">
+          <div className={`snapspot-hearts${heartShake ? ' snapspot-hearts-shake' : ''}`}>
+            <Heart size={32} fill="#ef4444" color="#ef4444" />
+            <span className="snapspot-heart-count">X{hearts}</span>
+          </div>
+          <div className="snapspot-hud-slots">
+            {differences.map((_, i) => (
+              <div key={i} className={`snapspot-slot${i < foundCount ? ' found' : ''}`} />
+            ))}
+          </div>
+          <button className="snapspot-hint-btn">
+            <Search size={22} />
+            <span>HINT</span>
+          </button>
+        </div>
+      )}
+
       {isWinner && (
         <div className="snapspot-win-overlay">
           <div className="snapspot-win-card">
             <div className="snapspot-win-emoji">🎉</div>
             <h2>모두 찾았어요!</h2>
             <p>{differences.length}개 차이점을 모두 발견했습니다.</p>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', margin: '0.75rem 0 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fefce8', border: '1px solid #eab308', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#92400e', fontSize: '0.95rem' }}>
+                🪙 +10
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
+                ⚡ 퍼즐력 +1
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'center' }}>
+              <button
+                onClick={() => setStageId(s => s + 1)}
+                style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#22c55e', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                다음 스테이지
+              </button>
+              <button
+                onClick={() => navigate('/snapspot')}
+                style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                모드 선택
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isGameOver && (
+        <div className="snapspot-win-overlay">
+          <div className="snapspot-win-card">
+            <div className="snapspot-win-emoji">💔</div>
+            <h2 style={{ color: '#ef4444' }}>게임 오버</h2>
+            <p>하트를 모두 소진했습니다.</p>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem', justifyContent: 'center' }}>
+              <button
+                onClick={() => navigate(0)}
+                style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#ef4444', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                다시 도전
+              </button>
+              <button
+                onClick={() => navigate('/snapspot')}
+                style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                모드 선택
+              </button>
+            </div>
           </div>
         </div>
       )}

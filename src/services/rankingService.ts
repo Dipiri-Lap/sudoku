@@ -219,3 +219,31 @@ export const getWordSortProgress = async (uid: string): Promise<number> => {
     }
     return 0;
 };
+
+// SnapSpot progress: save cleared stage number
+export const saveSnapSpotProgress = async (uid: string, clearedStage: number): Promise<void> => {
+    try {
+        const progressRef = doc(db, 'users', uid, 'snapspotProgress', 'data');
+        const snap = await getDoc(progressRef);
+        const currentCleared = snap.exists() ? (snap.data().clearedStage ?? 0) : 0;
+        if (clearedStage > currentCleared) {
+            await setDoc(progressRef, { clearedStage }, { merge: true });
+        }
+    } catch (e) {
+        console.error('Failed to save snapspot progress:', e);
+    }
+};
+
+// SnapSpot progress: get the last cleared stage (0 = none cleared)
+export const getSnapSpotProgress = async (uid: string): Promise<number> => {
+    try {
+        const progressRef = doc(db, 'users', uid, 'snapspotProgress', 'data');
+        const snap = await getDoc(progressRef);
+        if (snap.exists()) {
+            return snap.data().clearedStage ?? 0;
+        }
+    } catch (e) {
+        console.error('Failed to get snapspot progress:', e);
+    }
+    return 0;
+};

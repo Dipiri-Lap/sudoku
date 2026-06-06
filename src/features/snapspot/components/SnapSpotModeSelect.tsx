@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Timer, Users, ChevronLeft } from 'lucide-react';
+import { Timer, Users, ChevronLeft, Heart } from 'lucide-react';
 
 const SnapSpotModeSelect: React.FC = () => {
   const navigate = useNavigate();
@@ -28,11 +28,11 @@ const SnapSpotModeSelect: React.FC = () => {
           onClick={() => navigate('/snapspot/normal')}
         >
           <div className="game-card-icon">
-            <Eye size={40} />
+            <Heart size={40} />
           </div>
           <div className="game-card-content">
-            <h3>노말</h3>
-            <p>시간 제한 없이 두 그림의 차이점을 모두 찾아보세요.</p>
+            <h3>스테이지</h3>
+            <p>하트 3개로 도전! 3번 실수하면 게임 오버.</p>
             <div className="game-card-footer">
               <span className="play-now">플레이하기</span>
             </div>
@@ -41,8 +41,7 @@ const SnapSpotModeSelect: React.FC = () => {
 
         <div
           className="game-card animate-fade-in"
-          style={{ '--delay': '0.2s' } as React.CSSProperties}
-          onClick={() => navigate('/snapspot/time-attack')}
+          style={{ '--delay': '0.2s', opacity: 0.6, cursor: 'default' } as React.CSSProperties}
         >
           <div className="game-card-icon">
             <Timer size={40} />
@@ -51,7 +50,7 @@ const SnapSpotModeSelect: React.FC = () => {
             <h3>타임어택</h3>
             <p>제한 시간 안에 최대한 많은 차이점을 찾아내세요!</p>
             <div className="game-card-footer">
-              <span className="play-now">플레이하기</span>
+              <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>준비 중</span>
             </div>
           </div>
         </div>
