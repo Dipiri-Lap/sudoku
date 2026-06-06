@@ -100,11 +100,26 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   // Mouse drag state
   const mouseDrag = useRef({ down: false, start: { x: 0, y: 0 }, panOrigin: { x: 0, y: 0 }, moved: false });
 
-  // Lock body scroll while game is mounted (same pattern as WordSortGame)
   useEffect(() => {
-    const prev = document.body.style.overflow;
+    const root = document.getElementById('root');
+    const prevOverflow = document.body.style.overflow;
+    const prevBg = document.body.style.background;
+    const prevMaxWidth = root?.style.maxWidth ?? '';
+    const prevPadding = root?.style.padding ?? '';
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
+    document.body.style.background = '#111827';
+    if (root) {
+      root.style.maxWidth = 'none';
+      root.style.padding = '0';
+    }
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.background = prevBg;
+      if (root) {
+        root.style.maxWidth = prevMaxWidth;
+        root.style.padding = prevPadding;
+      }
+    };
   }, []);
 
   useEffect(() => {
