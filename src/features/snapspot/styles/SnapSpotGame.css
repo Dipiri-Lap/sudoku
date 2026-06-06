@@ -193,9 +193,9 @@
 }
 
 .snapspot-slot {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
   background: rgba(200, 169, 110, 0.3);
   border: 2px solid rgba(200, 169, 110, 0.6);
   transition: background 0.2s;
