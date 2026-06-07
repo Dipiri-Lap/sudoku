@@ -374,6 +374,17 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     [processHit],
   );
 
+  // ── Ad-gated actions ────────────────────────────────────────────────────────
+  const handleNextStage = useCallback(() => {
+    if (IS_DEV || !window.adBreak) { setStageId(s => s + 1); return; }
+    window.adBreak({ type: 'next', name: 'stage-clear', adBreakDone: () => setStageId(s => s + 1) });
+  }, []);
+
+  const handleRestart = useCallback(() => {
+    if (IS_DEV || !window.adBreak) { navigate(0); return; }
+    window.adBreak({ type: 'next', name: 'game-over-restart', adBreakDone: () => navigate(0) });
+  }, [navigate]);
+
   // ── Zoom buttons ────────────────────────────────────────────────────────────
   const adjustZoom = useCallback(
     (delta: number) => {
@@ -538,7 +549,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'center' }}>
               <button
-                onClick={() => setStageId(s => s + 1)}
+                onClick={handleNextStage}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#22c55e', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 다음 스테이지
@@ -562,7 +573,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             <p>하트를 모두 소진했습니다.</p>
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem', justifyContent: 'center' }}>
               <button
-                onClick={() => navigate(0)}
+                onClick={handleRestart}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#ef4444', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 다시 도전
