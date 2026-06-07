@@ -415,7 +415,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             <ChevronLeft size={22} />
           </button>
           <h2 className="snapspot-title">
-            {mode === 'time-attack' ? '타임어택' : mode === 'stage' ? '스테이지' : '노말'}
+            {mode === 'time-attack' ? 'TIME ATTACK' : mode === 'stage' ? `STAGE ${stageId}` : 'NORMAL'}
           </h2>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -435,7 +435,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           <button className="snapspot-zoom-btn" onClick={() => adjustZoom(-0.5)} disabled={zoom <= 1}>−</button>
           <span className="snapspot-zoom-label">{zoom.toFixed(1)}×</span>
           <button className="snapspot-zoom-btn" onClick={() => adjustZoom(0.5)} disabled={zoom >= MAX_ZOOM}>+</button>
-          <span className="snapspot-progress">{foundCount} / {differences.length}</span>
         </div>
       </div>
 
