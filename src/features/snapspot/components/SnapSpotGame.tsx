@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Heart, Search } from 'lucide-react';
+import { ChevronLeft, Heart, Search, Check } from 'lucide-react';
 import { useCoins } from '../../../context/CoinContext';
 import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
 import { auth } from '../../../firebase';
@@ -123,7 +123,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   }, []);
 
   useEffect(() => {
-    hasAwardedCoins.current = false;
     setLevelData(null);
     setFound([]);
     setIsWinner(false);
@@ -141,7 +140,11 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   }, [stageId, mode]);
 
   useEffect(() => {
-    if (isWinner && !hasAwardedCoins.current) {
+    if (!isWinner) {
+      hasAwardedCoins.current = false;
+      return;
+    }
+    if (!hasAwardedCoins.current) {
       hasAwardedCoins.current = true;
       addCoins(10);
       if (mode === 'stage') saveProgress(stageId);
@@ -523,7 +526,9 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           </div>
           <div className="snapspot-hud-slots">
             {differences.map((_, i) => (
-              <div key={i} className={`snapspot-slot${i < foundCount ? ' found' : ''}`} />
+              <div key={i} className={`snapspot-slot${i < foundCount ? ' found' : ''}`}>
+                {i < foundCount && <Check size={15} strokeWidth={3} color="#3a2000" />}
+              </div>
             ))}
           </div>
           <button className="snapspot-hint-btn">

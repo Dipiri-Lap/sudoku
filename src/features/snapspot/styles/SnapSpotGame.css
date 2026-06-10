@@ -199,7 +199,10 @@
 
 .snapspot-hud-slots {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.3rem;
+  max-width: 155px;
+  justify-content: flex-start;
 }
 
 .snapspot-slot {
@@ -209,6 +212,9 @@
   background: rgba(200, 169, 110, 0.3);
   border: 2px solid rgba(200, 169, 110, 0.6);
   transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .snapspot-slot.found {
