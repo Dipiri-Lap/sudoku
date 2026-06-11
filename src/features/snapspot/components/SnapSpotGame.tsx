@@ -58,6 +58,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const { addCoins } = useCoins();
   const { snapSpotProgress, saveSnapSpotProgress: saveProgress } = useSnapSpotProgress();
   const hasAwardedCoins = useRef(false);
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
   const [levelData, setLevelData] = useState<LevelData | null>(null);
   const [found, setFound] = useState<boolean[]>([]);
   const [wrongFlash, setWrongFlash] = useState<WrongFlash | null>(null);
@@ -112,12 +113,30 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       root.style.maxWidth = 'none';
       root.style.padding = '0';
     }
+
+    bgmRef.current = new Audio('/assets/snapspot/sounds/bgm.mp3');
+    bgmRef.current.loop = true;
+    bgmRef.current.volume = 0.3;
+    bgmRef.current.play().catch(() => {});
+
+    const handleVisibility = () => {
+      if (!bgmRef.current) return;
+      if (document.hidden) bgmRef.current.pause();
+      else bgmRef.current.play().catch(() => {});
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
       document.body.style.overflow = prevOverflow;
       document.body.style.background = prevBg;
       if (root) {
         root.style.maxWidth = prevMaxWidth;
         root.style.padding = prevPadding;
+      }
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (bgmRef.current) {
+        bgmRef.current.pause();
+        bgmRef.current.src = '';
       }
     };
   }, []);

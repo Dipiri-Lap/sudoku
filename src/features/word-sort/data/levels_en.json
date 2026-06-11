@@ -1,4 +1,4 @@
-﻿[
+[
     {
         "id": 1,
         "maxMoves": 100,
@@ -21481,6 +21481,535 @@
                     "Boss Stage Entry",
                     "Stage",
                     "Balance Patch"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 196,
+        "maxMoves": 104,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "guardian_protector",
+                "name": "Guardian",
+                "target": 6,
+                "words": [
+                    "Consent Signing",
+                    "Emergency Contact",
+                    "Patient Care",
+                    "Minor Accompaniment",
+                    "Liability",
+                    "Visit Request"
+                ]
+            },
+            {
+                "id": "refusal_rejection",
+                "name": "Refusal",
+                "target": 5,
+                "words": [
+                    "Polite Declination",
+                    "Refuse Request",
+                    "Reject Proposal",
+                    "Refusal Expression",
+                    "Looking Away"
+                ]
+            },
+            {
+                "id": "fireworks_display",
+                "name": "Fireworks",
+                "target": 7,
+                "words": [
+                    "Explosion Sound",
+                    "Night Festival",
+                    "Firework Powder",
+                    "Riverside Park",
+                    "Brilliant Descent",
+                    "Flash Burst",
+                    "Viewing Crowd"
+                ]
+            },
+            {
+                "id": "conversion_switch",
+                "name": "Transition",
+                "target": 4,
+                "words": [
+                    "Phase Shift",
+                    "Mode Change",
+                    "Stance Switch",
+                    "Scene Cut"
+                ]
+            },
+            {
+                "id": "statistics_data",
+                "name": "Statistics",
+                "target": 6,
+                "words": [
+                    "Graph Analysis",
+                    "Mean Calculation",
+                    "Survey Form",
+                    "Sampling Error",
+                    "Census",
+                    "Numerical Data"
+                ]
+            },
+            {
+                "id": "troublemaker_chaos",
+                "name": "Troublemaker",
+                "target": 5,
+                "words": [
+                    "Causing Mischief",
+                    "Broken Window",
+                    "Little Rascal",
+                    "Out of Control",
+                    "Nagging Barrage"
+                ]
+            },
+            {
+                "id": "business_report",
+                "name": "Report",
+                "target": 5,
+                "words": [
+                    "Approval Chain",
+                    "Interim Review",
+                    "Performance Analysis",
+                    "Planning Draft",
+                    "Submission"
+                ]
+            },
+            {
+                "id": "mind_map_brainstorm",
+                "name": "Mind Map",
+                "target": 4,
+                "words": [
+                    "Core Keyword",
+                    "Branching Out",
+                    "Thought Organizer",
+                    "Idea Sketch"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 197,
+        "maxMoves": 74,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "blank_space",
+                "name": "Margin",
+                "target": 5,
+                "words": [
+                    "Margin Meaning",
+                    "Emptiness",
+                    "Paper Background",
+                    "Page Border",
+                    "Letter Spacing"
+                ]
+            },
+            {
+                "id": "action_verb",
+                "name": "Verb",
+                "target": 5,
+                "words": [
+                    "Movement",
+                    "Run",
+                    "Eat",
+                    "Base Form",
+                    "Conjugated Form"
+                ]
+            },
+            {
+                "id": "fast_sprint",
+                "name": "Sprint",
+                "target": 5,
+                "words": [
+                    "Accelerator",
+                    "Cutting Wind",
+                    "Speedometer Needle",
+                    "Full Gallop",
+                    "Rampage"
+                ]
+            },
+            {
+                "id": "weight_classes",
+                "name": "Weight Class",
+                "target": 5,
+                "words": [
+                    "Flyweight",
+                    "Lightweight",
+                    "Welterweight",
+                    "Middleweight",
+                    "Heavyweight"
+                ]
+            },
+            {
+                "id": "founding_nation",
+                "name": "Nation Founding",
+                "target": 5,
+                "words": [
+                    "First King",
+                    "Capital Selection",
+                    "Nation Naming",
+                    "Charter Proclamation",
+                    "History Begins"
+                ]
+            },
+            {
+                "id": "ranking_system",
+                "name": "Ranking",
+                "target": 4,
+                "words": [
+                    "Leaderboard",
+                    "Ranking Table",
+                    "Real-Time Score",
+                    "First Place"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 198,
+        "maxMoves": 94,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "referee_misjudgment",
+                "name": "Bad Call",
+                "target": 5,
+                "words": [
+                    "Video Review",
+                    "Booing",
+                    "Biased Ruling",
+                    "Yellow Card",
+                    "Game Delay"
+                ]
+            },
+            {
+                "id": "autonomous_driving",
+                "name": "Self-Driving",
+                "target": 6,
+                "words": [
+                    "Sensor",
+                    "Precision Map",
+                    "AI Decision",
+                    "Lane Departure System",
+                    "Driverless Taxi",
+                    "Remote Control"
+                ]
+            },
+            {
+                "id": "role_playing_game",
+                "name": "RPG",
+                "target": 7,
+                "words": [
+                    "Experience Points",
+                    "Equipment Upgrade",
+                    "Boss Raid",
+                    "Class Change",
+                    "Quest Window",
+                    "Skill Tree",
+                    "Storyline"
+                ]
+            },
+            {
+                "id": "liberal_arts",
+                "name": "Liberal Arts",
+                "target": 5,
+                "words": [
+                    "Classical Music",
+                    "Humanities Lecture",
+                    "Art Appreciation",
+                    "Ancient Wisdom",
+                    "Etiquette Guide"
+                ]
+            },
+            {
+                "id": "central_america_countries",
+                "name": "Central America",
+                "target": 6,
+                "words": [
+                    "Guatemala",
+                    "Costa Rica",
+                    "Panama",
+                    "Honduras",
+                    "El Salvador",
+                    "Nicaragua"
+                ]
+            },
+            {
+                "id": "seven_continents",
+                "name": "Continent",
+                "target": 5,
+                "words": [
+                    "Asia Plate",
+                    "European Plain",
+                    "African Savanna",
+                    "Antarctic Glacier",
+                    "Oceania"
+                ]
+            },
+            {
+                "id": "blood_types",
+                "name": "Blood Type",
+                "target": 4,
+                "words": [
+                    "Blood Pack",
+                    "Antigen Antibody",
+                    "Personality Survey",
+                    "Agglutination Test"
+                ]
+            },
+            {
+                "id": "example_case",
+                "name": "Case Study",
+                "target": 8,
+                "words": [
+                    "Success Casebook",
+                    "Case Interpretation",
+                    "Similar Experience",
+                    "Example Sentence",
+                    "Concrete Evidence",
+                    "Failure Cause",
+                    "Journal Citation",
+                    "Report Sample"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 199,
+        "maxMoves": 110,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "life_experience",
+                "name": "Experience",
+                "target": 5,
+                "words": [
+                    "Backpacking Abroad",
+                    "Internship",
+                    "Rights and Wrongs",
+                    "Ups and Downs",
+                    "Success Story"
+                ]
+            },
+            {
+                "id": "world_cup_tournament",
+                "name": "World Cup",
+                "target": 6,
+                "words": [
+                    "Official Ball",
+                    "Group Stage",
+                    "Red Devils",
+                    "FIFA Ranking",
+                    "Opening Ceremony",
+                    "Penalty Shootout"
+                ]
+            },
+            {
+                "id": "blog_posting",
+                "name": "Blog",
+                "target": 6,
+                "words": [
+                    "Add Follower",
+                    "Theme Design",
+                    "Visitor Count",
+                    "Category Post",
+                    "Mutual Follow",
+                    "Scheduled Post"
+                ]
+            },
+            {
+                "id": "parts_of_speech",
+                "name": "Parts of Speech",
+                "target": 4,
+                "words": [
+                    "Pronoun",
+                    "Adjective",
+                    "Interjection",
+                    "Subject Marker"
+                ]
+            },
+            {
+                "id": "game_strategy",
+                "name": "Strategy Guide",
+                "target": 5,
+                "words": [
+                    "Boss Pattern",
+                    "Optimal Route",
+                    "Item Tree",
+                    "Beginners Guide",
+                    "Hidden Quest"
+                ]
+            },
+            {
+                "id": "synergy_effect",
+                "name": "Synergy",
+                "target": 5,
+                "words": [
+                    "Mutual Complement",
+                    "Joint Rise",
+                    "Combo Bonus",
+                    "Effect Maximization",
+                    "Cooperation System"
+                ]
+            },
+            {
+                "id": "source_origin",
+                "name": "Citation",
+                "target": 5,
+                "words": [
+                    "Footnote Mark",
+                    "References",
+                    "Citation Mark",
+                    "Journal Publisher",
+                    "Excerpt Sentence"
+                ]
+            },
+            {
+                "id": "university_department",
+                "name": "Department",
+                "target": 7,
+                "words": [
+                    "Computer Engineering",
+                    "Visual Design",
+                    "Business School",
+                    "Psychology",
+                    "Media Communication",
+                    "Electrical Engineering",
+                    "English Literature"
+                ]
+            },
+            {
+                "id": "stage_direction",
+                "name": "Direction",
+                "target": 6,
+                "words": [
+                    "Lighting Script",
+                    "Camera Work",
+                    "Mise en Scene",
+                    "Prop Placement",
+                    "Sound Effects",
+                    "Actor Blocking"
+                ]
+            },
+            {
+                "id": "destiny_fate",
+                "name": "Fate",
+                "target": 6,
+                "words": [
+                    "Four Pillars",
+                    "Tarot Cards",
+                    "Fateful Meeting",
+                    "Horoscope",
+                    "Irresistible",
+                    "Predestination"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 200,
+        "maxMoves": 82,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "pizza_baking",
+                "name": "Pizza",
+                "target": 5,
+                "words": [
+                    "Cheese Crust",
+                    "Wood-Fired Oven",
+                    "Tomato Sauce",
+                    "Pepperoni",
+                    "Pickle"
+                ]
+            },
+            {
+                "id": "scenery_view",
+                "name": "Scenery",
+                "target": 6,
+                "words": [
+                    "Horizon",
+                    "Sunset Glow",
+                    "Observation Deck",
+                    "Snow-Capped Mountain",
+                    "Blue Ocean",
+                    "Great Nature"
+                ]
+            },
+            {
+                "id": "bedding_room",
+                "name": "Bedding",
+                "target": 4,
+                "words": [
+                    "Goose Down Duvet",
+                    "Latex Pillow",
+                    "Mattress",
+                    "Cotton Pad"
+                ]
+            },
+            {
+                "id": "peter_pan_story",
+                "name": "Peter Pan",
+                "target": 5,
+                "words": [
+                    "Neverland",
+                    "Tinker Bell",
+                    "Captain Hook",
+                    "Fairy Dust",
+                    "Wendy"
+                ]
+            },
+            {
+                "id": "injury_hurt",
+                "name": "Injury",
+                "target": 6,
+                "words": [
+                    "First Aid",
+                    "X-Ray",
+                    "Cast Bandage",
+                    "Antiseptic",
+                    "Muscle Tear",
+                    "Pain Relief"
+                ]
+            },
+            {
+                "id": "projection_reflect",
+                "name": "Projection",
+                "target": 5,
+                "words": [
+                    "Lake Surface",
+                    "Beam Projector",
+                    "Shadow Play",
+                    "Hologram",
+                    "Psychological Analysis"
+                ]
+            },
+            {
+                "id": "comeback_return",
+                "name": "Return",
+                "target": 6,
+                "words": [
+                    "Return to Base",
+                    "League Resumption",
+                    "Comeback Stage",
+                    "Active Duty",
+                    "Leave Expired",
+                    "Daily Recovery"
+                ]
+            },
+            {
+                "id": "connection_link",
+                "name": "Connection",
+                "target": 5,
+                "words": [
+                    "Correlation",
+                    "Mediator",
+                    "Causality",
+                    "Algorithm Recommendation",
+                    "Chain Reaction"
                 ]
             }
         ]
