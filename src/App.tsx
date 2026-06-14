@@ -15,6 +15,7 @@ import QueensGame from './features/queens/components/QueensGame';
 import QueensModeSelect from './features/queens/components/QueensModeSelect';
 import ArrowPuzzleGame from './features/arrow-puzzle/components/ArrowPuzzleGame';
 import ArrowLevelEditor from './features/arrow-puzzle/components/ArrowLevelEditor';
+import DiffTool from './features/diff-tool/DiffTool';
 
 import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
@@ -117,6 +118,9 @@ const AppContent: React.FC = () => {
 
           {window.location.hostname === 'localhost' && (
             <Route path="/admin" element={<AdminPage />} />
+          )}
+          {window.location.hostname === 'localhost' && (
+            <Route path="/diff-tool" element={<DiffTool />} />
           )}
         </Routes>
       </CardBackProvider>

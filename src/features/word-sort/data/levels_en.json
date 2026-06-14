@@ -22013,5 +22013,112 @@
                 ]
             }
         ]
+    },
+    {
+        "id": 201,
+        "maxMoves": 106,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "vitamin_types",
+                "name": "Vitamins",
+                "target": 5,
+                "words": [
+                    "Ascorbic Acid",
+                    "Retinol",
+                    "Calciferol",
+                    "Thiamine",
+                    "Riboflavin"
+                ]
+            },
+            {
+                "id": "barbecue_party",
+                "name": "Barbecue",
+                "target": 6,
+                "words": [
+                    "Grill Grate",
+                    "Charcoal Embers",
+                    "Seasoning Rub",
+                    "Tongs and Scissors",
+                    "Pork Neck",
+                    "Skewer Grill"
+                ]
+            },
+            {
+                "id": "bank_loan",
+                "name": "Loan",
+                "target": 5,
+                "words": [
+                    "Fixed Rate",
+                    "Credit Score",
+                    "Repayment Period",
+                    "Collateral",
+                    "Principal and Interest"
+                ]
+            },
+            {
+                "id": "bell_sound",
+                "name": "Bell",
+                "target": 4,
+                "words": [
+                    "Rattle",
+                    "Bell Sound",
+                    "Water Drop",
+                    "Cat Collar"
+                ]
+            },
+            {
+                "id": "transit_station",
+                "name": "Transit Stop",
+                "target": 6,
+                "words": [
+                    "Bus",
+                    "Route Map",
+                    "Transfer",
+                    "Alighting",
+                    "Arrival Bell",
+                    "Waiting Seat"
+                ]
+            },
+            {
+                "id": "ocean_lighthouse",
+                "name": "Lighthouse",
+                "target": 5,
+                "words": [
+                    "Lighthouse Keeper",
+                    "Coastline",
+                    "Sea Fog",
+                    "Night Navigation",
+                    "Guide"
+                ]
+            },
+            {
+                "id": "brazil_country",
+                "name": "Brazil",
+                "target": 7,
+                "words": [
+                    "Samba Festival",
+                    "Amazon Rainforest",
+                    "Christ the Redeemer",
+                    "Football Nation",
+                    "Churrasco",
+                    "Carnival",
+                    "Coffee Origin"
+                ]
+            },
+            {
+                "id": "rainy_season",
+                "name": "Rainy Season",
+                "target": 6,
+                "words": [
+                    "Heavy Rainfall",
+                    "Dehumidifier",
+                    "Chronic Flooding",
+                    "Downpour",
+                    "Weather Alert",
+                    "Dampness"
+                ]
+            }
+        ]
     }
 ]
