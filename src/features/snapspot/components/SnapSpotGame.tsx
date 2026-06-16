@@ -68,6 +68,8 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [heartShake, setHeartShake] = useState(false);
   const [stageId, setStageId] = useState(() => mode === 'stage' ? Math.max(1, snapSpotProgress + 1) : 1);
+  const [hintIdx, setHintIdx] = useState<number | null>(null);
+  const [isHinting, setIsHinting] = useState(false);
 
   // Zoom / pan state (shared between both images)
   const [zoom, setZoom] = useState(1);
@@ -149,6 +151,8 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     setWrongFlash(null);
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setHintIdx(null);
+    setIsHinting(false);
     if (mode === 'stage') setHearts(MAX_HEARTS);
     fetch(`${CDN_BASE}/${stageId}.json`)
       .then((r) => r.json())
@@ -396,6 +400,22 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     [processHit],
   );
 
+  // 힌트로 가리킨 스팟을 찾으면 힌트 상태 해제
+  useEffect(() => {
+    if (hintIdx !== null && found[hintIdx]) {
+      setHintIdx(null);
+      setIsHinting(false);
+    }
+  }, [found, hintIdx]);
+
+  const handleHint = useCallback(() => {
+    if (isHinting) return;
+    const idx = found.findIndex(f => !f);
+    if (idx === -1) return;
+    setHintIdx(idx);
+    setIsHinting(true);
+  }, [isHinting, found]);
+
   // ── Ad-gated actions ────────────────────────────────────────────────────────
   const handleNextStage = useCallback(() => {
     if (IS_DEV || !window.adBreak) { setStageId(s => s + 1); return; }
@@ -504,6 +524,18 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                   />
                 );
               })}
+              {hintIdx !== null && !found[hintIdx] && (() => {
+                const diff = differences[hintIdx];
+                const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
+                const { left, top } = toPercent(pos, diff.colSize);
+                return (
+                  <div
+                    key={`hint-${hintIdx}`}
+                    className="snapspot-hint-marker"
+                    style={{ left: `${left}%`, top: `${top}%` }}
+                  />
+                );
+              })()}
               {IS_DEV && showDebug && differences.map((diff, i) => {
                 const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
                 const { left, top, width, height } = toPercent(pos, diff.colSize);
@@ -550,7 +582,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
               </div>
             ))}
           </div>
-          <button className="snapspot-hint-btn">
+          <button className="snapspot-hint-btn" onClick={handleHint} disabled={isHinting}>
             <Search size={22} />
             <span>HINT</span>
           </button>

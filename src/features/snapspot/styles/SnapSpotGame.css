@@ -237,6 +237,31 @@
   font-size: 0.65rem;
   letter-spacing: 0.05em;
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: opacity 0.2s;
+}
+
+.snapspot-hint-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Hint marker */
+@keyframes snapspot-hint-blink {
+  0%, 100% { opacity: 1;   transform: translate(-50%, -50%) scale(1);    }
+  50%       { opacity: 0.1; transform: translate(-50%, -50%) scale(1.2);  }
+}
+
+.snapspot-hint-marker {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%);
+  border: 3px solid #facc15;
+  border-radius: 50%;
+  background: rgba(250, 204, 21, 0.25);
+  pointer-events: none;
+  animation: snapspot-hint-blink 0.5s ease-in-out infinite;
+  z-index: 5;
 }
 
 @keyframes snapspot-heart-shake {

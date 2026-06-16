@@ -145,7 +145,6 @@ export const DiffTool: React.FC = () => {
 
   const [step,      setStep]      = useState<'upload' | 'review'>('upload');
   const [analyzing, setAnalyzing] = useState(false);
-  const [copied,    setCopied]    = useState(false);
 
   const pickFile = useCallback((idx: 0 | 1) => {
     const input = document.createElement('input');
@@ -211,9 +210,13 @@ export const DiffTool: React.FC = () => {
         colSize: { x: colSize, y: colSize },
       })),
     }, null, 2);
-    navigator.clipboard.writeText(json);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${String(imageID).padStart(4, '0')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const spotOverlay = (enableClick: boolean) =>
@@ -343,8 +346,8 @@ export const DiffTool: React.FC = () => {
             <input type="number" value={colSize} min={20} style={{ ...NUM_INPUT, width: '70px' }}
               onChange={e => setColSize(parseInt(e.target.value) || 120)} />
           </label>
-          <button onClick={exportJSON} style={{ ...BTN, background: copied ? '#22c55e' : '#4a90e2', color: '#fff' }}>
-            {copied ? '복사됨!' : 'JSON 복사'}
+          <button onClick={exportJSON} style={{ ...BTN, background: '#4a90e2', color: '#fff' }}>
+            JSON 다운로드
           </button>
         </div>
       </div>
