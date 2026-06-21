@@ -478,62 +478,40 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <a href="/queens" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit' } as any}>
+                <a href="/queens" className="animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                >
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
                         backgroundColor: '#4a90e2', color: 'white',
                         fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
                         padding: '2px 7px', borderRadius: '999px',
-                        boxShadow: '0 2px 6px rgba(74,144,226,0.5)'
+                        boxShadow: '0 2px 6px rgba(74,144,226,0.5)',
+                        zIndex: 1,
                     }}>NEW</div>
-                    <div className="game-card-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
-                        <img src="/crownquest_logo.png" alt="크라운 퀘스트" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>크라운 퀘스트</h3>
-                        <p>색상 영역마다 퀸을 하나씩 배치하는 논리 퍼즐</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                <Play size={16} fill="currentColor" /> 플레이하기
-                            </span>
-                        </div>
-                    </div>
+                    <img src="/images/crownquest/title.webp" alt="크라운 퀘스트" style={{ width: '100%', display: 'block' }} />
                 </a>
-                <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
+                <a href="/word-sort" className="animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                >
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
                         backgroundColor: '#ef4444', color: 'white',
                         fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
                         padding: '2px 7px', borderRadius: '999px',
-                        boxShadow: '0 2px 6px rgba(239,68,68,0.5)'
+                        boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
+                        zIndex: 1,
                     }}>HOT</div>
-                    <div className="game-card-icon">
-                        <img src="/wordstackLogo.png" alt="Word Sort Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>워드스택</h3>
-                        <p>단어를 알맞은 카테고리로 정리하는 분류 게임</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                <Play size={16} fill="currentColor" /> 플레이하기
-                            </span>
-                        </div>
-                    </div>
+                    <img src="/images/wordstack/title.webp" alt="워드스택" style={{ width: '100%', display: 'block' }} />
                 </a>
 
-                <a href="/sudoku" className="game-card animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', color: 'inherit' } as any}>
-                    <div className="game-card-icon">
-                        <img src="/logo.jpg" alt="Sudoku Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>스도쿠</h3>
-                        <p>숫자의 논리적 배치를 통한 두뇌 트레이닝</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                <Play size={16} fill="currentColor" /> 플레이하기
-                            </span>
-                        </div>
-                    </div>
+                <a href="/sudoku" className="animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                >
+                    <img src="/images/sudoku/title.webp" alt="스도쿠" style={{ width: '100%', display: 'block' }} />
                 </a>
 
                 {window.location.hostname === 'localhost' && (
