@@ -50,6 +50,7 @@ export type WordSolitaireAction =
     | { type: 'UNLOCK_SLOT' }
     | { type: 'REMOVE_CATEGORY'; catId: string }
     | { type: 'ADD_STEPS'; count: number }
+    | { type: 'HARD_WRONG_DROP' }
     | { type: 'RESTORE_GAME'; savedState: WordSolitaireState }
     | { type: 'UNDO_ACTION' }
     | { type: 'SET_LANGUAGE'; language: 'ko' | 'en'; newLevelData?: any };
@@ -465,6 +466,15 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                 stepsLeft: state.stepsLeft + action.count,
                 isStepsPurchased: true,
                 isGameOver: false // Resume if it was game over
+            };
+        }
+
+        case 'HARD_WRONG_DROP': {
+            const newSteps = state.stepsLeft - 1;
+            return {
+                ...state,
+                stepsLeft: newSteps,
+                isGameOver: newSteps <= 0,
             };
         }
 

@@ -425,6 +425,15 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             sfx.play().catch(() => {});
             setInvalidDropTarget(dropTarget);
             setTimeout(() => setInvalidDropTarget(null), 500);
+            // Hard mode penalty: -1 step when dropping on a non-empty target with wrong category
+            if (state.isHardMode) {
+                const targetHasCards = dropTarget.type === 'slot'
+                    ? state.activeSlots[dropTarget.index] !== null
+                    : state.stacks[dropTarget.index].length > 0;
+                if (targetHasCards) {
+                    dispatch({ type: 'HARD_WRONG_DROP' });
+                }
+            }
         }
         setDraggingGroup(null);
     };
