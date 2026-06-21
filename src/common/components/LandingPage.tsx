@@ -475,7 +475,7 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <a href="/queens" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
+                <a href="/queens" className="game-card animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', color: 'inherit' } as any}>
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
                         backgroundColor: '#4a90e2', color: 'white',
@@ -484,7 +484,7 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(74,144,226,0.5)'
                     }}>NEW</div>
                     <div className="game-card-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
-                        <img src="/crownquest_logo.png" alt="크라운 퀘스트" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                        <img src="/crownquest_logo.png" alt="크라운 퀘스트" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <div className="game-card-content">
                         <h3>크라운 퀘스트</h3>
@@ -496,7 +496,7 @@ const LandingPage: React.FC = () => {
                         </div>
                     </div>
                 </a>
-                 <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit', position: 'relative' } as any}>
+                <a href="/word-sort" className="game-card animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', color: 'inherit' } as any}>
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
                         backgroundColor: '#ef4444', color: 'white',

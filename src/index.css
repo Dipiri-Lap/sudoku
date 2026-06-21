@@ -498,8 +498,8 @@ body.landing-bg::before {
 
 .game-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.875rem;
   width: 100%;
 }
 
@@ -507,13 +507,15 @@ body.landing-bg::before {
   background: white;
   border: 1px solid #e1e8ed;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 1rem 0.875rem 0.875rem;
   display: flex;
-  gap: 1.5rem;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .game-card:hover {
@@ -536,8 +538,8 @@ body.landing-bg::before {
 .game-card-icon {
   background: var(--bg-secondary);
   color: var(--brand-primary);
-  width: 80px;
-  height: 80px;
+  width: 56px;
+  height: 56px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -545,21 +547,30 @@ body.landing-bg::before {
   flex-shrink: 0;
 }
 
+.game-card-content {
+  width: 100%;
+}
+
 .game-card-content h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.3rem;
+  margin: 0 0 0.25rem 0;
+  font-size: 1.05rem;
   color: var(--text-main);
+  line-height: 1.2;
 }
 
 .game-card-content p {
   margin: 0;
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .game-card-footer {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .play-now {
@@ -568,7 +579,7 @@ body.landing-bg::before {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 .landing-footer {
