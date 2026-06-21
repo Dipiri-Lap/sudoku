@@ -6,7 +6,7 @@ export type ChallengeType = 'STAGE' | 'TIME_ATTACK';
 
 export type GameKey = 'sudoku' | 'word-sort' | 'queens';
 
-export type ProgressSource = 'regular_stage' | 'beginner_stage' | 'time_attack' | 'word_sort_stage' | 'queens_stage';
+export type ProgressSource = 'regular_stage' | 'beginner_stage' | 'time_attack' | 'word_sort_stage' | 'word_sort_hard_stage' | 'queens_stage';
 
 export interface ChallengeProgressConfig {
     source: ProgressSource;

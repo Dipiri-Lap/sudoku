@@ -48,7 +48,7 @@
     "id": "word_st_50",
     "type": "STAGE",
     "game": "word-sort",
-    "title": "📖 워드스택을 깨닫다",
+    "title": "🗂️ 단어 수집가",
     "condition": "50스테이지 클리어",
     "progressConfig": {
       "source": "word_sort_stage",
@@ -63,30 +63,165 @@
     "id": "word_st_75",
     "type": "STAGE",
     "game": "word-sort",
-    "title": "🏛️ 워드스택 분석가",
+    "title": "📖 어휘 탐험가",
     "condition": "75스테이지 클리어",
     "progressConfig": {
       "source": "word_sort_stage",
       "target": 75
     },
     "reward": {
-      "puzzle_power": 150,
-      "coin": 200
+      "puzzle_power": 100,
+      "coin": 150
     }
   },
   {
     "id": "word_st_100",
     "type": "STAGE",
     "game": "word-sort",
-    "title": "🎓 워드스택 전문가",
+    "title": "🧩 분류 고수",
     "condition": "100스테이지 클리어",
     "progressConfig": {
       "source": "word_sort_stage",
       "target": 100
     },
     "reward": {
-      "puzzle_power": 300,
-      "coin": 500
+      "puzzle_power": 125,
+      "coin": 200
+    }
+  },
+  {
+    "id": "word_st_150",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "⚗️ 단어 연금술사",
+    "condition": "150스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 150
+    },
+    "reward": {
+      "puzzle_power": 150,
+      "coin": 250
+    }
+  },
+  {
+    "id": "word_st_200",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "📡 분류 전문가",
+    "condition": "200스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 200
+    },
+    "reward": {
+      "puzzle_power": 175,
+      "coin": 300
+    }
+  },
+  {
+    "id": "word_st_250",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🏺 단어 도예가",
+    "condition": "250스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 250
+    },
+    "reward": {
+      "puzzle_power": 200,
+      "coin": 350
+    }
+  },
+  {
+    "id": "word_st_300",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🧠 분류 천재",
+    "condition": "300스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_stage",
+      "target": 300
+    },
+    "reward": {
+      "puzzle_power": 225,
+      "coin": 400
+    }
+  },
+  {
+    "id": "word_hard_1",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🔥 매운맛",
+    "condition": "하드모드 1스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_hard_stage",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 30,
+      "coin": 50
+    }
+  },
+  {
+    "id": "word_hard_50",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🔥 매운맛 1단계",
+    "condition": "하드모드 50스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_hard_stage",
+      "target": 50
+    },
+    "reward": {
+      "puzzle_power": 50,
+      "coin": 100
+    }
+  },
+  {
+    "id": "word_hard_100",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🔥 매운맛 중독",
+    "condition": "하드모드 100스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_hard_stage",
+      "target": 100
+    },
+    "reward": {
+      "puzzle_power": 100,
+      "coin": 200
+    }
+  },
+  {
+    "id": "word_hard_150",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🔥 하드모드 애착",
+    "condition": "하드모드 150스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_hard_stage",
+      "target": 150
+    },
+    "reward": {
+      "puzzle_power": 200,
+      "coin": 250
+    }
+  },
+  {
+    "id": "word_hard_200",
+    "type": "STAGE",
+    "game": "word-sort",
+    "title": "🔥 워드스택 러버",
+    "condition": "하드모드 200스테이지 클리어",
+    "progressConfig": {
+      "source": "word_sort_hard_stage",
+      "target": 200
+    },
+    "reward": {
+      "puzzle_power": 250,
+      "coin": 300
     }
   }
 ]

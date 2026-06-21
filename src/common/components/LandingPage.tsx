@@ -17,6 +17,7 @@ import { CHALLENGE_MAP, ALL_CHALLENGES } from '../../data/challenges';
 import { useChallenges } from '../../context/ChallengeContext';
 import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
+import { useWordSortHardProgress } from '../../context/WordSortHardProgressContext';
 
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
@@ -30,6 +31,7 @@ const LandingPage: React.FC = () => {
     const challenges = useChallenges();
     const { stageProgress, beginnerProgress } = useSudokuProgress();
     const { wordSortProgress } = useWordSortProgress();
+    const { wordSortHardProgress } = useWordSortHardProgress();
     const hasUnclaimed = Object.values(ALL_CHALLENGES).flat().some(c => {
         if (challenges.isChallengeCompleted(c.id)) return false;
         const { source, target } = c.progressConfig;
@@ -37,6 +39,7 @@ const LandingPage: React.FC = () => {
         if (source === 'regular_stage') return Math.min(stageProgress - 1, target) >= target;
         if (source === 'beginner_stage') return Math.min(beginnerProgress, target) >= target;
         if (source === 'word_sort_stage') return Math.min(wordSortProgress, target) >= target;
+        if (source === 'word_sort_hard_stage') return Math.min(wordSortHardProgress, target) >= target;
         return false;
     });
     const [showLoginModal, setShowLoginModal] = useState(false);
