@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -90,6 +90,11 @@ const RULES = [
 const QueensModeSelect: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add('landing-bg');
+    return () => { document.body.classList.remove('landing-bg'); };
+  }, []);
 
   return (
     <div className="mode-select-page">

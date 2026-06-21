@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -26,6 +26,11 @@ const hoverOff = (e: React.MouseEvent<HTMLImageElement>) => {
 
 const SnapSpotModeSelect: React.FC = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.classList.add('landing-bg');
+    return () => { document.body.classList.remove('landing-bg'); };
+  }, []);
 
   return (
     <>

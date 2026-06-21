@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Timer, Layers, ChevronLeft, BookOpen } from 'lucide-react';
@@ -8,6 +8,11 @@ import { logEvent } from '../../../firebase';
 
 const SudokuModeSelect: React.FC = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        document.body.classList.add('landing-bg');
+        return () => { document.body.classList.remove('landing-bg'); };
+    }, []);
     const { dispatch } = useGame();
     const { stageProgress } = useSudokuProgress();
     const [testLevel, setTestLevel] = useState<string>('40');
