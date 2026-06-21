@@ -1,13 +1,34 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Layers, Flame } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useWordSortProgress } from '../../../context/WordSortProgressContext';
 import { useWordSortHardProgress } from '../../../context/WordSortHardProgressContext';
 import { useWordSort } from '../context/WordSortContext';
 import levelsKo from '../data/levels.json';
 import levelsEn from '../data/levels_en.json';
 import { i18n } from '../data/i18n';
+
+const btnStyle = (delay: string, clickable = true): React.CSSProperties => ({
+    '--delay': delay,
+    width: '100%',
+    borderRadius: 16,
+    objectFit: 'cover',
+    cursor: clickable ? 'pointer' : 'default',
+    display: 'block',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    transition: 'all 0.2s ease',
+    opacity: clickable ? 1 : 0.6,
+} as React.CSSProperties);
+
+const hoverOn = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.currentTarget.style.transform = 'translateY(-4px)';
+    e.currentTarget.style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)';
+};
+const hoverOff = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.currentTarget.style.transform = '';
+    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+};
 
 const WordSortModeSelect: React.FC = () => {
     const navigate = useNavigate();
@@ -100,57 +121,42 @@ const WordSortModeSelect: React.FC = () => {
             </header>
 
             <div className="mode-grid">
-                <div
-                    className="game-card animate-fade-in"
-                    style={{ '--delay': '0.1s' } as React.CSSProperties}
-                    onClick={handlePlay}
-                >
-                    <div className="game-card-icon">
-                        <Layers size={40} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>{language === 'ko' ? '스테이지 모드' : 'Stage Mode'}</h3>
-                        <p>{language === 'ko' ? '단어 카드를 같은 카테고리끼리 정렬해 스테이지를 클리어하세요.' : 'Sort word cards into matching categories to clear stages.'}</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                {!isSynced
-                                    ? (language === 'ko' ? '로딩 중...' : 'Loading...')
-                                    : wordSortProgress > 0
-                                        ? `Level ${wordSortProgress + 1} ${language === 'ko' ? '이어하기' : 'Resume'}`
-                                        : `Level 1 ${language === 'ko' ? '시작하기' : 'Start'}`}
-                            </span>
-                        </div>
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                    <img
+                        src="/images/wordstack/stageBtn.png"
+                        alt="스테이지 모드"
+                        className="animate-fade-in"
+                        style={btnStyle('0.1s', isSynced)}
+                        onClick={handlePlay}
+                        onMouseEnter={hoverOn}
+                        onMouseLeave={hoverOff}
+                    />
+                    <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
+                        {!isSynced
+                            ? (language === 'ko' ? '로딩 중...' : 'Loading...')
+                            : wordSortProgress > 0
+                                ? `Level ${wordSortProgress + 1} ${language === 'ko' ? '이어하기' : 'Resume'}`
+                                : `Level 1 ${language === 'ko' ? '시작하기' : 'Start'}`}
+                    </span>
                 </div>
 
-                <div
-                    className="game-card animate-fade-in"
-                    style={{ '--delay': '0.2s', background: 'linear-gradient(135deg, #1a0a0a 0%, #3a1010 100%)', border: '1px solid rgba(255,80,80,0.3)' } as React.CSSProperties}
-                    onClick={handleHardPlay}
-                >
-                    <div className="game-card-icon" style={{ color: '#ff4444' }}>
-                        <Flame size={40} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3 style={{ color: '#ff6b6b' }}>
-                            {language === 'ko' ? '하드 모드' : 'Hard Mode'}
-                            <span style={{ marginLeft: '8px', fontSize: '0.65rem', background: '#ff4444', color: 'white', borderRadius: '6px', padding: '2px 6px', verticalAlign: 'middle', fontWeight: 700 }}>HARD</span>
-                        </h3>
-                        <p style={{ color: 'rgba(255,180,180,0.8)', fontSize: '0.82rem' }}>
-                            {language === 'ko'
-                                ? '이동 횟수가 줄어들고, 도움 기능 중 하나만 사용 가능합니다.'
-                                : 'Fewer moves and only one help feature allowed.'}
-                        </p>
-                        <div className="game-card-footer">
-                            <span className="play-now" style={{ background: 'linear-gradient(135deg, #ff4444, #cc0000)', color: 'white' }}>
-                                {!isHardSynced
-                                    ? (language === 'ko' ? '로딩 중...' : 'Loading...')
-                                    : wordSortHardProgress > 0
-                                        ? `Level ${wordSortHardProgress + 1} ${language === 'ko' ? '도전' : 'Challenge'}`
-                                        : `Level 1 ${language === 'ko' ? '도전' : 'Challenge'}`}
-                            </span>
-                        </div>
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                    <img
+                        src="/images/wordstack/hardBtn.webp"
+                        alt="하드 모드"
+                        className="animate-fade-in"
+                        style={btnStyle('0.2s', isHardSynced)}
+                        onClick={handleHardPlay}
+                        onMouseEnter={hoverOn}
+                        onMouseLeave={hoverOff}
+                    />
+                    <span style={{ fontSize: '0.88rem', color: '#ff6b6b', fontWeight: 700 }}>
+                        {!isHardSynced
+                            ? (language === 'ko' ? '로딩 중...' : 'Loading...')
+                            : wordSortHardProgress > 0
+                                ? `Level ${wordSortHardProgress + 1} ${language === 'ko' ? '도전' : 'Challenge'}`
+                                : `Level 1 ${language === 'ko' ? '도전' : 'Challenge'}`}
+                    </span>
                 </div>
             </div>
 
