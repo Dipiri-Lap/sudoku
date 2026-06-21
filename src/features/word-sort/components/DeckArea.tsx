@@ -37,6 +37,7 @@ export const DeckArea: React.FC = () => {
         setShowMoveConfirm,
         coins,
         setNearestTarget,
+        isHelpBlocked,
     } = useWordSortUI();
 
     return (
@@ -45,29 +46,36 @@ export const DeckArea: React.FC = () => {
             <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', padding: '10px 5px', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '85px' }}>
                 <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>남은 횟수</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: '900' }}>{state.stepsLeft}</div>
-                {!state.isStepsPurchased && tutorialStep === null && (
-                    <button
-                        onClick={() => setShowMoveConfirm(true)}
-                        style={{
-                            marginTop: '6px',
-                            padding: '4px 8px',
-                            borderRadius: '20px',
-                            border: 'none',
-                            background: coins >= 50 ? 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' : '#555',
-                            color: '#fff',
-                            fontSize: '0.65rem',
-                            fontWeight: 'bold',
-                            cursor: coins >= 50 ? 'pointer' : 'not-allowed',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        +20 (🪙50)
-                    </button>
-                )}
+                {!state.isStepsPurchased && tutorialStep === null && (() => {
+                    const blocked = isHelpBlocked('move');
+                    const canAfford = coins >= 50;
+                    const disabled = !canAfford || blocked;
+                    return (
+                        <button
+                            onClick={() => !blocked && setShowMoveConfirm(true)}
+                            title={blocked ? '하드모드: 다른 도움 기능을 이미 사용했습니다' : undefined}
+                            style={{
+                                marginTop: '6px',
+                                padding: '4px 8px',
+                                borderRadius: '20px',
+                                border: blocked ? '1px solid rgba(255,68,68,0.5)' : 'none',
+                                background: blocked ? 'rgba(80,20,20,0.7)' : canAfford ? 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' : '#555',
+                                color: blocked ? 'rgba(255,100,100,0.6)' : '#fff',
+                                fontSize: '0.65rem',
+                                fontWeight: 'bold',
+                                cursor: disabled ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                                transition: 'all 0.2s',
+                                opacity: blocked ? 0.5 : 1,
+                            }}
+                        >
+                            {blocked ? '🔒' : '+20'} {!blocked && '(🪙50)'}
+                        </button>
+                    );
+                })()}
             </div>
 
             {/* Revealed deck + draw button */}

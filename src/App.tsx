@@ -23,6 +23,7 @@ import { CardBackProvider } from './features/word-sort/context/CardBackContext';
 import { CoinProvider } from './context/CoinContext';
 import { SudokuProgressProvider } from './context/SudokuProgressContext';
 import { WordSortProgressProvider } from './context/WordSortProgressContext';
+import { WordSortHardProgressProvider } from './context/WordSortHardProgressContext';
 import { QueensProgressProvider } from './context/QueensProgressContext';
 import { SnapSpotProgressProvider } from './context/SnapSpotProgressContext';
 import { QueensIconProvider } from './features/queens/context/QueensIconContext';
@@ -71,6 +72,7 @@ const AppContent: React.FC = () => {
       <ChallengeProvider>
       <SudokuProgressProvider>
       <WordSortProgressProvider>
+      <WordSortHardProgressProvider>
       <SnapSpotProgressProvider>
       <QueensProgressProvider>
       <QueensIconProvider>
@@ -108,6 +110,7 @@ const AppContent: React.FC = () => {
           <Route path="/snapspot" element={<SnapSpotModeSelect />} />
           <Route path="/snapspot/normal" element={<SnapSpotGame mode="stage" />} />
           <Route path="/snapspot/time-attack" element={<SnapSpotGame mode="time-attack" />} />
+          <Route path="/snapspot/arcade" element={<SnapSpotGame mode="arcade" />} />
           <Route path="/queen" element={<Navigate to="/queens" replace />} />
           <Route path="/queens" element={<QueensModeSelect />} />
           <Route path="/queens/play" element={<QueensGame />} />
@@ -127,6 +130,7 @@ const AppContent: React.FC = () => {
       </QueensIconProvider>
       </QueensProgressProvider>
       </SnapSpotProgressProvider>
+      </WordSortHardProgressProvider>
       </WordSortProgressProvider>
       </SudokuProgressProvider>
       </ChallengeProvider>

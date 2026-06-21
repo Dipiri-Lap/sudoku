@@ -22120,5 +22120,422 @@
                 ]
             }
         ]
+    },
+    {
+        "id": 202,
+        "maxMoves": 104,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "slot_machine",
+                "name": "Slot Machine",
+                "target": 5,
+                "words": [
+                    "Lever Pull",
+                    "Reel Spin",
+                    "Jackpot Win",
+                    "Cherry Symbol",
+                    "Casino Floor"
+                ]
+            },
+            {
+                "id": "sports_game",
+                "name": "Sports",
+                "target": 6,
+                "words": [
+                    "Scoreboard",
+                    "National Team",
+                    "Official Rulebook",
+                    "League",
+                    "Fair Play",
+                    "Hall of Fame"
+                ]
+            },
+            {
+                "id": "spain_travel",
+                "name": "Spain",
+                "target": 5,
+                "words": [
+                    "Bullfighting",
+                    "Sagrada Familia",
+                    "Flamenco",
+                    "Tapas",
+                    "Madrid"
+                ]
+            },
+            {
+                "id": "myth_giant",
+                "name": "Giant",
+                "target": 4,
+                "words": [
+                    "Gulliver's Travels",
+                    "Huge Footprint",
+                    "Mythical Beast",
+                    "Enormous Size"
+                ]
+            },
+            {
+                "id": "string_guitar",
+                "name": "Guitar",
+                "target": 6,
+                "words": [
+                    "Guitar Pick",
+                    "Guitar Fret",
+                    "Resonance Sound",
+                    "Tuner",
+                    "Melody Chord",
+                    "Instrument Case"
+                ]
+            },
+            {
+                "id": "bird_species",
+                "name": "Bird",
+                "target": 5,
+                "words": [
+                    "Oriole",
+                    "Crane",
+                    "Sparrow",
+                    "Eagle",
+                    "Warbler"
+                ]
+            },
+            {
+                "id": "ancient_book",
+                "name": "Ancient Book",
+                "target": 5,
+                "words": [
+                    "Faded Paper",
+                    "Ink Brush Mark",
+                    "Joseon Annals",
+                    "Museum Storage",
+                    "Hunminjeongeum"
+                ]
+            },
+            {
+                "id": "family_bond",
+                "name": "Family",
+                "target": 5,
+                "words": [
+                    "Family Tree",
+                    "Family Album",
+                    "Family Reunion",
+                    "Parental Love",
+                    "Warm Dinner Table"
+                ]
+            },
+            {
+                "id": "tax_payment",
+                "name": "Tax",
+                "target": 5,
+                "words": [
+                    "Tax Obligation",
+                    "Value Added Tax",
+                    "Tax Authority",
+                    "Receipt Proof",
+                    "Penalty Tax"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 203,
+        "maxMoves": 94,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "korean_traditional_sweets",
+                "name": "Korean Sweets",
+                "target": 5,
+                "words": [
+                    "Rice Puff Cookie",
+                    "Yakgwa Mold",
+                    "Corn Syrup Candy",
+                    "Holiday Gift Set",
+                    "Five-Color Maejak"
+                ]
+            },
+            {
+                "id": "returning_home",
+                "name": "Homecoming",
+                "target": 6,
+                "words": [
+                    "Highway Congestion",
+                    "Train Ticket Booking",
+                    "Rural Train Station",
+                    "Gift for Parents",
+                    "Hometown Bench",
+                    "Holiday Migration"
+                ]
+            },
+            {
+                "id": "lid_cover",
+                "name": "Lid",
+                "target": 4,
+                "words": [
+                    "Airtight Container",
+                    "Bottle Opener",
+                    "Pot Stand",
+                    "Cap Lock"
+                ]
+            },
+            {
+                "id": "instant_ramen",
+                "name": "Ramen",
+                "target": 5,
+                "words": [
+                    "Firm Noodles",
+                    "Powder Broth",
+                    "Aluminum Pot",
+                    "Kimchi Slice",
+                    "Cracked Egg"
+                ]
+            },
+            {
+                "id": "autumn_season",
+                "name": "Autumn",
+                "target": 6,
+                "words": [
+                    "Maple Leaf Viewing",
+                    "Ginkgo Tree",
+                    "Reading Season",
+                    "Cool Breeze",
+                    "Cosmos Flower",
+                    "Temperature Swing"
+                ]
+            },
+            {
+                "id": "human_race",
+                "name": "Ethnicity",
+                "target": 5,
+                "words": [
+                    "Genetic Map",
+                    "Skin Tone",
+                    "Multicultural Family",
+                    "Humanity",
+                    "Global"
+                ]
+            },
+            {
+                "id": "racing_competition",
+                "name": "Race",
+                "target": 4,
+                "words": [
+                    "Starting Line",
+                    "Stopwatch",
+                    "Finish Check",
+                    "Accelerator Pedal"
+                ]
+            },
+            {
+                "id": "buddhism_religion",
+                "name": "Buddhism",
+                "target": 7,
+                "words": [
+                    "Shakyamuni",
+                    "Main Hall",
+                    "Wooden Mallet",
+                    "Stone Pagoda",
+                    "Lotus Lantern",
+                    "108 Bows",
+                    "Offering"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 204,
+        "maxMoves": 78,
+        "slots": 3,
+        "categories": [
+            {
+                "id": "blocking_cutoff",
+                "name": "Blocking",
+                "target": 5,
+                "words": [
+                    "Spam Filter",
+                    "No Entry",
+                    "Account Banned",
+                    "UV Shield",
+                    "Firewall Setup"
+                ]
+            },
+            {
+                "id": "creative_idea",
+                "name": "Idea",
+                "target": 4,
+                "words": [
+                    "Flash of Inspiration",
+                    "Draft Proposal",
+                    "Brainstorming",
+                    "Patent Application"
+                ]
+            },
+            {
+                "id": "banner_flag",
+                "name": "Flag",
+                "target": 5,
+                "words": [
+                    "Fluttering",
+                    "Flagpole",
+                    "National Flag Stand",
+                    "Start Signal",
+                    "Tricolor"
+                ]
+            },
+            {
+                "id": "deep_sea_abyss",
+                "name": "Deep Sea",
+                "target": 5,
+                "words": [
+                    "Hydrothermal Vent",
+                    "Deep Sea Pressure",
+                    "Bioluminescent Jellyfish",
+                    "Dark World",
+                    "Mariana Trench"
+                ]
+            },
+            {
+                "id": "rainy_season_monsoon",
+                "name": "Monsoon",
+                "target": 5,
+                "words": [
+                    "Dehumidifier Run",
+                    "Flood-Prone Zone",
+                    "Torrential Sky",
+                    "Damp Laundry",
+                    "Heavy Downpour"
+                ]
+            },
+            {
+                "id": "tea_beverage_types",
+                "name": "Tea",
+                "target": 5,
+                "words": [
+                    "Earl Grey",
+                    "Oolong Tea",
+                    "Matcha Powder",
+                    "Peppermint Tea",
+                    "Rooibos"
+                ]
+            },
+            {
+                "id": "math_function",
+                "name": "Function",
+                "target": 4,
+                "words": [
+                    "Parameter",
+                    "Return Value",
+                    "Domain Range",
+                    "Graph Coordinates"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 205,
+        "maxMoves": 105,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "marathon_race",
+                "name": "Marathon",
+                "target": 6,
+                "words": [
+                    "Full Course Finish",
+                    "Pacemaker",
+                    "Water Station",
+                    "Turnaround Point",
+                    "Heart Rate",
+                    "Race Bib Number"
+                ]
+            },
+            {
+                "id": "elementary_math",
+                "name": "Arithmetic",
+                "target": 5,
+                "words": [
+                    "Multiplication Table",
+                    "Four Operations",
+                    "Abacus Beads",
+                    "Remainder",
+                    "Workbook"
+                ]
+            },
+            {
+                "id": "regular_customer",
+                "name": "Regular",
+                "target": 4,
+                "words": [
+                    "Owner's Treat",
+                    "Usual Seat",
+                    "Credit Ledger",
+                    "Coupon Stamp"
+                ]
+            },
+            {
+                "id": "chinese_characters",
+                "name": "Chinese Characters",
+                "target": 5,
+                "words": [
+                    "Thousand Character Classic",
+                    "Four-Character Idiom",
+                    "Radical Search",
+                    "Meaning and Sound",
+                    "Stroke Order"
+                ]
+            },
+            {
+                "id": "physiognomy_face",
+                "name": "Face Reading",
+                "target": 5,
+                "words": [
+                    "Brow Wrinkle",
+                    "Fortune Guide",
+                    "Eye Corner Reading",
+                    "Nose Shape",
+                    "Astrology Chart"
+                ]
+            },
+            {
+                "id": "news_broadcast",
+                "name": "News",
+                "target": 6,
+                "words": [
+                    "Anchor Comment",
+                    "Breaking News Alert",
+                    "Desk Report",
+                    "Field Reporter",
+                    "Subtitle Scroll",
+                    "Exclusive Report"
+                ]
+            },
+            {
+                "id": "shopping_mall",
+                "name": "Shopping",
+                "target": 7,
+                "words": [
+                    "Discount Coupon App",
+                    "Shopping Cart",
+                    "Receipt Print",
+                    "Fitting Room",
+                    "Impulse Buy",
+                    "Free Gift",
+                    "Display Shelf"
+                ]
+            },
+            {
+                "id": "softness_texture",
+                "name": "Softness",
+                "target": 6,
+                "words": [
+                    "Goose Down Duvet",
+                    "Silk Scarf",
+                    "Milk Pudding",
+                    "Baby Skin",
+                    "Moisture Cream",
+                    "Cotton Candy Texture"
+                ]
+            }
+        ]
     }
 ]

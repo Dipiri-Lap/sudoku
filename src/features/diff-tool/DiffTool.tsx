@@ -201,6 +201,27 @@ export const DiffTool: React.FC = () => {
     setSpots(prev => prev.filter((_, idx) => idx !== i));
   };
 
+  const saveAsWebP = async (file: File, filename: string) => {
+    const img = await loadImage(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvas.getContext('2d')!.drawImage(img, 0, 0);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/webp', 0.92);
+  };
+
+  const exportImages = () => {
+    const id = String(imageID);
+    if (fileA) saveAsWebP(fileA, `${id}.webp`);
+    if (fileB) saveAsWebP(fileB, `${id}_1.webp`);
+  };
+
   const exportJSON = () => {
     const json = JSON.stringify({
       imageID,
@@ -346,6 +367,9 @@ export const DiffTool: React.FC = () => {
             <input type="number" value={colSize} min={20} style={{ ...NUM_INPUT, width: '70px' }}
               onChange={e => setColSize(parseInt(e.target.value) || 120)} />
           </label>
+          <button onClick={exportImages} style={{ ...BTN, background: '#2e7d32', color: '#fff' }}>
+            이미지 저장 (WebP)
+          </button>
           <button onClick={exportJSON} style={{ ...BTN, background: '#4a90e2', color: '#fff' }}>
             JSON 다운로드
           </button>

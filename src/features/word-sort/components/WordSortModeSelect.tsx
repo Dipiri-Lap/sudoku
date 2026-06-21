@@ -1,8 +1,9 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Layers } from 'lucide-react';
+import { ChevronLeft, Layers, Flame } from 'lucide-react';
 import { useWordSortProgress } from '../../../context/WordSortProgressContext';
+import { useWordSortHardProgress } from '../../../context/WordSortHardProgressContext';
 import { useWordSort } from '../context/WordSortContext';
 import levelsKo from '../data/levels.json';
 import levelsEn from '../data/levels_en.json';
@@ -11,6 +12,7 @@ import { i18n } from '../data/i18n';
 const WordSortModeSelect: React.FC = () => {
     const navigate = useNavigate();
     const { wordSortProgress, isSynced } = useWordSortProgress();
+    const { wordSortHardProgress, isHardSynced } = useWordSortHardProgress();
     const { state, dispatch } = useWordSort();
     const { language } = state;
     const t = i18n[language];
@@ -20,7 +22,6 @@ const WordSortModeSelect: React.FC = () => {
         if (!isSynced) return;
         const tutorialDone = localStorage.getItem('wordSort_tutorialDone');
         if (!tutorialDone) {
-            // New user — game handles tutorial
             navigate('play');
             return;
         }
@@ -28,6 +29,19 @@ const WordSortModeSelect: React.FC = () => {
         const levelData = (levels as any[]).find((l) => l.id === nextLevel) || levels[0];
         dispatch({ type: 'START_LEVEL', levelData });
         navigate(`play?level=${nextLevel}`);
+    };
+
+    const handleHardPlay = () => {
+        if (!isHardSynced) return;
+        const tutorialDone = localStorage.getItem('wordSort_tutorialDone');
+        if (!tutorialDone) {
+            navigate('play');
+            return;
+        }
+        const nextLevel = wordSortHardProgress + 1;
+        const levelData = (levels as any[]).find((l) => l.id === nextLevel) || levels[0];
+        dispatch({ type: 'START_LEVEL', levelData, hardMode: true });
+        navigate(`play?level=${nextLevel}&mode=hard`);
     };
 
     return (
@@ -104,6 +118,36 @@ const WordSortModeSelect: React.FC = () => {
                                     : wordSortProgress > 0
                                         ? `Level ${wordSortProgress + 1} ${language === 'ko' ? '이어하기' : 'Resume'}`
                                         : `Level 1 ${language === 'ko' ? '시작하기' : 'Start'}`}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    className="game-card animate-fade-in"
+                    style={{ '--delay': '0.2s', background: 'linear-gradient(135deg, #1a0a0a 0%, #3a1010 100%)', border: '1px solid rgba(255,80,80,0.3)' } as React.CSSProperties}
+                    onClick={handleHardPlay}
+                >
+                    <div className="game-card-icon" style={{ color: '#ff4444' }}>
+                        <Flame size={40} />
+                    </div>
+                    <div className="game-card-content">
+                        <h3 style={{ color: '#ff6b6b' }}>
+                            {language === 'ko' ? '하드 모드' : 'Hard Mode'}
+                            <span style={{ marginLeft: '8px', fontSize: '0.65rem', background: '#ff4444', color: 'white', borderRadius: '6px', padding: '2px 6px', verticalAlign: 'middle', fontWeight: 700 }}>HARD</span>
+                        </h3>
+                        <p style={{ color: 'rgba(255,180,180,0.8)', fontSize: '0.82rem' }}>
+                            {language === 'ko'
+                                ? '이동 횟수가 줄어들고, 도움 기능 중 하나만 사용 가능합니다.'
+                                : 'Fewer moves and only one help feature allowed.'}
+                        </p>
+                        <div className="game-card-footer">
+                            <span className="play-now" style={{ background: 'linear-gradient(135deg, #ff4444, #cc0000)', color: 'white' }}>
+                                {!isHardSynced
+                                    ? (language === 'ko' ? '로딩 중...' : 'Loading...')
+                                    : wordSortHardProgress > 0
+                                        ? `Level ${wordSortHardProgress + 1} ${language === 'ko' ? '도전' : 'Challenge'}`
+                                        : `Level 1 ${language === 'ko' ? '도전' : 'Challenge'}`}
                             </span>
                         </div>
                     </div>

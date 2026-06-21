@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, type ReactNode } from 'react';
 
 export const WORDSORT_SAVE_KEY = 'wordSort_saveData';
+export const WORDSORT_HARD_SAVE_KEY = 'wordSort_hard_saveData';
 
 export type CardType = 'word' | 'category';
 
@@ -37,10 +38,11 @@ export interface WordSolitaireState {
     lastCompletedSlot: number | null; // slot index that just completed, for animation trigger
     history: Omit<WordSolitaireState, 'history'>[]; // state snapshots for Undo
     language: 'ko' | 'en';
+    isHardMode: boolean;
 }
 
 export type WordSolitaireAction =
-    | { type: 'START_LEVEL'; levelData: any }
+    | { type: 'START_LEVEL'; levelData: any; hardMode?: boolean }
     | { type: 'DRAW_DECK' }
     | { type: 'MOVE_CARD'; from: { type: 'stack' | 'deck'; index: number; cardIndex?: number; count?: number }; to: { type: 'slot' | 'stack'; index: number } }
     | { type: 'CLEAR_COMPLETED_SLOT' }
@@ -70,6 +72,7 @@ const initialState: WordSolitaireState = {
     lastCompletedSlot: null,
     history: [],
     language: (localStorage.getItem('wordSort_language') as 'ko' | 'en') || 'ko',
+    isHardMode: false,
 };
 
 function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAction): WordSolitaireState {
@@ -78,6 +81,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             const level = action.levelData;
             const categories = level.categories || [];
             const slotCount = level.slots || 4;
+            const hardMode = action.hardMode ?? false;
 
             // Fixed layout for tutorial
             if (level.fixedStacks && level.fixedDeck) {
@@ -96,6 +100,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     lockedStacks: 1,
                     lockedSlots: 1,
                     isStepsPurchased: false,
+                    isHardMode: false,
                 };
             }
 
@@ -166,10 +171,11 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             const activeSlots: Record<number, ActiveSlot | null> = {};
             for (let i = 0; i < slotCount; i++) activeSlots[i] = null;
 
+            const baseSteps = level.maxMoves || 100;
             return {
                 ...initialState,
                 level: level.id,
-                stepsLeft: level.maxMoves || 100,
+                stepsLeft: hardMode ? Math.round(baseSteps * 0.6) : baseSteps,
                 stacks: newStacks,
                 deck: newDeck,
                 categories: categories,
@@ -179,6 +185,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                 lockedSlots: 1,
                 isStepsPurchased: false,
                 language: state.language,
+                isHardMode: hardMode,
             };
         }
 

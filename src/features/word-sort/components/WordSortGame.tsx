@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { logEvent } from '../../../firebase';
 import { ChevronLeft, ShoppingCart, Settings } from 'lucide-react';
-import { useWordSort, WORDSORT_SAVE_KEY } from '../context/WordSortContext';
+import { useWordSort, WORDSORT_SAVE_KEY, WORDSORT_HARD_SAVE_KEY } from '../context/WordSortContext';
 import levelsKo from '../data/levels.json';
 import tutorialLevelKo from '../data/tutorial-level.json';
 import levelsEn from '../data/levels_en.json';
 import tutorialLevelEn from '../data/tutorial-level_en.json';
 import { useCoins } from '../../../context/CoinContext';
 import { useWordSortProgress } from '../../../context/WordSortProgressContext';
+import { useWordSortHardProgress } from '../../../context/WordSortHardProgressContext';
 import { useCardBacks, cardBackDesigns } from '../context/CardBackContext';
 import CardBackShopModal from './CardBackShopModal';
 import WordSortSettingsModal from './WordSortSettingsModal';
@@ -40,6 +41,7 @@ const WordSortGame: React.FC = () => {
     const navigate = useNavigate();
     const { addCoins, spendCoins, coins } = useCoins();
     const { saveWordSortProgress } = useWordSortProgress();
+    const { saveWordSortHardProgress } = useWordSortHardProgress();
     const hasAwardedCoins = useRef(false);
     const hasSavedLevelProgress = useRef(false);
     const hasLoggedPlay = useRef(false);
@@ -68,6 +70,20 @@ const WordSortGame: React.FC = () => {
     const [showCoinInsufficient, setShowCoinInsufficient] = useState(false);
 
     const [adUnlockedRemove, setAdUnlockedRemove] = useState(false);
+
+    const [hardModeHelpUsed, setHardModeHelpUsed] = useState<string | null>(null);
+
+    const markHelpUsed = (feature: string) => {
+        if (state.isHardMode && !hardModeHelpUsed) {
+            setHardModeHelpUsed(feature);
+        }
+    };
+
+    const isHelpBlocked = (_feature: string): boolean => {
+        return state.isHardMode && hardModeHelpUsed !== null;
+    };
+
+    const resetHardModeHelp = () => setHardModeHelpUsed(null);
 
     const handleWatchAd = (onSuccess: () => Promise<void> | void) => {
         if (adWatching) return;
@@ -273,7 +289,7 @@ const WordSortGame: React.FC = () => {
     const { tutorialStep, setTutorialStep, completeTutorial, tutorialHighlightCards, tutorialHighlightSlots, tutorialHighlightDeck } = useTutorialStep({ state, dispatch, triggerDealing });
 
     // Hook: gather/remove animation
-    const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef, adUnlockedRemove, setAdUnlockedRemove });
+    const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef, adUnlockedRemove, setAdUnlockedRemove, onRemoveUsed: () => markHelpUsed('remove') });
 
     // Hook: drag and drop
     const { draggingGroup, setDraggingGroup, dragGhostPos, setDragGhostPos, landingGroup, setLandingGroup, nearestValidTarget, setNearestValidTarget, nearestTarget, setNearestTarget, invalidDropTarget, handleDragStart, handleDragMove, handleDrop, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useWordSortDrag({ state, dispatch, tutorialStep, gatheringCat, stackRefs, slotRefs, finalCardWidth, cardHeight, visibleHeight, sfxVolume });
@@ -292,7 +308,11 @@ const WordSortGame: React.FC = () => {
             addCoins(10);
             if (!hasSavedLevelProgress.current) {
                 hasSavedLevelProgress.current = true;
-                saveWordSortProgress(state.level).catch(console.error);
+                if (state.isHardMode) {
+                    saveWordSortHardProgress(state.level).catch(console.error);
+                } else {
+                    saveWordSortProgress(state.level).catch(console.error);
+                }
             }
             import('../../../firebase').then(({ auth }) => {
                 if (auth.currentUser) {
@@ -376,9 +396,11 @@ const WordSortGame: React.FC = () => {
     useEffect(() => {
         if (!state || state.isTutorial) return;
 
+        const saveKey = state.isHardMode ? WORDSORT_HARD_SAVE_KEY : WORDSORT_SAVE_KEY;
+
         // Don't save if game is over or won
         if (state.isGameOver || state.isWinner) {
-            localStorage.removeItem(WORDSORT_SAVE_KEY);
+            localStorage.removeItem(saveKey);
             return;
         }
 
@@ -387,7 +409,7 @@ const WordSortGame: React.FC = () => {
 
         // Only save if the game has actually started (e.g., stacks are generated)
         if (stateToSave.stacks.length > 0) {
-            localStorage.setItem(WORDSORT_SAVE_KEY, JSON.stringify(stateToSave));
+            localStorage.setItem(saveKey, JSON.stringify(stateToSave));
         }
     }, [state]);
 
@@ -400,9 +422,10 @@ const WordSortGame: React.FC = () => {
             const params = new URLSearchParams(location.search);
             const urlLevelStr = params.get('level');
             const urlLevel = urlLevelStr ? parseInt(urlLevelStr) : null;
+            const isHardModeUrl = params.get('mode') === 'hard';
 
             // Fast path: state was pre-loaded by ModeSelect dispatch (like Sudoku)
-            if (state.stacks.length > 0 && urlLevel !== null && state.level === urlLevel) {
+            if (state.stacks.length > 0 && urlLevel !== null && state.level === urlLevel && state.isHardMode === isHardModeUrl) {
                 const levelData = levels.find((l: any) => l.id === state.level);
                 if (levelData) triggerDealing(levelStackTotal(levelData));
                 return;
@@ -416,7 +439,8 @@ const WordSortGame: React.FC = () => {
             }
 
             // Wait for Firebase auth state to be resolved (used for both URL and non-URL paths)
-            let clearedLevel = parseInt(localStorage.getItem('word_sort_progress') ?? '0', 10) || 0;
+            const lsKey = isHardModeUrl ? 'word_sort_hard_progress' : 'word_sort_progress';
+            let clearedLevel = parseInt(localStorage.getItem(lsKey) ?? '0', 10) || 0;
             try {
                 const { auth } = await import('../../../firebase');
                 const user = await new Promise<any>((resolve) => {
@@ -426,8 +450,10 @@ const WordSortGame: React.FC = () => {
                     });
                 });
                 if (user) {
-                    const { getWordSortProgress } = await import('../../../services/rankingService');
-                    const firebaseLevel = await getWordSortProgress(user.uid);
+                    const { getWordSortProgress, getWordSortHardProgress } = await import('../../../services/rankingService');
+                    const firebaseLevel = isHardModeUrl
+                        ? await getWordSortHardProgress(user.uid)
+                        : await getWordSortProgress(user.uid);
                     clearedLevel = Math.max(clearedLevel, firebaseLevel);
                 }
             } catch (e) {
@@ -437,18 +463,21 @@ const WordSortGame: React.FC = () => {
             if (urlLevel !== null && !isNaN(urlLevel)) {
                 const maxAllowed = clearedLevel + 1;
                 if (urlLevel > maxAllowed) {
+                    const modeQuery = isHardModeUrl ? '&mode=hard' : '';
                     alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${maxAllowed})`);
-                    window.location.replace(`/word-sort/play?level=${maxAllowed}`);
+                    window.location.replace(`/word-sort/play?level=${maxAllowed}${modeQuery}`);
                     return;
                 }
                 const levelData = levels.find((l: any) => l.id === urlLevel) || levels[0];
-                dispatch({ type: 'START_LEVEL', levelData });
+                dispatch({ type: 'START_LEVEL', levelData, hardMode: isHardModeUrl });
+                resetHardModeHelp();
                 triggerDealing(levelStackTotal(levelData));
                 return;
             }
 
             // Check localStorage — only restore if it's a level NOT yet cleared
-            const savedData = localStorage.getItem(WORDSORT_SAVE_KEY);
+            const gameSaveKey = isHardModeUrl ? WORDSORT_HARD_SAVE_KEY : WORDSORT_SAVE_KEY;
+            const savedData = localStorage.getItem(gameSaveKey);
             if (savedData) {
                 try {
                     const parsed = JSON.parse(savedData);
@@ -464,15 +493,15 @@ const WordSortGame: React.FC = () => {
                                 return;
                             }
                             // Stack count mismatch (old save) — discard
-                            localStorage.removeItem(WORDSORT_SAVE_KEY);
+                            localStorage.removeItem(gameSaveKey);
                         } else {
                             // Saved game is for an already-cleared level — discard it
-                            localStorage.removeItem(WORDSORT_SAVE_KEY);
+                            localStorage.removeItem(gameSaveKey);
                         }
                     }
                 } catch (e) {
                     console.error('Failed to parse saved game:', e);
-                    localStorage.removeItem(WORDSORT_SAVE_KEY);
+                    localStorage.removeItem(gameSaveKey);
                 }
             }
 
@@ -483,7 +512,7 @@ const WordSortGame: React.FC = () => {
                 startLevelIndex = nextIdx >= 0 ? nextIdx : levels.length - 1;
             }
             const levelData = levels[startLevelIndex] || levels[0];
-            dispatch({ type: 'START_LEVEL', levelData });
+            dispatch({ type: 'START_LEVEL', levelData, hardMode: isHardModeUrl });
             triggerDealing(levelStackTotal(levelData));
         };
 
@@ -492,6 +521,7 @@ const WordSortGame: React.FC = () => {
 
     const initializeNewGame = async () => {
         setAdUsedThisGame(false);
+        resetHardModeHelp();
         const tutorialDone = localStorage.getItem('wordSort_tutorialDone');
         if (!tutorialDone) {
             dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
@@ -501,10 +531,10 @@ const WordSortGame: React.FC = () => {
         }
 
         // Wait for Firebase auth to be ready, then load cleared level
+        const isHardModeUrl = new URLSearchParams(location.search).get('mode') === 'hard';
         let startLevelIndex = 0;
         try {
             const { auth } = await import('../../../firebase');
-            // Wait for auth state to be resolved (currentUser might be null on cold start)
             const user = await new Promise<any>((resolve) => {
                 const unsubscribe = auth.onAuthStateChanged((u) => {
                     unsubscribe();
@@ -512,8 +542,10 @@ const WordSortGame: React.FC = () => {
                 });
             });
             if (user) {
-                const { getWordSortProgress } = await import('../../../services/rankingService');
-                const clearedLevel = await getWordSortProgress(user.uid);
+                const { getWordSortProgress, getWordSortHardProgress } = await import('../../../services/rankingService');
+                const clearedLevel = isHardModeUrl
+                    ? await getWordSortHardProgress(user.uid)
+                    : await getWordSortProgress(user.uid);
                 if (clearedLevel > 0) {
                     // Find the next level after the cleared one
                     const nextIdx = levels.findIndex((l: any) => l.id === clearedLevel + 1);
@@ -525,7 +557,7 @@ const WordSortGame: React.FC = () => {
         }
 
         const levelData = levels[startLevelIndex] || levels[0];
-        dispatch({ type: 'START_LEVEL', levelData });
+        dispatch({ type: 'START_LEVEL', levelData, hardMode: isHardModeUrl });
         triggerDealing(levelStackTotal(levelData));
     };
 
@@ -533,7 +565,8 @@ const WordSortGame: React.FC = () => {
         if (confirmed && pendingSavedState) {
             dispatch({ type: 'RESTORE_GAME', savedState: pendingSavedState });
         } else {
-            localStorage.removeItem(WORDSORT_SAVE_KEY);
+            const saveKey = state.isHardMode ? WORDSORT_HARD_SAVE_KEY : WORDSORT_SAVE_KEY;
+            localStorage.removeItem(saveKey);
             initializeNewGame();
         }
         setShowResumeConfirm(false);
@@ -553,6 +586,7 @@ const WordSortGame: React.FC = () => {
         } else {
             dispatch({ type: 'UNLOCK_SLOT' });
         }
+        markHelpUsed(`unlock_${unlockConfirm}`);
         setUnlockConfirm(null);
     };
 
@@ -696,6 +730,11 @@ const WordSortGame: React.FC = () => {
             stackStartIndices,
             triggerDealing,
             language: state.language,
+            isHardMode: state.isHardMode,
+            hardModeHelpUsed,
+            markHelpUsed,
+            isHelpBlocked,
+            resetHardModeHelp,
             setLanguage: (l: 'ko' | 'en') => {
                 const targetLevels = l === 'en' ? levelsEn : levelsKo;
                 const targetTutorial = l === 'en' ? tutorialLevelEn : tutorialLevelKo;
@@ -738,6 +777,12 @@ const WordSortGame: React.FC = () => {
                         <span style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.08em', opacity: 0.7, color: 'white' }}>
                             {t.level.toUpperCase()} {state.level}
                         </span>
+                    )}
+                    {state.isHardMode && tutorialStep === null && (
+                        <span style={{
+                            fontSize: '0.6rem', fontWeight: 800, background: 'linear-gradient(135deg, #ff4444, #cc0000)',
+                            color: 'white', borderRadius: '6px', padding: '2px 7px', letterSpacing: '0.05em'
+                        }}>HARD</span>
                     )}
                 </div>
                 {tutorialStep === null && (
@@ -839,12 +884,12 @@ const WordSortGame: React.FC = () => {
                                 onClick={async () => {
                                     const action = async () => {
                                         const success = await spendCoins(50);
-                                        if (success) { dispatch({ type: 'ADD_STEPS', count: 20 }); }
+                                        if (success) { dispatch({ type: 'ADD_STEPS', count: 20 }); markHelpUsed('move'); }
                                         setShowMoveConfirm(false);
                                     };
                                     if (coins < 50) {
                                         if (adUsedThisGame) { setShowCoinInsufficient(true); }
-                                        else { setAdOfferConfig({ type: 'move', cost: 50, action: async () => { dispatch({ type: 'ADD_STEPS', count: 20 }); setShowMoveConfirm(false); } }); }
+                                        else { setAdOfferConfig({ type: 'move', cost: 50, action: async () => { dispatch({ type: 'ADD_STEPS', count: 20 }); markHelpUsed('move'); setShowMoveConfirm(false); } }); }
                                         return;
                                     }
                                     action();
@@ -886,12 +931,12 @@ const WordSortGame: React.FC = () => {
                                 onClick={async () => {
                                     const action = async () => {
                                         const success = await spendCoins(10);
-                                        if (success) { dispatch({ type: 'UNDO_ACTION' }); }
+                                        if (success) { dispatch({ type: 'UNDO_ACTION' }); markHelpUsed('undo'); }
                                         setShowUndoConfirm(false);
                                     };
                                     if (coins < 10) {
                                         if (adUsedThisGame) { setShowCoinInsufficient(true); }
-                                        else { setAdOfferConfig({ type: 'undo', cost: 10, action: async () => { dispatch({ type: 'UNDO_ACTION' }); setShowUndoConfirm(false); } }); }
+                                        else { setAdOfferConfig({ type: 'undo', cost: 10, action: async () => { dispatch({ type: 'UNDO_ACTION' }); markHelpUsed('undo'); setShowUndoConfirm(false); } }); }
                                         return;
                                     }
                                     action();

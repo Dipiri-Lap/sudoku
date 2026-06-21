@@ -220,6 +220,20 @@ export const getWordSortProgress = async (uid: string): Promise<number> => {
     return 0;
 };
 
+// Word Sort Hard Mode progress: get the last cleared level (0 = none cleared)
+export const getWordSortHardProgress = async (uid: string): Promise<number> => {
+    try {
+        const progressRef = doc(db, 'users', uid, 'wordSortHardProgress', 'data');
+        const snap = await getDoc(progressRef);
+        if (snap.exists()) {
+            return snap.data().clearedLevel ?? 0;
+        }
+    } catch (e) {
+        console.error('Failed to get wordSort hard progress:', e);
+    }
+    return 0;
+};
+
 // SnapSpot progress: save cleared stage number
 export const saveSnapSpotProgress = async (uid: string, clearedStage: number): Promise<void> => {
     try {
@@ -244,6 +258,30 @@ export const getSnapSpotProgress = async (uid: string): Promise<number> => {
         }
     } catch (e) {
         console.error('Failed to get snapspot progress:', e);
+    }
+    return 0;
+};
+
+export const saveArcadeBestScore = async (uid: string, score: number): Promise<void> => {
+    try {
+        const ref = doc(db, 'users', uid, 'arcadeProgress', 'data');
+        const snap = await getDoc(ref);
+        const current = snap.exists() ? (snap.data().bestScore ?? 0) : 0;
+        if (score > current) {
+            await setDoc(ref, { bestScore: score, updatedAt: new Date() }, { merge: true });
+        }
+    } catch (e) {
+        console.error('Failed to save arcade best score:', e);
+    }
+};
+
+export const getArcadeBestScore = async (uid: string): Promise<number> => {
+    try {
+        const ref = doc(db, 'users', uid, 'arcadeProgress', 'data');
+        const snap = await getDoc(ref);
+        if (snap.exists()) return snap.data().bestScore ?? 0;
+    } catch (e) {
+        console.error('Failed to get arcade best score:', e);
     }
     return 0;
 };

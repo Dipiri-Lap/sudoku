@@ -40,6 +40,7 @@ export const StackArea: React.FC = () => {
         nearestTarget,
         setNearestTarget,
         invalidDropTarget,
+        isHelpBlocked,
     } = useWordSortUI();
 
     const { lockedStacks } = state;
@@ -57,39 +58,44 @@ export const StackArea: React.FC = () => {
             zIndex: gatheringCat ? 6000 : 1
         }}>
             {/* 1. Locks on the left */}
-            {tutorialStep === null && Array.from({ length: lockedStacks }).map((_, i) => (
-                <div
-                    key={`locked-stack-${i}`}
-                    onClick={() => setUnlockConfirm('stack')}
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        minHeight: `${cardHeight}px`,
-                        cursor: 'pointer',
-                    }}
-                >
-                    <div style={{
-                        ...stackCardStyle,
-                        width: `${finalCardWidth}px`,
-                        height: `${cardHeight}px`,
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1.5px dashed rgba(255,255,255,0.25)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '3px',
-                        color: 'rgba(255,255,255,0.5)',
-                        cursor: 'pointer',
-                    }}>
-                        <span style={{ fontSize: '1.1rem' }}>🔒</span>
-                        <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
-                        <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>
+            {tutorialStep === null && Array.from({ length: lockedStacks }).map((_, i) => {
+                const blocked = isHelpBlocked('unlock_stack');
+                return (
+                    <div
+                        key={`locked-stack-${i}`}
+                        onClick={() => !blocked && setUnlockConfirm('stack')}
+                        title={blocked ? '하드모드: 다른 도움 기능을 이미 사용했습니다' : undefined}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            minHeight: `${cardHeight}px`,
+                            cursor: blocked ? 'not-allowed' : 'pointer',
+                        }}
+                    >
+                        <div style={{
+                            ...stackCardStyle,
+                            width: `${finalCardWidth}px`,
+                            height: `${cardHeight}px`,
+                            background: blocked ? 'rgba(80,20,20,0.5)' : 'rgba(255,255,255,0.05)',
+                            border: blocked ? '1.5px dashed rgba(255,68,68,0.3)' : '1.5px dashed rgba(255,255,255,0.25)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '3px',
+                            color: blocked ? 'rgba(255,100,100,0.4)' : 'rgba(255,255,255,0.5)',
+                            cursor: blocked ? 'not-allowed' : 'pointer',
+                            opacity: blocked ? 0.5 : 1,
+                        }}>
+                            <span style={{ fontSize: '1.1rem' }}>{blocked ? '⛔' : '🔒'}</span>
+                            <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
+                            {!blocked && <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>}
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
 
             {/* 2. Active Stacks - natural order: newly unlocked (prepended) appears leftmost */}
             {state.stacks.map((stack, sIdx) => {

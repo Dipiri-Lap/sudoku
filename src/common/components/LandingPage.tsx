@@ -21,6 +21,11 @@ import { useWordSortProgress } from '../../context/WordSortProgressContext';
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
 const LandingPage: React.FC = () => {
+    useEffect(() => {
+        document.body.classList.add('landing-bg');
+        return () => { document.body.classList.remove('landing-bg'); };
+    }, []);
+
     const { isInstalled, promptToInstall } = usePWAInstall();
     const challenges = useChallenges();
     const { stageProgress, beginnerProgress } = useSudokuProgress();

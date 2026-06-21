@@ -23,12 +23,20 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
         setShowUndoConfirm,
         setShowRemoveConfirm,
         language,
+        isHardMode,
+        isHelpBlocked,
+        resetHardModeHelp,
     } = useWordSortUI();
 
     const t = i18n[language];
     const levels = language === 'en' ? levelsEn : levelsKo;
 
     if (tutorialStep !== null) return null;
+
+    const undoBlocked = isHelpBlocked('undo');
+    const removeBlocked = isHelpBlocked('remove');
+    const undoAvail = state.history.length > 0 && coins >= 10 && !undoBlocked;
+    const removeAvail = (coins >= 50 || isRemoveMode) && !removeBlocked;
 
     return (
         <div style={{
@@ -37,10 +45,11 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
             borderTop: '1px solid rgba(255,255,255,0.1)'
         }}>
             <div style={{ textAlign: 'center' }}>
-                <RotateCcw size={24} onClick={() => {
+                <RotateCcw size={24} style={{ cursor: 'pointer' }} onClick={() => {
                     const currentLevelData = levels.find((l: any) => l.id === state.level) || levels[0];
                     resetUnlocks();
-                    dispatch({ type: 'START_LEVEL', levelData: currentLevelData });
+                    resetHardModeHelp();
+                    dispatch({ type: 'START_LEVEL', levelData: currentLevelData, hardMode: isHardMode });
                     triggerDealing(levelStackTotal(currentLevelData));
                 }} />
                 <div style={{ fontSize: '0.7rem' }}>{t.retry}</div>
@@ -48,37 +57,48 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
             <div
                 style={{
                     textAlign: 'center',
-                    cursor: (state.history.length > 0 && coins >= 10) ? 'pointer' : 'not-allowed',
-                    color: (state.history.length > 0 && coins >= 10) ? 'white' : 'rgba(255,255,255,0.3)',
-                    opacity: (state.history.length > 0 && coins >= 10) ? 1 : 0.5
+                    cursor: undoAvail ? 'pointer' : 'not-allowed',
+                    color: undoBlocked ? 'rgba(255,80,80,0.4)' : (undoAvail ? 'white' : 'rgba(255,255,255,0.3)'),
+                    opacity: undoBlocked ? 0.4 : (undoAvail ? 1 : 0.5),
+                    position: 'relative',
                 }}
+                title={undoBlocked ? '하드모드: 다른 도움 기능을 이미 사용했습니다' : undefined}
                 onClick={() => {
-                    if (state.history.length === 0) return;
+                    if (undoBlocked || state.history.length === 0) return;
                     setShowUndoConfirm(true);
                 }}
             >
                 <Undo2 size={24} style={{ margin: '0 auto' }} />
                 <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>{language === 'ko' ? '철회' : 'Undo'}</div>
-                <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 10</div>
+                {undoBlocked
+                    ? <div style={{ fontSize: '0.65rem', color: 'rgba(255,80,80,0.6)', fontWeight: 'bold' }}>⛔ 불가</div>
+                    : <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 10</div>
+                }
             </div>
             <div
                 style={{
                     textAlign: 'center',
-                    cursor: (coins >= 50 || isRemoveMode) ? 'pointer' : 'not-allowed',
-                    color: isRemoveMode ? '#ff6b6b' : (coins >= 50 ? 'white' : 'rgba(255,255,255,0.3)'),
-                    opacity: isRemoveMode ? 1 : (coins >= 50 ? 1 : 0.5)
+                    cursor: (isRemoveMode || removeAvail) ? 'pointer' : 'not-allowed',
+                    color: (removeBlocked && !isRemoveMode) ? 'rgba(255,80,80,0.4)' : (isRemoveMode ? '#ff6b6b' : (removeAvail ? 'white' : 'rgba(255,255,255,0.3)')),
+                    opacity: (removeBlocked && !isRemoveMode) ? 0.4 : (isRemoveMode ? 1 : (removeAvail ? 1 : 0.5)),
                 }}
+                title={(removeBlocked && !isRemoveMode) ? '하드모드: 도움 기능을 이미 사용했습니다' : undefined}
                 onClick={() => {
                     if (isRemoveMode) {
                         setIsRemoveMode(false);
-                    } else {
-                        setShowRemoveConfirm(true);
+                        return;
                     }
+                    if (removeBlocked) return;
+                    setShowRemoveConfirm(true);
                 }}
             >
                 <LayersIcon size={24} style={{ margin: '0 auto' }} />
                 <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>{isRemoveMode ? t.cancel : (language === 'ko' ? '제거' : 'Remove')}</div>
-                {!isRemoveMode && <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 50</div>}
+                {!isRemoveMode && (
+                    removeBlocked
+                        ? <div style={{ fontSize: '0.65rem', color: 'rgba(255,80,80,0.6)', fontWeight: 'bold' }}>⛔ 불가</div>
+                        : <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 50</div>
+                )}
             </div>
         </div>
     );

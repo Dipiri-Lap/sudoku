@@ -18,6 +18,7 @@ interface UseGatherAnimationParams {
     deckCardRef: React.MutableRefObject<HTMLDivElement | null>;
     adUnlockedRemove: boolean;
     setAdUnlockedRemove: React.Dispatch<React.SetStateAction<boolean>>;
+    onRemoveUsed?: () => void;
 }
 
 export function useGatherAnimation(params: UseGatherAnimationParams) {
@@ -36,6 +37,7 @@ export function useGatherAnimation(params: UseGatherAnimationParams) {
         deckCardRef,
         adUnlockedRemove,
         setAdUnlockedRemove,
+        onRemoveUsed,
     } = params;
 
     const [gatheringCat, setGatheringCat] = useState<string | null>(null);
@@ -113,6 +115,9 @@ export function useGatherAnimation(params: UseGatherAnimationParams) {
             const success = await spendCoins(50);
             if (!success) return;
         }
+
+        // 실제 제거가 확정된 시점 — 하드모드 도움 사용 기록
+        onRemoveUsed?.();
 
         // 1. Find the target slot for this category to determine destination
         let targetX = window.innerWidth / 2 - finalCardWidth / 2;

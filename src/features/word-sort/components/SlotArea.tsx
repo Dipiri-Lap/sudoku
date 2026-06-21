@@ -26,6 +26,7 @@ export const SlotArea: React.FC = () => {
         slotRefs,
         nearestTarget,
         invalidDropTarget,
+        isHelpBlocked,
     } = useWordSortUI();
 
     const { lockedSlots } = state;
@@ -43,31 +44,36 @@ export const SlotArea: React.FC = () => {
             zIndex: gatheringCat ? 6000 : 1
         }}>
             {/* 1. Locks on the left */}
-            {tutorialStep === null && Array.from({ length: lockedSlots }).map((_, i) => (
-                <div key={`locked-slot-${i}`} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                    <div style={{ height: '25px' }} />
-                    <div
-                        onClick={() => setUnlockConfirm('slot')}
-                        style={{
-                            ...slotCardStyle,
-                            width: `${finalCardWidth}px`,
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1.5px dashed rgba(255,255,255,0.25)',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '3px',
-                            color: 'rgba(255,255,255,0.5)',
-                        }}
-                    >
-                        <span style={{ fontSize: '1.1rem' }}>🔒</span>
-                        <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
-                        <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>
+            {tutorialStep === null && Array.from({ length: lockedSlots }).map((_, i) => {
+                const blocked = isHelpBlocked('unlock_slot');
+                return (
+                    <div key={`locked-slot-${i}`} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                        <div style={{ height: '25px' }} />
+                        <div
+                            onClick={() => !blocked && setUnlockConfirm('slot')}
+                            title={blocked ? '하드모드: 다른 도움 기능을 이미 사용했습니다' : undefined}
+                            style={{
+                                ...slotCardStyle,
+                                width: `${finalCardWidth}px`,
+                                background: blocked ? 'rgba(80,20,20,0.5)' : 'rgba(255,255,255,0.05)',
+                                border: blocked ? '1.5px dashed rgba(255,68,68,0.3)' : '1.5px dashed rgba(255,255,255,0.25)',
+                                cursor: blocked ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '3px',
+                                color: blocked ? 'rgba(255,100,100,0.4)' : 'rgba(255,255,255,0.5)',
+                                opacity: blocked ? 0.5 : 1,
+                            }}
+                        >
+                            <span style={{ fontSize: '1.1rem' }}>{blocked ? '⛔' : '🔒'}</span>
+                            <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
+                            {!blocked && <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>}
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
 
             {/* 2. Active Slots - Sorted ASCENDING: lowest index (newly unlocked) appears leftmost */}
             {Object.keys(state.activeSlots)

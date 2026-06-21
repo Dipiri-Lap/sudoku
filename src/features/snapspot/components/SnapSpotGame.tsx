@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import confetti from 'canvas-confetti';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Heart, Search, Check } from 'lucide-react';
@@ -7,9 +8,23 @@ import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
 import { auth } from '../../../firebase';
 import '../styles/SnapSpotGame.css';
 
-export type SnapSpotMode = 'normal' | 'time-attack' | 'stage';
+export type SnapSpotMode = 'normal' | 'time-attack' | 'stage' | 'arcade';
 
 const MAX_HEARTS = 3;
+const ARCADE_CDN_BASE = 'https://images.tmhub.co.kr/spot-the-difference/arcade/0001-0150';
+const ARCADE_TOTAL = 150;
+const ARCADE_INITIAL_TIME = 60;
+const ARCADE_BONUS_TIME = 5;
+const ARCADE_MIN_WAIT = 1000; // 스테이지 모드보다 짧게
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 // Unity Canvas RectTransform: Width=1020, Height=770, Pivot=0.5/0.5, Pos=0/0
 const IMG_DISPLAY_W = 1020;
@@ -49,16 +64,27 @@ function toPercent(pos: { x: number; y: number }, size: { x: number; y: number }
 const IS_DEV = import.meta.env.DEV;
 const CDN_BASE = 'https://images.tmhub.co.kr/spot-the-difference/stages/0001-0500';
 
+const EXCLAMATIONS = ['NICE!', 'GOOD!', 'GREAT!', 'AWESOME!', 'PERFECT!', 'AMAZING!', 'EXCELLENT!', 'BRILLIANT!', 'SUPERB!', 'SPOT ON!'];
+const PARTICLE_COLORS = ['#fbbf24', '#22c55e', '#6366f1', '#f472b6', '#fb923c', '#38bdf8', '#a3e635'];
+const PARTICLE_DIRS = [
+  [-38, -48], [38, -48], [-52,  0], [52,  0],
+  [-38,  42], [38,  42], [  0, -58], [ 0,  50],
+];
+
 interface Props {
   mode: SnapSpotMode;
 }
 
 const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const navigate = useNavigate();
-  const { addCoins } = useCoins();
+  const { addCoins, spendCoins, coins } = useCoins();
   const { snapSpotProgress, saveSnapSpotProgress: saveProgress } = useSnapSpotProgress();
   const hasAwardedCoins = useRef(false);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const prefetchCache = useRef<Record<number, LevelData>>({});
+  const arcadeQueue = useRef<number[]>(
+    mode === 'arcade' ? shuffleArray(Array.from({ length: ARCADE_TOTAL }, (_, i) => i + 1)) : []
+  );
   const [levelData, setLevelData] = useState<LevelData | null>(null);
   const [found, setFound] = useState<boolean[]>([]);
   const [wrongFlash, setWrongFlash] = useState<WrongFlash | null>(null);
@@ -67,9 +93,25 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const [hearts, setHearts] = useState(mode === 'stage' ? MAX_HEARTS : 0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [heartShake, setHeartShake] = useState(false);
-  const [stageId, setStageId] = useState(() => mode === 'stage' ? Math.max(1, snapSpotProgress + 1) : 1);
-  // const [hintIdx, setHintIdx] = useState<number | null>(null);
-  // const [isHinting, setIsHinting] = useState(false);
+  const [stageId, setStageId] = useState(() => {
+    if (mode === 'stage') return Math.max(1, snapSpotProgress + 1);
+    if (mode === 'arcade') return arcadeQueue.current.pop()!;
+    return 1;
+  });
+  const [hintIdx, setHintIdx] = useState<number | null>(null);
+  const [isHinting, setIsHinting] = useState(false);
+  const [hintUsed, setHintUsed] = useState(false);
+  const [curtainOpen, setCurtainOpen] = useState(false);
+  const [imgsLoaded, setImgsLoaded] = useState({ orig: false, mod: false });
+  const [minWaitDone, setMinWaitDone] = useState(false);
+  const [stageNotFound, setStageNotFound] = useState(false);
+  const [lastFoundIdx, setLastFoundIdx] = useState<number | null>(null);
+  const [screenShake, setScreenShake] = useState(false);
+  const [arcadeTime, setArcadeTime] = useState(ARCADE_INITIAL_TIME);
+  const [arcadeStages, setArcadeStages] = useState(0);
+  const [arcadeGameOver, setArcadeGameOver] = useState(false);
+  const [correctHit, setCorrectHit] = useState<{ diffIdx: number; text: string; key: number } | null>(null);
+  const correctHitKey = useRef(0);
 
   // Zoom / pan state (shared between both images)
   const [zoom, setZoom] = useState(1);
@@ -151,15 +193,51 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     setWrongFlash(null);
     setZoom(1);
     setPan({ x: 0, y: 0 });
-    // setHintIdx(null);
-    // setIsHinting(false);
+    setHintIdx(null);
+    setIsHinting(false);
+    setHintUsed(false);
+    setCurtainOpen(false);
+    setImgsLoaded({ orig: false, mod: false });
+    setMinWaitDone(false);
+    setStageNotFound(false);
+    setLastFoundIdx(null);
+    setCorrectHit(null);
     if (mode === 'stage') setHearts(MAX_HEARTS);
-    fetch(`${CDN_BASE}/${stageId}.json`)
-      .then((r) => r.json())
-      .then((data: LevelData) => {
-        setLevelData(data);
-        setFound(new Array(data.differences.length).fill(false));
-      });
+    const minWait = mode === 'arcade' ? ARCADE_MIN_WAIT : 2000;
+    const timer = setTimeout(() => setMinWaitDone(true), minWait);
+
+    const base = mode === 'arcade' ? ARCADE_CDN_BASE : CDN_BASE;
+
+    const applyData = (data: LevelData) => {
+      setLevelData(data);
+      setFound(new Array(data.differences.length).fill(false));
+      // 스테이지 모드만 프리페치
+      if (mode === 'stage') {
+        const nextId = stageId + 1;
+        if (!prefetchCache.current[nextId]) {
+          fetch(`${CDN_BASE}/${nextId}.json`)
+            .then(r => r.json())
+            .then((nextData: LevelData) => {
+              prefetchCache.current[nextId] = nextData;
+              new Image().src = `${CDN_BASE}/${nextData.imageID}.webp`;
+              new Image().src = `${CDN_BASE}/${nextData.imageID}_1.webp`;
+            })
+            .catch(() => {});
+        }
+      }
+    };
+
+    const cached = mode === 'stage' ? prefetchCache.current[stageId] : null;
+    if (cached) {
+      applyData(cached);
+    } else {
+      fetch(`${base}/${stageId}.json`)
+        .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
+        .then(applyData)
+        .catch(() => setStageNotFound(true));
+    }
+
+    return () => clearTimeout(timer);
   }, [stageId, mode]);
 
   useEffect(() => {
@@ -169,6 +247,30 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     }
     if (!hasAwardedCoins.current) {
       hasAwardedCoins.current = true;
+      confetti({ particleCount: 90, angle: 60,  spread: 60, origin: { x: 0, y: 0.6 }, colors: ['#fbbf24','#22c55e','#6366f1','#f472b6','#fb923c'] });
+      confetti({ particleCount: 90, angle: 120, spread: 60, origin: { x: 1, y: 0.6 }, colors: ['#fbbf24','#22c55e','#6366f1','#f472b6','#fb923c'] });
+
+      if (mode === 'arcade') {
+        setArcadeTime(t => t + ARCADE_BONUS_TIME);
+        setArcadeStages(s => {
+          const next = s + 1;
+          // 최고 기록 저장
+          if (auth.currentUser) {
+            import('../../../services/rankingService').then(m => {
+              m.saveArcadeBestScore(auth.currentUser!.uid, next).catch(console.error);
+            });
+          }
+          return next;
+        });
+        // 자동으로 다음 랜덤 스테이지 로드
+        if (arcadeQueue.current.length === 0) {
+          arcadeQueue.current = shuffleArray(Array.from({ length: ARCADE_TOTAL }, (_, i) => i + 1));
+        }
+        const nextId = arcadeQueue.current.pop()!;
+        setStageId(nextId);
+        return;
+      }
+
       addCoins(10);
       if (mode === 'stage') saveProgress(stageId);
       if (auth.currentUser) {
@@ -217,6 +319,11 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           const next = [...found];
           next[i] = true;
           setFound(next);
+          setLastFoundIdx(i);
+          const text = EXCLAMATIONS[Math.floor(Math.random() * EXCLAMATIONS.length)];
+          setCorrectHit({ diffIdx: i, text, key: ++correctHitKey.current });
+          setTimeout(() => setCorrectHit(null), 900);
+          navigator.vibrate?.(30);
           if (next.every(Boolean)) setIsWinner(true);
           return;
         }
@@ -226,7 +333,10 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         console.log(`[SnapSpot] miss → canvas x=${canvasX.toFixed(1)}, y=${canvasY.toFixed(1)}`);
       }
       setWrongFlash({ x: clientX - rect.left, y: clientY - rect.top, side });
-      setTimeout(() => setWrongFlash(null), 600);
+      setTimeout(() => setWrongFlash(null), 650);
+      setScreenShake(true);
+      setTimeout(() => setScreenShake(false), 400);
+      navigator.vibrate?.(80);
 
       if (mode === 'stage') {
         setHearts((h) => {
@@ -400,21 +510,50 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     [processHit],
   );
 
-  // // 힌트로 가리킨 스팟을 찾으면 힌트 상태 해제
-  // useEffect(() => {
-  //   if (hintIdx !== null && found[hintIdx]) {
-  //     setHintIdx(null);
-  //     setIsHinting(false);
-  //   }
-  // }, [found, hintIdx]);
+  // 아케이드 타이머
+  useEffect(() => {
+    if (mode !== 'arcade' || arcadeGameOver) return;
+    const interval = setInterval(() => {
+      setArcadeTime(t => {
+        if (t <= 1) { setArcadeGameOver(true); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [mode, arcadeGameOver]);
 
-  // const handleHint = useCallback(() => {
-  //   if (isHinting) return;
-  //   const idx = found.findIndex(f => !f);
-  //   if (idx === -1) return;
-  //   setHintIdx(idx);
-  //   setIsHinting(true);
-  // }, [isHinting, found]);
+  // 최소 2초 대기 + 양쪽 이미지 로드 완료 → 커튼 열기
+  useEffect(() => {
+    if (minWaitDone && imgsLoaded.orig && imgsLoaded.mod) setCurtainOpen(true);
+  }, [minWaitDone, imgsLoaded]);
+
+  // 힌트로 가리킨 스팟을 찾으면 마커만 해제 (hintUsed는 유지 → 재사용 불가)
+  useEffect(() => {
+    if (hintIdx !== null && found[hintIdx]) {
+      setHintIdx(null);
+      setIsHinting(false);
+    }
+  }, [found, hintIdx]);
+
+  const activateHint = useCallback(() => {
+    const idx = found.findIndex(f => !f);
+    if (idx === -1) return;
+    setHintIdx(idx);
+    setIsHinting(true);
+    setHintUsed(true);
+  }, [found]);
+
+  const handleHint = useCallback(() => {
+    if (hintUsed) return;
+    if (coins >= 50) {
+      spendCoins(50).then(() => activateHint());
+    } else {
+      if (IS_DEV || !window.adBreak) { activateHint(); return; }
+      window.adBreak({ type: 'reward', name: 'hint', adBreakDone: (info: { breakStatus: string }) => {
+        if (info.breakStatus === 'viewed') activateHint();
+      }});
+    }
+  }, [hintUsed, coins, spendCoins, activateHint]);
 
   // ── Ad-gated actions ────────────────────────────────────────────────────────
   const handleNextStage = useCallback(() => {
@@ -441,6 +580,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   if (!levelData) return <div className="snapspot-loading">로딩 중...</div>;
 
   const { imageID, differences } = levelData;
+  const cdnBase = mode === 'arcade' ? ARCADE_CDN_BASE : CDN_BASE;
   const foundCount = found.filter(Boolean).length;
 
   const innerStyle: React.CSSProperties = {
@@ -491,7 +631,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         </div>
       </div>
 
-      <div className="snapspot-images">
+      <div className={`snapspot-images${screenShake ? ' snapspot-shake' : ''}`}>
         {(['orig', 'mod'] as const).map((side) => (
           <div
             key={side}
@@ -508,9 +648,10 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           >
             <div style={innerStyle}>
               <img
-                src={`${CDN_BASE}/${imageID}${side === 'mod' ? '_1' : ''}.jpg`}
+                src={`${cdnBase}/${imageID}${side === 'mod' ? '_1' : ''}.webp`}
                 alt={side === 'orig' ? '원본' : '변경본'}
                 draggable={false}
+                onLoad={() => setImgsLoaded(prev => ({ ...prev, [side]: true }))}
               />
               {differences.map((diff, i) => {
                 if (!found[i]) return null;
@@ -524,7 +665,45 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                   />
                 );
               })}
-              {/* {hintIdx !== null && !found[hintIdx] && (() => {
+              {correctHit !== null && (() => {
+                const diff = differences[correctHit.diffIdx];
+                const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
+                const { left, top } = toPercent(pos, diff.colSize);
+                return (
+                  <React.Fragment key={correctHit.key}>
+                    <div className="snapspot-correct-text" style={{ left: `${left}%`, top: `${top}%` }}>
+                      {correctHit.text}
+                    </div>
+                    <div className="snapspot-particles" style={{ left: `${left}%`, top: `${top}%` }}>
+                      {PARTICLE_DIRS.map(([tx, ty], pi) => (
+                        <div
+                          key={pi}
+                          className="snapspot-particle"
+                          style={{
+                            background: PARTICLE_COLORS[pi % PARTICLE_COLORS.length],
+                            '--tx0': '0px', '--ty0': '0px',
+                            '--tx1': `${tx}px`, '--ty1': `${ty}px`,
+                            animationDelay: `${pi * 0.02}s`,
+                          } as React.CSSProperties}
+                        />
+                      ))}
+                    </div>
+                  </React.Fragment>
+                );
+              })()}
+              {isWinner && lastFoundIdx !== null && (() => {
+                const diff = differences[lastFoundIdx];
+                const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
+                const { left, top } = toPercent(pos, diff.colSize);
+                return (
+                  <div className="snapspot-ripple" style={{ left: `${left}%`, top: `${top}%` }}>
+                    <div className="snapspot-ripple-ring" />
+                    <div className="snapspot-ripple-ring" />
+                    <div className="snapspot-ripple-ring" />
+                  </div>
+                );
+              })()}
+              {hintIdx !== null && !found[hintIdx] && (() => {
                 const diff = differences[hintIdx];
                 const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
                 const { left, top } = toPercent(pos, diff.colSize);
@@ -535,7 +714,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                     style={{ left: `${left}%`, top: `${top}%` }}
                   />
                 );
-              })()} */}
+              })()}
               {IS_DEV && showDebug && differences.map((diff, i) => {
                 const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
                 const { left, top, width, height } = toPercent(pos, diff.colSize);
@@ -561,10 +740,14 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             </div>
             {wrongFlash?.side === side && (
               <div
-                className="snapspot-wrong-flash"
+                className="snapspot-wrong-x"
                 style={{ left: wrongFlash.x, top: wrongFlash.y }}
               />
             )}
+            <div className={`snapspot-curtain${curtainOpen ? ' snapspot-curtain--open' : ''}`}>
+              <div className="snapspot-curtain-panel snapspot-curtain-left" />
+              <div className="snapspot-curtain-panel snapspot-curtain-right" />
+            </div>
           </div>
         ))}
       </div>
@@ -582,14 +765,33 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
               </div>
             ))}
           </div>
-          {/* <button className="snapspot-hint-btn" onClick={handleHint} disabled={isHinting}>
+          <button className="snapspot-hint-btn" onClick={handleHint} disabled={hintUsed}>
             <Search size={22} />
-            <span>HINT</span>
-          </button> */}
+            <span>{hintUsed ? 'USED' : coins >= 50 ? 'HINT' : 'AD'}</span>
+          </button>
         </div>
       )}
 
-      {isWinner && (
+      {mode === 'arcade' && (
+        <div className="snapspot-hud snapspot-arcade-hud">
+          <div className="snapspot-arcade-stages">
+            <span className="snapspot-arcade-stages-label">STAGE</span>
+            <span className="snapspot-arcade-stages-count">{arcadeStages}</span>
+          </div>
+          <div className="snapspot-hud-slots">
+            {differences.map((_, i) => (
+              <div key={i} className={`snapspot-slot${i < foundCount ? ' found' : ''}`}>
+                {i < foundCount && <Check size={15} strokeWidth={3} color="#3a2000" />}
+              </div>
+            ))}
+          </div>
+          <div className={`snapspot-arcade-timer${arcadeTime <= 10 ? ' snapspot-arcade-timer--danger' : ''}`}>
+            <span className="snapspot-arcade-timer-num">{arcadeTime}</span>
+          </div>
+        </div>
+      )}
+
+      {isWinner && mode !== 'arcade' && (
         <div className="snapspot-win-overlay">
           <div className="snapspot-win-card">
             <div className="snapspot-win-emoji">🎉</div>
@@ -621,6 +823,24 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         </div>
       )}
 
+      {stageNotFound && (
+        <div className="snapspot-win-overlay">
+          <div className="snapspot-win-card">
+            <div className="snapspot-win-emoji">🚧</div>
+            <h2 style={{ fontSize: '1.4rem' }}>Under Construction</h2>
+            <p style={{ color: '#6b7280', marginTop: '0.25rem' }}>More stages are on the way. Stay tuned!</p>
+            <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center' }}>
+              <button
+                onClick={() => navigate('/snapspot')}
+                style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#6366f1', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                Back to Menu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isGameOver && (
         <div className="snapspot-win-overlay">
           <div className="snapspot-win-card">
@@ -639,6 +859,32 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 모드 선택
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {arcadeGameOver && (
+        <div className="snapspot-win-overlay">
+          <div className="snapspot-win-card">
+            <div className="snapspot-win-emoji">⏱️</div>
+            <h2>TIME'S UP!</h2>
+            <p style={{ fontSize: '1rem', color: '#374151', margin: '0.25rem 0 0' }}>Stages Cleared</p>
+            <div style={{ fontSize: '3.5rem', fontWeight: 900, color: '#6366f1', lineHeight: 1.1, margin: '0.25rem 0 0.75rem' }}>
+              {arcadeStages}
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+              <button
+                onClick={() => navigate(0)}
+                style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#6366f1', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                Play Again
+              </button>
+              <button
+                onClick={() => navigate('/snapspot')}
+                style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                Menu
               </button>
             </div>
           </div>

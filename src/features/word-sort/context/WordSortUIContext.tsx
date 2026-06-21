@@ -77,6 +77,12 @@ interface WordSortUIContextType {
     setShowMoveConfirm: (v: boolean) => void;
     setShowUndoConfirm: (v: boolean) => void;
     setShowRemoveConfirm: (v: boolean) => void;
+    // Hard mode
+    isHardMode: boolean;
+    hardModeHelpUsed: string | null;
+    markHelpUsed: (feature: string) => void;
+    isHelpBlocked: (feature: string) => boolean;
+    resetHardModeHelp: () => void;
     // Dealing animation
     isDealingAnimation: boolean;
     dealingProgress: number;
