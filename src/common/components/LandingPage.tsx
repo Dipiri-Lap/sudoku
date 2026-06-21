@@ -508,7 +508,7 @@ const LandingPage: React.FC = () => {
                         <img src="/wordstackLogo.png" alt="Word Sort Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <div className="game-card-content">
-                        <h3>단어 분류 퍼즐</h3>
+                        <h3>워드스택</h3>
                         <p>단어를 알맞은 카테고리로 정리하는 분류 게임</p>
                         <div className="game-card-footer">
                             <span className="play-now">
