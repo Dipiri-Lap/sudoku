@@ -20,8 +20,8 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
         isRemoveMode,
         setIsRemoveMode,
         tutorialStep,
-        setShowUndoConfirm,
-        setShowRemoveConfirm,
+        openUndoConfirm,
+        openRemoveConfirm,
         language,
         isHardMode,
         isHelpBlocked,
@@ -35,8 +35,10 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
 
     const undoBlocked = isHelpBlocked('undo');
     const removeBlocked = isHelpBlocked('remove');
-    const undoAvail = state.history.length > 0 && coins >= 10 && !undoBlocked;
-    const removeAvail = (coins >= 50 || isRemoveMode) && !removeBlocked;
+    const undoAvail = state.history.length > 0 && !undoBlocked;
+    const undoCanAfford = coins >= 10;
+    const removeAvail = !removeBlocked;
+    const removeCanAfford = coins >= 50;
 
     return (
         <div style={{
@@ -65,14 +67,16 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
                 title={undoBlocked ? '하드모드: 다른 도움 기능을 이미 사용했습니다' : undefined}
                 onClick={() => {
                     if (undoBlocked || state.history.length === 0) return;
-                    setShowUndoConfirm(true);
+                    openUndoConfirm();
                 }}
             >
                 <Undo2 size={24} style={{ margin: '0 auto' }} />
                 <div style={{ fontSize: '0.7rem', marginTop: '4px' }}>{language === 'ko' ? '철회' : 'Undo'}</div>
                 {undoBlocked
                     ? <div style={{ fontSize: '0.65rem', color: 'rgba(255,80,80,0.6)', fontWeight: 'bold' }}>⛔ 불가</div>
-                    : <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 10</div>
+                    : !undoCanAfford
+                        ? <div style={{ fontSize: '0.65rem', color: '#a78bfa', fontWeight: 'bold' }}>🎬 광고</div>
+                        : <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 10</div>
                 }
             </div>
             <div
@@ -89,7 +93,7 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
                         return;
                     }
                     if (removeBlocked) return;
-                    setShowRemoveConfirm(true);
+                    openRemoveConfirm();
                 }}
             >
                 <LayersIcon size={24} style={{ margin: '0 auto' }} />
@@ -97,7 +101,9 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
                 {!isRemoveMode && (
                     removeBlocked
                         ? <div style={{ fontSize: '0.65rem', color: 'rgba(255,80,80,0.6)', fontWeight: 'bold' }}>⛔ 불가</div>
-                        : <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 50</div>
+                        : !removeCanAfford
+                            ? <div style={{ fontSize: '0.65rem', color: '#a78bfa', fontWeight: 'bold' }}>🎬 광고</div>
+                            : <div style={{ fontSize: '0.65rem', color: '#fda085', fontWeight: 'bold' }}>🪙 50</div>
                 )}
             </div>
         </div>

@@ -77,6 +77,11 @@ interface WordSortUIContextType {
     setShowMoveConfirm: (v: boolean) => void;
     setShowUndoConfirm: (v: boolean) => void;
     setShowRemoveConfirm: (v: boolean) => void;
+    // Smart open handlers (coin pre-check → ad offer if insufficient)
+    openMoveConfirm: () => void;
+    openUndoConfirm: () => void;
+    openRemoveConfirm: () => void;
+    openUnlockDialog: (type: 'stack' | 'slot') => void;
     // Hard mode
     isHardMode: boolean;
     hardModeHelpUsed: string | null;

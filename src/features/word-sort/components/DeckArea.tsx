@@ -34,10 +34,10 @@ export const DeckArea: React.FC = () => {
         deckCardRef,
         drawDeck,
         splitText,
-        setShowMoveConfirm,
         coins,
         setNearestTarget,
         isHelpBlocked,
+        openMoveConfirm,
     } = useWordSortUI();
 
     return (
@@ -49,21 +49,20 @@ export const DeckArea: React.FC = () => {
                 {!state.isStepsPurchased && tutorialStep === null && (() => {
                     const blocked = isHelpBlocked('move');
                     const canAfford = coins >= 50;
-                    const disabled = !canAfford || blocked;
                     return (
                         <button
-                            onClick={() => !blocked && setShowMoveConfirm(true)}
+                            onClick={() => !blocked && openMoveConfirm()}
                             title={blocked ? '하드모드: 다른 도움 기능을 이미 사용했습니다' : undefined}
                             style={{
                                 marginTop: '6px',
                                 padding: '4px 8px',
                                 borderRadius: '20px',
                                 border: blocked ? '1px solid rgba(255,68,68,0.5)' : 'none',
-                                background: blocked ? 'rgba(80,20,20,0.7)' : canAfford ? 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' : '#555',
+                                background: blocked ? 'rgba(80,20,20,0.7)' : canAfford ? 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' : 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
                                 color: blocked ? 'rgba(255,100,100,0.6)' : '#fff',
                                 fontSize: '0.65rem',
                                 fontWeight: 'bold',
-                                cursor: disabled ? 'not-allowed' : 'pointer',
+                                cursor: blocked ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '4px',
@@ -72,7 +71,7 @@ export const DeckArea: React.FC = () => {
                                 opacity: blocked ? 0.5 : 1,
                             }}
                         >
-                            {blocked ? '🔒' : '+20'} {!blocked && '(🪙50)'}
+                            {blocked ? '🔒' : canAfford ? '+20 (🪙50)' : '+20 (🎬)'}
                         </button>
                     );
                 })()}

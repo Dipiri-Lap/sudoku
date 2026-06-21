@@ -30,7 +30,7 @@ export const StackArea: React.FC = () => {
         handleDrop,
         tutorialStep,
         tutorialHighlightCards,
-        setUnlockConfirm,
+        openUnlockDialog,
         isDealingAnimation,
         dealingProgress,
         stackStartIndices,
@@ -63,7 +63,7 @@ export const StackArea: React.FC = () => {
                 return (
                     <div
                         key={`locked-stack-${i}`}
-                        onClick={() => !blocked && setUnlockConfirm('stack')}
+                        onClick={() => !blocked && openUnlockDialog('stack')}
                         title={blocked ? '하드모드: 다른 도움 기능을 이미 사용했습니다' : undefined}
                         style={{
                             display: 'flex',

@@ -20,13 +20,13 @@ export const SlotArea: React.FC = () => {
         completingSlot,
         tutorialHighlightSlots,
         tutorialStep,
-        setUnlockConfirm,
         handleDrop,
         splitText,
         slotRefs,
         nearestTarget,
         invalidDropTarget,
         isHelpBlocked,
+        openUnlockDialog,
     } = useWordSortUI();
 
     const { lockedSlots } = state;
@@ -50,7 +50,7 @@ export const SlotArea: React.FC = () => {
                     <div key={`locked-slot-${i}`} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
                         <div style={{ height: '25px' }} />
                         <div
-                            onClick={() => !blocked && setUnlockConfirm('slot')}
+                            onClick={() => !blocked && openUnlockDialog('slot')}
                             title={blocked ? '하드모드: 다른 도움 기능을 이미 사용했습니다' : undefined}
                             style={{
                                 ...slotCardStyle,

@@ -577,6 +577,52 @@ const WordSortGame: React.FC = () => {
         // No local state to reset anymore, START_LEVEL in reducer handles this
     };
 
+    // 코인 사전 체크 후 부족 시 광고 안내로 직행
+    const openMoveConfirm = () => {
+        if (coins < 50) {
+            if (adUsedThisGame) setShowCoinInsufficient(true);
+            else setAdOfferConfig({ type: 'move', cost: 50, action: async () => { dispatch({ type: 'ADD_STEPS', count: 20 }); markHelpUsed('move'); } });
+        } else {
+            setShowMoveConfirm(true);
+        }
+    };
+
+    const openUndoConfirm = () => {
+        if (state.history.length === 0) return;
+        if (coins < 10) {
+            if (adUsedThisGame) setShowCoinInsufficient(true);
+            else setAdOfferConfig({ type: 'undo', cost: 10, action: async () => { dispatch({ type: 'UNDO_ACTION' }); markHelpUsed('undo'); } });
+        } else {
+            setShowUndoConfirm(true);
+        }
+    };
+
+    const openRemoveConfirm = () => {
+        if (coins < 50) {
+            if (adUsedThisGame) setShowCoinInsufficient(true);
+            else setAdOfferConfig({ type: 'remove', cost: 50, action: async () => { setAdUnlockedRemove(true); setIsRemoveMode(true); } });
+        } else {
+            setShowRemoveConfirm(true);
+        }
+    };
+
+    const openUnlockDialog = (type: 'stack' | 'slot') => {
+        if (coins < 50) {
+            if (adUsedThisGame) setShowCoinInsufficient(true);
+            else setAdOfferConfig({
+                type: type === 'stack' ? 'unlock_stack' : 'unlock_slot',
+                cost: 50,
+                action: async () => {
+                    if (type === 'stack') dispatch({ type: 'UNLOCK_STACK' });
+                    else dispatch({ type: 'UNLOCK_SLOT' });
+                    markHelpUsed(`unlock_${type}`);
+                }
+            });
+        } else {
+            setUnlockConfirm(type);
+        }
+    };
+
     const handleUnlockConfirm = async () => {
         if (!unlockConfirm) return;
         const success = await spendCoins(50);
@@ -730,6 +776,10 @@ const WordSortGame: React.FC = () => {
             stackStartIndices,
             triggerDealing,
             language: state.language,
+            openMoveConfirm,
+            openUndoConfirm,
+            openRemoveConfirm,
+            openUnlockDialog,
             isHardMode: state.isHardMode,
             hardModeHelpUsed,
             markHelpUsed,
