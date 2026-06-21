@@ -108,7 +108,7 @@ const QueensModeSelect: React.FC = () => {
       <div className="mode-grid">
         <div className="game-card" onClick={() => navigate('/queens/play')}>
           <div className="game-card-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
-            <img src="/crownquest_logo.png" alt="크라운 퀘스트" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+            <img src="/images/crownquest/normalBtn.webp" alt="노말" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
           </div>
           <div className="game-card-content">
             <h3>노말</h3>
