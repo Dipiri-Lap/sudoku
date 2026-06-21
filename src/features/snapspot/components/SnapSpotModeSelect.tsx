@@ -39,7 +39,7 @@ const SnapSpotModeSelect: React.FC = () => {
       <meta name="description" content="두 사진을 비교해 다른 부분을 찾는 틀린그림찾기 게임. 노말·타임어택·PVP 모드로 즐기세요!" />
       <link rel="canonical" href="https://puzzles.tmhub.co.kr/snapspot" />
     </Helmet>
-    <div className="mode-select-bg"><div className="mode-select-page">
+    <div className="mode-select-page">
       <header className="mode-header">
         <button className="back-btn" onClick={() => navigate('/')}>
           <ChevronLeft size={24} />
@@ -75,7 +75,7 @@ const SnapSpotModeSelect: React.FC = () => {
           style={btnStyle('0.3s', false)}
         />
       </div>
-    </div></div>
+    </div>
     </>
   );
 };
