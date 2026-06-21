@@ -229,8 +229,8 @@ const LandingPage: React.FC = () => {
     return (
         <>
         <Helmet>
-            <title>퍼즐 가든 - 무료 스도쿠, 단어 정렬, 틀린그림찾기 게임</title>
-            <meta name="description" content="퍼즐 가든에서 무료로 즐기는 두뇌 퍼즐 게임! 스도쿠, 단어 정렬 카드 게임, 틀린그림찾기(스냅스팟)를 온라인에서 바로 플레이하세요." />
+            <title>퍼즐 가든 - 무료 스도쿠, 워드스택, 틀린그림찾기 게임</title>
+            <meta name="description" content="퍼즐 가든에서 무료로 즐기는 두뇌 퍼즐 게임! 스도쿠, 워드스택 카드 게임, 틀린그림찾기(스냅스팟)를 온라인에서 바로 플레이하세요." />
             <link rel="canonical" href="https://puzzles.tmhub.co.kr/" />
         </Helmet>
         <div className="landing-page">
@@ -702,7 +702,7 @@ const LandingPage: React.FC = () => {
                 <div style={{ marginTop: '1rem' }}>
                     <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>
                         퍼즐 가든은 언제 어디서나 즐길 수 있는 <strong>무료 두뇌 퍼즐 게임</strong> 사이트입니다.
-                        스도쿠, 단어 정렬, 틀린그림찾기(스냅스팟)까지 — 설치 없이 브라우저에서 바로 플레이하세요.
+                        스도쿠, 워드스택, 틀린그림찾기(스냅스팟)까지 — 설치 없이 브라우저에서 바로 플레이하세요.
                     </p>
 
                     <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🔢 스도쿠</h3>
@@ -711,7 +711,7 @@ const LandingPage: React.FC = () => {
                         매일 꾸준히 풀면 집중력과 논리적 사고력 향상에 도움이 됩니다.
                     </p>
 
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🃏 단어 정렬</h3>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🃏 워드스택</h3>
                     <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
                         카드를 드래그해 같은 주제의 단어끼리 분류하는 <strong>단어 카드 게임</strong>.
                         다양한 주제의 레벨이 준비되어 있어 어휘력과 연상 능력을 자연스럽게 키울 수 있습니다.

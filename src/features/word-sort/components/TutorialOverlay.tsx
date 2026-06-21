@@ -9,7 +9,7 @@ export interface TutorialStepConfig {
 
 export const TUTORIAL_STEPS: Record<number, TutorialStepConfig> = {
     1: {
-        message: '단어 정렬 게임에 오신 걸 환영합니다! 👋',
+        message: '워드스택 게임에 오신 걸 환영합니다! 👋',
         subMessage: '카테고리에 맞게 모든 단어 카드를 정렬하면 클리어! 함께 배워볼게요.',
         showNext: true,
     },

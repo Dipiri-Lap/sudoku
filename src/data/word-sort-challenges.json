@@ -3,7 +3,7 @@
     "id": "word_st_1",
     "type": "STAGE",
     "game": "word-sort",
-    "title": "📝 단어정렬 스타터",
+    "title": "📝 워드스택 스타터",
     "condition": "1스테이지 클리어",
     "progressConfig": {
       "source": "word_sort_stage",
@@ -18,7 +18,7 @@
     "id": "word_st_10",
     "type": "STAGE",
     "game": "word-sort",
-    "title": "📚 단어정렬 입문",
+    "title": "📚 워드스택 입문",
     "condition": "10스테이지 클리어",
     "progressConfig": {
       "source": "word_sort_stage",
@@ -48,7 +48,7 @@
     "id": "word_st_50",
     "type": "STAGE",
     "game": "word-sort",
-    "title": "📖 단어정렬을 깨닫다",
+    "title": "📖 워드스택을 깨닫다",
     "condition": "50스테이지 클리어",
     "progressConfig": {
       "source": "word_sort_stage",
@@ -63,7 +63,7 @@
     "id": "word_st_75",
     "type": "STAGE",
     "game": "word-sort",
-    "title": "🏛️ 단어정렬 분석가",
+    "title": "🏛️ 워드스택 분석가",
     "condition": "75스테이지 클리어",
     "progressConfig": {
       "source": "word_sort_stage",
@@ -78,7 +78,7 @@
     "id": "word_st_100",
     "type": "STAGE",
     "game": "word-sort",
-    "title": "🎓 단어정렬 전문가",
+    "title": "🎓 워드스택 전문가",
     "condition": "100스테이지 클리어",
     "progressConfig": {
       "source": "word_sort_stage",
