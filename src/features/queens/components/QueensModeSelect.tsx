@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
+import { useQueensProgress } from '../../../context/QueensProgressContext';
 
 // ── Mini grid ─────────────────────────────────────────────────────────────────
 
@@ -87,9 +88,30 @@ const RULES = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+const btnStyle = (clickable = true): React.CSSProperties => ({
+  width: '100%',
+  borderRadius: 16,
+  objectFit: 'cover' as const,
+  cursor: clickable ? 'pointer' : 'default',
+  display: 'block',
+  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+  transition: 'all 0.2s ease',
+  opacity: clickable ? 1 : 0.6,
+});
+
+const hoverOn = (e: React.MouseEvent<HTMLImageElement>) => {
+  e.currentTarget.style.transform = 'translateY(-4px)';
+  e.currentTarget.style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)';
+};
+const hoverOff = (e: React.MouseEvent<HTMLImageElement>) => {
+  e.currentTarget.style.transform = '';
+  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+};
+
 const QueensModeSelect: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { queensProgress, isSynced } = useQueensProgress();
 
   useEffect(() => {
     document.body.classList.add('landing-bg');
@@ -106,15 +128,19 @@ const QueensModeSelect: React.FC = () => {
       </header>
 
       <div className="mode-grid">
-        <div className="game-card" onClick={() => navigate('/queens/play')}>
-          <div className="game-card-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
-            <img src="/images/crownquest/normalBtn.webp" alt="노말" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-          </div>
-          <div className="game-card-content">
-            <h3>노말</h3>
-            <p>스테이지를 순서대로 클리어하세요.</p>
-          </div>
-          <ChevronRight size={20} style={{ marginLeft: 'auto', color: '#94a3b8', flexShrink: 0 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <img
+            src="/images/crownquest/normalBtn.webp"
+            alt="노말 모드"
+            className="animate-fade-in"
+            style={btnStyle(isSynced)}
+            onClick={() => { if (isSynced) navigate('/queens/play'); }}
+            onMouseEnter={hoverOn}
+            onMouseLeave={hoverOff}
+          />
+          <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
+            {!isSynced ? '로딩 중...' : queensProgress > 0 ? `Level ${queensProgress + 1} 이어하기` : 'Level 1 시작하기'}
+          </span>
         </div>
       </div>
 
