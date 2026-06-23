@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Heart, Search, Check } from 'lucide-react';
+import { ChevronLeft, Heart, Search, Check, Palette } from 'lucide-react';
+import { useSnapSpotMarker, getMarkerContent } from '../context/SnapSpotMarkerContext';
+import SnapSpotMarkerShopModal from './SnapSpotMarkerShopModal';
 import { useCoins } from '../../../context/CoinContext';
 import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
 import { auth } from '../../../firebase';
@@ -79,6 +81,8 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const navigate = useNavigate();
   const { addCoins, spendCoins, coins } = useCoins();
   const { snapSpotProgress, saveSnapSpotProgress: saveProgress } = useSnapSpotProgress();
+  const { selectedMarkerId } = useSnapSpotMarker();
+  const [showMarkerShop, setShowMarkerShop] = useState(false);
   const hasAwardedCoins = useRef(false);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const prefetchCache = useRef<Record<number, LevelData>>({});
@@ -625,6 +629,14 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
               DEBUG
             </button>
           )}
+          <button
+            className="snapspot-zoom-btn"
+            onClick={() => setShowMarkerShop(true)}
+            style={{ padding: '4px 8px' }}
+            title="마커 상점"
+          >
+            <Palette size={16} />
+          </button>
           <button className="snapspot-zoom-btn" onClick={() => adjustZoom(-0.5)} disabled={zoom <= 1}>−</button>
           <span className="snapspot-zoom-label">{zoom.toFixed(1)}×</span>
           <button className="snapspot-zoom-btn" onClick={() => adjustZoom(0.5)} disabled={zoom >= MAX_ZOOM}>+</button>
@@ -660,9 +672,11 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                 return (
                   <div
                     key={i}
-                    className="snapspot-found-marker"
+                    className={`snapspot-found-marker snapspot-marker-${selectedMarkerId}`}
                     style={{ left: `${left}%`, top: `${top}%` }}
-                  />
+                  >
+                    {getMarkerContent(selectedMarkerId)}
+                  </div>
                 );
               })}
               {correctHit !== null && (() => {
@@ -891,6 +905,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         </div>
       )}
     </div>
+      {showMarkerShop && <SnapSpotMarkerShopModal onClose={() => setShowMarkerShop(false)} />}
     </>
   );
 };

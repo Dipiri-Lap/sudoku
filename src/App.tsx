@@ -27,6 +27,7 @@ import { WordSortHardProgressProvider } from './context/WordSortHardProgressCont
 import { QueensProgressProvider } from './context/QueensProgressContext';
 import { SnapSpotProgressProvider } from './context/SnapSpotProgressContext';
 import { QueensIconProvider } from './features/queens/context/QueensIconContext';
+import { SnapSpotMarkerProvider } from './features/snapspot/context/SnapSpotMarkerContext';
 import { SudokuThemeProvider } from './features/sudoku/context/SudokuThemeContext';
 import { ChallengeProvider } from './context/ChallengeContext';
 import { UserInitProvider, useUserInit } from './context/UserInitContext';
@@ -76,6 +77,7 @@ const AppContent: React.FC = () => {
       <SnapSpotProgressProvider>
       <QueensProgressProvider>
       <QueensIconProvider>
+      <SnapSpotMarkerProvider>
       <CardBackProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -127,6 +129,7 @@ const AppContent: React.FC = () => {
           )}
         </Routes>
       </CardBackProvider>
+      </SnapSpotMarkerProvider>
       </QueensIconProvider>
       </QueensProgressProvider>
       </SnapSpotProgressProvider>

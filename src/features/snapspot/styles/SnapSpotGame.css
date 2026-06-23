@@ -163,17 +163,26 @@
   text-align: center;
 }
 
-/* Found marker */
+/* Found marker — base: positioning + pop animation only */
 .snapspot-found-marker {
   position: absolute;
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
   transform: translate(-50%, -50%);
-  border: 3px solid #ef4444;
-  border-radius: 50%;
-  background: rgba(239, 68, 68, 0.15);
   pointer-events: none;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: snapspot-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Shop preview — same layout without absolute positioning */
+.snapspot-marker-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 @keyframes snapspot-pop {
@@ -185,6 +194,115 @@
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
+}
+
+@keyframes snapspot-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Marker variants ─────────────────────────────────────────── */
+
+/* circle (default) */
+.snapspot-marker-circle {
+  border: 3px solid #ef4444;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.18);
+}
+
+/* check */
+.snapspot-marker-check {
+  background: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.55);
+}
+
+/* star — emoji, no border */
+.snapspot-marker-star {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
+}
+
+/* target — crosshair with outer ring */
+.snapspot-marker-target {
+  border: 2px solid #f87171;
+  border-radius: 50%;
+  box-shadow: 0 0 0 7px rgba(248, 113, 113, 0.18);
+}
+.snapspot-marker-target::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 44px;
+  background: rgba(248, 113, 113, 0.65);
+  border-radius: 1px;
+}
+.snapspot-marker-target::after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  width: 44px;
+  background: rgba(248, 113, 113, 0.65);
+  border-radius: 1px;
+}
+
+/* smile — emoji */
+.snapspot-marker-smile {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* pin — emoji */
+.snapspot-marker-pin {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* heart — emoji */
+.snapspot-marker-heart {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* sparkle — emoji, spinning inner */
+.snapspot-marker-sparkle {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+.snapspot-marker-spin {
+  animation: snapspot-spin 2.5s linear infinite;
+  display: flex;
+}
+
+/* fire — emoji */
+.snapspot-marker-fire {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* crown — emoji + gold glow */
+.snapspot-marker-crown {
+  filter: drop-shadow(0 0 7px rgba(245, 158, 11, 0.9)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
+}
+
+/* rainbow — conic-gradient border via padding trick */
+.snapspot-marker-rainbow {
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(#f87171, #fbbf24, #4ade80, #60a5fa, #a78bfa, #f472b6, #f87171);
+}
+.snapspot-marker-rainbow .snapspot-marker-inner,
+.snapspot-marker-preview.snapspot-marker-rainbow .snapspot-marker-inner {
+  width: 100%;
+  height: 100%;
+  background: #1e293b;
+  border-radius: 50%;
+}
+
+/* portal — spinning dashed ring inside */
+.snapspot-marker-portal {}
+.snapspot-marker-portal .snapspot-marker-inner,
+.snapspot-marker-preview.snapspot-marker-portal .snapspot-marker-inner {
+  width: 38px;
+  height: 38px;
+  border: 3px dashed #a78bfa;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.55), inset 0 0 10px rgba(167, 139, 250, 0.2);
+  animation: snapspot-spin 1.5s linear infinite;
 }
 
 /* Wrong click — X mark */
