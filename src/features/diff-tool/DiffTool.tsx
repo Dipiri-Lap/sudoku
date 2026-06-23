@@ -235,7 +235,7 @@ export const DiffTool: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${String(imageID).padStart(4, '0')}.json`;
+    a.download = `${imageID}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
