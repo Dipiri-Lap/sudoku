@@ -14,7 +14,7 @@ import '../styles/SnapSpotGame.css';
 export type SnapSpotMode = 'normal' | 'time-attack' | 'stage' | 'arcade';
 
 const MAX_HEARTS = 3;
-const ARCADE_CDN_BASE = 'https://images.tmhub.co.kr/spot-the-difference/arcade/0001-0150';
+const ARCADE_CDN_BASE = 'https://images.tmhub.co.kr/spot-the-difference/arcade';
 const ARCADE_TOTAL = 150;
 const ARCADE_INITIAL_TIME = 60;
 const ARCADE_BONUS_TIME = 5;
@@ -250,8 +250,8 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             .then(r => r.json())
             .then((nextData: LevelData) => {
               prefetchCache.current[nextId] = nextData;
-              new Image().src = `${CDN_BASE}/${nextData.imageID}.webp`;
-              new Image().src = `${CDN_BASE}/${nextData.imageID}_1.webp`;
+              new Image().src = `${CDN_BASE}/${nextData.imageID}.jpg`;
+              new Image().src = `${CDN_BASE}/${nextData.imageID}_1.jpg`;
             })
             .catch(() => {});
         }
@@ -700,7 +700,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           >
             <div style={innerStyle}>
               <img
-                src={`${cdnBase}/${imageID}${side === 'mod' ? '_1' : ''}.webp`}
+                src={`${cdnBase}/${imageID}${side === 'mod' ? '_1' : ''}.${mode === 'arcade' ? 'webp' : 'jpg'}`}
                 alt={side === 'orig' ? '원본' : '변경본'}
                 draggable={false}
                 onLoad={() => setImgsLoaded(prev => ({ ...prev, [side]: true }))}
