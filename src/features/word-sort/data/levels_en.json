@@ -23078,5 +23078,554 @@
                                          ]
                            }
                        ]
+    },
+    {
+        "id":  211,
+        "maxMoves":  94,
+        "slots":  4,
+        "categories":  [
+                           {
+                               "id":  "organ_dishes",
+                               "name":  "Offal Dishes",
+                               "target":  5,
+                               "words":  [
+                                             "Grilled Beef Tripe",
+                                             "Chewy Pork Rectum",
+                                             "Sundae Intestine",
+                                             "Organ Meat",
+                                             "Heart Skewer"
+                                         ]
+                           },
+                           {
+                               "id":  "school_classroom",
+                               "name":  "Classroom",
+                               "target":  6,
+                               "words":  [
+                                             "Chalk Dust",
+                                             "Class Schedule",
+                                             "Teacher\u0027s Podium",
+                                             "Locker",
+                                             "Green Chalkboard",
+                                             "Lesson"
+                                         ]
+                           },
+                           {
+                               "id":  "wisdom_intellect",
+                               "name":  "Wisdom",
+                               "target":  4,
+                               "words":  [
+                                             "Solomon\u0027s Judgment",
+                                             "Words of the Wise",
+                                             "Insight",
+                                             "Life Experience"
+                                         ]
+                           },
+                           {
+                               "id":  "blanket_bedding",
+                               "name":  "Blanket",
+                               "target":  5,
+                               "words":  [
+                                             "Feather Filling",
+                                             "Microfiber",
+                                             "Duvet Cover",
+                                             "Cozy Pad",
+                                             "Wardrobe Storage"
+                                         ]
+                           },
+                           {
+                               "id":  "unrequited_love",
+                               "name":  "Unrequited Love",
+                               "target":  5,
+                               "words":  [
+                                             "Secret Diary",
+                                             "Watching from Afar",
+                                             "Heartache",
+                                             "Talking to Yourself",
+                                             "Misunderstanding"
+                                         ]
+                           },
+                           {
+                               "id":  "game_character",
+                               "name":  "Game Characters",
+                               "target":  6,
+                               "words":  [
+                                             "Mario",
+                                             "Sonic",
+                                             "Chun-Li",
+                                             "Pac-Man",
+                                             "Ryu",
+                                             "Bowser"
+                                         ]
+                           },
+                           {
+                               "id":  "makeup_cosmetics",
+                               "name":  "Makeup",
+                               "target":  5,
+                               "words":  [
+                                             "Foundation",
+                                             "Hydrating Mist",
+                                             "Lip Gloss",
+                                             "Eyebrow Pencil",
+                                             "Cleansing Foam"
+                                         ]
+                           },
+                           {
+                               "id":  "solar_system",
+                               "name":  "The Sun",
+                               "target":  6,
+                               "words":  [
+                                             "Sunspot Eruption",
+                                             "UV Protection",
+                                             "Solar Panel",
+                                             "Solar Eclipse",
+                                             "Corona Emission",
+                                             "Photosynthesis"
+                                         ]
+                           }
+                       ]
+    },
+    {
+        "id":  212,
+        "maxMoves":  90,
+        "slots":  4,
+        "categories":  [
+                           {
+                               "id":  "good_manners",
+                               "name":  "Manners",
+                               "target":  5,
+                               "words":  [
+                                             "Table Etiquette",
+                                             "Giving Way",
+                                             "Knock Sound",
+                                             "Offering a Handshake",
+                                             "Formal Speech"
+                                         ]
+                           },
+                           {
+                               "id":  "recruitment_notice",
+                               "name":  "Recruitment",
+                               "target":  6,
+                               "words":  [
+                                             "Application Received",
+                                             "Experienced Hire",
+                                             "Notice Board",
+                                             "Deadline Near",
+                                             "Staffing Up",
+                                             "Acceptance Notice"
+                                         ]
+                           },
+                           {
+                               "id":  "government_administration",
+                               "name":  "Government",
+                               "target":  6,
+                               "words":  [
+                                             "Cabinet Meeting",
+                                             "Policy Announcement",
+                                             "Joint Ministry",
+                                             "Term Begins",
+                                             "Administrative Capital",
+                                             "Spokesperson Briefing"
+                                         ]
+                           },
+                           {
+                               "id":  "dj_club_radio",
+                               "name":  "DJ",
+                               "target":  5,
+                               "words":  [
+                                             "DJ Booth",
+                                             "Audio Mixer",
+                                             "Turntable",
+                                             "Wearing Headphones",
+                                             "Track List"
+                                         ]
+                           },
+                           {
+                               "id":  "product_merchandise",
+                               "name":  "Merchandise",
+                               "target":  7,
+                               "words":  [
+                                             "Barcode Tag",
+                                             "Sold Out Frenzy",
+                                             "Display Shelf",
+                                             "Packaging Box",
+                                             "New Product Launch",
+                                             "Retail Price",
+                                             "Exchange \u0026 Refund"
+                                         ]
+                           },
+                           {
+                               "id":  "the_last_final",
+                               "name":  "The Last",
+                               "target":  5,
+                               "words":  [
+                                             "Final Match",
+                                             "Last Will",
+                                             "Countdown",
+                                             "Last Stop",
+                                             "Farewell"
+                                         ]
+                           },
+                           {
+                               "id":  "question_inquiry",
+                               "name":  "Questions",
+                               "target":  5,
+                               "words":  [
+                                             "Question Mark",
+                                             "Q\u0026A Session",
+                                             "Curiosity",
+                                             "Interview",
+                                             "Key Point"
+                                         ]
+                           }
+                       ]
+    },
+    {
+        "id":  213,
+        "maxMoves":  100,
+        "slots":  4,
+        "categories":  [
+                           {
+                               "id":  "hangover_relief",
+                               "name":  "Hangover",
+                               "target":  5,
+                               "words":  [
+                                             "Hangover Soup",
+                                             "Headache Pills",
+                                             "Heavy Drinking",
+                                             "Nausea",
+                                             "Hovenia Tea"
+                                         ]
+                           },
+                           {
+                               "id":  "memory_recall",
+                               "name":  "Memory",
+                               "target":  6,
+                               "words":  [
+                                             "Photo Album",
+                                             "Deja Vu",
+                                             "Brain Stimulation",
+                                             "Reminiscing",
+                                             "Time Capsule",
+                                             "Forgetting Curve"
+                                         ]
+                           },
+                           {
+                               "id":  "system_upgrade",
+                               "name":  "Upgrade",
+                               "target":  5,
+                               "words":  [
+                                             "Latest Version",
+                                             "Performance Boost",
+                                             "Patch Notes",
+                                             "Parts Replacement",
+                                             "Spec Change"
+                                         ]
+                           },
+                           {
+                               "id":  "information_sharing",
+                               "name":  "Sharing",
+                               "target":  6,
+                               "words":  [
+                                             "Copy Link",
+                                             "Cloud Folder",
+                                             "Group Chat Send",
+                                             "Password Shared",
+                                             "Screen Share",
+                                             "Group Purchase"
+                                         ]
+                           },
+                           {
+                               "id":  "meal_time",
+                               "name":  "Meal Time",
+                               "target":  7,
+                               "words":  [
+                                             "Spoon and Chopsticks",
+                                             "Home-Style Rice Set",
+                                             "Dirty Dishes",
+                                             "Menu Scan",
+                                             "Dessert Time",
+                                             "Table Manners",
+                                             "Cafeteria"
+                                         ]
+                           },
+                           {
+                               "id":  "special_effect",
+                               "name":  "Effect",
+                               "target":  5,
+                               "words":  [
+                                             "Synergistic Response",
+                                             "Side Effect Concern",
+                                             "Immediate Response",
+                                             "Clinical Trial",
+                                             "Placebo"
+                                         ]
+                           },
+                           {
+                               "id":  "user_interest",
+                               "name":  "Interest",
+                               "target":  6,
+                               "words":  [
+                                             "Focused Attention",
+                                             "Curiosity Spark",
+                                             "Bookmark",
+                                             "Notification Setting",
+                                             "Eye Contact",
+                                             "Trend"
+                                         ]
+                           },
+                           {
+                               "id":  "cozy_warmth",
+                               "name":  "Coziness",
+                               "target":  4,
+                               "words":  [
+                                             "Goose Down Duvet",
+                                             "Sleep Socks",
+                                             "Fireplace Log",
+                                             "Being Held Close"
+                                         ]
+                           }
+                       ]
+    },
+    {
+        "id":  214,
+        "maxMoves":  74,
+        "slots":  3,
+        "categories":  [
+                           {
+                               "id":  "moving_house",
+                               "name":  "Moving House",
+                               "target":  6,
+                               "words":  [
+                                             "Packing Box",
+                                             "Moving Truck",
+                                             "Jajangmyeon Delivery",
+                                             "Address Change",
+                                             "Deposit Return",
+                                             "Tape Mark"
+                                         ]
+                           },
+                           {
+                               "id":  "hot_issue",
+                               "name":  "Hot Issue",
+                               "target":  5,
+                               "words":  [
+                                             "Real-Time Search",
+                                             "Opinion Poll",
+                                             "Hashtag",
+                                             "Press Conference",
+                                             "Center of Controversy"
+                                         ]
+                           },
+                           {
+                               "id":  "feeling_scared",
+                               "name":  "Being Scared",
+                               "target":  5,
+                               "words":  [
+                                             "Haunted House",
+                                             "Goosebumps",
+                                             "Horror Movie",
+                                             "Heartbeat",
+                                             "Scream"
+                                         ]
+                           },
+                           {
+                               "id":  "intensive_study",
+                               "name":  "Studying",
+                               "target":  7,
+                               "words":  [
+                                             "Highlighter Mark",
+                                             "Error Notebook",
+                                             "Study Cafe",
+                                             "Online Lecture",
+                                             "Mock Exam",
+                                             "Memory Card",
+                                             "Concept Understanding"
+                                         ]
+                           },
+                           {
+                               "id":  "sky_clouds",
+                               "name":  "Clouds",
+                               "target":  5,
+                               "words":  [
+                                             "Cumulus Cloud",
+                                             "White Flock",
+                                             "Rain Cloud",
+                                             "Cumulonimbus",
+                                             "High Altitude"
+                                         ]
+                           },
+                           {
+                               "id":  "colony_history",
+                               "name":  "Colonialism",
+                               "target":  6,
+                               "words":  [
+                                             "Forced Plunder",
+                                             "Independence Fighter",
+                                             "Imperialism",
+                                             "Treaty Signing",
+                                             "War Declaration",
+                                             "Historical Pain"
+                                         ]
+                           }
+                       ]
+    },
+    {
+        "id":  215,
+        "maxMoves":  168,
+        "slots":  5,
+        "categories":  [
+                           {
+                               "id":  "old_castle",
+                               "name":  "Old Castle",
+                               "target":  5,
+                               "words":  [
+                                             "Stone Wall Moss",
+                                             "Iron Armor",
+                                             "Secret Passage",
+                                             "Drawbridge",
+                                             "Spiral Staircase"
+                                         ]
+                           },
+                           {
+                               "id":  "bitter_cold",
+                               "name":  "Cold",
+                               "target":  6,
+                               "words":  [
+                                             "Breath Fog",
+                                             "Icicle",
+                                             "Cold Hands",
+                                             "Winter Padding",
+                                             "Pipe Burst",
+                                             "Frost"
+                                         ]
+                           },
+                           {
+                               "id":  "historical_era",
+                               "name":  "Era",
+                               "target":  5,
+                               "words":  [
+                                             "Artifact Excavation",
+                                             "History Textbook",
+                                             "Timeline Chart",
+                                             "End of Century",
+                                             "Paradigm"
+                                         ]
+                           },
+                           {
+                               "id":  "ideology_belief",
+                               "name":  "Ideology",
+                               "target":  5,
+                               "words":  [
+                                             "Political Thought",
+                                             "Progressive vs Conservative",
+                                             "System Conflict",
+                                             "Philosopher",
+                                             "Manifesto"
+                                         ]
+                           },
+                           {
+                               "id":  "aging_process",
+                               "name":  "Aging",
+                               "target":  6,
+                               "words":  [
+                                             "Eye Wrinkles",
+                                             "Gray Hair Dye",
+                                             "Reading Glasses",
+                                             "Bone Density Loss",
+                                             "Memory Decline",
+                                             "Age Spots"
+                                         ]
+                           },
+                           {
+                               "id":  "daily_schedule",
+                               "name":  "Schedule",
+                               "target":  6,
+                               "words":  [
+                                             "Calendar App",
+                                             "Deadline",
+                                             "Time Coordination",
+                                             "Reminder Buzzer",
+                                             "Canceled Reservation",
+                                             "Meeting Spot"
+                                         ]
+                           },
+                           {
+                               "id":  "hiphop_culture",
+                               "name":  "Hip-Hop",
+                               "target":  6,
+                               "words":  [
+                                             "Rhyme Beat",
+                                             "Rap Battle",
+                                             "DJing",
+                                             "Mic Check",
+                                             "Turntable",
+                                             "Graffiti"
+                                         ]
+                           },
+                           {
+                               "id":  "santiago_pilgrimage",
+                               "name":  "Santiago",
+                               "target":  6,
+                               "words":  [
+                                             "Pilgrim\u0027s Staff",
+                                             "Scallop Shell",
+                                             "Albergue Hostel",
+                                             "Hiking Backpack",
+                                             "Completion Certificate",
+                                             "Yellow Arrow"
+                                         ]
+                           },
+                           {
+                               "id":  "book_store",
+                               "name":  "Bookstore",
+                               "target":  6,
+                               "words":  [
+                                             "Bestseller",
+                                             "Book Search Kiosk",
+                                             "Paper Book Smell",
+                                             "Member Card",
+                                             "Publication Party",
+                                             "New Arrivals Corner"
+                                         ]
+                           },
+                           {
+                               "id":  "exhibition_hall",
+                               "name":  "Exhibition Hall",
+                               "target":  6,
+                               "words":  [
+                                             "Catalog Guide",
+                                             "Artwork Caption",
+                                             "Lighting Angle",
+                                             "Curator",
+                                             "Docent Tour",
+                                             "Ticket Gate"
+                                         ]
+                           },
+                           {
+                               "id":  "foul_language",
+                               "name":  "Profanity",
+                               "target":  5,
+                               "words":  [
+                                             "Bleep Sound",
+                                             "Using Slang",
+                                             "Verbal Abuse",
+                                             "Verbal Argument",
+                                             "Malicious Comment"
+                                         ]
+                           },
+                           {
+                               "id":  "garden_snail",
+                               "name":  "Snail",
+                               "target":  6,
+                               "words":  [
+                                             "Antennae",
+                                             "Spiral Shell",
+                                             "Slime Trail",
+                                             "Lettuce Leaf",
+                                             "Slow and Steady",
+                                             "Moisture Boost"
+                                         ]
+                           }
+                       ]
     }
 ]
