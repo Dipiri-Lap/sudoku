@@ -10,7 +10,7 @@ import {
 } from '../context/SnapSpotMarkerContext';
 import { useCoins } from '../../../context/CoinContext';
 
-const GRADE_ORDER: MarkerGrade[] = ['common', 'rare', 'epic', 'legendary'];
+const GRADE_ORDER: MarkerGrade[] = ['common', 'rare', 'elite', 'unique', 'epic', 'legendary'];
 
 const CoinImg = ({ size = 16 }: { size?: number }) => (
   <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />

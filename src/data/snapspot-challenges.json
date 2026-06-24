@@ -1,0 +1,122 @@
+[
+  {
+    "id": "ss_1",
+    "type": "STAGE",
+    "game": "snapspot",
+    "title": "🔍 첫 발견",
+    "condition": "스테이지 1 클리어",
+    "progressConfig": {
+      "source": "snapspot_stage",
+      "target": 1
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
+  },
+  {
+    "id": "ss_10",
+    "type": "STAGE",
+    "game": "snapspot",
+    "title": "👁️ 또렷한 눈",
+    "condition": "스테이지 10 클리어",
+    "progressConfig": {
+      "source": "snapspot_stage",
+      "target": 10
+    },
+    "reward": {
+      "puzzle_power": 20,
+      "coin": 25
+    }
+  },
+  {
+    "id": "ss_30",
+    "type": "STAGE",
+    "game": "snapspot",
+    "title": "🦉 올빼미의 눈",
+    "condition": "스테이지 30 클리어",
+    "progressConfig": {
+      "source": "snapspot_stage",
+      "target": 30
+    },
+    "reward": {
+      "puzzle_power": 30,
+      "coin": 50
+    }
+  },
+  {
+    "id": "ss_50",
+    "type": "STAGE",
+    "game": "snapspot",
+    "title": "🔎 예리한 관찰자",
+    "condition": "스테이지 50 클리어",
+    "progressConfig": {
+      "source": "snapspot_stage",
+      "target": 50
+    },
+    "reward": {
+      "puzzle_power": 50,
+      "coin": 100
+    }
+  },
+  {
+    "id": "ss_100",
+    "type": "STAGE",
+    "game": "snapspot",
+    "title": "🦅 매의 눈",
+    "condition": "스테이지 100 클리어",
+    "progressConfig": {
+      "source": "snapspot_stage",
+      "target": 100
+    },
+    "reward": {
+      "puzzle_power": 100,
+      "coin": 150
+    }
+  },
+  {
+    "id": "ss_200",
+    "type": "STAGE",
+    "game": "snapspot",
+    "title": "✨ 꿰뚫는 시선",
+    "condition": "스테이지 200 클리어",
+    "progressConfig": {
+      "source": "snapspot_stage",
+      "target": 200
+    },
+    "reward": {
+      "puzzle_power": 150,
+      "coin": 200
+    }
+  },
+  {
+    "id": "ss_300",
+    "type": "STAGE",
+    "game": "snapspot",
+    "title": "🐆 표범의 눈",
+    "condition": "스테이지 300 클리어",
+    "progressConfig": {
+      "source": "snapspot_stage",
+      "target": 300
+    },
+    "reward": {
+      "puzzle_power": 200,
+      "coin": 250
+    }
+  },
+  {
+    "id": "ss_500",
+    "type": "STAGE",
+    "game": "snapspot",
+    "title": "👁️ 천리안",
+    "condition": "스테이지 500 클리어",
+    "progressConfig": {
+      "source": "snapspot_stage",
+      "target": 500
+    },
+    "reward": {
+      "puzzle_power": 250,
+      "coin": 300
+    }
+  }
+]

@@ -11,6 +11,7 @@ import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
 import { useWordSortHardProgress } from '../../context/WordSortHardProgressContext';
 import { useQueensProgress } from '../../context/QueensProgressContext';
+import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
 
 interface ProfileModalProps {
     uid: string;
@@ -53,6 +54,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const { wordSortProgress } = useWordSortProgress();
     const { wordSortHardProgress } = useWordSortHardProgress();
     const { queensProgress } = useQueensProgress();
+    const { snapSpotProgress } = useSnapSpotProgress();
 
     /** Returns { current, target } for the challenge's progress bar */
     const getProgress = (challenge: Challenge): { current: number; target: number } => {
@@ -68,6 +70,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 return { current: Math.min(wordSortHardProgress, target), target };
             case 'queens_stage':
                 return { current: Math.min(queensProgress, target), target };
+            case 'snapspot_stage':
+                return { current: Math.min(snapSpotProgress, target), target };
             case 'time_attack': {
                 const cleared = challenges.isChallengeCleared(challenge.id) || challenges.isChallengeCompleted(challenge.id);
                 return { current: cleared ? 1 : 0, target: 1 };
@@ -595,7 +599,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                             >
                                                 <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: expandedGames.has(game) ? 'rotate(0deg)' : 'rotate(-90deg)', flexShrink: 0 }} />
                                                 <span style={{ fontSize: '0.72rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                                    {game === 'sudoku' ? '스도쿠' : game === 'queens' ? 'Crown Quest' : '워드스택'}
+                                                    {game === 'sudoku' ? '스도쿠' : game === 'queens' ? '크라운 퀘스트' : game === 'snapspot' ? '스냅스팟' : '워드스택'}
                                                     <span style={{ marginLeft: '5px', fontSize: '0.65rem', color: '#64748b' }}>
                                                         ({list.filter(c => challenges.isChallengeCompleted(c.id)).length}/{list.length})
                                                     </span>

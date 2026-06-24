@@ -40,7 +40,7 @@
       "target": 25
     },
     "reward": {
-      "puzzle_power": 40,
+      "puzzle_power": 30,
       "coin": 50
     }
   },
@@ -55,7 +55,7 @@
       "target": 50
     },
     "reward": {
-      "puzzle_power": 80,
+      "puzzle_power": 50,
       "coin": 100
     }
   },
@@ -70,8 +70,8 @@
       "target": 100
     },
     "reward": {
-      "puzzle_power": 150,
-      "coin": 200
+      "puzzle_power": 100,
+      "coin": 150
     }
   },
   {
@@ -85,8 +85,8 @@
       "target": 200
     },
     "reward": {
-      "puzzle_power": 200,
-      "coin": 300
+      "puzzle_power": 150,
+      "coin": 200
     }
   },
   {
@@ -100,8 +100,8 @@
       "target": 300
     },
     "reward": {
-      "puzzle_power": 250,
-      "coin": 400
+      "puzzle_power": 200,
+      "coin": 300
     }
   },
   {
@@ -115,8 +115,8 @@
       "target": 400
     },
     "reward": {
-      "puzzle_power": 300,
-      "coin": 500
+      "puzzle_power": 250,
+      "coin": 400
     }
   },
   {
@@ -130,8 +130,8 @@
       "target": 500
     },
     "reward": {
-      "puzzle_power": 350,
-      "coin": 600
+      "puzzle_power": 300,
+      "coin": 500
     }
   },
   {

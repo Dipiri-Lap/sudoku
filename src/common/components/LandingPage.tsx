@@ -18,6 +18,7 @@ import { useChallenges } from '../../context/ChallengeContext';
 import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
 import { useWordSortHardProgress } from '../../context/WordSortHardProgressContext';
+import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
 
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
@@ -32,6 +33,7 @@ const LandingPage: React.FC = () => {
     const { stageProgress, beginnerProgress } = useSudokuProgress();
     const { wordSortProgress } = useWordSortProgress();
     const { wordSortHardProgress } = useWordSortHardProgress();
+    const { snapSpotProgress } = useSnapSpotProgress();
     const hasUnclaimed = Object.values(ALL_CHALLENGES).flat().some(c => {
         if (challenges.isChallengeCompleted(c.id)) return false;
         const { source, target } = c.progressConfig;
@@ -40,6 +42,7 @@ const LandingPage: React.FC = () => {
         if (source === 'beginner_stage') return Math.min(beginnerProgress, target) >= target;
         if (source === 'word_sort_stage') return Math.min(wordSortProgress, target) >= target;
         if (source === 'word_sort_hard_stage') return Math.min(wordSortHardProgress, target) >= target;
+        if (source === 'snapspot_stage') return Math.min(snapSpotProgress, target) >= target;
         return false;
     });
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -548,22 +551,12 @@ const LandingPage: React.FC = () => {
                     </a>
                 )}
 
-                {window.location.hostname === 'localhost' && (
-                    <a href="/snapspot" className="game-card animate-fade-in" style={{ '--delay': '0.6s', textDecoration: 'none', color: 'inherit' } as any}>
-                        <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
-                            🔍
-                        </div>
-                        <div className="game-card-content">
-                            <h3>틀린 그림 찾기</h3>
-                            <p>두 그림의 차이점을 찾아내는 관찰력 퍼즐</p>
-                            <div className="game-card-footer">
-                                <span className="play-now">
-                                    <Play size={16} fill="currentColor" /> 플레이하기
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-                )}
+                <a href="/snapspot" className="animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                >
+                    <img src="/images/snapspot/title.webp" alt="스냅스팟" style={{ width: '100%', display: 'block' }} />
+                </a>
             </div>
 
 

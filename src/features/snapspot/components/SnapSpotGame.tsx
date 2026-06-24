@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Heart, Search, Check, Palette } from 'lucide-react';
+import { ChevronLeft, Heart, Search, Check, Palette, Settings } from 'lucide-react';
 import { useSnapSpotMarker, getMarkerContent } from '../context/SnapSpotMarkerContext';
 import SnapSpotMarkerShopModal from './SnapSpotMarkerShopModal';
+import SnapSpotSettingsModal from './SnapSpotSettingsModal';
 import { useCoins } from '../../../context/CoinContext';
 import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
 import { auth } from '../../../firebase';
@@ -83,8 +84,16 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const { snapSpotProgress, saveSnapSpotProgress: saveProgress } = useSnapSpotProgress();
   const { selectedMarkerId } = useSnapSpotMarker();
   const [showMarkerShop, setShowMarkerShop] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [bgmVolume, setBgmVolume] = useState(() => parseFloat(localStorage.getItem('snapspot_bgmVolume') ?? '0.3'));
+  const [sfxVolume, setSfxVolume] = useState(() => parseFloat(localStorage.getItem('snapspot_sfxVolume') ?? '1'));
+  const sfxVolumeRef = useRef(sfxVolume);
   const hasAwardedCoins = useRef(false);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const correctSfxRef = useRef<HTMLAudioElement | null>(null);
+  const wrongSfxRef = useRef<HTMLAudioElement | null>(null);
+  const clearSfxRef = useRef<HTMLAudioElement | null>(null);
+  const failSfxRef = useRef<HTMLAudioElement | null>(null);
   const prefetchCache = useRef<Record<number, LevelData>>({});
   const arcadeQueue = useRef<number[]>(
     mode === 'arcade' ? shuffleArray(Array.from({ length: ARCADE_TOTAL }, (_, i) => i + 1)) : []
@@ -103,7 +112,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     return 1;
   });
   const [hintIdx, setHintIdx] = useState<number | null>(null);
-  const [isHinting, setIsHinting] = useState(false);
   const [hintUsed, setHintUsed] = useState(false);
   const [curtainOpen, setCurtainOpen] = useState(false);
   const [imgsLoaded, setImgsLoaded] = useState({ orig: false, mod: false });
@@ -164,8 +172,13 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
 
     bgmRef.current = new Audio('/assets/snapspot/sounds/bgm.mp3');
     bgmRef.current.loop = true;
-    bgmRef.current.volume = 0.3;
+    bgmRef.current.volume = bgmVolume;
     bgmRef.current.play().catch(() => {});
+
+    correctSfxRef.current = new Audio('/assets/snapspot/sounds/correct.mp3');
+    wrongSfxRef.current = new Audio('/assets/snapspot/sounds/wrong.mp3');
+    clearSfxRef.current = new Audio('/assets/snapspot/sounds/clear.mp3');
+    failSfxRef.current = new Audio('/assets/snapspot/sounds/fail.mp3');
 
     const handleVisibility = () => {
       if (!bgmRef.current) return;
@@ -186,8 +199,23 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         bgmRef.current.pause();
         bgmRef.current.src = '';
       }
+      for (const ref of [correctSfxRef, wrongSfxRef, clearSfxRef, failSfxRef]) {
+        if (ref.current) ref.current.src = '';
+      }
     };
   }, []);
+
+  // BGM 볼륨 동기화
+  useEffect(() => {
+    localStorage.setItem('snapspot_bgmVolume', String(bgmVolume));
+    if (bgmRef.current) bgmRef.current.volume = bgmVolume;
+  }, [bgmVolume]);
+
+  // SFX 볼륨 동기화 (ref로 콜백 내 최신값 유지)
+  useEffect(() => {
+    localStorage.setItem('snapspot_sfxVolume', String(sfxVolume));
+    sfxVolumeRef.current = sfxVolume;
+  }, [sfxVolume]);
 
   useEffect(() => {
     setLevelData(null);
@@ -198,7 +226,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
     setHintIdx(null);
-    setIsHinting(false);
     setHintUsed(false);
     setCurtainOpen(false);
     setImgsLoaded({ orig: false, mod: false });
@@ -253,6 +280,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       hasAwardedCoins.current = true;
       confetti({ particleCount: 90, angle: 60,  spread: 60, origin: { x: 0, y: 0.6 }, colors: ['#fbbf24','#22c55e','#6366f1','#f472b6','#fb923c'] });
       confetti({ particleCount: 90, angle: 120, spread: 60, origin: { x: 1, y: 0.6 }, colors: ['#fbbf24','#22c55e','#6366f1','#f472b6','#fb923c'] });
+      if (clearSfxRef.current) { clearSfxRef.current.currentTime = 0; clearSfxRef.current.volume = 0.8 * sfxVolumeRef.current; clearSfxRef.current.play().catch(() => {}); }
 
       if (mode === 'arcade') {
         setArcadeTime(t => t + ARCADE_BONUS_TIME);
@@ -328,6 +356,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           setCorrectHit({ diffIdx: i, text, key: ++correctHitKey.current });
           setTimeout(() => setCorrectHit(null), 900);
           navigator.vibrate?.(30);
+          if (correctSfxRef.current) { correctSfxRef.current.currentTime = 0; correctSfxRef.current.volume = 0.7 * sfxVolumeRef.current; correctSfxRef.current.play().catch(() => {}); }
           if (next.every(Boolean)) setIsWinner(true);
           return;
         }
@@ -341,11 +370,16 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       setScreenShake(true);
       setTimeout(() => setScreenShake(false), 400);
       navigator.vibrate?.(80);
+      if (wrongSfxRef.current) { wrongSfxRef.current.currentTime = 0; wrongSfxRef.current.volume = 0.7 * sfxVolumeRef.current; wrongSfxRef.current.play().catch(() => {}); }
 
       if (mode === 'stage') {
         setHearts((h) => {
           const next = h - 1;
-          if (next <= 0) setIsGameOver(true);
+          if (next <= 0) {
+            setIsGameOver(true);
+            bgmRef.current?.pause();
+            if (failSfxRef.current) { failSfxRef.current.currentTime = 0; failSfxRef.current.volume = 0.4 * sfxVolumeRef.current; failSfxRef.current.play().catch(() => {}); }
+          }
           return Math.max(0, next);
         });
         setHeartShake(true);
@@ -519,7 +553,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     if (mode !== 'arcade' || arcadeGameOver) return;
     const interval = setInterval(() => {
       setArcadeTime(t => {
-        if (t <= 1) { setArcadeGameOver(true); return 0; }
+        if (t <= 1) { setArcadeGameOver(true); if (failSfxRef.current) { failSfxRef.current.currentTime = 0; failSfxRef.current.volume = 0.4 * sfxVolumeRef.current; failSfxRef.current.play().catch(() => {}); } return 0; }
         return t - 1;
       });
     }, 1000);
@@ -535,7 +569,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   useEffect(() => {
     if (hintIdx !== null && found[hintIdx]) {
       setHintIdx(null);
-      setIsHinting(false);
     }
   }, [found, hintIdx]);
 
@@ -543,7 +576,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     const idx = found.findIndex(f => !f);
     if (idx === -1) return;
     setHintIdx(idx);
-    setIsHinting(true);
     setHintUsed(true);
   }, [found]);
 
@@ -629,6 +661,14 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
               DEBUG
             </button>
           )}
+          <button
+            className="snapspot-zoom-btn"
+            onClick={() => setShowSettings(true)}
+            style={{ padding: '4px 8px' }}
+            title="사운드 설정"
+          >
+            <Settings size={16} />
+          </button>
           <button
             className="snapspot-zoom-btn"
             onClick={() => setShowMarkerShop(true)}
@@ -906,6 +946,15 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       )}
     </div>
       {showMarkerShop && <SnapSpotMarkerShopModal onClose={() => setShowMarkerShop(false)} />}
+      {showSettings && (
+        <SnapSpotSettingsModal
+          bgmVolume={bgmVolume}
+          sfxVolume={sfxVolume}
+          onBgmChange={setBgmVolume}
+          onSfxChange={setSfxVolume}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
     </>
   );
 };

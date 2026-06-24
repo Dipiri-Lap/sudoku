@@ -1,0 +1,286 @@
+/* ── 전체 레이아웃 ── */
+.crossword-outer {
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: #1e1e2e;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.crossword-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+  background: #35354a;
+  color: #fff;
+  font-family: 'Noto Sans KR', sans-serif;
+  user-select: none;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+/* ── 헤더 ── */
+.crossword-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #2c2c3e;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.crossword-back-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: #4a4a60;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.crossword-back-btn:active { opacity: 0.7; }
+
+.crossword-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  flex: 1;
+  text-align: center;
+}
+
+.crossword-reset-btn {
+  height: 36px;
+  padding: 0 12px;
+  border: none;
+  background: #4a4a60;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #ccc;
+  flex-shrink: 0;
+}
+
+.crossword-reset-btn:active { opacity: 0.7; }
+
+/* ── 격자 영역 ── */
+.crossword-grid-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.crossword-grid {
+  display: grid;
+  gap: 4px;
+}
+
+/* ── 셀 ── */
+.crossword-cell {
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, transform 0.08s;
+}
+
+.crossword-cell.blocked {
+  background: #2e2e40;
+  cursor: default;
+  border-radius: 8px;
+}
+
+.crossword-cell.active {
+  background: #5a5a72;
+  color: #fff;
+  border: 2px solid #6a6a84;
+}
+
+.crossword-cell.fixed {
+  background: #5a5a72;
+  color: #e0e0f0;
+  border: 2px solid #6a6a84;
+  cursor: default;
+}
+
+.crossword-cell.highlighted {
+  background: #5a5a72;
+  border: 2.5px solid #e87f3a;
+}
+
+.crossword-cell.correct {
+  background: #2d6a4f;
+  border: 2px solid #3d8a5f;
+  color: #b8f0d0;
+  cursor: default;
+}
+
+.crossword-cell.shaking {
+  background: #6a2020;
+  border: 2px solid #e74c3c;
+  color: #ffb0b0;
+  animation: cell-shake 0.55s ease;
+}
+
+@keyframes cell-shake {
+  0%, 100% { transform: translateX(0); }
+  15%  { transform: translateX(-6px); }
+  35%  { transform: translateX(6px); }
+  55%  { transform: translateX(-4px); }
+  75%  { transform: translateX(4px); }
+  90%  { transform: translateX(-2px); }
+}
+
+/* ── 선택 힌트 ── */
+.crossword-selected-hint {
+  font-size: 0.82rem;
+  color: #9090b0;
+  text-align: center;
+  padding: 6px 16px;
+  min-height: 28px;
+  flex-shrink: 0;
+}
+
+/* ── 타일 풀 ── */
+.crossword-tile-pool {
+  background: #2c2c3e;
+  padding: 12px 16px 28px;
+  flex-shrink: 0;
+}
+
+.crossword-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.crossword-tile {
+  width: 62px;
+  height: 62px;
+  background: #5a5a72;
+  border: 2px solid #7070a0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.08s, background 0.1s;
+  box-shadow: 0 3px 0 #3a3a50;
+}
+
+.crossword-tile:hover:not(:disabled) {
+  background: #6a6a88;
+  transform: translateY(-2px);
+}
+
+.crossword-tile:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #3a3a50;
+}
+
+.crossword-tile:disabled,
+.crossword-tile.used {
+  background: #3a3a50;
+  border-color: #4a4a60;
+  color: #5a5a70;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── 클리어 오버레이 ── */
+.crossword-win-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.crossword-win-card {
+  background: #2c2c3e;
+  border: 2px solid #5a5a80;
+  border-radius: 24px;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  max-width: 300px;
+  width: 88%;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  animation: pop-in 0.25s ease;
+}
+
+@keyframes pop-in {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.crossword-win-emoji {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.crossword-win-card h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #7de8a0;
+  margin: 0 0 0.35rem;
+}
+
+.crossword-win-card p {
+  color: #9090b0;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+.crossword-win-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.crossword-win-btn {
+  padding: 0.7rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #4a7abf;
+  color: #fff;
+}
+
+.crossword-win-btn:active { opacity: 0.8; }
+
+.crossword-win-btn.secondary {
+  background: #4a4a60;
+  color: #ccc;
+}

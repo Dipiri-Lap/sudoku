@@ -8,13 +8,15 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../../firebase';
 import { useCoins } from '../../../context/CoinContext';
 
-export type MarkerGrade = 'common' | 'rare' | 'epic' | 'legendary';
+export type MarkerGrade = 'common' | 'rare' | 'elite' | 'unique' | 'epic' | 'legendary';
 
 export const MARKER_GRADE_CONFIG: Record<MarkerGrade, { label: string; color: string; cost: number }> = {
   common:    { label: '일반',  color: '#94a3b8', cost: 0   },
   rare:      { label: '희귀',  color: '#3b82f6', cost: 100 },
-  epic:      { label: '영웅',  color: '#a855f7', cost: 200 },
-  legendary: { label: '전설',  color: '#f59e0b', cost: 300 },
+  elite:     { label: '고급',  color: '#10b981', cost: 200 },
+  unique:    { label: '유니크', color: '#f97316', cost: 300 },
+  epic:      { label: '영웅',  color: '#a855f7', cost: 400 },
+  legendary: { label: '전설',  color: '#f59e0b', cost: 500 },
 };
 
 export interface MarkerDesign {
@@ -24,22 +26,30 @@ export interface MarkerDesign {
 }
 
 export const markerDesigns: MarkerDesign[] = [
-  { id: 'circle',   grade: 'common',    label: '서클'    },
-  { id: 'check',    grade: 'common',    label: '체크'    },
-  { id: 'star',     grade: 'common',    label: '별'      },
-  { id: 'target',   grade: 'rare',      label: '타겟'    },
-  { id: 'smile',    grade: 'rare',      label: '스마일'  },
-  { id: 'pin',      grade: 'rare',      label: '핀'      },
-  { id: 'heart',    grade: 'epic',      label: '하트'    },
-  { id: 'sparkle',  grade: 'epic',      label: '스파클'  },
-  { id: 'fire',     grade: 'epic',      label: '파이어'  },
-  { id: 'crown',    grade: 'legendary', label: '크라운'  },
-  { id: 'rainbow',  grade: 'legendary', label: '레인보우' },
-  { id: 'portal',   grade: 'legendary', label: '포탈'    },
+  { id: 'circle',    grade: 'common',    label: '서클'    },
+  { id: 'check',     grade: 'common',    label: '체크'    },
+  { id: 'star',      grade: 'common',    label: '별'      },
+  { id: 'target',    grade: 'rare',      label: '타겟'    },
+  { id: 'smile',     grade: 'rare',      label: '스마일'  },
+  { id: 'pin',       grade: 'rare',      label: '핀'      },
+  { id: 'lightning', grade: 'elite',     label: '번개'    },
+  { id: 'gem',       grade: 'elite',     label: '보석'    },
+  { id: 'clover',    grade: 'elite',     label: '클로버'  },
+  { id: 'trophy',    grade: 'unique',    label: '트로피'  },
+  { id: 'magic',     grade: 'unique',    label: '매직'    },
+  { id: 'eyes',      grade: 'unique',    label: '눈'      },
+  { id: 'heart',     grade: 'epic',      label: '하트'    },
+  { id: 'sparkle',   grade: 'epic',      label: '스파클'  },
+  { id: 'fire',      grade: 'epic',      label: '파이어'  },
+  { id: 'crown',     grade: 'legendary', label: '크라운'  },
+  { id: 'rainbow',   grade: 'legendary', label: '레인보우' },
+  { id: 'portal',    grade: 'legendary', label: '포탈'    },
 ];
 
 const MARKER_EMOJI: Record<string, string> = {
   star: '⭐', smile: '😊', pin: '📍',
+  lightning: '⚡', gem: '💎', clover: '🍀',
+  trophy: '🏆', magic: '🪄', eyes: '👀',
   heart: '💖', sparkle: '✨', fire: '🔥', crown: '👑',
 };
 

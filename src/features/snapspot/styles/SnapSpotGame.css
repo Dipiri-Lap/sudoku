@@ -255,6 +255,36 @@
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
 }
 
+/* lightning — emoji */
+.snapspot-marker-lightning {
+  filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.7)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* gem — emoji */
+.snapspot-marker-gem {
+  filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.6)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* clover — emoji */
+.snapspot-marker-clover {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* trophy — emoji */
+.snapspot-marker-trophy {
+  filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.6)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* magic — emoji */
+.snapspot-marker-magic {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* eyes — emoji */
+.snapspot-marker-eyes {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
 /* heart — emoji */
 .snapspot-marker-heart {
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
@@ -279,16 +309,24 @@
   filter: drop-shadow(0 0 7px rgba(245, 158, 11, 0.9)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
 }
 
-/* rainbow — conic-gradient border via padding trick */
+/* rainbow — spinning conic-gradient ring (inner element spins, outer just sizes) */
 .snapspot-marker-rainbow {
   border-radius: 50%;
-  padding: 3px;
-  background: conic-gradient(#f87171, #fbbf24, #4ade80, #60a5fa, #a78bfa, #f472b6, #f87171);
 }
 .snapspot-marker-rainbow .snapspot-marker-inner,
 .snapspot-marker-preview.snapspot-marker-rainbow .snapspot-marker-inner {
   width: 100%;
   height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#f87171, #fbbf24, #4ade80, #60a5fa, #a78bfa, #f472b6, #f87171);
+  animation: snapspot-spin 2s linear infinite;
+  position: relative;
+}
+.snapspot-marker-rainbow .snapspot-marker-inner::after,
+.snapspot-marker-preview.snapspot-marker-rainbow .snapspot-marker-inner::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
   background: #1e293b;
   border-radius: 50%;
 }
