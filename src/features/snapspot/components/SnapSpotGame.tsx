@@ -704,6 +704,12 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                 alt={side === 'orig' ? '원본' : '변경본'}
                 draggable={false}
                 onLoad={() => setImgsLoaded(prev => ({ ...prev, [side]: true }))}
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (img.src.endsWith('.jpg')) {
+                    img.src = img.src.replace(/\.jpg$/, '.jpeg');
+                  }
+                }}
               />
               {differences.map((diff, i) => {
                 if (!found[i]) return null;
