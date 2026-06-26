@@ -1,10 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { Timer, Layers, ChevronLeft, BookOpen, Grid2x2 } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useGame } from '../context/SudokuContext';
 import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 import { logEvent } from '../../../firebase';
+
+const btnStyle = (delay: string): React.CSSProperties => ({
+    '--delay': delay,
+    width: '100%',
+    borderRadius: 16,
+    objectFit: 'cover' as const,
+    cursor: 'pointer',
+    display: 'block',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    transition: 'all 0.2s ease',
+} as React.CSSProperties);
+
+const hoverOn = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.currentTarget.style.transform = 'translateY(-4px)';
+    e.currentTarget.style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)';
+};
+const hoverOff = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.currentTarget.style.transform = '';
+    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+};
 
 const SudokuModeSelect: React.FC = () => {
     const navigate = useNavigate();
@@ -79,85 +99,87 @@ const SudokuModeSelect: React.FC = () => {
                 <button className="back-btn" onClick={() => navigate('/')}>
                     <ChevronLeft size={24} />
                 </button>
-                <h1>스도쿠 모드 선택</h1>
+                <h1>스도쿠</h1>
             </header>
 
             <div className="mode-grid">
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.1s', position: 'relative' } as any} onClick={() => {
-                    const startLevel = beginnerAllCleared ? 1 : Math.min(beginnerProgress + 1, 5);
-                    dispatch({ type: 'START_BEGINNER', level: startLevel });
-                    logEvent('game_play', { game: 'sudoku', mode: 'beginner' });
-                    navigate(`/sudoku/beginner?level=${startLevel}`);
-                }}>
-                    <div className="game-card-icon">
-                        <BookOpen size={40} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            입문자 모드
-                            {beginnerAllCleared && (
-                                <img src="/clearBadge.png" alt="클리어" style={{ width: '36px', height: '36px' }} />
-                            )}
-                        </h3>
-                        <p>6×6 스도쿠로 시작해 9×9로 단계별 입문하세요.</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                {beginnerAllCleared ? '처음부터 하기' : beginnerProgress > 0 ? `Level ${beginnerProgress + 1} 시작하기` : 'Level 1 시작하기'}
-                            </span>
-                        </div>
-                    </div>
+                {/* 입문자 모드 */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                    <img
+                        src="/images/sudoku/beginnerBtn.webp"
+                        alt="입문자 모드"
+                        className="animate-fade-in"
+                        style={btnStyle('0.1s')}
+                        onClick={() => {
+                            const startLevel = beginnerAllCleared ? 1 : Math.min(beginnerProgress + 1, 5);
+                            dispatch({ type: 'START_BEGINNER', level: startLevel });
+                            logEvent('game_play', { game: 'sudoku', mode: 'beginner' });
+                            navigate(`/sudoku/beginner?level=${startLevel}`);
+                        }}
+                        onMouseEnter={hoverOn}
+                        onMouseLeave={hoverOff}
+                    />
+                    <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
+                        {beginnerAllCleared ? '처음부터 하기' : beginnerProgress > 0 ? `Level ${beginnerProgress + 1} 시작하기` : 'Level 1 시작하기'}
+                    </span>
                 </div>
 
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.3s' } as any} onClick={() => {
-                    dispatch({ type: 'START_STAGE', level: stageProgress });
-                    logEvent('game_play', { game: 'sudoku', mode: 'stage' });
-                    navigate(`/sudoku/stage?mode=stage&level=${stageProgress}`);
-                }}>
-                    <div className="game-card-icon">
-                        <Layers size={40} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>스테이지 모드</h3>
-                        <p>점점 어려워지는 스테이지를 클리어하며 실력을 쌓으세요.</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                {stageProgress > 1 ? `Level ${stageProgress} 이어하기` : `Level 1 시작하기`}
-                            </span>
-                        </div>
-                    </div>
+                {/* 스테이지 모드 */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                    <img
+                        src="/images/sudoku/stageBtn.webp"
+                        alt="스테이지 모드"
+                        className="animate-fade-in"
+                        style={btnStyle('0.2s')}
+                        onClick={() => {
+                            dispatch({ type: 'START_STAGE', level: stageProgress });
+                            logEvent('game_play', { game: 'sudoku', mode: 'stage' });
+                            navigate(`/sudoku/stage?mode=stage&level=${stageProgress}`);
+                        }}
+                        onMouseEnter={hoverOn}
+                        onMouseLeave={hoverOff}
+                    />
+                    <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
+                        {stageProgress > 1 ? `Level ${stageProgress} 이어하기` : 'Level 1 시작하기'}
+                    </span>
                 </div>
 
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.4s' } as any} onClick={() => {
-                    const level = Math.min(bigProgress, 100);
-                    dispatch({ type: 'START_BIG', level });
-                    logEvent('game_play', { game: 'sudoku', mode: 'big_size' });
-                    navigate(`/sudoku/big?level=${level}`);
-                }}>
-                    <div className="game-card-icon">
-                        <Grid2x2 size={40} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>빅 사이즈 모드</h3>
-                        <p>16×16 초대형 스도쿠! 1~16까지의 숫자를 채워보세요.</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">
-                                {bigProgress > 1 ? `Level ${bigProgress} 이어하기` : 'Level 1 시작하기'}
-                            </span>
-                        </div>
-                    </div>
+                {/* 빅 사이즈 모드 */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                    <img
+                        src="/images/sudoku/hardBtn.webp"
+                        alt="빅 사이즈 모드"
+                        className="animate-fade-in"
+                        style={btnStyle('0.3s')}
+                        onClick={() => {
+                            const level = Math.min(bigProgress, 200);
+                            dispatch({ type: 'START_BIG', level });
+                            logEvent('game_play', { game: 'sudoku', mode: 'big_size' });
+                            navigate(`/sudoku/big?level=${level}`);
+                        }}
+                        onMouseEnter={hoverOn}
+                        onMouseLeave={hoverOff}
+                    />
+                    <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
+                        {bigProgress > 1 ? `Level ${bigProgress} 이어하기` : 'Level 1 시작하기'}
+                    </span>
                 </div>
 
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.5s' } as any} onClick={() => { logEvent('game_play', { game: 'sudoku', mode: 'time_attack' }); navigate('/sudoku/time-attack'); }}>
-                    <div className="game-card-icon">
-                        <Timer size={40} />
-                    </div>
-                    <div className="game-card-content">
-                        <h3>타임어택 모드</h3>
-                        <p>최대한 빨리 퍼즐을 완성하고 다른 플레이어와 기록을 경루세요.</p>
-                        <div className="game-card-footer">
-                            <span className="play-now">플레이</span>
-                        </div>
-                    </div>
+                {/* 타임어택 모드 */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                    <img
+                        src="/images/sudoku/timeattackBtn.webp"
+                        alt="타임어택 모드"
+                        className="animate-fade-in"
+                        style={btnStyle('0.4s')}
+                        onClick={() => {
+                            logEvent('game_play', { game: 'sudoku', mode: 'time_attack' });
+                            navigate('/sudoku/time-attack');
+                        }}
+                        onMouseEnter={hoverOn}
+                        onMouseLeave={hoverOff}
+                    />
+                    <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>플레이</span>
                 </div>
             </div>
 

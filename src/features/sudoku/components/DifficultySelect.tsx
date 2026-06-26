@@ -3,25 +3,25 @@ import { auth } from '../../../firebase';
 import { getUserProfile, getGlobalBestTime } from '../../../services/rankingService';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/SudokuContext';
-import { ChevronLeft, Trophy, Zap, Flame, Crown, Smile, Gauge } from 'lucide-react';
+import { ChevronLeft, Trophy, Flame, Crown } from 'lucide-react';
 
-const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Expert', 'Master'] as const;
+const DIFFICULTIES = [/*'Easy', 'Medium', 'Hard',*/ 'Expert', /*'Master'*/] as const;
 type Difficulty = (typeof DIFFICULTIES)[number];
 
 const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-    Easy: '쉬움',
-    Medium: '보통',
-    Hard: '어려움',
+    // Easy: '쉬움',
+    // Medium: '보통',
+    // Hard: '어려움',
     Expert: '전문가',
-    Master: '마스터',
+    // Master: '마스터',
 };
 
 const DIFFICULTY_ICONS: Record<Difficulty, React.ReactNode> = {
-    Easy: <Smile size={40} />,
-    Medium: <Gauge size={40} />,
-    Hard: <Zap size={40} />,
+    // Easy: <Smile size={40} />,
+    // Medium: <Gauge size={40} />,
+    // Hard: <Zap size={40} />,
     Expert: <Flame size={40} />,
-    Master: <Crown size={40} />,
+    // Master: <Crown size={40} />,
 };
 
 const DifficultySelect: React.FC = () => {
