@@ -103,24 +103,44 @@ const Controls: React.FC = () => {
                 </button>
             </div>
 
-            {/* Number Row */}
-            <div className="number-row animate-fade-in" style={{ '--delay': '0.2s' } as any}>
-                {Array.from({ length: state.boardSize }, (_, i) => i + 1).map((num) => (
-                    <button
-                        key={num}
-                        className="number-btn"
-                        onClick={() => handleNumberClick(num)}
-                        disabled={
-                            !state.selectedCell ||
-                            state.initialBoard[state.selectedCell.row][state.selectedCell.col] !== null ||
-                            state.isGameOver ||
-                            state.isWinner
-                        }
-                    >
-                        {num}
-                    </button>
-                ))}
-            </div>
+            {/* Number Row(s) */}
+            {state.boardSize === 16 ? (
+                <div className="number-grid-16 animate-fade-in" style={{ '--delay': '0.2s' } as any}>
+                    {Array.from({ length: 16 }, (_, i) => i + 1).map((num) => (
+                        <button
+                            key={num}
+                            className="number-btn number-btn-16"
+                            onClick={() => handleNumberClick(num)}
+                            disabled={
+                                !state.selectedCell ||
+                                state.initialBoard[state.selectedCell.row][state.selectedCell.col] !== null ||
+                                state.isGameOver ||
+                                state.isWinner
+                            }
+                        >
+                            {num}
+                        </button>
+                    ))}
+                </div>
+            ) : (
+                <div className="number-row animate-fade-in" style={{ '--delay': '0.2s' } as any}>
+                    {Array.from({ length: state.boardSize }, (_, i) => i + 1).map((num) => (
+                        <button
+                            key={num}
+                            className="number-btn"
+                            onClick={() => handleNumberClick(num)}
+                            disabled={
+                                !state.selectedCell ||
+                                state.initialBoard[state.selectedCell.row][state.selectedCell.col] !== null ||
+                                state.isGameOver ||
+                                state.isWinner
+                            }
+                        >
+                            {num}
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
         </>
     );

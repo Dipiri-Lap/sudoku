@@ -93,6 +93,7 @@ const AppContent: React.FC = () => {
                   <Route path="time-attack/play" element={<SudokuGame />} />
                   <Route path="stage" element={<SudokuGame />} />
                   <Route path="beginner" element={<SudokuGame />} />
+                  <Route path="big" element={<SudokuGame />} />
                 </Routes>
               </SudokuProvider>
               </SudokuThemeProvider>

@@ -21,7 +21,7 @@ const Board: React.FC = () => {
     const boardSize = state.board.length;
 
     return (
-        <div className={`sudoku-board ${boardSize === 6 ? 'sudoku-board-6' : ''} ${isEntering ? 'is-entering' : ''}`} key={boardKey}>
+        <div className={`sudoku-board ${boardSize === 6 ? 'sudoku-board-6' : boardSize === 16 ? 'sudoku-board-16' : ''} ${isEntering ? 'is-entering' : ''}`} key={boardKey}>
             {Array(boardSize).fill(0).map((_, r) =>
                 Array(boardSize).fill(0).map((_, c) => (
                     <Cell key={`${r}-${c}`} row={r} col={c} />

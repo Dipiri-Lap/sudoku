@@ -4,6 +4,7 @@ import type { Grid } from '../../../engine/validator';
 import type { Difficulty } from '../../../engine/generator';
 import { generatePuzzles } from '../../../engine/generator';
 import stagesData from '../../../data/stages.json';
+import bigStagesData from '../../../data/big-stages.json';
 import { beginnerStages } from '../../../data/beginner-stages';
 
 interface GameState {
@@ -26,8 +27,8 @@ interface GameState {
     animatingSectors: number[];
     mistakeCell: { row: number; col: number } | null;
     hintCell: { row: number; col: number } | null;
-    gameMode: 'TimeAttack' | 'Stage' | 'Beginner';
-    boardSize: 6 | 9;
+    gameMode: 'TimeAttack' | 'Stage' | 'Beginner' | 'BigSize';
+    boardSize: 6 | 9 | 16;
     currentLevel: number | null;
     hintsRemaining: number;
 }
@@ -47,13 +48,14 @@ type GameAction =
     | { type: 'CLEAR_MISTAKE' }
     | { type: 'CLEAR_HINT' }
     | { type: 'START_STAGE'; level: number }
-    | { type: 'START_BEGINNER'; level: number };
+    | { type: 'START_BEGINNER'; level: number }
+    | { type: 'START_BIG'; level: number };
 
 const initialState: GameState = {
     board: Array(9).fill(null).map(() => Array(9).fill(null)),
     initialBoard: Array(9).fill(null).map(() => Array(9).fill(null)),
     solution: Array(9).fill(null).map(() => Array(9).fill(null)),
-    notes: Array(9).fill(null).map(() => Array(9).fill(null).map(() => [])),
+    notes: Array(9).fill(null).map(() => Array(9).fill(null).map(() => [] as number[])),
     history: [],
     redoStack: [],
     selectedCell: null,
@@ -102,6 +104,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                 solution: stage.solution.map(r => r.map(c => c as number)) as Grid,
                 difficulty: stage.difficulty as Difficulty,
                 gameMode: 'Stage',
+                currentLevel: action.level,
+                hintsRemaining: 1,
+            };
+        }
+
+        case 'START_BIG': {
+            const stage = (bigStagesData as any[]).find((s: any) => s.id === action.level);
+            if (!stage) return state;
+            const size = 16;
+            return {
+                ...initialState,
+                board: stage.board.map((r: any[]) => r.map((c: any) => c as number | null)) as Grid,
+                initialBoard: stage.board.map((r: any[]) => r.map((c: any) => c as number | null)) as Grid,
+                solution: stage.solution.map((r: any[]) => r.map((c: any) => c as number)) as Grid,
+                notes: Array(size).fill(null).map(() => Array(size).fill(null).map(() => [] as number[])),
+                difficulty: stage.difficulty as Difficulty,
+                gameMode: 'BigSize',
+                boardSize: 16,
                 currentLevel: action.level,
                 hintsRemaining: 1,
             };
@@ -222,9 +242,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                     animatingCols.push(col);
                 }
 
-                // Check sector (supports 6x6 with 2×3 boxes and 9x9 with 3×3 boxes)
-                const boxRows = state.boardSize === 6 ? 2 : 3;
-                const boxCols = 3;
+                // Check sector (6×6 → 2×3 boxes, 9×9 → 3×3 boxes, 16×16 → 4×4 boxes)
+                const boxRows = state.boardSize === 6 ? 2 : state.boardSize === 16 ? 4 : 3;
+                const boxCols = state.boardSize === 16 ? 4 : 3;
                 const numBoxCols = state.boardSize / boxCols;
                 const startRow = Math.floor(row / boxRows) * boxRows;
                 const startCol = Math.floor(col / boxCols) * boxCols;
@@ -375,7 +395,7 @@ const GameContext = createContext<{
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [state, dispatch] = useReducer(gameReducer, initialState);
-    const { saveStageProgress } = useSudokuProgress();
+    const { saveStageProgress, saveBigProgress } = useSudokuProgress();
     const savedLevelRef = useRef<number | null>(null);
 
     useEffect(() => {
@@ -386,14 +406,15 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     useEffect(() => {
-        if (state.isWinner && state.gameMode === 'Stage' && state.currentLevel !== null) {
+        if (state.isWinner && state.currentLevel !== null) {
             const nextLevel = state.currentLevel + 1;
             if (savedLevelRef.current !== nextLevel) {
                 savedLevelRef.current = nextLevel;
-                saveStageProgress(nextLevel);
+                if (state.gameMode === 'Stage') saveStageProgress(nextLevel);
+                if (state.gameMode === 'BigSize') saveBigProgress(nextLevel);
             }
         }
-    }, [state.isWinner, state.gameMode, state.currentLevel, saveStageProgress]);
+    }, [state.isWinner, state.gameMode, state.currentLevel, saveStageProgress, saveBigProgress]);
 
     useEffect(() => {
         if (state.animatingRows.length > 0 || state.animatingCols.length > 0 || state.animatingSectors.length > 0) {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { Timer, Layers, ChevronLeft, BookOpen } from 'lucide-react';
+import { Timer, Layers, ChevronLeft, BookOpen, Grid2x2 } from 'lucide-react';
 import { useGame } from '../context/SudokuContext';
 import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 import { logEvent } from '../../../firebase';
@@ -14,7 +14,7 @@ const SudokuModeSelect: React.FC = () => {
         return () => { document.body.classList.remove('landing-bg'); };
     }, []);
     const { dispatch } = useGame();
-    const { stageProgress } = useSudokuProgress();
+    const { stageProgress, bigProgress } = useSudokuProgress();
     const [testLevel, setTestLevel] = useState<string>('40');
     const beginnerProgress = parseInt(localStorage.getItem('beginner_progress') || '1', 10);
     const beginnerAllCleared = !!localStorage.getItem('beginner_all_cleared');
@@ -127,7 +127,27 @@ const SudokuModeSelect: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="game-card animate-fade-in" style={{ '--delay': '0.4s' } as any} onClick={() => { logEvent('game_play', { game: 'sudoku', mode: 'time_attack' }); navigate('/sudoku/time-attack'); }}>
+                <div className="game-card animate-fade-in" style={{ '--delay': '0.4s' } as any} onClick={() => {
+                    const level = Math.min(bigProgress, 100);
+                    dispatch({ type: 'START_BIG', level });
+                    logEvent('game_play', { game: 'sudoku', mode: 'big_size' });
+                    navigate(`/sudoku/big?level=${level}`);
+                }}>
+                    <div className="game-card-icon">
+                        <Grid2x2 size={40} />
+                    </div>
+                    <div className="game-card-content">
+                        <h3>빅 사이즈 모드</h3>
+                        <p>16×16 초대형 스도쿠! 1~16까지의 숫자를 채워보세요.</p>
+                        <div className="game-card-footer">
+                            <span className="play-now">
+                                {bigProgress > 1 ? `Level ${bigProgress} 이어하기` : 'Level 1 시작하기'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="game-card animate-fade-in" style={{ '--delay': '0.5s' } as any} onClick={() => { logEvent('game_play', { game: 'sudoku', mode: 'time_attack' }); navigate('/sudoku/time-attack'); }}>
                     <div className="game-card-icon">
                         <Timer size={40} />
                     </div>

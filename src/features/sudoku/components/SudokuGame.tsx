@@ -19,7 +19,7 @@ const SudokuGame: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { addCoins } = useCoins();
-    const { stageProgress, saveBeginnerProgress } = useSudokuProgress();
+    const { stageProgress, saveBeginnerProgress, bigProgress } = useSudokuProgress();
     const hasAwardedCoins = useRef(false);
     const { selectedTheme } = useSudokuTheme();
     const [showThemeModal, setShowThemeModal] = useState(false);
@@ -95,6 +95,11 @@ const SudokuGame: React.FC = () => {
                     localStorage.setItem('beginner_all_cleared', '1');
                 }
             }
+            if (state.gameMode === 'BigSize' && state.currentLevel !== null) {
+                if (state.currentLevel === 200) {
+                    localStorage.setItem('big_all_cleared', '1');
+                }
+            }
         }
     }, [state.isWinner, addCoins, state.gameMode]);
 
@@ -151,11 +156,12 @@ const SudokuGame: React.FC = () => {
                     return;
                 }
 
+                const maxIdx = state.boardSize - 1;
                 switch (e.key) {
                     case 'ArrowUp': row = Math.max(0, row - 1); break;
-                    case 'ArrowDown': row = Math.min(8, row + 1); break;
+                    case 'ArrowDown': row = Math.min(maxIdx, row + 1); break;
                     case 'ArrowLeft': col = Math.max(0, col - 1); break;
-                    case 'ArrowRight': col = Math.min(8, col + 1); break;
+                    case 'ArrowRight': col = Math.min(maxIdx, col + 1); break;
                 }
                 dispatch({ type: 'SELECT_CELL', row, col });
                 return;
@@ -204,6 +210,19 @@ const SudokuGame: React.FC = () => {
             return;
         }
 
+        // Big Size mode (from /sudoku/big?level=N)
+        if (location.pathname.includes('/big') && level !== null) {
+            if (level !== state.currentLevel || state.gameMode !== 'BigSize') {
+                if (level > bigProgress) {
+                    alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${bigProgress})`);
+                    navigate('/sudoku/big?level=' + bigProgress, { replace: true });
+                    return;
+                }
+                dispatch({ type: 'START_BIG', level });
+            }
+            return;
+        }
+
         if (mode === 'stage' && level !== null && level !== state.currentLevel) {
             // Progression Guard: Prevent skipping levels via URL
             if (level > stageProgress) {
@@ -225,7 +244,7 @@ const SudokuGame: React.FC = () => {
                     return;
                 }
                 dispatch({ type: 'START_STAGE', level });
-            } else if (!location.pathname.includes('/beginner')) {
+            } else if (!location.pathname.includes('/beginner') && !location.pathname.includes('/big')) {
                 const diffParam = params.get('difficulty') as Difficulty || 'Easy';
                 dispatch({ type: 'START_GAME', difficulty: diffParam });
             }
@@ -250,6 +269,8 @@ const SudokuGame: React.FC = () => {
             navigate('/sudoku');
         }
     };
+
+    const isBigSize = state.gameMode === 'BigSize';
 
 
     const handleNicknameUpdate = async () => {
@@ -281,11 +302,14 @@ const SudokuGame: React.FC = () => {
                 {/* Info bar */}
                 <div className="game-info-bar">
                     <div className="info-left">
-                        {(state.gameMode === 'Stage' || state.gameMode === 'Beginner') ? (
+                        {(state.gameMode === 'Stage' || state.gameMode === 'Beginner' || state.gameMode === 'BigSize') ? (
                             <div className="level-badge">
                                 {state.gameMode === 'Beginner' ? `입문 ${state.currentLevel}` : `Level ${state.currentLevel}`}
                                 {state.gameMode === 'Beginner' && state.boardSize === 6 && (
                                     <span style={{ fontSize: '0.65rem', marginLeft: '4px', opacity: 0.8 }}>6×6</span>
+                                )}
+                                {state.gameMode === 'BigSize' && (
+                                    <span style={{ fontSize: '0.65rem', marginLeft: '4px', opacity: 0.8 }}>16×16</span>
                                 )}
                             </div>
                         ) : (
@@ -354,7 +378,7 @@ const SudokuGame: React.FC = () => {
                     </div>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                         <a
-                            href={state.gameMode === 'Stage' ? '/sudoku' : '/sudoku/time-attack'}
+                            href={state.gameMode === 'TimeAttack' ? '/sudoku/time-attack' : '/sudoku'}
                             style={{
                                 padding: '0.75rem 1.8rem', fontSize: '1rem', borderRadius: '30px',
                                 border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)',
@@ -365,9 +389,11 @@ const SudokuGame: React.FC = () => {
                             뒤로
                         </a>
                         <a
-                            href={state.gameMode === 'Stage'
-                                ? `/sudoku/stage?mode=stage&level=${state.currentLevel}`
-                                : `/sudoku/time-attack/play?difficulty=${state.difficulty}`}
+                            href={state.gameMode === 'BigSize'
+                                ? `/sudoku/big?level=${state.currentLevel}`
+                                : state.gameMode === 'Stage'
+                                    ? `/sudoku/stage?mode=stage&level=${state.currentLevel}`
+                                    : `/sudoku/time-attack/play?difficulty=${state.difficulty}`}
                             style={{
                                 padding: '0.75rem 2.2rem', fontSize: '1rem', borderRadius: '30px',
                                 border: 'none', background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
@@ -436,7 +462,21 @@ const SudokuGame: React.FC = () => {
                             <a href="/sudoku" className="modal-home-btn" style={{ textDecoration: 'none' }}>
                                 <House size={22} />
                             </a>
-                            {state.gameMode === 'Stage' ? (
+                            {state.gameMode === 'BigSize' ? (
+                                state.currentLevel !== null && state.currentLevel < 200 ? (
+                                    <button
+                                        onClick={() => handleNextWithAd(`/sudoku/big?level=${state.currentLevel! + 1}`)}
+                                        className="primary-btn bonus-btn"
+                                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
+                                    >
+                                        다음 레벨로 <ArrowRight size={20} />
+                                    </button>
+                                ) : (
+                                    <button onClick={() => navigate('/sudoku')} className="primary-btn" style={{ textAlign: 'center', flex: 1 }}>
+                                        완료! 홈으로
+                                    </button>
+                                )
+                            ) : state.gameMode === 'Stage' ? (
                                 <button
                                     onClick={() => handleNextWithAd(state.currentLevel ? `/sudoku/stage?mode=stage&level=${state.currentLevel + 1}` : '/sudoku')}
                                     className="primary-btn bonus-btn"

@@ -17,8 +17,9 @@ const Cell: React.FC<CellProps> = ({ row, col }) => {
     const notes = state.notes[row][col];
 
     const boardSize = state.board.length;
-    const boxRows = boardSize === 6 ? 2 : 3;
-    const sectorIdx = Math.floor(row / boxRows) * (boardSize / 3) + Math.floor(col / 3);
+    const boxRows = boardSize === 6 ? 2 : boardSize === 16 ? 4 : 3;
+    const boxCols = boardSize === 16 ? 4 : 3;
+    const sectorIdx = Math.floor(row / boxRows) * (boardSize / boxCols) + Math.floor(col / boxCols);
     const isAnimatingRow = state.animatingRows.includes(row);
     const isAnimatingCol = state.animatingCols.includes(col);
     const isAnimatingSector = state.animatingSectors.includes(sectorIdx);
@@ -50,7 +51,7 @@ const Cell: React.FC<CellProps> = ({ row, col }) => {
             {value !== null ? (
                 value
             ) : (
-                <div className="notes-grid">
+                <div className={`notes-grid${boardSize === 16 ? ' notes-grid-16' : ''}`}>
                     {Array.from({ length: boardSize }, (_, i) => i + 1).map((n) => (
                         <div key={n} className="note-item">
                             {notes.includes(n) ? n : ''}

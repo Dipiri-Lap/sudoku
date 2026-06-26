@@ -5,19 +5,21 @@
  *   npm run generate-queens               # continue from where left off
  *   npm run generate-queens -- --reset    # clear game levels and start fresh
  *
- * Level plan (400 stages):
+ * Level plan (500 stages):
  *   1–3   : 4×4
  *   4–5   : 5×5
  *   6–100 : [5,5,6,6,7] repeating (95 levels)
  *   101–200: [5,6,7,7,8] repeating (100 levels)
  *   201–300: [6,7,8,8,9] repeating (100 levels)
  *   301–400: [7,8,9,9,10] repeating (100 levels)
+ *   401–500: [8,9,9,10,10] repeating (100 levels)
+ *     450, 500: double mode 9×9 (queensPerColor: 2)
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { generateLevel } from '../src/features/queens/utils/generator.js';
+import { generateLevel, generateDoubleLevel } from '../src/features/queens/utils/generator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,11 +44,18 @@ interface Level {
   size: number;
   grid: number[][];
   colors: string[];
+  queensPerColor?: number;
 }
 
 // Milestone positions within each 100-level block get a level one size
 // larger than the block's normal maximum (positions 25, 50, 75).
 const MILESTONE_OFFSETS = new Set([24, 49, 74]); // 0-based within each block
+
+// Absolute 0-based slot index → grid size for double-mode levels.
+const DOUBLE_SLOTS = new Map<number, number>([
+  [449, 9], // level 450
+  [499, 9], // level 500
+]);
 
 function buildSizePlan(): number[] {
   const plan: number[] = [];
@@ -82,7 +91,15 @@ function buildSizePlan(): number[] {
     plan.push(MILESTONE_OFFSETS.has(i) ? 11 : p4[i % p4.length]);
   }
 
-  return plan; // 400 total
+  // 401–500: 100 levels (block 5, normal max 10×10, no milestone bumps)
+  // Slots 449 and 499 are double-mode 9×9 — handled in main(), size stored in DOUBLE_SLOTS.
+  const p5 = [8, 9, 9, 10, 10];
+  for (let i = 0; i < 100; i++) {
+    const absSlot = 400 + i;
+    plan.push(DOUBLE_SLOTS.has(absSlot) ? DOUBLE_SLOTS.get(absSlot)! : p5[i % p5.length]);
+  }
+
+  return plan; // 500 total
 }
 
 function formatTime(ms: number): string {
@@ -136,11 +153,13 @@ function main() {
       `... `
     );
 
+    const isDouble = DOUBLE_SLOTS.has(slot);
+
     // Retry until we get a non-duplicate (up to 5 extra tries)
     let result = null;
     let dupRetries = 0;
     for (let retry = 0; retry <= 5; retry++) {
-      result = generateLevel(n, maxAttempts);
+      result = isDouble ? generateDoubleLevel(n, maxAttempts) : generateLevel(n, maxAttempts);
       if (!result) break;
       const key = result.grid.flat().join(',');
       if (!seenGrids.has(key)) {
@@ -159,13 +178,15 @@ function main() {
     }
 
     // Sequential ID = position in gameLevels array (1-based)
-    gameLevels.push({
+    const level: Level = {
       id: gameLevels.length + 1,
       name: `레벨 ${gameLevels.length + 1}`,
       size: result.size,
       grid: result.grid,
       colors: result.colors,
-    });
+    };
+    if (isDouble) level.queensPerColor = 2;
+    gameLevels.push(level);
     console.log('OK');
 
     // Save checkpoint every 10 successful levels

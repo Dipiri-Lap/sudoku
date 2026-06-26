@@ -5,6 +5,7 @@ import { auth, db } from '../firebase';
 
 const LS_STAGE_KEY = 'sudoku_stage_progress';
 const LS_BEGINNER_KEY = 'beginner_progress';
+const LS_BIG_KEY = 'sudoku_big_progress';
 const FIRESTORE_DOC = (uid: string) => doc(db, 'users', uid, 'sudokuProgress', 'data');
 
 interface SudokuProgressContextValue {
@@ -12,6 +13,8 @@ interface SudokuProgressContextValue {
     saveStageProgress: (nextLevel: number) => Promise<void>;
     beginnerProgress: number;
     saveBeginnerProgress: (level: number) => Promise<void>;
+    bigProgress: number;
+    saveBigProgress: (nextLevel: number) => Promise<void>;
 }
 
 const SudokuProgressContext = createContext<SudokuProgressContextValue | null>(null);
@@ -31,6 +34,10 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
         const stored = localStorage.getItem(LS_BEGINNER_KEY);
         return stored ? parseInt(stored, 10) || 0 : 0;
     });
+    const [bigProgress, setBigProgress] = useState<number>(() => {
+        const stored = localStorage.getItem(LS_BIG_KEY);
+        return stored ? parseInt(stored, 10) || 1 : 1;
+    });
     const syncedRef = useRef(false);
 
     useEffect(() => {
@@ -44,11 +51,13 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
 
                 let cloudStage = 1;
                 let cloudBeginner = 0;
+                let cloudBig = 1;
 
                 if (progressSnap.exists()) {
                     const data = progressSnap.data();
                     cloudStage = data?.sudokuStageProgress ?? 1;
                     cloudBeginner = data?.beginnerProgress ?? 0;
+                    cloudBig = data?.sudokuBigProgress ?? 1;
                 } else {
                     // Fallback to legacy top-level user doc
                     const userSnap = await getDoc(doc(db, 'users', user.uid));
@@ -57,9 +66,11 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
 
                 const localStage = parseInt(localStorage.getItem(LS_STAGE_KEY) ?? '1', 10) || 1;
                 const localBeginner = parseInt(localStorage.getItem(LS_BEGINNER_KEY) ?? '0', 10) || 0;
+                const localBig = parseInt(localStorage.getItem(LS_BIG_KEY) ?? '1', 10) || 1;
 
                 const mergedStage = Math.max(localStage, cloudStage);
                 const mergedBeginner = Math.max(localBeginner, cloudBeginner);
+                const mergedBig = Math.max(localBig, cloudBig);
 
                 if (mergedStage !== localStage) {
                     localStorage.setItem(LS_STAGE_KEY, String(mergedStage));
@@ -69,12 +80,17 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
                     localStorage.setItem(LS_BEGINNER_KEY, String(mergedBeginner));
                     setBeginnerProgress(mergedBeginner);
                 }
+                if (mergedBig !== localBig) {
+                    localStorage.setItem(LS_BIG_KEY, String(mergedBig));
+                    setBigProgress(mergedBig);
+                }
 
                 // Write back to Firestore if local is ahead of cloud
-                if (mergedStage !== cloudStage || mergedBeginner !== cloudBeginner) {
+                if (mergedStage !== cloudStage || mergedBeginner !== cloudBeginner || mergedBig !== cloudBig) {
                     await setDoc(progressRef, {
                         sudokuStageProgress: mergedStage,
                         beginnerProgress: mergedBeginner,
+                        sudokuBigProgress: mergedBig,
                     }, { merge: true });
                 }
             } catch (e) {
@@ -105,8 +121,17 @@ export const SudokuProgressProvider: React.FC<{ children: React.ReactNode }> = (
         }
     }, []);
 
+    const saveBigProgress = useCallback(async (nextLevel: number) => {
+        localStorage.setItem(LS_BIG_KEY, String(nextLevel));
+        setBigProgress(nextLevel);
+        const user = auth.currentUser;
+        if (user) {
+            await setDoc(FIRESTORE_DOC(user.uid), { sudokuBigProgress: nextLevel }, { merge: true });
+        }
+    }, []);
+
     return (
-        <SudokuProgressContext.Provider value={{ stageProgress, saveStageProgress, beginnerProgress, saveBeginnerProgress }}>
+        <SudokuProgressContext.Provider value={{ stageProgress, saveStageProgress, beginnerProgress, saveBeginnerProgress, bigProgress, saveBigProgress }}>
             {children}
         </SudokuProgressContext.Provider>
     );
