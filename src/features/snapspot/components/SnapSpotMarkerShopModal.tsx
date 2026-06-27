@@ -27,14 +27,15 @@ function MarkerPreview({ markerId, size = 44 }: { markerId: string; size?: numbe
   );
 }
 
-interface Props { onClose: () => void; }
+interface Props { onClose: () => void; onPlayBtnSfx?: () => void; }
 
-const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose }) => {
+const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => {
   const { selectedMarkerId, hasUnlocked, unlockMarker, selectMarker } = useSnapSpotMarker();
   const { coins } = useCoins();
   const [confirmDesign, setConfirmDesign] = useState<MarkerDesign | null>(null);
 
   const handleAction = (design: MarkerDesign) => {
+    onPlayBtnSfx?.();
     if (hasUnlocked(design.id)) {
       selectMarker(design.id);
     } else {
@@ -45,6 +46,7 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose }) => {
 
   const handleConfirmUnlock = async () => {
     if (!confirmDesign) return;
+    onPlayBtnSfx?.();
     await unlockMarker(confirmDesign.id);
     setConfirmDesign(null);
   };
@@ -71,7 +73,7 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose }) => {
           <h2 style={{ margin: 0, color: 'white', fontSize: '1.1rem', fontWeight: 800 }}>
             🎨 마커 상점
           </h2>
-          <button onClick={onClose} style={{
+          <button onClick={() => { onPlayBtnSfx?.(); onClose(); }} style={{
             position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)',
             background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer',
           }}>
@@ -224,7 +226,7 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose }) => {
               <span>{MARKER_GRADE_CONFIG[confirmDesign.grade].cost} 코인을 사용하시겠습니까?</span>
             </div>
             <div style={{ display: 'flex', gap: '0.6rem', width: '100%' }}>
-              <button onClick={() => setConfirmDesign(null)} style={{
+              <button onClick={() => { onPlayBtnSfx?.(); setConfirmDesign(null); }} style={{
                 flex: 1, padding: '0.6rem', borderRadius: '10px', border: 'none',
                 backgroundColor: 'rgba(255,255,255,0.08)', color: '#94a3b8',
                 fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem',

@@ -222,7 +222,17 @@
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
 }
 
-/* target — crosshair with outer ring */
+/* target — zoom-in from huge */
+@keyframes snapspot-target-zoom-in {
+  0%   { transform: translate(-50%, -50%) scale(20);   opacity: 0.5; }
+  35%  { transform: translate(-50%, -50%) scale(0.88); opacity: 1;   }
+  55%  { transform: translate(-50%, -50%) scale(1.1);  opacity: 1;   }
+  72%  { transform: translate(-50%, -50%) scale(0.97); opacity: 1;   }
+  100% { transform: translate(-50%, -50%) scale(1);    opacity: 1;   }
+}
+.snapspot-found-marker.snapspot-marker-target {
+  animation: snapspot-target-zoom-in 0.65s cubic-bezier(0.1, 0.9, 0.2, 1) 1 forwards;
+}
 .snapspot-marker-target {
   border: 2px solid #f87171;
   border-radius: 50%;
@@ -255,9 +265,21 @@
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
 }
 
-/* lightning — emoji */
+/* lightning — one-shot flash on mount */
+@keyframes snapspot-lightning-strike {
+  0%   { transform: scale(0.2);  opacity: 0;   filter: drop-shadow(0 0 0px   rgba(250,204,21,0)); }
+  12%  { transform: scale(2.2);  opacity: 1;   filter: drop-shadow(0 0 28px  rgba(255,255,180,1)) drop-shadow(0 0 50px rgba(250,204,21,0.9)); }
+  28%  { transform: scale(0.85); opacity: 1;   filter: drop-shadow(0 0 10px  rgba(250,204,21,0.8)); }
+  45%  { transform: scale(1.15); opacity: 1;   filter: drop-shadow(0 0 14px  rgba(250,204,21,0.9)); }
+  65%  { transform: scale(0.97); opacity: 1;   filter: drop-shadow(0 0 6px   rgba(250,204,21,0.5)); }
+  100% { transform: scale(1);    opacity: 1;   filter: drop-shadow(0 0 4px   rgba(250,204,21,0.35)); }
+}
 .snapspot-marker-lightning {
   filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.7)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+.snapspot-marker-lightning-strike {
+  animation: snapspot-lightning-strike 0.65s cubic-bezier(0.22, 1, 0.36, 1) 1 forwards;
+  display: flex;
 }
 
 /* gem — emoji */
@@ -270,19 +292,47 @@
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
 }
 
-/* trophy — emoji */
-.snapspot-marker-trophy {
-  filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.6)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+/* dizzy — emoji */
+.snapspot-marker-dizzy {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
 }
 
-/* magic — emoji */
+/* magic — wand + floating stardust particles */
 .snapspot-marker-magic {
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
 }
+@keyframes snapspot-stardust {
+  0%   { opacity: 0;   transform: translate(0, 0)      scale(0.4); }
+  25%  { opacity: 1;   transform: translate(var(--sx), var(--sy1)) scale(1);   }
+  75%  { opacity: 0.6; transform: translate(var(--sx), var(--sy2)) scale(0.7); }
+  100% { opacity: 0;   transform: translate(var(--sx), var(--sy3)) scale(0.2); }
+}
+.snapspot-stardust {
+  position: absolute;
+  font-size: 9px;
+  color: #fde68a;
+  pointer-events: none;
+  animation: snapspot-stardust 1.4s ease-out infinite;
+  text-shadow: 0 0 4px rgba(253, 224, 71, 0.9);
+}
+.snapspot-stardust.s0 { top: -4px;  left: 14px; --sx: -2px; --sy1: -7px;  --sy2: -13px; --sy3: -18px; animation-delay: 0s;    }
+.snapspot-stardust.s1 { top: 0px;   left: 18px; --sx:  3px; --sy1: -8px;  --sy2: -15px; --sy3: -20px; animation-delay: 0.28s; }
+.snapspot-stardust.s2 { top: -6px;  left: 10px; --sx: -5px; --sy1: -6px;  --sy2: -11px; --sy3: -16px; animation-delay: 0.56s; }
+.snapspot-stardust.s3 { top: 2px;   left: 16px; --sx:  4px; --sy1: -9px;  --sy2: -16px; --sy3: -22px; animation-delay: 0.84s; }
+.snapspot-stardust.s4 { top: -2px;  left: 12px; --sx: -1px; --sy1: -10px; --sy2: -17px; --sy3: -23px; animation-delay: 1.12s; }
 
-/* eyes — emoji */
+/* eyes — emoji, double blink */
+@keyframes snapspot-eyeblink {
+  0%, 18%, 26%, 44%, 100% { transform: scaleY(1); }
+  20%, 24%                 { transform: scaleY(0.08); }
+}
 .snapspot-marker-eyes {
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+.snapspot-marker-eyeblink {
+  animation: snapspot-eyeblink 2.4s ease-in-out infinite;
+  display: flex;
+  transform-origin: center;
 }
 
 /* heart — emoji */
@@ -299,14 +349,41 @@
   display: flex;
 }
 
-/* fire — emoji */
-.snapspot-marker-fire {
+@keyframes snapspot-heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%       { transform: scale(1.35); }
+  28%       { transform: scale(1); }
+  42%       { transform: scale(1.18); }
+  56%       { transform: scale(1); }
+}
+.snapspot-marker-pulse {
+  animation: snapspot-heartbeat 1.2s ease-in-out infinite;
+  display: flex;
+}
+
+@keyframes snapspot-bulbblink {
+  0%, 40%    { opacity: 1;   filter: drop-shadow(0 0 10px rgba(253, 224, 71, 0.95)) drop-shadow(0 0 4px rgba(255, 255, 200, 0.7)); }
+  45%, 50%   { opacity: 0.2; filter: none; }
+  55%, 100%  { opacity: 1;   filter: drop-shadow(0 0 10px rgba(253, 224, 71, 0.95)) drop-shadow(0 0 4px rgba(255, 255, 200, 0.7)); }
+}
+.snapspot-marker-blink {
+  animation: snapspot-bulbblink 1.6s ease-in-out infinite;
+  display: flex;
+}
+
+/* bulb — emoji */
+.snapspot-marker-bulb {
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
 }
 
-/* crown — emoji + gold glow */
-.snapspot-marker-crown {
-  filter: drop-shadow(0 0 7px rgba(245, 158, 11, 0.9)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
+/* crown — float + gold glow pulse (applied to inner span only, not outer div) */
+@keyframes snapspot-crownfloat {
+  0%, 100% { transform: translateY(0);    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8)) drop-shadow(0 1px 4px rgba(0,0,0,0.4)); }
+  50%       { transform: translateY(-5px); filter: drop-shadow(0 0 14px rgba(251, 191, 36, 1))  drop-shadow(0 2px 6px rgba(0,0,0,0.4)); }
+}
+.snapspot-marker-crown-anim {
+  animation: snapspot-crownfloat 1.8s ease-in-out infinite;
+  display: flex;
 }
 
 /* rainbow — spinning conic-gradient ring (inner element spins, outer just sizes) */
@@ -320,15 +397,8 @@
   border-radius: 50%;
   background: conic-gradient(#f87171, #fbbf24, #4ade80, #60a5fa, #a78bfa, #f472b6, #f87171);
   animation: snapspot-spin 2s linear infinite;
-  position: relative;
-}
-.snapspot-marker-rainbow .snapspot-marker-inner::after,
-.snapspot-marker-preview.snapspot-marker-rainbow .snapspot-marker-inner::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  background: #1e293b;
-  border-radius: 50%;
+  mask: radial-gradient(circle closest-side at center, transparent 72%, black 73%);
+  -webkit-mask: radial-gradient(circle closest-side at center, transparent 72%, black 73%);
 }
 
 /* portal — spinning dashed ring inside */

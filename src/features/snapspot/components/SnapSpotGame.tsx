@@ -67,6 +67,7 @@ function toPercent(pos: { x: number; y: number }, size: { x: number; y: number }
 const IS_DEV = import.meta.env.DEV;
 const CDN_BASE = 'https://images.tmhub.co.kr/spot-the-difference/stages/0001-0500';
 
+
 const EXCLAMATIONS = ['NICE!', 'GOOD!', 'GREAT!', 'AWESOME!', 'PERFECT!', 'AMAZING!', 'EXCELLENT!', 'BRILLIANT!', 'SUPERB!', 'SPOT ON!'];
 const PARTICLE_COLORS = ['#fbbf24', '#22c55e', '#6366f1', '#f472b6', '#fb923c', '#38bdf8', '#a3e635'];
 const PARTICLE_DIRS = [
@@ -94,6 +95,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const wrongSfxRef = useRef<HTMLAudioElement | null>(null);
   const clearSfxRef = useRef<HTMLAudioElement | null>(null);
   const failSfxRef = useRef<HTMLAudioElement | null>(null);
+  const btnSfxRef = useRef<HTMLAudioElement | null>(null);
   const prefetchCache = useRef<Record<number, LevelData>>({});
   const arcadeQueue = useRef<number[]>(
     mode === 'arcade' ? shuffleArray(Array.from({ length: ARCADE_TOTAL }, (_, i) => i + 1)) : []
@@ -112,7 +114,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     return 1;
   });
   const [hintIdx, setHintIdx] = useState<number | null>(null);
-  const [hintUsed, setHintUsed] = useState(false);
   const [curtainOpen, setCurtainOpen] = useState(false);
   const [imgsLoaded, setImgsLoaded] = useState({ orig: false, mod: false });
   const [minWaitDone, setMinWaitDone] = useState(false);
@@ -179,6 +180,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     wrongSfxRef.current = new Audio('/assets/snapspot/sounds/wrong.mp3');
     clearSfxRef.current = new Audio('/assets/snapspot/sounds/clear.mp3');
     failSfxRef.current = new Audio('/assets/snapspot/sounds/fail.mp3');
+    btnSfxRef.current = new Audio('/assets/snapspot/sounds/btn.mp3');
 
     const handleVisibility = () => {
       if (!bgmRef.current) return;
@@ -199,7 +201,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         bgmRef.current.pause();
         bgmRef.current.src = '';
       }
-      for (const ref of [correctSfxRef, wrongSfxRef, clearSfxRef, failSfxRef]) {
+      for (const ref of [correctSfxRef, wrongSfxRef, clearSfxRef, failSfxRef, btnSfxRef]) {
         if (ref.current) ref.current.src = '';
       }
     };
@@ -226,7 +228,6 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
     setHintIdx(null);
-    setHintUsed(false);
     setCurtainOpen(false);
     setImgsLoaded({ orig: false, mod: false });
     setMinWaitDone(false);
@@ -304,7 +305,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       }
 
       addCoins(10);
-      if (mode === 'stage') saveProgress(stageId);
+      if (mode === 'stage') { bgmRef.current?.pause(); saveProgress(stageId); }
       if (auth.currentUser) {
         import('../../../services/rankingService').then(m => {
           m.incrementPuzzlePower(auth.currentUser!.uid).catch(console.error);
@@ -572,35 +573,42 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     }
   }, [found, hintIdx]);
 
+  const playBtnSfx = useCallback(() => {
+    if (!btnSfxRef.current) return;
+    btnSfxRef.current.currentTime = 0;
+    btnSfxRef.current.volume = sfxVolumeRef.current;
+    btnSfxRef.current.play().catch(() => {});
+  }, []);
+
   const activateHint = useCallback(() => {
     const idx = found.findIndex(f => !f);
     if (idx === -1) return;
     setHintIdx(idx);
-    setHintUsed(true);
   }, [found]);
 
   const handleHint = useCallback(() => {
-    if (hintUsed) return;
-    if (coins >= 50) {
+    if (hintIdx !== null) return;
+    playBtnSfx();
+    if (IS_DEV) {
+      activateHint();
+    } else if (coins >= 50) {
       spendCoins(50).then(() => activateHint());
-    } else {
-      if (IS_DEV || !window.adBreak) { activateHint(); return; }
-      window.adBreak({ type: 'reward', name: 'hint', adBreakDone: (info: { breakStatus: string }) => {
-        if (info.breakStatus === 'viewed') activateHint();
-      }});
     }
-  }, [hintUsed, coins, spendCoins, activateHint]);
+  }, [hintIdx, coins, spendCoins, activateHint, playBtnSfx]);
 
   // ── Ad-gated actions ────────────────────────────────────────────────────────
   const handleNextStage = useCallback(() => {
+    playBtnSfx();
+    bgmRef.current?.play().catch(() => {});
     if (IS_DEV || !window.adBreak) { setStageId(s => s + 1); return; }
     window.adBreak({ type: 'next', name: 'stage-clear', adBreakDone: () => setStageId(s => s + 1) });
-  }, []);
+  }, [playBtnSfx]);
 
   const handleRestart = useCallback(() => {
+    playBtnSfx();
     if (IS_DEV || !window.adBreak) { navigate(0); return; }
     window.adBreak({ type: 'next', name: 'game-over-restart', adBreakDone: () => navigate(0) });
-  }, [navigate]);
+  }, [navigate, playBtnSfx]);
 
   // ── Zoom buttons ────────────────────────────────────────────────────────────
   const adjustZoom = useCallback(
@@ -638,7 +646,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       <div className="snapspot-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button
-            onClick={() => navigate('/snapspot')}
+            onClick={() => { playBtnSfx(); navigate('/snapspot'); }}
             style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', color: 'inherit' }}
           >
             <ChevronLeft size={22} />
@@ -663,7 +671,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           )}
           <button
             className="snapspot-zoom-btn"
-            onClick={() => setShowSettings(true)}
+            onClick={() => { playBtnSfx(); setShowSettings(true); }}
             style={{ padding: '4px 8px' }}
             title="사운드 설정"
           >
@@ -671,15 +679,15 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           </button>
           <button
             className="snapspot-zoom-btn"
-            onClick={() => setShowMarkerShop(true)}
+            onClick={() => { playBtnSfx(); setShowMarkerShop(true); }}
             style={{ padding: '4px 8px' }}
             title="마커 상점"
           >
             <Palette size={16} />
           </button>
-          <button className="snapspot-zoom-btn" onClick={() => adjustZoom(-0.5)} disabled={zoom <= 1}>−</button>
+          <button className="snapspot-zoom-btn" onClick={() => { playBtnSfx(); adjustZoom(-0.5); }} disabled={zoom <= 1}>−</button>
           <span className="snapspot-zoom-label">{zoom.toFixed(1)}×</span>
-          <button className="snapspot-zoom-btn" onClick={() => adjustZoom(0.5)} disabled={zoom >= MAX_ZOOM}>+</button>
+          <button className="snapspot-zoom-btn" onClick={() => { playBtnSfx(); adjustZoom(0.5); }} disabled={zoom >= MAX_ZOOM}>+</button>
         </div>
       </div>
 
@@ -825,9 +833,13 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
               </div>
             ))}
           </div>
-          <button className="snapspot-hint-btn" onClick={handleHint} disabled={hintUsed}>
+          <button
+            className="snapspot-hint-btn"
+            onClick={handleHint}
+            disabled={hintIdx !== null || (!IS_DEV && coins < 50)}
+          >
             <Search size={22} />
-            <span>{hintUsed ? 'USED' : coins >= 50 ? 'HINT' : 'AD'}</span>
+            <span>{IS_DEV ? 'HINT ∞' : '50🪙'}</span>
           </button>
         </div>
       )}
@@ -873,7 +885,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                 다음 스테이지
               </button>
               <button
-                onClick={() => navigate('/snapspot')}
+                onClick={() => { playBtnSfx(); navigate('/snapspot'); }}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 모드 선택
@@ -891,7 +903,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             <p style={{ color: '#6b7280', marginTop: '0.25rem' }}>More stages are on the way. Stay tuned!</p>
             <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center' }}>
               <button
-                onClick={() => navigate('/snapspot')}
+                onClick={() => { playBtnSfx(); navigate('/snapspot'); }}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#6366f1', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 Back to Menu
@@ -915,7 +927,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                 다시 도전
               </button>
               <button
-                onClick={() => navigate('/snapspot')}
+                onClick={() => { playBtnSfx(); navigate('/snapspot'); }}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 모드 선택
@@ -935,13 +947,13 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <button
-                onClick={() => navigate(0)}
+                onClick={() => { playBtnSfx(); navigate(0); }}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#6366f1', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 Play Again
               </button>
               <button
-                onClick={() => navigate('/snapspot')}
+                onClick={() => { playBtnSfx(); navigate('/snapspot'); }}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
                 Menu
@@ -951,7 +963,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         </div>
       )}
     </div>
-      {showMarkerShop && <SnapSpotMarkerShopModal onClose={() => setShowMarkerShop(false)} />}
+      {showMarkerShop && <SnapSpotMarkerShopModal onClose={() => setShowMarkerShop(false)} onPlayBtnSfx={playBtnSfx} />}
       {showSettings && (
         <SnapSpotSettingsModal
           bgmVolume={bgmVolume}
@@ -959,6 +971,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           onBgmChange={setBgmVolume}
           onSfxChange={setSfxVolume}
           onClose={() => setShowSettings(false)}
+          onPlayBtnSfx={playBtnSfx}
         />
       )}
     </>

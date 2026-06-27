@@ -29,34 +29,53 @@ export const markerDesigns: MarkerDesign[] = [
   { id: 'circle',    grade: 'common',    label: '서클'    },
   { id: 'check',     grade: 'common',    label: '체크'    },
   { id: 'star',      grade: 'common',    label: '별'      },
-  { id: 'target',    grade: 'rare',      label: '타겟'    },
+  { id: 'gem',       grade: 'rare',      label: '보석'    },
   { id: 'smile',     grade: 'rare',      label: '스마일'  },
-  { id: 'pin',       grade: 'rare',      label: '핀'      },
-  { id: 'lightning', grade: 'elite',     label: '번개'    },
-  { id: 'gem',       grade: 'elite',     label: '보석'    },
+  { id: 'magnify',   grade: 'rare',      label: '돋보기'  },
+  { id: 'dizzy',     grade: 'elite',     label: '반짝별'  },
+  { id: 'target',    grade: 'elite',     label: '타겟'    },
   { id: 'clover',    grade: 'elite',     label: '클로버'  },
-  { id: 'trophy',    grade: 'unique',    label: '트로피'  },
-  { id: 'magic',     grade: 'unique',    label: '매직'    },
-  { id: 'eyes',      grade: 'unique',    label: '눈'      },
+  { id: 'lightning', grade: 'unique',    label: '번개'    },
+  { id: 'sparkle',   grade: 'unique',    label: '스파클'  },
+  { id: 'bulb',      grade: 'unique',    label: '전구'    },
   { id: 'heart',     grade: 'epic',      label: '하트'    },
-  { id: 'sparkle',   grade: 'epic',      label: '스파클'  },
-  { id: 'fire',      grade: 'epic',      label: '파이어'  },
+  { id: 'magic',     grade: 'epic',      label: '매직'    },
+  { id: 'eyes',      grade: 'epic',      label: '눈'      },
   { id: 'crown',     grade: 'legendary', label: '크라운'  },
   { id: 'rainbow',   grade: 'legendary', label: '레인보우' },
   { id: 'portal',    grade: 'legendary', label: '포탈'    },
 ];
 
 const MARKER_EMOJI: Record<string, string> = {
-  star: '⭐', smile: '😊', pin: '📍',
+  star: '⭐', smile: '😊', magnify: '🔍',
   lightning: '⚡', gem: '💎', clover: '🍀',
-  trophy: '🏆', magic: '🪄', eyes: '👀',
-  heart: '💖', sparkle: '✨', fire: '🔥', crown: '👑',
+  dizzy: '💫', magic: '🪄', eyes: '👀',
+  heart: '💖', sparkle: '✨', bulb: '💡', crown: '👑',
+};
+
+const MARKER_ANIM_CLASS: Record<string, string> = {
+  sparkle:   'snapspot-marker-spin',
+  heart:     'snapspot-marker-pulse',
+  bulb:      'snapspot-marker-blink',
+  crown:     'snapspot-marker-crown-anim',
+  eyes:      'snapspot-marker-eyeblink',
+  lightning: 'snapspot-marker-lightning-strike',
 };
 
 export function getMarkerContent(markerId: string): React.ReactNode {
+  if (markerId === 'magic') {
+    return (
+      <div style={{ position: 'relative', width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: 26, lineHeight: 1 }}>🪄</span>
+        {[0, 1, 2, 3, 4].map(i => (
+          <span key={i} className={`snapspot-stardust s${i}`}>✦</span>
+        ))}
+      </div>
+    );
+  }
   if (MARKER_EMOJI[markerId]) {
     return (
-      <span className={markerId === 'sparkle' ? 'snapspot-marker-spin' : undefined}
+      <span className={MARKER_ANIM_CLASS[markerId]}
         style={{ fontSize: 26, lineHeight: 1, display: 'flex' }}>
         {MARKER_EMOJI[markerId]}
       </span>

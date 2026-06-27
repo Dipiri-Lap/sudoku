@@ -7,9 +7,10 @@ interface Props {
   onBgmChange: (v: number) => void;
   onSfxChange: (v: number) => void;
   onClose: () => void;
+  onPlayBtnSfx?: () => void;
 }
 
-const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmChange, onSfxChange, onClose }) => (
+const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmChange, onSfxChange, onClose, onPlayBtnSfx }) => (
   <div
     style={{
       position: 'fixed', inset: 0,
@@ -17,7 +18,7 @@ const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmCha
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       zIndex: 3000, padding: '1rem',
     }}
-    onClick={onClose}
+    onClick={() => { onPlayBtnSfx?.(); onClose(); }}
   >
     <div
       style={{
@@ -30,7 +31,7 @@ const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmCha
       onClick={(e) => e.stopPropagation()}
     >
       <button
-        onClick={onClose}
+        onClick={() => { onPlayBtnSfx?.(); onClose(); }}
         style={{
           position: 'absolute', top: '1rem', right: '1rem',
           background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)',
