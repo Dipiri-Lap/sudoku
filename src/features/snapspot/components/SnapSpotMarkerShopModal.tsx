@@ -40,7 +40,11 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => 
       selectMarker(design.id);
     } else {
       const cost = MARKER_GRADE_CONFIG[design.grade].cost;
-      if (cost === 0 || coins >= cost) setConfirmDesign(design);
+      if (cost === 0) {
+        unlockMarker(design.id);
+      } else if (coins >= cost) {
+        setConfirmDesign(design);
+      }
     }
   };
 
@@ -166,11 +170,6 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => 
                             </div>
                           )}
                         </div>
-
-                        {/* Name */}
-                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#e2e8f0' }}>
-                          {design.label}
-                        </span>
 
                         {/* Status */}
                         <div style={{

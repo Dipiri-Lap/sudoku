@@ -716,6 +716,8 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                   const img = e.currentTarget;
                   if (img.src.endsWith('.jpg')) {
                     img.src = img.src.replace(/\.jpg$/, '.jpeg');
+                  } else if (img.src.endsWith('.jpeg')) {
+                    img.src = img.src.replace(/\.jpeg$/, '.webp');
                   }
                 }}
               />

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, signInAnonymously } from '../firebase';
 
 interface UserInitContextValue {
     isInitialized: boolean;
@@ -21,10 +21,11 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user || syncedRef.current) {
-                if (!user) setIsInitialized(false);
+            if (!user) {
+                signInAnonymously(auth).catch(console.error);
                 return;
             }
+            if (syncedRef.current) return;
             syncedRef.current = true;
 
             try {
