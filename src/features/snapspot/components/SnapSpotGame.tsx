@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, Heart, Search, Check, Palette, Settings } from 'lucide-react';
 import { useSnapSpotMarker, getMarkerContent } from '../context/SnapSpotMarkerContext';
 import SnapSpotMarkerShopModal from './SnapSpotMarkerShopModal';
@@ -81,6 +81,7 @@ interface Props {
 
 const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { addCoins, spendCoins, coins } = useCoins();
   const { snapSpotProgress, saveSnapSpotProgress: saveProgress } = useSnapSpotProgress();
   const { selectedMarkerId } = useSnapSpotMarker();
@@ -109,7 +110,13 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [heartShake, setHeartShake] = useState(false);
   const [stageId, setStageId] = useState(() => {
-    if (mode === 'stage') return Math.max(1, snapSpotProgress + 1);
+    if (mode === 'stage') {
+      if (IS_DEV) {
+        const devStage = parseInt(searchParams.get('stage') ?? '', 10);
+        if (devStage >= 1) return devStage;
+      }
+      return Math.max(1, snapSpotProgress + 1);
+    }
     if (mode === 'arcade') return arcadeQueue.current.pop()!;
     return 1;
   });

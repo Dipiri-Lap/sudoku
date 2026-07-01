@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
 
+const IS_DEV = import.meta.env.DEV;
+
 // ── Mini visuals ───────────────────────────────────────────────────────────────
 
 function MiniCompare() {
@@ -162,7 +164,13 @@ const hoverOff = (e: React.MouseEvent<HTMLImageElement>) => {
 const SnapSpotModeSelect: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [devStage, setDevStage] = useState('');
   const { snapSpotProgress, isSynced } = useSnapSpotProgress();
+
+  const handleDevStageGo = () => {
+    const n = parseInt(devStage, 10);
+    if (n >= 1) navigate(`/snapspot/normal?stage=${n}`);
+  };
 
   useEffect(() => {
     document.body.classList.add('landing-bg');
@@ -241,6 +249,33 @@ const SnapSpotModeSelect: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* DEV: 스테이지 직접 입력 */}
+      {IS_DEV && (
+        <div style={{ padding: '0 1.5rem 1rem', maxWidth: '480px', margin: '0 auto', display: 'flex', gap: '0.5rem' }}>
+          <input
+            type="number"
+            min={1}
+            placeholder="스테이지 번호"
+            value={devStage}
+            onChange={e => setDevStage(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleDevStageGo()}
+            style={{
+              flex: 1, padding: '0.5rem 0.75rem', borderRadius: '10px',
+              border: '1.5px solid #f97316', background: '#fff7ed',
+              fontSize: '0.9rem', fontWeight: 700, outline: 'none',
+            }}
+          />
+          <button
+            onClick={handleDevStageGo}
+            style={{
+              padding: '0.5rem 1rem', borderRadius: '10px', border: 'none',
+              background: '#f97316', color: '#fff', fontWeight: 800,
+              fontSize: '0.9rem', cursor: 'pointer',
+            }}
+          >GO</button>
+        </div>
+      )}
 
       {/* 게임 안내 */}
       <details

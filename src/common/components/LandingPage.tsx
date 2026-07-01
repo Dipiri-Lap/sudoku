@@ -481,21 +481,7 @@ const LandingPage: React.FC = () => {
             </header>
 
             <div className="game-grid">
-                <a href="/queens" className="animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
-                >
-                    <div style={{
-                        position: 'absolute', top: '10px', right: '10px',
-                        backgroundColor: '#4a90e2', color: 'white',
-                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
-                        padding: '2px 7px', borderRadius: '999px',
-                        boxShadow: '0 2px 6px rgba(74,144,226,0.5)',
-                        zIndex: 1,
-                    }}>NEW</div>
-                    <img src="/images/crownquest/title.webp" alt="크라운 퀘스트" style={{ width: '100%', display: 'block' }} />
-                </a>
-                <a href="/word-sort" className="animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
+                <a href="/snapspot" className="animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
                 >
@@ -506,11 +492,41 @@ const LandingPage: React.FC = () => {
                         padding: '2px 7px', borderRadius: '999px',
                         boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
                         zIndex: 1,
+                    }}>NEW</div>
+                    <img src="/images/snapspot/title.webp" alt="스냅스팟" style={{ width: '100%', display: 'block' }} />
+                </a>
+
+                <a href="/queens" className="animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                >
+                    <div style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        backgroundColor: '#f97316', color: 'white',
+                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
+                        padding: '2px 7px', borderRadius: '999px',
+                        boxShadow: '0 2px 6px rgba(249,115,22,0.5)',
+                        zIndex: 1,
+                    }}>HOT</div>
+                    <img src="/images/crownquest/title.webp" alt="크라운 퀘스트" style={{ width: '100%', display: 'block' }} />
+                </a>
+
+                <a href="/word-sort" className="animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                >
+                    <div style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        backgroundColor: '#f97316', color: 'white',
+                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
+                        padding: '2px 7px', borderRadius: '999px',
+                        boxShadow: '0 2px 6px rgba(249,115,22,0.5)',
+                        zIndex: 1,
                     }}>HOT</div>
                     <img src="/images/wordstack/title.webp" alt="워드스택" style={{ width: '100%', display: 'block' }} />
                 </a>
 
-                <a href="/sudoku" className="animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
+                <a href="/sudoku" className="animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
                 >
@@ -551,14 +567,6 @@ const LandingPage: React.FC = () => {
                     </a>
                 )}
 
-                {window.location.hostname === 'localhost' && (
-                    <a href="/snapspot" className="animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
-                    >
-                        <img src="/images/snapspot/title.webp" alt="스냅스팟" style={{ width: '100%', display: 'block' }} />
-                    </a>
-                )}
             </div>
 
 
