@@ -742,7 +742,9 @@ const LandingPage: React.FC = () => {
                         <span style={{ whiteSpace: 'nowrap' }}>대표: 김도균</span>
                         <br/>
                         <span style={{ wordBreak: 'keep-all', marginRight: '4px' }}>사업장 주소 (08799) 서울특별시 관악구 낙성대역8길 49-11, **호 <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
-                        <span style={{ whiteSpace: 'nowrap' }}>고객센터: 070-8984-4679</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>
+                            고객센터: <a href="https://open.kakao.com/o/sd3A2bCi" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b', textDecoration: 'underline' }}>고객센터 문의하기</a> (070-8984-4679)
+                        </span>
                     </div>
                     
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#475569', fontWeight: 600, fontSize: '0.8rem', margin: '1rem 0', cursor: 'pointer' }}>

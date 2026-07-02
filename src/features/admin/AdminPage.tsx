@@ -1,11 +1,33 @@
-import React, { useState, useCallback } from 'react';
-import { auth } from '../../firebase';
-import {
-    collection, doc, getDoc, getDocs, setDoc,
-    query, where, orderBy,
-} from 'firebase/firestore';
+import React, { useState, useEffect, useCallback } from 'react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { httpsCallable } from 'firebase/functions';
+import { auth, functions } from '../../firebase';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ALL_CHALLENGES } from '../../data/challenges';
+import { signInWithGoogle } from '../../services/authService';
+
+type AdminDocType = 'profile' | 'sudoku' | 'challenges' | 'wordsort';
+const adminGetUserData = httpsCallable<{ targetUid: string }, {
+    profile: UserDoc | null;
+    sudoku: SudokuProgressDoc | null;
+    challenges: ChallengesDoc | null;
+    wordsort: WordSortProgressDoc | null;
+}>(functions, 'adminGetUserData');
+const adminSaveUserData = httpsCallable<{ targetUid: string; docType: AdminDocType; data: object }, { ok: boolean }>(
+    functions,
+    'adminSaveUserData'
+);
+const adminGetPayments = httpsCallable<{ targetUid: string }, { payments: PaymentRow[] }>(
+    functions,
+    'adminGetPayments'
+);
+const refundPortOnePayment = httpsCallable<{ paymentId: string }, { refundedCoins: number; refundedAmount: number }>(
+    functions,
+    'refundPortOnePayment'
+);
+
+const ADMIN_EMAIL = 'ehrbs50@gmail.com';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -14,6 +36,8 @@ interface UserDoc {
     nickname: string;
     photoURL: string;
     coins: number;
+    freeCoins?: number;
+    paidCoins?: number;
     puzzlePower: number;
     unlockedAvatars: string[];
     activeTitle: string | null;
@@ -22,6 +46,23 @@ interface UserDoc {
     selectedWordSortBack: string;
     createdAt?: string;
 }
+
+interface PaymentRow {
+    paymentId: string;
+    amount: number;
+    coins: number;
+    refunded: boolean;
+    refundedCoins: number;
+    refundedAmount: number;
+    processedAt: number | null;
+    refundedAt: number | null;
+}
+
+// 레거시 단일 coins 필드와 신규 freeCoins/paidCoins 필드를 모두 지원
+const totalCoins = (d: { coins?: number; freeCoins?: number; paidCoins?: number }): number =>
+    (d.freeCoins !== undefined || d.paidCoins !== undefined)
+        ? (d.freeCoins ?? 0) + (d.paidCoins ?? 0)
+        : (d.coins ?? 0);
 
 interface SudokuProgressDoc {
     sudokuStageProgress: number;
@@ -62,6 +103,15 @@ const S = {
         display: 'flex', height: '100vh', fontFamily: 'monospace',
         fontSize: '13px', background: '#0f172a', color: '#e2e8f0',
     } as React.CSSProperties,
+    gatePage: {
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        height: '100vh', fontFamily: 'monospace', fontSize: '13px',
+        background: '#0f172a', color: '#e2e8f0',
+    } as React.CSSProperties,
+    gateBox: {
+        textAlign: 'center' as const, padding: '24px 32px',
+        border: '1px solid #1e293b', borderRadius: '10px', background: '#1e293b',
+    },
     sidebar: {
         width: '260px', flexShrink: 0, borderRight: '1px solid #1e293b',
         display: 'flex', flexDirection: 'column' as const, overflow: 'hidden',
@@ -142,11 +192,38 @@ const S = {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const AdminPage: React.FC = () => {
+    const [authUser, setAuthUser] = useState<User | null>(null);
+    const [authChecked, setAuthChecked] = useState(false);
+    const [loggingIn, setLoggingIn] = useState(false);
+    const [loginError, setLoginError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const unsub = onAuthStateChanged(auth, (user) => {
+            setAuthUser(user);
+            setAuthChecked(true);
+        });
+        return unsub;
+    }, []);
+
+    const handleAdminLogin = async () => {
+        setLoggingIn(true);
+        setLoginError(null);
+        try {
+            await signInWithGoogle();
+        } catch {
+            setLoginError('로그인에 실패했습니다. 다시 시도해 주세요.');
+        } finally {
+            setLoggingIn(false);
+        }
+    };
+
+    const isAdmin = authUser?.email === ADMIN_EMAIL;
+
     const [searchInput, setSearchInput] = useState('');
     const [searchResults, setSearchResults] = useState<UserRow[]>([]);
     const [searching, setSearching] = useState(false);
     const [selectedUid, setSelectedUid] = useState<string | null>(null);
-    const [tab, setTab] = useState<'profile' | 'sudoku' | 'wordsort' | 'challenges'>('profile');
+    const [tab, setTab] = useState<'profile' | 'sudoku' | 'wordsort' | 'challenges' | 'payments'>('profile');
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
@@ -155,6 +232,9 @@ const AdminPage: React.FC = () => {
     const [sudokuDoc, setSudokuDoc] = useState<SudokuProgressDoc | null>(null);
     const [challengesDoc, setChallengesDoc] = useState<ChallengesDoc | null>(null);
     const [wordSortDoc, setWordSortDoc] = useState<WordSortProgressDoc | null>(null);
+    const [payments, setPayments] = useState<PaymentRow[]>([]);
+    const [paymentsLoading, setPaymentsLoading] = useState(false);
+    const [refundingId, setRefundingId] = useState<string | null>(null);
 
     // Edit states (local drafts)
     const [editUser, setEditUser] = useState<Partial<UserDoc>>({});
@@ -182,36 +262,29 @@ const AdminPage: React.FC = () => {
             const snap = await getDocs(q);
             setSearchResults(snap.docs.map(d => {
                 const data = d.data();
-                return { uid: d.id, nickname: data.nickname ?? d.id.slice(0, 8), coins: data.coins ?? 0, puzzlePower: data.puzzlePower ?? 0 };
+                return { uid: d.id, nickname: data.nickname ?? d.id.slice(0, 8), coins: totalCoins(data), puzzlePower: data.puzzlePower ?? 0 };
             }));
         } finally {
             setSearching(false);
         }
     };
 
-    // Load selected user's all subcollection data
+    // Load selected user's all subcollection data (관리자 전용 Cloud Function 경유)
     const loadUser = useCallback(async (uid: string) => {
         setSelectedUid(uid);
         setLoading(true);
         try {
-            const [uSnap, sSnap, cSnap, wSnap] = await Promise.all([
-                getDoc(doc(db, 'users', uid)),
-                getDoc(doc(db, 'users', uid, 'sudokuProgress', 'data')),
-                getDoc(doc(db, 'users', uid, 'challenges', 'data')),
-                getDoc(doc(db, 'users', uid, 'wordSortProgress', 'data')),
-            ]);
+            const result = await adminGetUserData({ targetUid: uid });
+            const { profile, sudoku, challenges, wordsort } = result.data;
 
-            const u: UserDoc = uSnap.exists() ? uSnap.data() as UserDoc : {
-                uid, nickname: '', photoURL: '1', coins: 0, puzzlePower: 0,
+            const u: UserDoc = profile ?? {
+                uid, nickname: '', photoURL: '1', coins: 0, freeCoins: 0, paidCoins: 0, puzzlePower: 0,
                 unlockedAvatars: [], activeTitle: null, bestTimes: {},
                 unlockedWordSortBacks: [], selectedWordSortBack: '1',
             };
-            const s: SudokuProgressDoc = sSnap.exists() ? sSnap.data() as SudokuProgressDoc
-                : { sudokuStageProgress: 0, beginnerProgress: 0, bestTimes: {} };
-            const c: ChallengesDoc = cSnap.exists() ? cSnap.data() as ChallengesDoc
-                : { clearedIds: [], claimedIds: [], puzzlePower: 0, mainDocSyncedPP: 0 };
-            const w: WordSortProgressDoc = wSnap.exists() ? wSnap.data() as WordSortProgressDoc
-                : { clearedLevel: 0 };
+            const s: SudokuProgressDoc = sudoku ?? { sudokuStageProgress: 0, beginnerProgress: 0, bestTimes: {} };
+            const c: ChallengesDoc = challenges ?? { clearedIds: [], claimedIds: [], puzzlePower: 0, mainDocSyncedPP: 0 };
+            const w: WordSortProgressDoc = wordsort ?? { clearedLevel: 0 };
 
             setUserDoc(u);
             setSudokuDoc(s);
@@ -221,6 +294,7 @@ const AdminPage: React.FC = () => {
             setEditSudoku({});
             setEditChallenges({});
             setEditWordSort({});
+            setPayments([]);
         } catch (e) {
             showToast(`권한 오류: ${String(e)}`, false);
         } finally {
@@ -228,17 +302,53 @@ const AdminPage: React.FC = () => {
         }
     }, [showToast]);
 
-    // ── Save helpers ──────────────────────────────────────────────────────────
+    // Load payment history for the selected user (관리자 전용 Cloud Function 경유)
+    const loadPayments = useCallback(async (uid: string) => {
+        setPaymentsLoading(true);
+        try {
+            const result = await adminGetPayments({ targetUid: uid });
+            setPayments(result.data.payments);
+        } catch (e) {
+            showToast(`결제 내역 조회 오류: ${String(e)}`, false);
+        } finally {
+            setPaymentsLoading(false);
+        }
+    }, [showToast]);
+
+    useEffect(() => {
+        if (tab === 'payments' && selectedUid) {
+            loadPayments(selectedUid);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tab, selectedUid]);
+
+    const handleRefund = async (paymentId: string) => {
+        if (!selectedUid) return;
+        if (!window.confirm('이 결제를 환불 처리하시겠습니까? PortOne 결제취소가 함께 진행됩니다.')) return;
+        setRefundingId(paymentId);
+        try {
+            const result = await refundPortOnePayment({ paymentId });
+            showToast(`환불 완료: ${result.data.refundedCoins}코인 / ${result.data.refundedAmount.toLocaleString()}원`);
+            await loadPayments(selectedUid);
+            await loadUser(selectedUid);
+        } catch (e) {
+            showToast(`환불 실패: ${String(e)}`, false);
+        } finally {
+            setRefundingId(null);
+        }
+    };
+
+    // ── Save helpers (관리자 전용 Cloud Function 경유) ───────────────────────────
 
     const saveUser = async () => {
         if (!selectedUid || !userDoc) return;
         try {
             const merged = { ...userDoc, ...editUser };
-            await setDoc(doc(db, 'users', selectedUid), merged, { merge: true });
+            await adminSaveUserData({ targetUid: selectedUid, docType: 'profile', data: merged });
             setUserDoc(merged);
             setEditUser({});
             setSearchResults(prev => prev.map(u => u.uid === selectedUid
-                ? { ...u, nickname: merged.nickname, coins: merged.coins, puzzlePower: merged.puzzlePower }
+                ? { ...u, nickname: merged.nickname, coins: totalCoins(merged), puzzlePower: merged.puzzlePower }
                 : u));
             showToast('프로필 저장 완료');
         } catch (e) { showToast(String(e), false); }
@@ -248,7 +358,7 @@ const AdminPage: React.FC = () => {
         if (!selectedUid || !sudokuDoc) return;
         try {
             const merged = { ...sudokuDoc, ...editSudoku };
-            await setDoc(doc(db, 'users', selectedUid, 'sudokuProgress', 'data'), merged, { merge: true });
+            await adminSaveUserData({ targetUid: selectedUid, docType: 'sudoku', data: merged });
             setSudokuDoc(merged);
             setEditSudoku({});
             showToast('스도쿠 저장 완료');
@@ -259,7 +369,7 @@ const AdminPage: React.FC = () => {
         if (!selectedUid || !challengesDoc) return;
         try {
             const merged = { ...challengesDoc, ...editChallenges };
-            await setDoc(doc(db, 'users', selectedUid, 'challenges', 'data'), merged, { merge: true });
+            await adminSaveUserData({ targetUid: selectedUid, docType: 'challenges', data: merged });
             setChallengesDoc(merged);
             setEditChallenges({});
             showToast('챌린지 저장 완료');
@@ -270,7 +380,7 @@ const AdminPage: React.FC = () => {
         if (!selectedUid || !wordSortDoc) return;
         try {
             const merged = { ...wordSortDoc, ...editWordSort };
-            await setDoc(doc(db, 'users', selectedUid, 'wordSortProgress', 'data'), merged, { merge: true });
+            await adminSaveUserData({ targetUid: selectedUid, docType: 'wordsort', data: merged });
             setWordSortDoc(merged);
             setEditWordSort({});
             showToast('워드소트 저장 완료');
@@ -321,6 +431,33 @@ const AdminPage: React.FC = () => {
             claimedIds: cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id],
         }));
     };
+
+    // ── Auth gate ─────────────────────────────────────────────────────────────
+
+    if (!authChecked) {
+        return <div style={S.gatePage}>확인 중...</div>;
+    }
+
+    if (!isAdmin) {
+        return (
+            <div style={S.gatePage}>
+                <div style={S.gateBox}>
+                    <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '8px' }}>🔒 관리자 전용 페이지</div>
+                    {authUser && !authUser.isAnonymous && (
+                        <div style={{ color: '#f87171', fontSize: '12px', marginBottom: '12px' }}>
+                            {authUser.email} 계정은 접근 권한이 없습니다.
+                        </div>
+                    )}
+                    <button style={S.btn()} onClick={handleAdminLogin} disabled={loggingIn}>
+                        {loggingIn ? '로그인 중...' : 'Google로 로그인'}
+                    </button>
+                    {loginError && (
+                        <div style={{ color: '#f87171', fontSize: '12px', marginTop: '10px' }}>{loginError}</div>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     // ── Render ────────────────────────────────────────────────────────────────
 
@@ -378,9 +515,9 @@ const AdminPage: React.FC = () => {
                 {selectedUid && !loading && (
                     <>
                         <div style={S.tabs}>
-                            {(['profile', 'sudoku', 'wordsort', 'challenges'] as const).map(t => (
+                            {(['profile', 'sudoku', 'wordsort', 'challenges', 'payments'] as const).map(t => (
                                 <div key={t} style={S.tab(tab === t)} onClick={() => setTab(t)}>
-                                    {{ profile: '프로필', sudoku: '스도쿠', wordsort: '워드소트', challenges: '챌린지' }[t]}
+                                    {{ profile: '프로필', sudoku: '스도쿠', wordsort: '워드소트', challenges: '챌린지', payments: '결제/환불' }[t]}
                                 </div>
                             ))}
                         </div>
@@ -395,7 +532,8 @@ const AdminPage: React.FC = () => {
 
                                         {([
                                             ['nickname', '닉네임', 'text'],
-                                            ['coins', '코인', 'number'],
+                                            ['freeCoins', '무료 코인', 'number'],
+                                            ['paidCoins', '유료 코인 (환불 대상)', 'number'],
                                             ['puzzlePower', '퍼즐 파워', 'number'],
                                             ['photoURL', '아바타 ID (photoURL)', 'text'],
                                             ['activeTitle', '활성 타이틀 ID', 'text'],
@@ -610,6 +748,50 @@ const AdminPage: React.FC = () => {
                                     </div>
 
                                     <button style={S.btn()} onClick={saveChallenges}>챌린지 저장</button>
+                                </>
+                            )}
+
+                            {/* ── Payments Tab ── */}
+                            {tab === 'payments' && (
+                                <>
+                                    <div style={S.section}>
+                                        <div style={S.sectionTitle}>
+                                            결제 내역 {curUser && `(현재 유료 코인: ${curUser.paidCoins ?? 0})`}
+                                        </div>
+                                        {paymentsLoading && <div style={{ color: '#64748b' }}>불러오는 중...</div>}
+                                        {!paymentsLoading && payments.length === 0 && (
+                                            <div style={{ color: '#334155', fontSize: '12px' }}>결제 내역이 없습니다</div>
+                                        )}
+                                        {!paymentsLoading && payments.map(p => (
+                                            <div key={p.paymentId} style={{
+                                                padding: '10px 12px', background: '#1e293b',
+                                                borderRadius: '6px', border: '1px solid #334155',
+                                                marginBottom: '8px',
+                                            }}>
+                                                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px' }}>
+                                                    {p.paymentId}
+                                                </div>
+                                                <div style={{ fontSize: '12px', marginBottom: '4px' }}>
+                                                    🪙{p.coins.toLocaleString()} · {p.amount.toLocaleString()}원
+                                                    {p.processedAt && ` · ${new Date(p.processedAt).toLocaleString()}`}
+                                                </div>
+                                                {p.refunded ? (
+                                                    <div style={{ fontSize: '12px', color: '#f59e0b' }}>
+                                                        환불 완료: 🪙{p.refundedCoins.toLocaleString()} / {p.refundedAmount.toLocaleString()}원
+                                                        {p.refundedAt && ` (${new Date(p.refundedAt).toLocaleString()})`}
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        style={S.btnSmall('#ef4444')}
+                                                        disabled={refundingId === p.paymentId}
+                                                        onClick={() => handleRefund(p.paymentId)}
+                                                    >
+                                                        {refundingId === p.paymentId ? '처리 중...' : '환불 처리'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </>
                             )}
                         </div>

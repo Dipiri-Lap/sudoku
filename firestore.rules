@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{uid} {
+      // 읽기: 로그인한 사용자라면 누구나 다른 사람의 랭킹 정보를 볼 수 있음
+      allow read: if request.auth != null;
+
+      // 쓰기: 오직 본인의 정보만 수정 가능
+      allow write: if request.auth != null && request.auth.uid == uid;
+
+      // 서브콜렉션(진행 데이터 등)은 본인만 접근 가능
+      match /{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // 랭킹용 collectionGroup 읽기 권한
+    match /{path=**}/{progressCollection}/{doc} {
+      allow read: if request.auth != null && progressCollection.matches('.*Progress');
+    }
+
+    // 위에 명시 안 된 나머지는 기본적으로 전부 거부됨
+  }
+}

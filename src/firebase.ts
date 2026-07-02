@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, linkWithPopup } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
 import { getAnalytics, logEvent as firebaseLogEvent, isSupported } from "firebase/analytics";
 
 // TODO: Replace the following with your app's Firebase project configuration
@@ -21,6 +22,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app);
 
 // Analytics (not supported in some environments e.g. localhost without measurementId)
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;
@@ -33,4 +35,4 @@ export const logEvent = (eventName: string, params?: Record<string, any>) => {
 };
 
 export const googleProvider = new GoogleAuthProvider();
-export { auth, db, signInAnonymously, signInWithPopup, linkWithPopup };
+export { auth, db, functions, signInAnonymously, signInWithPopup, linkWithPopup };

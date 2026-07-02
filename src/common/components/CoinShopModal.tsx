@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Play } from 'lucide-react';
 import * as PortOne from '@portone/browser-sdk/v2';
+import { httpsCallable } from 'firebase/functions';
 const CoinImg = ({ size = 16 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { useCoins } from '../../context/CoinContext';
-import { auth } from '../../firebase';
+import { auth, functions } from '../../firebase';
 
 const PORTONE_STORE_ID = 'store-5fe3aecd-4b34-4afd-8010-c04757231e1a';
-const PORTONE_CHANNEL_KEY = 'channel-key-8112f1af-1321-4f01-9a04-abdf11417a32';
+const PORTONE_CHANNEL_KEY = 'channel-key-67141cfa-6abd-40c7-8646-ea2e64b082ef'; // 실연동(퍼즐가든) 채널
 
 const COIN_PACKAGES = [
     { coins: 500,   price: '₩2,200',  amount: 2200,  label: null,     img: '/500coin.png' },
@@ -25,7 +26,7 @@ interface CoinShopModalProps {
 
 
 const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => {
-    const { coins, addCoins } = useCoins();
+    const { coins, addCoins, applyServerGrant } = useCoins();
     const [adCooldownLeft, setAdCooldownLeft] = useState(0);
     const [adWatching, setAdWatching] = useState(false);
     const [pendingShowAd, setPendingShowAd] = useState<(() => void) | null>(null);
@@ -125,14 +126,19 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                 return;
             }
 
-            // 결제 성공 → 코인 지급 (테스트 중 비활성화)
-            // TODO: 실서비스에서는 서버에서 response.paymentId 검증 후 지급
-            // await addCoins(pkg.coins);
-            showToast(`결제 완료 (테스트 모드 — 코인 미지급)`);
+            // 결제 성공 → 서버(Cloud Functions)에서 PortOne API로 실제 결제 여부를
+            // 검증한 뒤에만 코인을 지급한다 (클라이언트만 믿고 지급하지 않음)
+            const verifyPortOnePayment = httpsCallable<{ paymentId: string }, { coins: number; alreadyProcessed: boolean }>(
+                functions,
+                'verifyPortOnePayment'
+            );
+            const result = await verifyPortOnePayment({ paymentId: response.paymentId });
+            applyServerGrant(result.data.coins);
+            showToast(`🪙 ${result.data.coins.toLocaleString()} 코인 지급 완료!`);
             onClose();
         } catch (e) {
             console.error('Payment error:', e);
-            showToast('결제 중 오류가 발생했습니다.');
+            showToast('결제 검증 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         } finally {
             setPurchasing(false);
         }

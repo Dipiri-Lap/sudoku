@@ -8,6 +8,19 @@ interface TermsModalProps {
     onClose: () => void;
 }
 
+const KAKAO_OPEN_CHAT_URL = 'https://open.kakao.com/o/sd3A2bCi';
+
+const ContactLink: React.FC<{ children?: React.ReactNode }> = ({ children = '고객센터 문의하기' }) => (
+    <a
+        href={KAKAO_OPEN_CHAT_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: '#60a5fa', textDecoration: 'underline' }}
+    >
+        {children}
+    </a>
+);
+
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div style={{ marginBottom: '1.25rem' }}>
         <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '0.4rem' }}>{title}</h3>
@@ -49,7 +62,7 @@ const TERMS_CONTENT: Record<TermsType, { title: string; content: React.ReactNode
                         <li>코인은 서비스 내 결제 수단을 통해 구매할 수 있습니다.</li>
                         <li>구매한 코인은 전자상거래법에 따라 구매일로부터 7일 이내 미사용 시 환불을 요청할 수 있습니다.</li>
                         <li>사용된 코인은 환불되지 않습니다.</li>
-                        <li>환불 문의: 고객센터 070-8984-4679</li>
+                        <li>환불 문의: <ContactLink /> (070-8984-4679)</li>
                     </ol>
                 </Section>
                 <Section title="제6조 (책임 제한)">
@@ -117,12 +130,12 @@ const TERMS_CONTENT: Record<TermsType, { title: string; content: React.ReactNode
                     </table>
                 </Section>
                 <Section title="6. 이용자의 권리">
-                    이용자는 언제든지 개인정보 열람, 수정, 삭제, 처리정지를 요청할 수 있습니다. 문의는 고객센터(070-8984-4679)로 연락하시기 바랍니다.
+                    이용자는 언제든지 개인정보 열람, 수정, 삭제, 처리정지를 요청할 수 있습니다. 문의는 <ContactLink />(070-8984-4679)로 연락하시기 바랍니다.
                 </Section>
                 <Section title="7. 개인정보 보호책임자">
                     <ul>
                         <li>성명: 김도균</li>
-                        <li>연락처: 070-8984-4679</li>
+                        <li>연락처: <ContactLink /> (070-8984-4679)</li>
                     </ul>
                 </Section>
                 <p style={{ marginTop: '1.5rem', color: '#94a3b8', fontSize: '0.75rem' }}>시행일: 2024년 1월 1일</p>
@@ -157,7 +170,7 @@ const TERMS_CONTENT: Record<TermsType, { title: string; content: React.ReactNode
                     <ol>
                         <li>코인 구매 후 7일 이내, 미사용 상태인 경우 전액 환불을 요청할 수 있습니다.</li>
                         <li>일부 사용된 코인은 사용분을 제외한 잔여분에 대해 환불이 가능합니다.</li>
-                        <li>환불 요청: 고객센터 070-8984-4679</li>
+                        <li>환불 요청: <ContactLink /> (070-8984-4679)</li>
                     </ol>
                 </Section>
                 <Section title="제6조 (회사의 책임)">
@@ -169,7 +182,7 @@ const TERMS_CONTENT: Record<TermsType, { title: string; content: React.ReactNode
                 <Section title="제7조 (분쟁 처리 및 고충 처리)">
                     전자금융거래와 관련한 분쟁 또는 불만 사항은 아래로 문의하시기 바랍니다.
                     <ul style={{ marginTop: '0.5rem' }}>
-                        <li>고객센터: 070-8984-4679</li>
+                        <li>고객센터: <ContactLink /> (070-8984-4679)</li>
                         <li>금융감독원 분쟁조정: 1332</li>
                     </ul>
                 </Section>
