@@ -57,16 +57,13 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const snap = await getDoc(userRef);
                 const cloudData = snap.data();
 
-                let cloudFree: number;
-                let cloudPaid: number;
-                if (cloudData?.freeCoins === undefined && cloudData?.paidCoins === undefined) {
-                    // 레거시 단일 'coins' 필드만 있는 계정 - 전액 무료 코인으로 간주
-                    cloudFree = cloudData?.coins ?? 0;
-                    cloudPaid = 0;
-                } else {
-                    cloudFree = cloudData?.freeCoins ?? 0;
-                    cloudPaid = cloudData?.paidCoins ?? 0;
-                }
+                // freeCoins/paidCoins는 서로 독립적으로 마이그레이션한다.
+                // (paidCoins가 결제로 새로 생겼다고 해서 레거시 coins를 무료 코인으로
+                //  옮기는 걸 건너뛰면 안 됨 - 이전에 여기서 버그가 있었음)
+                const cloudFree = cloudData?.freeCoins !== undefined
+                    ? cloudData.freeCoins
+                    : (cloudData?.coins ?? 0);
+                const cloudPaid = cloudData?.paidCoins ?? 0;
 
                 const localFree = readInt(FREE_LS_KEY);
                 const localPaid = readInt(PAID_LS_KEY);
@@ -78,6 +75,12 @@ export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     localStorage.setItem(PAID_LS_KEY, String(mergedPaid));
                     setFreeCoins(mergedFree);
                     setPaidCoins(mergedPaid);
+                }
+
+                // 마이그레이션/병합 결과를 Firestore에도 반영해서
+                // 관리자 페이지 등 서버 측에서 봐도 정확한 값이 보이도록 한다.
+                if (mergedFree !== cloudFree || mergedPaid !== cloudPaid) {
+                    await setDoc(userRef, { freeCoins: mergedFree, paidCoins: mergedPaid }, { merge: true });
                 }
             } catch (e) {
                 console.error('CoinContext sync error:', e);

@@ -132,17 +132,19 @@ const S = {
         background: selected ? '#334155' : 'transparent',
         borderLeft: selected ? '3px solid #3b82f6' : '3px solid transparent',
     }),
-    main: { flex: 1, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden' },
+    main: { flex: 1, display: 'flex', flexDirection: 'column' as const, minWidth: 0 },
     topbar: {
         padding: '10px 16px', background: '#1e293b', borderBottom: '1px solid #334155',
-        display: 'flex', alignItems: 'center', gap: '10px',
+        display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' as const,
+        wordBreak: 'break-all' as const,
     },
     tabs: {
-        display: 'flex', borderBottom: '1px solid #1e293b', background: '#0f172a',
+        display: 'flex', flexWrap: 'wrap' as const, borderBottom: '1px solid #1e293b', background: '#0f172a',
     },
     tab: (active: boolean): React.CSSProperties => ({
         padding: '10px 18px', cursor: 'pointer', borderBottom: active ? '2px solid #3b82f6' : '2px solid transparent',
         color: active ? '#3b82f6' : '#94a3b8', fontWeight: active ? 700 : 400,
+        whiteSpace: 'nowrap' as const,
     }),
     content: { flex: 1, overflowY: 'auto' as const, padding: '20px' },
     section: { marginBottom: '24px' },
@@ -152,12 +154,12 @@ const S = {
         marginBottom: '10px', borderBottom: '1px solid #1e293b', paddingBottom: '6px',
     },
     fieldRow: {
-        display: 'flex', alignItems: 'center', gap: '8px',
+        display: 'flex', flexWrap: 'wrap' as const, alignItems: 'center', gap: '8px',
         marginBottom: '8px',
     },
-    label: { width: '180px', flexShrink: 0, color: '#94a3b8' },
+    label: { minWidth: '180px', flexShrink: 0, color: '#94a3b8' },
     input: {
-        flex: 1, padding: '5px 8px', background: '#1e293b', border: '1px solid #334155',
+        flex: 1, minWidth: '220px', padding: '5px 8px', background: '#1e293b', border: '1px solid #334155',
         color: '#e2e8f0', fontFamily: 'monospace', fontSize: '12px',
         borderRadius: '4px', outline: 'none',
     },
@@ -210,8 +212,16 @@ const AdminPage: React.FC = () => {
         setLoginError(null);
         try {
             await signInWithGoogle();
-        } catch {
-            setLoginError('로그인에 실패했습니다. 다시 시도해 주세요.');
+        } catch (err) {
+            console.error('Admin login error:', err);
+            const code = (err as { code?: string })?.code;
+            if (code === 'auth/popup-blocked') {
+                setLoginError('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해 주세요.');
+            } else if (code === 'auth/popup-closed-by-user') {
+                setLoginError(null);
+            } else {
+                setLoginError(`로그인에 실패했습니다. (${code ?? String(err)})`);
+            }
         } finally {
             setLoggingIn(false);
         }
@@ -543,7 +553,7 @@ const AdminPage: React.FC = () => {
                                                 <input
                                                     style={S.input}
                                                     type={type}
-                                                    value={String(curUser[key] ?? '')}
+                                                    value={type === 'number' ? String(curUser[key] ?? 0) : String(curUser[key] ?? '')}
                                                     onChange={e => setEditUser(prev => ({
                                                         ...prev,
                                                         [key]: type === 'number' ? Number(e.target.value) : e.target.value || null,
