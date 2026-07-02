@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refundPortOnePayment = exports.adminGetPayments = exports.adminSaveUserData = exports.adminGetUserData = exports.verifyPortOnePayment = void 0;
+exports.adminMigrateLegacyCoins = exports.refundPortOnePayment = exports.adminGetPayments = exports.adminSaveUserData = exports.adminGetUserData = exports.verifyPortOnePayment = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const params_1 = require("firebase-functions/params");
 const app_1 = require("firebase-admin/app");
@@ -196,4 +196,24 @@ exports.refundPortOnePayment = (0, https_1.onCall)({ secrets: [PORTONE_API_SECRE
         }, { merge: true });
     });
     return { refundedCoins: refundableCoins, refundedAmount: refundAmount };
+});
+// ── 관리자 전용: 레거시 coins -> freeCoins 일괄 마이그레이션 ──────────────────
+// paidCoins만 생기고 freeCoins 마이그레이션이 스킵됐던 유저들을 서버에서
+// 일괄로 바로잡는다. freeCoins가 이미 있는 유저는 건드리지 않아 반복 실행해도 안전하다.
+exports.adminMigrateLegacyCoins = (0, https_1.onCall)(async (request) => {
+    assertAdmin(request);
+    const snap = await db.collection("users").get();
+    const targets = snap.docs.filter((d) => {
+        const data = d.data();
+        return data.freeCoins === undefined && typeof data.coins === "number";
+    });
+    const BATCH_SIZE = 400;
+    for (let i = 0; i < targets.length; i += BATCH_SIZE) {
+        const batch = db.batch();
+        for (const d of targets.slice(i, i + BATCH_SIZE)) {
+            batch.set(d.ref, { freeCoins: d.data().coins }, { merge: true });
+        }
+        await batch.commit();
+    }
+    return { migratedCount: targets.length };
 });

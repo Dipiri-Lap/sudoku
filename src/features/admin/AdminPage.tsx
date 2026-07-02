@@ -26,6 +26,10 @@ const refundPortOnePayment = httpsCallable<{ paymentId: string }, { refundedCoin
     functions,
     'refundPortOnePayment'
 );
+const adminMigrateLegacyCoins = httpsCallable<void, { migratedCount: number }>(
+    functions,
+    'adminMigrateLegacyCoins'
+);
 
 const ADMIN_EMAIL = 'ehrbs50@gmail.com';
 
@@ -236,6 +240,7 @@ const AdminPage: React.FC = () => {
     const [tab, setTab] = useState<'profile' | 'sudoku' | 'wordsort' | 'challenges' | 'payments'>('profile');
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+    const [migrating, setMigrating] = useState(false);
 
     // Data states
     const [userDoc, setUserDoc] = useState<UserDoc | null>(null);
@@ -256,6 +261,21 @@ const AdminPage: React.FC = () => {
         setToast({ msg, ok });
         setTimeout(() => setToast(null), 2500);
     }, []);
+
+    // 레거시 coins -> freeCoins 일괄 마이그레이션 (서버 일괄 실행, 반복 실행해도 안전)
+    const handleMigrateLegacyCoins = async () => {
+        if (!window.confirm('freeCoins가 없는 모든 유저의 레거시 coins를 무료 코인으로 일괄 이전합니다. 진행할까요?')) return;
+        setMigrating(true);
+        try {
+            const result = await adminMigrateLegacyCoins();
+            showToast(`${result.data.migratedCount}명 마이그레이션 완료`);
+            if (selectedUid) loadUser(selectedUid);
+        } catch (e) {
+            showToast(`마이그레이션 실패: ${String(e)}`, false);
+        } finally {
+            setMigrating(false);
+        }
+    };
 
     // Search users by nickname prefix
     const handleSearch = async () => {
@@ -475,7 +495,17 @@ const AdminPage: React.FC = () => {
         <div style={S.page}>
             {/* Sidebar */}
             <div style={S.sidebar}>
-                <div style={S.sidebarHeader}>🛠 Admin</div>
+                <div style={{ ...S.sidebarHeader, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>🛠 Admin</span>
+                    <button
+                        style={S.btnSmall('#7c3aed')}
+                        disabled={migrating}
+                        onClick={handleMigrateLegacyCoins}
+                        title="freeCoins가 없는 유저의 레거시 coins를 무료 코인으로 일괄 이전"
+                    >
+                        {migrating ? '처리 중...' : '코인 마이그레이션'}
+                    </button>
+                </div>
                 <div style={{ display: 'flex', borderBottom: '1px solid #1e293b' }}>
                     <input
                         style={{ ...S.searchBox, borderBottom: 'none', flex: 1 }}
