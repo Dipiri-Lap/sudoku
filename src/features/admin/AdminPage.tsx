@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
 import { auth, functions } from '../../firebase';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, collectionGroup, getDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ALL_CHALLENGES } from '../../data/challenges';
 import { signInWithGoogle } from '../../services/authService';
@@ -67,6 +67,37 @@ const totalCoins = (d: { coins?: number; freeCoins?: number; paidCoins?: number 
     (d.freeCoins !== undefined || d.paidCoins !== undefined)
         ? (d.freeCoins ?? 0) + (d.paidCoins ?? 0)
         : (d.coins ?? 0);
+
+interface TopStageEntry {
+    uid: string;
+    nickname: string;
+    stage: number;
+}
+
+const GAME_PROGRESS_CONFIGS = [
+    { label: '스도쿠', collectionName: 'sudokuProgress', field: 'sudokuStageProgress' },
+    { label: '워드소트', collectionName: 'wordSortProgress', field: 'clearedLevel' },
+    { label: '워드소트 (하드)', collectionName: 'wordSortHardProgress', field: 'clearedLevel' },
+    { label: '퀸즈', collectionName: 'queensProgress', field: 'clearedLevel' },
+    { label: '스냅스팟', collectionName: 'snapspotProgress', field: 'clearedStage' },
+] as const;
+
+async function fetchTopStage(collectionName: string, field: string): Promise<TopStageEntry | null> {
+    const q = query(collectionGroup(db, collectionName), orderBy(field, 'desc'), limit(1));
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+
+    const topDoc = snap.docs[0];
+    const stage = topDoc.data()[field] ?? 0;
+    const userRef = topDoc.ref.parent.parent;
+    const uid = userRef?.id ?? 'unknown';
+    let nickname = uid.slice(0, 8);
+    if (userRef) {
+        const userSnap = await getDoc(userRef);
+        nickname = userSnap.data()?.nickname ?? nickname;
+    }
+    return { uid, nickname, stage };
+}
 
 interface SudokuProgressDoc {
     sudokuStageProgress: number;
@@ -241,6 +272,8 @@ const AdminPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
     const [migrating, setMigrating] = useState(false);
+    const [topStages, setTopStages] = useState<Record<string, TopStageEntry | null>>({});
+    const [topStagesLoading, setTopStagesLoading] = useState(false);
 
     // Data states
     const [userDoc, setUserDoc] = useState<UserDoc | null>(null);
@@ -351,6 +384,20 @@ const AdminPage: React.FC = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab, selectedUid]);
+
+    // 게임별 스테이지 최고 기록 (admin 로그인 후 한 번 조회)
+    useEffect(() => {
+        if (!isAdmin) return;
+        setTopStagesLoading(true);
+        Promise.all(
+            GAME_PROGRESS_CONFIGS.map(async (cfg) => {
+                const entry = await fetchTopStage(cfg.collectionName, cfg.field).catch(() => null);
+                return [cfg.label, entry] as const;
+            })
+        ).then((results) => {
+            setTopStages(Object.fromEntries(results));
+        }).finally(() => setTopStagesLoading(false));
+    }, [isAdmin]);
 
     const handleRefund = async (paymentId: string) => {
         if (!selectedUid) return;
@@ -839,8 +886,42 @@ const AdminPage: React.FC = () => {
                 )}
 
                 {!selectedUid && (
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#334155' }}>
-                        ← 왼쪽에서 유저를 선택하세요
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+                        <div style={S.sectionTitle}>게임별 스테이지 최고 기록</div>
+                        {topStagesLoading && <div style={{ color: '#64748b' }}>불러오는 중...</div>}
+                        {!topStagesLoading && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
+                                {GAME_PROGRESS_CONFIGS.map(cfg => {
+                                    const entry = topStages[cfg.label];
+                                    return (
+                                        <div key={cfg.label} style={{
+                                            padding: '12px', background: '#1e293b',
+                                            borderRadius: '8px', border: '1px solid #334155',
+                                        }}>
+                                            <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '6px' }}>{cfg.label}</div>
+                                            {entry ? (
+                                                <>
+                                                    <div
+                                                        style={{ fontWeight: 700, color: '#3b82f6', cursor: 'pointer' }}
+                                                        onClick={() => loadUser(entry.uid)}
+                                                    >
+                                                        {entry.nickname}
+                                                    </div>
+                                                    <div style={{ fontSize: '12px', color: '#e2e8f0', marginTop: '2px' }}>
+                                                        스테이지 {entry.stage}
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div style={{ color: '#334155', fontSize: '12px' }}>기록 없음</div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                        <div style={{ marginTop: '24px', color: '#334155' }}>
+                            ← 왼쪽에서 유저를 검색해 선택하세요
+                        </div>
                     </div>
                 )}
             </div>
