@@ -24131,5 +24131,578 @@
         ]
       }
     ]
+  },
+  {
+    "id": 221,
+    "maxMoves": 114,
+    "slots": 4,
+    "categories": [
+      {
+        "id": "color_palette",
+        "name": "Palette",
+        "target": 5,
+        "words": [
+          "Squeezing Paint",
+          "Color Mixing",
+          "Knife Blending",
+          "Watercolor Brush",
+          "Wood Panel Shape"
+        ]
+      },
+      {
+        "id": "korean_set_meal",
+        "name": "Set Meal",
+        "target": 6,
+        "words": [
+          "Grilled Mackerel",
+          "Stone Pot",
+          "Extra Rice",
+          "Roasted Seaweed",
+          "Grandma's Taste",
+          "Daily Side Dishes"
+        ]
+      },
+      {
+        "id": "germany_country",
+        "name": "Germany",
+        "target": 5,
+        "words": [
+          "Brandenburg Gate",
+          "Beer Festival",
+          "Grilled Sausage",
+          "Autobahn",
+          "Berlin Wall"
+        ]
+      },
+      {
+        "id": "ott_service",
+        "name": "OTT",
+        "target": 5,
+        "words": [
+          "Streaming",
+          "Account Sharing",
+          "Netflix",
+          "Watcha",
+          "Disney Plus"
+        ]
+      },
+      {
+        "id": "cost_effectiveness",
+        "name": "Value for Money",
+        "target": 4,
+        "words": [
+          "Refillable",
+          "Dollar Store",
+          "Ultra Low Price Event",
+          "High Volume Low Margin"
+        ]
+      },
+      {
+        "id": "behind_story",
+        "name": "Behind the Scenes",
+        "target": 5,
+        "words": [
+          "Unreleased Cut",
+          "Making Film",
+          "Extra Recording",
+          "Deleted Interview",
+          "Backstage Story"
+        ]
+      },
+      {
+        "id": "pass_ticket",
+        "name": "Pass",
+        "target": 5,
+        "words": [
+          "Membership Pass",
+          "Free Pass",
+          "Entry Permit",
+          "Season Ticket",
+          "Barcode Scan"
+        ]
+      },
+      {
+        "id": "special_lecture",
+        "name": "Special Lecture",
+        "target": 6,
+        "words": [
+          "Star Instructor",
+          "First-Come Registration",
+          "Summary Textbook",
+          "One-Day Class",
+          "Q&A Time",
+          "Course Review"
+        ]
+      },
+      {
+        "id": "online_chatting",
+        "name": "Chatting",
+        "target": 5,
+        "words": [
+          "Sending Emoji",
+          "Typing Sound",
+          "Joining Open Chat",
+          "Read Receipt",
+          "Chat History"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 222,
+    "maxMoves": 96,
+    "slots": 4,
+    "categories": [
+      {
+        "id": "frozen_kingdom",
+        "name": "Frozen",
+        "target": 6,
+        "words": [
+          "Elsa",
+          "Anna",
+          "Olaf",
+          "Arendelle Palace",
+          "Ice Magic",
+          "Building a Snowman"
+        ]
+      },
+      {
+        "id": "manufacturing_production",
+        "name": "Production",
+        "target": 5,
+        "words": [
+          "Blueprint",
+          "Prototype Test",
+          "Manufacturing Process",
+          "Assembly Line",
+          "Quality Inspection"
+        ]
+      },
+      {
+        "id": "evening_sunset",
+        "name": "Sunset",
+        "target": 5,
+        "words": [
+          "Red Glow",
+          "Beyond the Horizon",
+          "Shadow",
+          "Twilight",
+          "Painting the Sky"
+        ]
+      },
+      {
+        "id": "shelter_rest",
+        "name": "Shelter",
+        "target": 4,
+        "words": [
+          "Shaded Bench",
+          "Field Hut",
+          "Folding Chair",
+          "Pavilion"
+        ]
+      },
+      {
+        "id": "sacred_oath",
+        "name": "Oath",
+        "target": 5,
+        "words": [
+          "Writing in Blood",
+          "Reading the Vow",
+          "Ring Exchange",
+          "Lifelong Promise",
+          "Candle Ceremony"
+        ]
+      },
+      {
+        "id": "child_adoption",
+        "name": "Adoption",
+        "target": 6,
+        "words": [
+          "Foster Care",
+          "Birth Record",
+          "Welcoming New Family",
+          "Orphanage Visit",
+          "Legal Process",
+          "Giving Up Custody"
+        ]
+      },
+      {
+        "id": "vehicle_engine",
+        "name": "Engine",
+        "target": 6,
+        "words": [
+          "Piston Movement",
+          "Cylinder Block",
+          "Spark Plug",
+          "Oil Cap",
+          "Horsepower Measurement",
+          "Exhaust Valve"
+        ]
+      },
+      {
+        "id": "waterfall_cascade",
+        "name": "Waterfall",
+        "target": 6,
+        "words": [
+          "Cliff Drop",
+          "Misty Spray",
+          "Valley Water Sound",
+          "Swirling Section",
+          "Vertical Descent",
+          "Suspension Bridge View"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 223,
+    "maxMoves": 98,
+    "slots": 4,
+    "categories": [
+      {
+        "id": "tall_stature",
+        "name": "Tall Stature",
+        "target": 5,
+        "words": [
+          "Basketball Player",
+          "Giant Build",
+          "Hitting Head on Doorframe",
+          "High Eye Level",
+          "Long Leg Fit"
+        ]
+      },
+      {
+        "id": "jeering_boo",
+        "name": "Jeering",
+        "target": 5,
+        "words": [
+          "Crowd Shouting",
+          "Thumbs Down",
+          "Whistle Sound",
+          "Accusing Glare",
+          "Megaphone Noise"
+        ]
+      },
+      {
+        "id": "river_fishing",
+        "name": "Fishing",
+        "target": 4,
+        "words": [
+          "Bobber Adjustment",
+          "Bait Dough",
+          "Setting Up Rod Stand",
+          "Checking Live Well"
+        ]
+      },
+      {
+        "id": "sky_clouds",
+        "name": "Clouds",
+        "target": 5,
+        "words": [
+          "Fluffy Sheep Cloud",
+          "Rain Cloud",
+          "Thunderstorm Cloud",
+          "High Altitude",
+          "Cumulus Cloud"
+        ]
+      },
+      {
+        "id": "big_fish_species",
+        "name": "Large Fish",
+        "target": 6,
+        "words": [
+          "Grouper",
+          "Tuna",
+          "Marlin",
+          "Whale Shark",
+          "Deep Sea Species",
+          "Giant Fin"
+        ]
+      },
+      {
+        "id": "item_collection",
+        "name": "Collection",
+        "target": 5,
+        "words": [
+          "Limited Figure",
+          "Display Cabinet",
+          "Rare Coin",
+          "Completing the Series",
+          "Commemorative Stamp"
+        ]
+      },
+      {
+        "id": "sns_influencer",
+        "name": "Influencer",
+        "target": 5,
+        "words": [
+          "Follower Count",
+          "Sponsorship Fee",
+          "Undisclosed Ad Controversy",
+          "Live Broadcast",
+          "Celebrity Verification"
+        ]
+      },
+      {
+        "id": "overseas_direct_buy",
+        "name": "Overseas Shopping",
+        "target": 5,
+        "words": [
+          "Personal Customs Code",
+          "Forwarding Address",
+          "Duty Free Exemption",
+          "Air Logistics",
+          "Local Shipping"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 224,
+    "maxMoves": 76,
+    "slots": 3,
+    "categories": [
+      {
+        "id": "street_vendor",
+        "name": "Street Vendor",
+        "target": 5,
+        "words": [
+          "Megaphone Noise",
+          "Cart Wheel",
+          "Stall Table",
+          "Illegal Stand",
+          "Forced Sale"
+        ]
+      },
+      {
+        "id": "morning_sunrise",
+        "name": "Sunrise",
+        "target": 4,
+        "words": [
+          "Beyond the Horizon",
+          "New Year's Day",
+          "Red Dawn",
+          "Sunrise Spot"
+        ]
+      },
+      {
+        "id": "clothing_size",
+        "name": "Size",
+        "target": 5,
+        "words": [
+          "Measuring",
+          "Tape Measure",
+          "Free Size",
+          "Oversized Fit",
+          "Label Tag"
+        ]
+      },
+      {
+        "id": "state_of_chaos",
+        "name": "Chaos",
+        "target": 5,
+        "words": [
+          "Total Mayhem",
+          "Breakdown of Order",
+          "Running in Circles",
+          "Mental Breakdown",
+          "Loss of Judgment"
+        ]
+      },
+      {
+        "id": "travel_bag",
+        "name": "Bag",
+        "target": 5,
+        "words": [
+          "Zipper Lock",
+          "Adjustable Strap",
+          "Storage Space",
+          "Leather Material",
+          "Name Tag"
+        ]
+      },
+      {
+        "id": "cozy_ambience",
+        "name": "Coziness",
+        "target": 4,
+        "words": [
+          "Soft Lighting",
+          "Rocking Chair",
+          "Warm Interior",
+          "Fireplace Warmth"
+        ]
+      },
+      {
+        "id": "domestic_pig",
+        "name": "Pig",
+        "target": 5,
+        "words": [
+          "Oink Oink",
+          "Pigsty",
+          "Lottery Win Dream",
+          "Feeding",
+          "Curly Tail"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 225,
+    "maxMoves": 165,
+    "slots": 5,
+    "categories": [
+      {
+        "id": "rock_music",
+        "name": "Rock",
+        "target": 6,
+        "words": [
+          "Electric Guitar",
+          "Drumstick",
+          "Headbanging",
+          "Leather Jacket",
+          "Base Camp",
+          "Rock Festival"
+        ]
+      },
+      {
+        "id": "small_village",
+        "name": "Village",
+        "target": 5,
+        "words": [
+          "Signpost",
+          "Village Hall",
+          "Alleyway",
+          "Guardian Tree",
+          "Neighborhood Meeting"
+        ]
+      },
+      {
+        "id": "quiet_tranquility",
+        "name": "Tranquility",
+        "target": 5,
+        "words": [
+          "Birdsong",
+          "Slow Steps",
+          "Countryside Scenery",
+          "Walk",
+          "Stillness"
+        ]
+      },
+      {
+        "id": "traditional_costumes",
+        "name": "Traditional Dress",
+        "target": 7,
+        "words": [
+          "Hanbok",
+          "Kimono",
+          "Qipao",
+          "Ao Dai",
+          "Sari",
+          "Kilt",
+          "Dirndl"
+        ]
+      },
+      {
+        "id": "treasure_hunt",
+        "name": "Treasure Hunt",
+        "target": 6,
+        "words": [
+          "Old Map",
+          "Compass Needle",
+          "Hidden Chest",
+          "Hint Note",
+          "Adventurer",
+          "Pile of Gold Coins"
+        ]
+      },
+      {
+        "id": "language_translation",
+        "name": "Translation",
+        "target": 6,
+        "words": [
+          "Dictionary Search",
+          "Free vs Mistranslation",
+          "Simultaneous Interpreter",
+          "Subtitle Making",
+          "Language Barrier",
+          "Source Text Comparison"
+        ]
+      },
+      {
+        "id": "scenic_view",
+        "name": "View",
+        "target": 5,
+        "words": [
+          "Telescope Lens",
+          "Rooftop Cafe",
+          "Checkout View",
+          "Horizon",
+          "Observation Tower"
+        ]
+      },
+      {
+        "id": "movie_poster",
+        "name": "Poster",
+        "target": 5,
+        "words": [
+          "Tagline",
+          "Wall Posting",
+          "Main Title",
+          "Cast Names",
+          "Design Draft"
+        ]
+      },
+      {
+        "id": "lunch_time",
+        "name": "Lunch",
+        "target": 6,
+        "words": [
+          "Cafeteria",
+          "Choosing a Menu",
+          "After-Meal Coffee",
+          "Food Coma",
+          "Lunchbox",
+          "Break Time"
+        ]
+      },
+      {
+        "id": "verification_process",
+        "name": "Verification",
+        "target": 6,
+        "words": [
+          "Fact Checking",
+          "Evidence",
+          "Authenticity",
+          "Expert Consultation",
+          "Cross Verification",
+          "Experiment Result"
+        ]
+      },
+      {
+        "id": "national_president",
+        "name": "President",
+        "target": 6,
+        "words": [
+          "Presidential Office",
+          "State Address",
+          "End of Term",
+          "First Lady",
+          "Summit Meeting",
+          "Security Escort"
+        ]
+      },
+      {
+        "id": "coming_soon",
+        "name": "Coming Soon",
+        "target": 5,
+        "words": [
+          "Trailer Video",
+          "Teaser Image",
+          "Release Date",
+          "Writing Anticipation Reviews",
+          "Preview Invitation"
+        ]
+      }
+    ]
   }
 ]
