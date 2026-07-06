@@ -15,6 +15,7 @@ import QueensGame from './features/queens/components/QueensGame';
 import QueensModeSelect from './features/queens/components/QueensModeSelect';
 import ArrowPuzzleGame from './features/arrow-puzzle/components/ArrowPuzzleGame';
 import ArrowLevelEditor from './features/arrow-puzzle/components/ArrowLevelEditor';
+import SnakeEscapeGame from './features/snake-escape/components/SnakeEscapeGame';
 import DiffTool from './features/diff-tool/DiffTool';
 import CrosswordGame from './features/crossword/components/CrosswordGame';
 
@@ -119,6 +120,7 @@ const AppContent: React.FC = () => {
           <Route path="/queens" element={<QueensModeSelect />} />
           <Route path="/queens/play" element={<QueensGame />} />
           <Route path="/arrow-puzzle" element={<ArrowPuzzleGame />} />
+          <Route path="/snake-escape" element={<SnakeEscapeGame />} />
           <Route path="/crossword" element={<CrosswordGame />} />
           {window.location.hostname === 'localhost' && (
             <Route path="/arrow-level-editor" element={<ArrowLevelEditor />} />

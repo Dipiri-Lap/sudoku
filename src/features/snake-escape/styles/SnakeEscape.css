@@ -1,0 +1,230 @@
+.se-page {
+  min-height: 100dvh;
+  background: #cfe0ec;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #1b2a48;
+}
+
+.se-header {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+}
+
+.se-icon-btn {
+  background: #ffffff;
+  border: none;
+  border-radius: 12px;
+  color: #3a5a8a;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+  transition: transform 0.1s;
+}
+.se-icon-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.se-title-badge {
+  font-size: 1rem;
+  font-weight: 800;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 0.45rem 1.3rem;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+}
+
+.se-board-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  padding: 1rem;
+}
+
+.se-svg {
+  width: min(calc(100vw - 2rem), 420px);
+  height: auto;
+  touch-action: none;
+}
+
+.se-cell-bg {
+  fill: #a9bfd1;
+}
+
+.se-piece {
+  cursor: grab;
+}
+.se-piece:active {
+  cursor: grabbing;
+}
+
+/* ── Level select screen ── */
+.se-select-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem 1.5rem;
+}
+
+.se-select-screen h1 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.se-level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  width: 100%;
+  max-width: 360px;
+}
+
+.se-level-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.1rem 0.9rem;
+  border-radius: 16px;
+  border: none;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s;
+  text-align: center;
+}
+.se-level-card:hover {
+  transform: translateY(-3px);
+}
+.se-level-card:active {
+  transform: translateY(1px);
+}
+
+.se-level-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #3a5a8a;
+}
+
+.se-level-meta {
+  font-size: 0.72rem;
+  color: rgba(27, 42, 72, 0.55);
+  font-weight: 600;
+}
+
+/* ── Clear overlay ── */
+.se-clear-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  border-radius: 16px;
+  animation: seFadeIn 0.3s ease;
+}
+
+@keyframes seFadeIn {
+  from { opacity: 0; transform: scale(0.93); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.se-clear-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 2.5rem 2.2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.se-clear-emoji {
+  font-size: 3.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.se-clear-card h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+  color: #1b2a48;
+}
+
+.se-clear-card p {
+  color: rgba(27, 42, 72, 0.55);
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.se-clear-btns {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.se-btn-primary {
+  background: linear-gradient(135deg, #29b6f6, #4fc3f7);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.8rem 2rem;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.se-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(41, 182, 246, 0.45);
+}
+.se-btn-primary:active {
+  transform: translateY(0);
+}
+
+.se-btn-secondary {
+  background: #eef3f8;
+  border: none;
+  border-radius: 14px;
+  color: #1b2a48;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.se-btn-secondary:hover {
+  background: #dde6ef;
+}
+
+.se-btn-text {
+  background: none;
+  border: none;
+  color: rgba(27, 42, 72, 0.45);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  transition: color 0.15s;
+  margin-top: 0.2rem;
+}
+.se-btn-text:hover {
+  color: rgba(27, 42, 72, 0.8);
+}
