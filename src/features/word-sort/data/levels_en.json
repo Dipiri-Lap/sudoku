@@ -24704,5 +24704,523 @@
         ]
       }
     ]
+  },
+  {
+    "id": 226,
+    "maxMoves": 96,
+    "slots": 4,
+    "categories": [
+      {
+        "id": "official_association",
+        "name": "Association",
+        "target": 5,
+        "words": [
+          "Membership Dues",
+          "Bylaws",
+          "Board Chairman",
+          "Official Approval",
+          "Founding"
+        ]
+      },
+      {
+        "id": "flower_arrangement",
+        "name": "Flower Arranging",
+        "target": 6,
+        "words": [
+          "Flower Frog",
+          "Floral Foam",
+          "Garden Shears",
+          "Glass Vase",
+          "Stem Trimming",
+          "Florist"
+        ]
+      },
+      {
+        "id": "championship_title",
+        "name": "Title",
+        "target": 5,
+        "words": [
+          "Champion Belt",
+          "Successful Defense",
+          "Challenger List",
+          "Ascension to the Throne",
+          "All-Time Holder"
+        ]
+      },
+      {
+        "id": "sweet_watermelon",
+        "name": "Watermelon",
+        "target": 5,
+        "words": [
+          "Black Stripes",
+          "Red Flesh",
+          "Fruit Punch Ice",
+          "Vine Cultivation",
+          "Triangular Slice"
+        ]
+      },
+      {
+        "id": "skinny_bony",
+        "name": "Gauntness",
+        "target": 5,
+        "words": [
+          "Thorn Bird",
+          "Winter Deciduous Tree",
+          "Rib Outline",
+          "Skin and Bones",
+          "Withered Branch"
+        ]
+      },
+      {
+        "id": "tennis_match",
+        "name": "Tennis",
+        "target": 6,
+        "words": [
+          "Clay Court",
+          "Racket String",
+          "Service Ace",
+          "Net Touch",
+          "Ball Boy",
+          "Grand Slam"
+        ]
+      },
+      {
+        "id": "tv_talk_show",
+        "name": "Talk Show",
+        "target": 5,
+        "words": [
+          "Studio Audience",
+          "Guest Booking",
+          "Opening Remarks",
+          "Cue Card",
+          "Unexpected Question"
+        ]
+      },
+      {
+        "id": "harry_potter_world",
+        "name": "Harry Potter",
+        "target": 5,
+        "words": [
+          "Hogwarts Castle",
+          "Gryffindor",
+          "Wand Shop",
+          "Butterbeer",
+          "Platform 9¾"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 227,
+    "maxMoves": 88,
+    "slots": 4,
+    "categories": [
+      {
+        "id": "daily_snack",
+        "name": "Snacks",
+        "target": 5,
+        "words": [
+          "Potato Chips",
+          "Chocolate Bar",
+          "Jelly Pudding",
+          "Tteokbokki",
+          "Roasted Sweet Potato"
+        ]
+      },
+      {
+        "id": "islam_culture",
+        "name": "Islam",
+        "target": 6,
+        "words": [
+          "Mosque Sanctuary",
+          "Hijab",
+          "Quran Scripture",
+          "Ramadan",
+          "Halal Food",
+          "Mecca"
+        ]
+      },
+      {
+        "id": "human_life",
+        "name": "Life",
+        "target": 4,
+        "words": [
+          "Heartbeat",
+          "Ventilator",
+          "Crossroads of Life and Death",
+          "Last Will"
+        ]
+      },
+      {
+        "id": "liberal_arts",
+        "name": "Liberal Arts",
+        "target": 5,
+        "words": [
+          "Classical Music Appreciation",
+          "Humanities Book",
+          "Museum Docent",
+          "Table Manners",
+          "Philosophy Lecture"
+        ]
+      },
+      {
+        "id": "screen_touch",
+        "name": "Touch",
+        "target": 5,
+        "words": [
+          "Smartphone Screen",
+          "Fingerprint Scanner",
+          "Double Click",
+          "Touchpad",
+          "Pressure Sensor"
+        ]
+      },
+      {
+        "id": "rescue_operation",
+        "name": "Rescue",
+        "target": 6,
+        "words": [
+          "Life Jacket",
+          "Helicopter Rappel",
+          "Fire Axe",
+          "Air Mattress",
+          "Rescue Dog Search",
+          "SOS Radio Call"
+        ]
+      },
+      {
+        "id": "sudden_change",
+        "name": "Sudden Change",
+        "target": 4,
+        "words": [
+          "Attitude Shift",
+          "Turning Serious",
+          "Surprise Attack",
+          "Change of Expression"
+        ]
+      },
+      {
+        "id": "reptile_snake",
+        "name": "Snake",
+        "target": 5,
+        "words": [
+          "Venom Fang Spray",
+          "Shedding Skin",
+          "Forked Tongue",
+          "Scale Pattern",
+          "Coiling Up"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 228,
+    "maxMoves": 78,
+    "slots": 3,
+    "categories": [
+      {
+        "id": "italy_country",
+        "name": "Italy",
+        "target": 5,
+        "words": [
+          "Colosseum",
+          "Gondola",
+          "Leaning Tower of Pisa",
+          "Vatican",
+          "Venice"
+        ]
+      },
+      {
+        "id": "noodle_types",
+        "name": "Noodle Dishes",
+        "target": 6,
+        "words": [
+          "Spaghetti",
+          "Hamhung Cold Noodles",
+          "Tonkotsu Ramen",
+          "Clam Knife-Cut Noodles",
+          "Jajangmyeon",
+          "Vietnamese Pho"
+        ]
+      },
+      {
+        "id": "wilderness_desert",
+        "name": "Wilderness",
+        "target": 4,
+        "words": [
+          "Sandstorm",
+          "Parched Earth",
+          "Horizon",
+          "Rugged Wasteland"
+        ]
+      },
+      {
+        "id": "buddha_buddhism",
+        "name": "Buddha",
+        "target": 5,
+        "words": [
+          "Shakyamuni",
+          "Bodhi Tree",
+          "State of Enlightenment",
+          "Compassion",
+          "First Turning of the Wheel"
+        ]
+      },
+      {
+        "id": "christmas_holiday",
+        "name": "Christmas",
+        "target": 5,
+        "words": [
+          "Santa Claus",
+          "Rudolph's Sleigh",
+          "Carol Song",
+          "Tree Decoration",
+          "Gift Box"
+        ]
+      },
+      {
+        "id": "surface_texture",
+        "name": "Texture",
+        "target": 4,
+        "words": [
+          "Smoothness",
+          "Roughness",
+          "Softness",
+          "Bumpiness"
+        ]
+      },
+      {
+        "id": "food_spices",
+        "name": "Spices",
+        "target": 4,
+        "words": [
+          "Whole Peppercorn",
+          "Cinnamon",
+          "Rosemary",
+          "Cilantro"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 229,
+    "maxMoves": 90,
+    "slots": 4,
+    "categories": [
+      {
+        "id": "toiletries_wash",
+        "name": "Toiletries",
+        "target": 5,
+        "words": [
+          "Toothbrush Bristles",
+          "Soap Dish",
+          "Toothpaste Tube",
+          "Cleansing Foam",
+          "Shower Towel"
+        ]
+      },
+      {
+        "id": "jupiter_planet",
+        "name": "Jupiter",
+        "target": 6,
+        "words": [
+          "Great Red Spot",
+          "Gas Giant",
+          "Galilean Moons",
+          "Strong Magnetic Field",
+          "Striped Surface",
+          "Largest in Solar System"
+        ]
+      },
+      {
+        "id": "sweet_honey",
+        "name": "Honey",
+        "target": 5,
+        "words": [
+          "Honeycomb",
+          "Beekeeper",
+          "Royal Jelly",
+          "Propolis",
+          "Sweetness"
+        ]
+      },
+      {
+        "id": "crustacean_crab",
+        "name": "Crab",
+        "target": 5,
+        "words": [
+          "Pincer Claws",
+          "Shell Carapace",
+          "Sideways Walk",
+          "Crab Stew",
+          "Chitosan"
+        ]
+      },
+      {
+        "id": "soup_types",
+        "name": "Soup",
+        "target": 6,
+        "words": [
+          "Cream of Mushroom",
+          "Bisque",
+          "Corn Soup",
+          "Beef and Broccoli",
+          "Clam Chowder",
+          "French Onion"
+        ]
+      },
+      {
+        "id": "candle_light",
+        "name": "Candlelight",
+        "target": 5,
+        "words": [
+          "Candle Wick",
+          "Dripping Wax",
+          "Birthday Party",
+          "Prayer Ritual",
+          "Gentle Warmth"
+        ]
+      },
+      {
+        "id": "stay_calm",
+        "name": "Composure",
+        "target": 4,
+        "words": [
+          "Deep Breathing",
+          "Maintaining Composure",
+          "Poker Face",
+          "Mind Control"
+        ]
+      },
+      {
+        "id": "rabbit_animal",
+        "name": "Rabbit",
+        "target": 6,
+        "words": [
+          "Carrot Piece",
+          "Long Ears",
+          "Hopping Jump",
+          "Moon Rabbit's Mortar",
+          "Race with the Tortoise",
+          "Cotton Tail"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 230,
+    "maxMoves": 112,
+    "slots": 4,
+    "categories": [
+      {
+        "id": "human_personality",
+        "name": "Personality",
+        "target": 5,
+        "words": [
+          "Outgoing",
+          "Timidness",
+          "Prickly",
+          "Easygoing",
+          "Warmhearted"
+        ]
+      },
+      {
+        "id": "glance_peek",
+        "name": "Glance",
+        "target": 4,
+        "words": [
+          "Reading the Room",
+          "Side-Eye",
+          "Sneaky Glance",
+          "Peeking"
+        ]
+      },
+      {
+        "id": "shabby_appearance",
+        "name": "Shabbiness",
+        "target": 5,
+        "words": [
+          "Worn-Out Clothes",
+          "Slumped Shoulders",
+          "Sighing",
+          "Empty Wallet",
+          "Shabby Appearance"
+        ]
+      },
+      {
+        "id": "game_rule",
+        "name": "Rule",
+        "target": 5,
+        "words": [
+          "Foul Loss",
+          "Fair Play",
+          "Rulebook",
+          "Time Limit",
+          "Referee's Call"
+        ]
+      },
+      {
+        "id": "masterpiece_dish",
+        "name": "Masterpiece",
+        "target": 5,
+        "words": [
+          "Top-Grade Dish",
+          "Thumbs Up",
+          "Amazing Taste",
+          "Secret Seasoning",
+          "Signature Menu"
+        ]
+      },
+      {
+        "id": "shaved_ice_dessert",
+        "name": "Shaved Ice",
+        "target": 6,
+        "words": [
+          "Sweet Red Bean",
+          "Drizzled Condensed Milk",
+          "Rice Cake Topping",
+          "Finely Shaved Ice",
+          "Brain Freeze",
+          "Topping"
+        ]
+      },
+      {
+        "id": "extra_bonus",
+        "name": "Bonus",
+        "target": 5,
+        "words": [
+          "Extra Allowance",
+          "Performance Pay",
+          "Benefit",
+          "Freebie",
+          "Special Allowance"
+        ]
+      },
+      {
+        "id": "mongolia_travel",
+        "name": "Mongolia",
+        "target": 6,
+        "words": [
+          "Ulaanbaatar",
+          "Ger Tent",
+          "Vast Steppe",
+          "Horseback Riding Experience",
+          "Milky Way Night Sky",
+          "Nomadic People"
+        ]
+      },
+      {
+        "id": "exclamation_word",
+        "name": "Exclamation",
+        "target": 5,
+        "words": [
+          "Wow",
+          "Oh My",
+          "Good Heavens",
+          "Aha",
+          "Bravo"
+        ]
+      }
+    ]
   }
 ]

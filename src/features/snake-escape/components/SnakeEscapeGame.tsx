@@ -8,7 +8,7 @@ const CELL = 80;
 const PADDING = 40;
 const STROKE_W = 34;
 const BLOCKED_OFFSET = 0.85; // how far a blocked piece is allowed to "press" toward the obstacle
-const VISUAL_EASE = 0.12; // how quickly the rendered body catches up to its target each frame
+const VISUAL_EASE = 0.05; // how quickly the rendered body catches up to its target each frame
 const SNAP_THRESHOLD = 0.5; // just past the cell boundary is enough to commit - no extra resistance mid-drag
 
 // Like Math.round, but the flip point is `threshold` (0.5-1) instead of 0.5 -
