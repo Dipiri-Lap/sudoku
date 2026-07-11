@@ -10,6 +10,11 @@ interface Spot {
   y: number;
 }
 
+function stripExt(filename: string): string {
+  const idx = filename.lastIndexOf('.');
+  return idx > 0 ? filename.slice(0, idx) : filename;
+}
+
 function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
     const img = new Image();
@@ -141,7 +146,7 @@ export const DiffTool: React.FC = () => {
   const [threshold,    setThreshold]    = useState(0.1);
   const [minPx,        setMinPx]        = useState(30);
   const [mergeRadius,  setMergeRadius]  = useState(80);
-  const [imageID,      setImageID]      = useState(1);
+  const [imageID,      setImageID]      = useState('');
 
   const [step,      setStep]      = useState<'upload' | 'review'>('upload');
   const [analyzing, setAnalyzing] = useState(false);
@@ -152,7 +157,7 @@ export const DiffTool: React.FC = () => {
     input.onchange = () => {
       const f = input.files?.[0]; if (!f) return;
       const url = URL.createObjectURL(f);
-      if (idx === 0) { setFileA(f); setUrlA(url); }
+      if (idx === 0) { setFileA(f); setUrlA(url); setImageID(stripExt(f.name)); }
       else           { setFileB(f); setUrlB(url); }
     };
     input.click();
@@ -162,7 +167,7 @@ export const DiffTool: React.FC = () => {
     e.preventDefault();
     const f = e.dataTransfer.files[0]; if (!f) return;
     const url = URL.createObjectURL(f);
-    if (idx === 0) { setFileA(f); setUrlA(url); }
+    if (idx === 0) { setFileA(f); setUrlA(url); setImageID(stripExt(f.name)); }
     else           { setFileB(f); setUrlB(url); }
   }, []);
 
@@ -217,14 +222,15 @@ export const DiffTool: React.FC = () => {
   };
 
   const exportImages = () => {
-    const id = String(imageID);
+    const id = imageID.trim() || '1';
     if (fileA) saveAsWebP(fileA, `${id}.webp`);
     if (fileB) saveAsWebP(fileB, `${id}_1.webp`);
   };
 
   const exportJSON = () => {
+    const id = imageID.trim() || '1';
     const json = JSON.stringify({
-      imageID,
+      imageID: /^\d+$/.test(id) ? Number(id) : id,
       differences: spots.map(s => ({
         topPosition:    { x: s.x, y: s.y },
         bottomPosition: { x: s.x, y: s.y },
@@ -235,7 +241,7 @@ export const DiffTool: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${imageID}.json`;
+    a.download = `${id}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -335,13 +341,24 @@ export const DiffTool: React.FC = () => {
           ))}
         </div>
 
-        <button
-          disabled={!fileA || !fileB || analyzing}
-          onClick={analyze}
-          style={{ ...BTN, background: fileA && fileB ? '#4a90e2' : '#2a2a2a', color: '#fff', padding: '0.75rem 2rem', fontSize: '1rem', opacity: analyzing ? 0.7 : 1 }}
-        >
-          {analyzing ? '분석 중…' : '차이점 감지'}
-        </button>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '1.5rem', width: 'fit-content' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Image ID</span>
+          <input
+            type="text" value={imageID} placeholder="이미지 업로드 시 자동 입력"
+            onChange={e => setImageID(e.target.value)}
+            style={{ ...NUM_INPUT, width: '200px' }}
+          />
+        </label>
+
+        <div>
+          <button
+            disabled={!fileA || !fileB || analyzing}
+            onClick={analyze}
+            style={{ ...BTN, background: fileA && fileB ? '#4a90e2' : '#2a2a2a', color: '#fff', padding: '0.75rem 2rem', fontSize: '1rem', opacity: analyzing ? 0.7 : 1 }}
+          >
+            {analyzing ? '분석 중…' : '차이점 감지'}
+          </button>
+        </div>
       </div>
     );
   }
@@ -359,8 +376,8 @@ export const DiffTool: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: '#aaa' }}>
             Image ID:
-            <input type="number" value={imageID} min={1} style={{ ...NUM_INPUT, width: '60px' }}
-              onChange={e => setImageID(parseInt(e.target.value) || 1)} />
+            <input type="text" value={imageID} style={{ ...NUM_INPUT, width: '80px' }}
+              onChange={e => setImageID(e.target.value)} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: '#aaa' }}>
             ColSize:
