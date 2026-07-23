@@ -19,6 +19,7 @@ import SnakeEscapeGame from './features/snake-escape/components/SnakeEscapeGame'
 import WormEscapeGame from './features/worm-escape/components/WormEscapeGame';
 import DiffTool from './features/diff-tool/DiffTool';
 import CrosswordGame from './features/crossword/components/CrosswordGame';
+import CrossMathGame from './features/cross-math/components/CrossMathGame';
 
 import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
@@ -124,6 +125,7 @@ const AppContent: React.FC = () => {
           <Route path="/snake-escape" element={<SnakeEscapeGame />} />
           <Route path="/worm-escape" element={<WormEscapeGame />} />
           <Route path="/crossword" element={<CrosswordGame />} />
+          <Route path="/cross-math" element={<CrossMathGame />} />
           {window.location.hostname === 'localhost' && (
             <Route path="/arrow-level-editor" element={<ArrowLevelEditor />} />
           )}
