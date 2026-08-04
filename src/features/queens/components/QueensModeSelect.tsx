@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
+import levels from '../data/levels.json';
+
+const MAX_LEVEL = levels.length - 1; // id 0 is the tutorial, not a playable stage
 
 // ── Mini grid ─────────────────────────────────────────────────────────────────
 
@@ -139,7 +142,7 @@ const QueensModeSelect: React.FC = () => {
             onMouseLeave={hoverOff}
           />
           <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
-            {!isSynced ? '로딩 중...' : queensProgress > 0 ? `Level ${queensProgress + 1} 이어하기` : 'Level 1 시작하기'}
+            {!isSynced ? '로딩 중...' : queensProgress > 0 ? `Level ${queensProgress + 1}/${MAX_LEVEL} 이어하기` : `Level 1/${MAX_LEVEL} 시작하기`}
           </span>
         </div>
       </div>

@@ -5,6 +5,12 @@ import { ChevronLeft } from 'lucide-react';
 import { useGame } from '../context/SudokuContext';
 import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 import { logEvent } from '../../../firebase';
+import stagesData from '../../../data/stages.json';
+import bigStagesData from '../../../data/big-stages.json';
+
+const MAX_BEGINNER_LEVEL = 5;
+const MAX_STAGE_LEVEL = stagesData.length;
+const MAX_BIG_LEVEL = bigStagesData.length;
 
 const btnStyle = (delay: string): React.CSSProperties => ({
     '--delay': delay,
@@ -120,7 +126,7 @@ const SudokuModeSelect: React.FC = () => {
                         onMouseLeave={hoverOff}
                     />
                     <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
-                        {beginnerAllCleared ? '처음부터 하기' : beginnerProgress > 0 ? `Level ${beginnerProgress + 1} 시작하기` : 'Level 1 시작하기'}
+                        {beginnerAllCleared ? '처음부터 하기' : beginnerProgress > 0 ? `Level ${beginnerProgress + 1}/${MAX_BEGINNER_LEVEL} 시작하기` : `Level 1/${MAX_BEGINNER_LEVEL} 시작하기`}
                     </span>
                 </div>
 
@@ -140,7 +146,7 @@ const SudokuModeSelect: React.FC = () => {
                         onMouseLeave={hoverOff}
                     />
                     <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
-                        {stageProgress > 1 ? `Level ${stageProgress} 이어하기` : 'Level 1 시작하기'}
+                        {stageProgress > 1 ? `Level ${stageProgress}/${MAX_STAGE_LEVEL} 이어하기` : `Level 1/${MAX_STAGE_LEVEL} 시작하기`}
                     </span>
                 </div>
 
@@ -161,7 +167,7 @@ const SudokuModeSelect: React.FC = () => {
                         onMouseLeave={hoverOff}
                     />
                     <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
-                        {bigProgress > 1 ? `Level ${bigProgress} 이어하기` : 'Level 1 시작하기'}
+                        {bigProgress > 1 ? `Level ${bigProgress}/${MAX_BIG_LEVEL} 이어하기` : `Level 1/${MAX_BIG_LEVEL} 시작하기`}
                     </span>
                 </div>
 

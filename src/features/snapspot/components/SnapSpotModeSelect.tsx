@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
 
 const IS_DEV = import.meta.env.DEV;
+const MAX_STAGE = 536;
 
 // ── Mini visuals ───────────────────────────────────────────────────────────────
 
@@ -205,7 +206,7 @@ const SnapSpotModeSelect: React.FC = () => {
             onMouseLeave={hoverOff}
           />
           <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
-            {!isSynced ? '로딩 중...' : snapSpotProgress > 0 ? `Stage ${snapSpotProgress + 1} 이어하기` : 'Stage 1 시작하기'}
+            {!isSynced ? '로딩 중...' : snapSpotProgress > 0 ? `Stage ${snapSpotProgress + 1}/${MAX_STAGE} 이어하기` : `Stage 1/${MAX_STAGE} 시작하기`}
           </span>
         </div>
 
