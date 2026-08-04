@@ -176,7 +176,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             return {
                 ...initialState,
                 level: level.id,
-                stepsLeft: hardMode ? Math.round(baseSteps * 0.6) : baseSteps,
+                stepsLeft: baseSteps,
                 stacks: newStacks,
                 deck: newDeck,
                 categories: categories,
