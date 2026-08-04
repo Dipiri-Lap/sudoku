@@ -32,15 +32,49 @@ function getScaledImageData(img: HTMLImageElement): ImageData {
   return ctx.getImageData(0, 0, IMG_W, IMG_H);
 }
 
-/** Direct pixel comparison — returns binary mask (1 = different, 0 = same) */
+const MATCH_RADIUS = 2; // px — search window for nearest-color match, tolerates sub-pixel misalignment
+
+/**
+ * Windowed nearest-color diff — for each pixel in `a`, looks for the closest
+ * matching color within a small neighborhood in `b` (and vice versa) instead
+ * of comparing strictly co-located pixels. A true content edit has no nearby
+ * match in either direction and still registers; a pixel that only moved by
+ * a pixel or two (resize/re-compression edge jitter) finds its match and is
+ * correctly ignored.
+ */
 function buildDiffMask(a: ImageData, b: ImageData, threshold: number): Uint8Array {
   const mask = new Uint8Array(IMG_W * IMG_H);
   const t = threshold * 255 * Math.sqrt(3); // Euclidean RGB distance cutoff
-  for (let i = 0; i < IMG_W * IMG_H; i++) {
-    const dr = a.data[i * 4]     - b.data[i * 4];
-    const dg = a.data[i * 4 + 1] - b.data[i * 4 + 1];
-    const db = a.data[i * 4 + 2] - b.data[i * 4 + 2];
-    mask[i] = Math.sqrt(dr * dr + dg * dg + db * db) > t ? 1 : 0;
+  const t2 = t * t;
+
+  const minDistSq = (src: ImageData, dst: ImageData, x: number, y: number): number => {
+    const si = (y * IMG_W + x) * 4;
+    const sr = src.data[si], sg = src.data[si + 1], sb = src.data[si + 2];
+    let best = Infinity;
+    for (let dy = -MATCH_RADIUS; dy <= MATCH_RADIUS; dy++) {
+      const ny = y + dy;
+      if (ny < 0 || ny >= IMG_H) continue;
+      for (let dx = -MATCH_RADIUS; dx <= MATCH_RADIUS; dx++) {
+        const nx = x + dx;
+        if (nx < 0 || nx >= IMG_W) continue;
+        const di = (ny * IMG_W + nx) * 4;
+        const dr = sr - dst.data[di];
+        const dg = sg - dst.data[di + 1];
+        const db = sb - dst.data[di + 2];
+        const dist = dr * dr + dg * dg + db * db;
+        if (dist < best) best = dist;
+        if (best === 0) return 0;
+      }
+    }
+    return best;
+  };
+
+  for (let y = 0; y < IMG_H; y++) {
+    for (let x = 0; x < IMG_W; x++) {
+      const i = y * IMG_W + x;
+      // Only flag as different if there's no nearby match in *either* direction.
+      mask[i] = (minDistSq(a, b, x, y) > t2 && minDistSq(b, a, x, y) > t2) ? 1 : 0;
+    }
   }
   return mask;
 }

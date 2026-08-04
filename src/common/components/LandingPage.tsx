@@ -551,6 +551,23 @@ const LandingPage: React.FC = () => {
                 )}
 
                 {window.location.hostname === 'localhost' && (
+                    <a href="/royal-match" className="game-card animate-fade-in" style={{ '--delay': '0.45s', textDecoration: 'none', color: 'inherit' } as any}>
+                        <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
+                            👑
+                        </div>
+                        <div className="game-card-content">
+                            <h3>로얄 매치</h3>
+                            <p>인접한 젬을 교환해 3개 이상 맞추는 클래식 매치-3 퍼즐</p>
+                            <div className="game-card-footer">
+                                <span className="play-now">
+                                    <Play size={16} fill="currentColor" /> 플레이하기
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                )}
+
+                {window.location.hostname === 'localhost' && (
                     <a href="/arrow-puzzle" className="game-card animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             🏹

@@ -1,0 +1,192 @@
+.royal-match-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+.royal-match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 16px;
+}
+
+.royal-match-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.royal-match-title h1 {
+  font-size: 1.4rem;
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.royal-match-icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.royal-match-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.royal-match-stats {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.royal-match-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 6px 14px;
+}
+
+.royal-match-stat .label {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+.royal-match-stat .value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fde047;
+}
+
+.royal-match-progress {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.royal-match-progress-track {
+  width: 100%;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.royal-match-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #f97316);
+  transition: width 0.3s ease;
+}
+
+.royal-match-progress-text {
+  font-size: 0.7rem;
+  color: #cbd5e1;
+  text-align: right;
+}
+
+.royal-match-board-outer {
+  width: min(92vw, 480px);
+  aspect-ratio: 1 / 1;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.royal-match-board {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.royal-match-tile {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  cursor: grab;
+  /* left/top은 그리드 좌표에 맞춰 즉시 이동하고, 실제 슬라이드는 FLIP 기법으로
+     transform에 걸리는 트랜지션이 담당한다(useLayoutEffect 참고). */
+  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.12s ease;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.royal-match-tile:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.royal-match-tile.selected {
+  background: rgba(253, 224, 71, 0.35);
+  box-shadow: 0 0 0 2px #fde047 inset;
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.royal-match-tile.invalid {
+  background: rgba(239, 68, 68, 0.35);
+  z-index: 2;
+}
+
+.royal-match-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.royal-match-overlay h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.royal-match-overlay p {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.royal-match-btn {
+  background: #fde047;
+  color: #333;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #b8860b;
+  margin-top: 8px;
+}
