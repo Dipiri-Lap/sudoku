@@ -43,6 +43,7 @@ const WordSortModeSelect: React.FC = () => {
     const { language } = state;
     const t = i18n[language];
     const levels = language === 'en' ? levelsEn : levelsKo;
+    const maxLevel = levels.length;
 
     const handlePlay = () => {
         if (!isSynced) return;
@@ -140,8 +141,8 @@ const WordSortModeSelect: React.FC = () => {
                         {!isSynced
                             ? (language === 'ko' ? '로딩 중...' : 'Loading...')
                             : wordSortProgress > 0
-                                ? `Level ${wordSortProgress + 1} ${language === 'ko' ? '이어하기' : 'Resume'}`
-                                : `Level 1 ${language === 'ko' ? '시작하기' : 'Start'}`}
+                                ? `Level ${wordSortProgress + 1}/${maxLevel} ${language === 'ko' ? '이어하기' : 'Resume'}`
+                                : `Level 1/${maxLevel} ${language === 'ko' ? '시작하기' : 'Start'}`}
                     </span>
                 </div>
 
@@ -159,8 +160,8 @@ const WordSortModeSelect: React.FC = () => {
                         {!isHardSynced
                             ? (language === 'ko' ? '로딩 중...' : 'Loading...')
                             : wordSortHardProgress > 0
-                                ? `Level ${wordSortHardProgress + 1} ${language === 'ko' ? '도전' : 'Challenge'}`
-                                : `Level 1 ${language === 'ko' ? '도전' : 'Challenge'}`}
+                                ? `Level ${wordSortHardProgress + 1}/${maxLevel} ${language === 'ko' ? '도전' : 'Challenge'}`
+                                : `Level 1/${maxLevel} ${language === 'ko' ? '도전' : 'Challenge'}`}
                     </span>
                 </div>
             </div>
