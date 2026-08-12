@@ -20,6 +20,9 @@ const assetById = (id: string) => PLACEHOLDER_ASSETS.find((a) => a.id === id);
 const GardenMap: React.FC = () => {
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(PLACEHOLDER_ASSETS[0].id);
   const [placed, setPlaced] = useState<PlacedAsset[]>([]);
+  const [coins] = useState(8500);
+  const [gems] = useState(586);
+  const [level] = useState(7);
 
   const placedAt = (row: number, col: number) =>
     placed.find((p) => p.row === row && p.col === col);
@@ -47,11 +50,15 @@ const GardenMap: React.FC = () => {
       cells.push(
         <button
           key={`${row}-${col}`}
-          className="garden-cell"
+          className={`garden-cell${asset ? ' occupied' : ''}`}
           onClick={() => handleCellClick(row, col)}
           title={asset ? `${asset.label} (클릭해서 제거)` : '클릭해서 배치'}
         >
-          {asset && <span className="garden-cell-asset">{asset.emoji}</span>}
+          {asset && (
+            <span className="garden-cell-plot">
+              <span className="garden-cell-asset">{asset.emoji}</span>
+            </span>
+          )}
         </button>
       );
     }
@@ -59,7 +66,27 @@ const GardenMap: React.FC = () => {
 
   return (
     <div className="garden-map-page">
-      <h1 className="garden-title">가든 맵 테스트</h1>
+      <div className="garden-hud">
+        <div className="garden-hud-left">
+          <span className="garden-level-badge">
+            <span className="garden-level-star">🏆</span>
+            {level}
+          </span>
+          <div className="garden-hud-bars">
+            <div className="garden-xp-bar">
+              <div className="garden-xp-fill" style={{ width: '55%' }} />
+            </div>
+            <div className="garden-resource-pill gold">
+              <span className="garden-resource-icon">🪙</span>
+              {coins.toLocaleString()}
+            </div>
+            <div className="garden-resource-pill gem">
+              <span className="garden-resource-icon">💎</span>
+              {gems.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="garden-palette">
         {PLACEHOLDER_ASSETS.map((asset) => (
@@ -77,14 +104,16 @@ const GardenMap: React.FC = () => {
         </button>
       </div>
 
-      <div
-        className="garden-grid"
-        style={{
-          gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
-          gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`,
-        }}
-      >
-        {cells}
+      <div className="garden-field-frame">
+        <div
+          className="garden-grid"
+          style={{
+            gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
+            gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`,
+          }}
+        >
+          {cells}
+        </div>
       </div>
 
       <p className="garden-hint">
