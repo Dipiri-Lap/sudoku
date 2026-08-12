@@ -58,6 +58,18 @@ const tileCenter = (row: number, col: number) => ({
 
 // 임시 플레이스홀더 에셋 (실제 아트 나오면 emoji -> 이미지로 교체)
 const PLACEHOLDER_ASSETS: GardenAssetDef[] = [
+  { id: 'grass', label: '잔디', image: '/garden-assets/grass-tile.png', kind: 'ground' },
+  { id: 'weed1', label: '잡초', image: '/garden-assets/weed1.png' },
+  { id: 'weed2', label: '잡초(작은)', image: '/garden-assets/weed2.png' },
+  { id: 'daisy1', label: '흰꽃', image: '/garden-assets/daisy1.png' },
+  { id: 'daisy2', label: '흰꽃(2)', image: '/garden-assets/daisy2.png' },
+  { id: 'bush1', label: '덤불꽃', image: '/garden-assets/bush1.png' },
+  { id: 'bush2', label: '덤불꽃(2)', image: '/garden-assets/bush2.png' },
+  { id: 'mushroom', label: '버섯', image: '/garden-assets/mushroom.png' },
+  { id: 'rock', label: '돌', image: '/garden-assets/rock.png' },
+  { id: 'sprout', label: '새싹', image: '/garden-assets/sprout.png' },
+  { id: 'wheat', label: '밀', image: '/garden-assets/wheat.png' },
+  { id: 'sunflower', label: '해바라기', image: '/garden-assets/sunflower.png' },
   { id: 'tree', label: '나무', emoji: '🌳' },
   { id: 'flower', label: '꽃', emoji: '🌷' },
   { id: 'fence', label: '울타리', emoji: '🚧' },
@@ -119,14 +131,24 @@ const GardenMap: React.FC = () => {
       );
 
       if (asset) {
+        const isGround = asset.kind === 'ground';
         assetSprites.push(
           <span
             key={`asset-${row}-${col}`}
-            className="garden-asset-sprite"
+            className={`garden-asset-sprite${isGround ? ' ground' : ''}`}
             style={{ left: x, top: y, zIndex: zIndex + GRID_ROWS + GRID_COLS }}
             onClick={() => handleCellClick(row, col)}
           >
-            {asset.emoji}
+            {asset.image ? (
+              <img
+                src={asset.image}
+                alt={asset.label}
+                style={isGround ? { width: TILE_W * 1.08, height: 'auto' } : undefined}
+                draggable={false}
+              />
+            ) : (
+              asset.emoji
+            )}
           </span>
         );
       }
@@ -164,7 +186,9 @@ const GardenMap: React.FC = () => {
             className={`garden-palette-item${selectedAssetId === asset.id ? ' selected' : ''}`}
             onClick={() => setSelectedAssetId(asset.id)}
           >
-            <span className="garden-palette-emoji">{asset.emoji}</span>
+            <span className="garden-palette-emoji">
+              {asset.image ? <img src={asset.image} alt={asset.label} /> : asset.emoji}
+            </span>
             <span className="garden-palette-label">{asset.label}</span>
           </button>
         ))}
