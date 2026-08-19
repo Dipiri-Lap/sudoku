@@ -172,18 +172,28 @@
 
 .cm-board-viewport {
   position: relative;
+  touch-action: none;
+  overscroll-behavior: contain;
   flex: 1;
   min-height: 0;
   overflow: hidden;
 }
 
+/* 확대·이동은 transform 으로만 처리한다. 스크롤과 섞으면 서로 밀어내서 좌표가 어긋난다. */
 .cm-board-scroll {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: auto;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.cm-board-scroll-zoomed {
+  cursor: grab;
+}
+.cm-board-scroll-zoomed:active {
+  cursor: grabbing;
 }
 
 .cm-board {

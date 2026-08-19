@@ -94,7 +94,37 @@ const RULES = [
 const POOL_COLS = 8;
 const MIN_CELL_PX = 16;
 const MAX_CELL_PX = 54;
-const ZOOM_FACTOR = 1.6;
+interface View { scale: number; x: number; y: number }
+
+/**
+ * 배율을 바꾸되 화면상의 한 점(px, py)이 제자리에 남도록 이동량을 보정한다.
+ * transform-origin 이 0 0 이라 화면좌표 = 콘텐츠좌표 * scale + offset 이고,
+ * 그 점을 고정하려면 offset' = p - (p - offset) * (newScale / scale) 이다.
+ */
+function zoomAt(v: View, nextScale: number, px = 0, py = 0, box?: { w: number; h: number }): View {
+  const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, nextScale));
+  const k = scale / v.scale;
+  const x = px - (px - v.x) * k;
+  const y = py - (py - v.y) * k;
+  return clampView({ scale, x, y }, box);
+}
+
+/** 확대한 내용 바깥의 빈 공간이 보이지 않도록 이동량을 가둔다 */
+function clampView(v: View, box?: { w: number; h: number }): View {
+  if (!box || v.scale <= 1) return { scale: v.scale, x: 0, y: 0 };
+  const minX = box.w - box.w * v.scale;
+  const minY = box.h - box.h * v.scale;
+  return {
+    scale: v.scale,
+    x: Math.min(0, Math.max(minX, v.x)),
+    y: Math.min(0, Math.max(minY, v.y)),
+  };
+}
+
+const MIN_SCALE = 1;
+const MAX_SCALE = 3;
+/** 확대 버튼을 눌렀을 때의 배율 */
+const BUTTON_SCALE = 2;
 
 const CrossMathGame: React.FC = () => {
   const navigate = useNavigate();
@@ -136,7 +166,12 @@ const CrossMathGame: React.FC = () => {
   /** 먼저 고른 빈칸. 숫자 → 칸, 칸 → 숫자 두 순서 모두 지원하기 위한 것 */
   const [selectedCellKey, setSelectedCellKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [zoomed, setZoomed] = useState(false);
+  /**
+   * 보드 확대/이동 상태. 배율은 CSS transform 으로만 적용해 격자를 다시 그리지 않는다.
+   * x, y 는 컨테이너 좌표계 기준 이동량이고 transform-origin 은 0 0 이다.
+   */
+  const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
+  const zoomed = view.scale > 1;
   /** 놓은 순서. 되돌리기가 마지막 것부터 빼낸다 */
   const [history, setHistory] = useState<string[]>([]);
 
@@ -251,7 +286,7 @@ const CrossMathGame: React.FC = () => {
     setPlacements({});
     setSelectedTileId(null);
     setSelectedCellKey(null);
-    setZoomed(false);
+    setView({ scale: 1, x: 0, y: 0 });
     setHistory([]);
     setAdUsedThisStage(false);
     setHintPrompt(null);
@@ -359,6 +394,90 @@ const CrossMathGame: React.FC = () => {
     setHintMode(false);
   }, [adHintCredit, revealCell, spendCoins]);
 
+  /** 보드 위 포인터들 — 1개면 이동(팬), 2개면 핀치 줌 */
+  const boardPointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ dist: number; cx: number; cy: number } | null>(null);
+  /** 팬이 일어났으면 뒤따르는 셀 클릭을 무시한다 */
+  const panMovedRef = useRef(false);
+
+  const boardPoint = useCallback((e: { clientX: number; clientY: number }) => {
+    const r = boardViewportRef.current?.getBoundingClientRect();
+    return { x: e.clientX - (r?.left ?? 0), y: e.clientY - (r?.top ?? 0) };
+  }, []);
+
+  const handleBoardWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const p = boardPoint(e);
+    // deltaY 가 음수면 위로 굴린 것 = 확대
+    const factor = Math.exp(-e.deltaY * 0.0015);
+    setView(v => zoomAt(v, v.scale * factor, p.x, p.y, boardBox));
+  }, [boardPoint, boardBox]);
+
+  const handleBoardPointerDown = useCallback((e: React.PointerEvent) => {
+    boardPointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    panMovedRef.current = false;
+    if (boardPointers.current.size === 2) {
+      const [a, b] = [...boardPointers.current.values()];
+      pinchRef.current = {
+        dist: Math.hypot(a.x - b.x, a.y - b.y),
+        cx: (a.x + b.x) / 2,
+        cy: (a.y + b.y) / 2,
+      };
+    }
+  }, []);
+
+  /** 실제로 끌기 시작한 순간에만 캡처한다 — pointerdown 에서 캡처하면 click 이 이 요소로 옮겨가 셀 클릭이 죽는다 */
+  const capturePan = useCallback((e: React.PointerEvent) => {
+    const el = e.currentTarget as HTMLElement;
+    if (!el.hasPointerCapture(e.pointerId)) el.setPointerCapture(e.pointerId);
+  }, []);
+
+  const handleBoardPointerMove = useCallback((e: React.PointerEvent) => {
+    const pts = boardPointers.current;
+    const prev = pts.get(e.pointerId);
+    if (!prev) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // 두 손가락 — 벌린 만큼 확대하고 중심 이동만큼 함께 옮긴다
+    if (pts.size >= 2 && pinchRef.current) {
+      const [a, b] = [...pts.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const cx = (a.x + b.x) / 2;
+      const cy = (a.y + b.y) / 2;
+      const start = pinchRef.current;
+      if (start.dist > 0) {
+        panMovedRef.current = true;
+        capturePan(e);
+        const p = boardPoint({ clientX: cx, clientY: cy });
+        const ratio = dist / start.dist;
+        setView(v => {
+          const zoomed2 = zoomAt(v, v.scale * ratio, p.x, p.y, boardBox);
+          return clampView(
+            { scale: zoomed2.scale, x: zoomed2.x + (cx - start.cx), y: zoomed2.y + (cy - start.cy) },
+            boardBox
+          );
+        });
+      }
+      pinchRef.current = { dist, cx, cy };
+      return;
+    }
+
+    // 한 손가락 — 확대된 상태에서만 이동
+    const dx = e.clientX - prev.x;
+    const dy = e.clientY - prev.y;
+    if (!panMovedRef.current && Math.hypot(dx, dy) < 1) return;
+    setView(v => {
+      if (v.scale <= 1) return v;
+      return clampView({ scale: v.scale, x: v.x + dx, y: v.y + dy }, boardBox);
+    });
+    if (view.scale > 1) { panMovedRef.current = true; capturePan(e); }
+  }, [boardPoint, boardBox, view.scale, capturePan]);
+
+  const handleBoardPointerUp = useCallback((e: React.PointerEvent) => {
+    boardPointers.current.delete(e.pointerId);
+    if (boardPointers.current.size < 2) pinchRef.current = null;
+  }, []);
+
   const DRAG_THRESHOLD = 6;
 
   /** 화면 좌표 아래에 있는 '비어 있는 빈칸'의 키를 찾는다 */
@@ -401,6 +520,7 @@ const CrossMathGame: React.FC = () => {
   }, [dropTargetAt, place, handleTileClick]);
 
   const handleCellClick = useCallback((key: string) => {
+    if (panMovedRef.current) return;   // 화면을 끌어 옮긴 직후의 클릭은 무시
     // 힌트 대기 중에는 빈칸만 반응한다
     if (hintMode) {
       if (!placements[key]) void applyHintTo(key);
@@ -592,7 +712,7 @@ const CrossMathGame: React.FC = () => {
         )
       )
     : 0;
-  const cellPx = zoomed ? Math.round(fitCellPx * ZOOM_FACTOR) : fitCellPx;
+  const cellPx = fitCellPx;
   const fontPx = Math.max(11, Math.floor(cellPx * 0.46));
 
   return (
@@ -619,8 +739,19 @@ const CrossMathGame: React.FC = () => {
       </header>
 
       <section className="cm-board-panel">
-        <div className="cm-board-viewport" ref={boardViewportRef}>
-          <div className="cm-board-scroll">
+        <div
+          className="cm-board-viewport"
+          ref={boardViewportRef}
+          onWheel={handleBoardWheel}
+          onPointerDown={handleBoardPointerDown}
+          onPointerMove={handleBoardPointerMove}
+          onPointerUp={handleBoardPointerUp}
+          onPointerCancel={handleBoardPointerUp}
+        >
+          <div
+            className={`cm-board-scroll ${zoomed ? 'cm-board-scroll-zoomed' : ''}`}
+            style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}
+          >
           {measured && (
           <div
             className="cm-board"
@@ -734,7 +865,7 @@ const CrossMathGame: React.FC = () => {
         </button>
         <button
           className={`cm-action-btn ${zoomed ? 'cm-action-btn-on' : ''}`}
-          onClick={() => setZoomed(z => !z)}
+          onClick={() => setView(v => (v.scale > 1 ? { scale: 1, x: 0, y: 0 } : zoomAt(v, BUTTON_SCALE, boardBox.w / 2, boardBox.h / 2, boardBox)))}
         >
           <ZoomIn size={22} />
           <span>{zoomed ? '축소' : '확대'}</span>
