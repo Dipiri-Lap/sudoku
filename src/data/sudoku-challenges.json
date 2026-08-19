@@ -55,7 +55,7 @@
       "target": 10
     },
     "reward": {
-      "puzzle_power": 20,
+      "puzzle_power": 10,
       "coin": 25
     }
   },
@@ -70,7 +70,7 @@
       "target": 25
     },
     "reward": {
-      "puzzle_power": 30,
+      "puzzle_power": 10,
       "coin": 50
     }
   },
@@ -85,7 +85,7 @@
       "target": 50
     },
     "reward": {
-      "puzzle_power": 50,
+      "puzzle_power": 10,
       "coin": 75
     }
   },
@@ -100,7 +100,7 @@
       "target": 100
     },
     "reward": {
-      "puzzle_power": 100,
+      "puzzle_power": 10,
       "coin": 100
     }
   },
@@ -115,7 +115,7 @@
       "target": 200
     },
     "reward": {
-      "puzzle_power": 150,
+      "puzzle_power": 10,
       "coin": 200
     }
   },
@@ -130,7 +130,7 @@
       "target": 300
     },
     "reward": {
-      "puzzle_power": 200,
+      "puzzle_power": 10,
       "coin": 300
     }
   },
@@ -145,7 +145,7 @@
       "target": 400
     },
     "reward": {
-      "puzzle_power": 250,
+      "puzzle_power": 10,
       "coin": 400
     }
   },
@@ -160,7 +160,7 @@
       "target": 500
     },
     "reward": {
-      "puzzle_power": 300,
+      "puzzle_power": 10,
       "coin": 500
     }
   },
@@ -175,83 +175,8 @@
       "target": 1000
     },
     "reward": {
-      "puzzle_power": 500,
-      "coin": 500
-    }
-  },
-  {
-    "id": "ta_easy",
-    "type": "TIME_ATTACK",
-    "game": "sudoku",
-    "title": "⏱️ 퀵 스타터",
-    "condition": "타임어택 [쉬움] 클리어",
-    "progressConfig": {
-      "source": "time_attack",
-      "target": 1
-    },
-    "reward": {
       "puzzle_power": 10,
-      "coin": 10
-    }
-  },
-  {
-    "id": "ta_normal",
-    "type": "TIME_ATTACK",
-    "game": "sudoku",
-    "title": "⚡ 스피드 레이서",
-    "condition": "타임어택 [보통] 클리어",
-    "progressConfig": {
-      "source": "time_attack",
-      "target": 1
-    },
-    "reward": {
-      "puzzle_power": 30,
-      "coin": 20
-    }
-  },
-  {
-    "id": "ta_hard",
-    "type": "TIME_ATTACK",
-    "game": "sudoku",
-    "title": "🔥 극한의 집중력",
-    "condition": "타임어택 [어려움] 클리어",
-    "progressConfig": {
-      "source": "time_attack",
-      "target": 1
-    },
-    "reward": {
-      "puzzle_power": 50,
-      "coin": 40
-    }
-  },
-  {
-    "id": "ta_expert",
-    "type": "TIME_ATTACK",
-    "game": "sudoku",
-    "title": "🌀 시공의 분석자",
-    "condition": "타임어택 [전문가] 클리어",
-    "progressConfig": {
-      "source": "time_attack",
-      "target": 1
-    },
-    "reward": {
-      "puzzle_power": 100,
-      "coin": 100
-    }
-  },
-  {
-    "id": "ta_master",
-    "type": "TIME_ATTACK",
-    "game": "sudoku",
-    "title": "👑 신의 직관",
-    "condition": "타임어택 [마스터] 클리어",
-    "progressConfig": {
-      "source": "time_attack",
-      "target": 1
-    },
-    "reward": {
-      "puzzle_power": 300,
-      "coin": 200
+      "coin": 500
     }
   }
 ]

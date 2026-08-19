@@ -1,3 +1,8 @@
+/* ──────────────────────────────────────────────────────────────
+   Crossum
+   구조: 상단바 / 보드 패널(+도구줄) / 숫자 풀 패널 / 하단 액션바
+   ────────────────────────────────────────────────────────────── */
+
 .cm-page {
   height: 100dvh;
   overflow: hidden;
@@ -5,26 +10,55 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  box-sizing: border-box;
   color: #4a3418;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Pretendard, sans-serif;
 }
 
-.cm-header {
+/* ── 상단바 ── */
+.cm-topbar {
   width: 100%;
   max-width: 480px;
+  height: 60px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
+  padding: 0 1rem;
+  gap: 0.5rem;
+}
+
+.cm-topbar-side {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.cm-topbar-side-right {
+  justify-content: flex-end;
+}
+
+.cm-topbar-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #7a4f18;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .cm-icon-btn {
+  position: relative;
   background: #fff8ea;
   border: 1.5px solid #e8cf9c;
   border-radius: 12px;
   color: #8a5a1e;
   width: 42px;
   height: 42px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,175 +75,169 @@
   box-shadow: 0 1px 0 rgba(160, 110, 40, 0.15);
 }
 
-.cm-header-btns {
-  display: flex;
-  gap: 0.4rem;
+/* 상단바 보유 코인 */
+.cm-coin {
+  display: inline-flex;
   align-items: center;
-}
-
-.cm-level-badge {
-  font-size: 0.95rem;
-  font-weight: 800;
+  gap: 0.3rem;
+  height: 36px;
+  padding: 0 0.8rem 0 0.35rem;
+  border-radius: 20px;
   background: #fff8ea;
   border: 1.5px solid #e8cf9c;
-  border-radius: 20px;
-  padding: 0.35rem 1.2rem;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
   color: #7a4f18;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+.cm-coin img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
-/* ── 난이도 선택 ── */
-.cm-select-screen {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+/* ── 힌트 안내 모달 ── */
+.cm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(80, 55, 20, 0.4);
+  backdrop-filter: blur(4px);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.6rem;
-  padding: 1.5rem 1.25rem 2.5rem;
+  padding: 1.5rem;
+}
+
+.cm-modal {
   width: 100%;
-}
-
-.cm-select-title {
+  max-width: 320px;
+  background: #fffaef;
+  border: 3px solid #e2c68a;
+  border-radius: 20px;
+  padding: 1.6rem 1.4rem 1.3rem;
   text-align: center;
+  box-shadow: 0 6px 0 #e2c68a;
 }
-
-.cm-select-title h1 {
-  font-size: 1.9rem;
+.cm-modal h3 {
+  margin: 0 0 0.7rem;
+  font-size: 1.15rem;
   font-weight: 900;
-  margin: 0;
   color: #6b4416;
 }
-
-.cm-select-title p {
-  color: #a17c45;
+.cm-modal p {
+  margin: 0 0 0.35rem;
   font-size: 0.88rem;
-  margin: 0.5rem 0 0;
   font-weight: 600;
-}
-
-.cm-error {
-  color: #d1453b;
-  font-size: 0.85rem;
-  text-align: center;
-  font-weight: 700;
-}
-
-.cm-diff-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-  width: 100%;
-  max-width: 420px;
-}
-
-.cm-diff-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 1rem 0.85rem;
-  border-radius: 16px;
-  border: 2px solid #eeddb6;
-  background: #fffcf4;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-  text-align: center;
-  box-shadow: 0 3px 0 #eeddb6;
-}
-
-.cm-diff-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--diff-color);
-  box-shadow: 0 5px 0 var(--diff-color);
-}
-
-.cm-diff-card:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 0 var(--diff-color);
-}
-
-.cm-diff-name {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: var(--diff-color);
-}
-
-.cm-diff-meta {
-  font-size: 0.72rem;
   color: #8a6a3a;
-  font-weight: 700;
+  line-height: 1.5;
 }
-
-.cm-diff-desc {
-  font-size: 0.7rem;
-  color: #b79b6c;
-  margin-top: 0.1rem;
-  font-weight: 600;
+.cm-modal-sub {
+  color: #b79b6c !important;
+  font-size: 0.78rem !important;
 }
-
-/* ── 생성 중 ── */
-.cm-generating {
+.cm-modal-btns {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+.cm-modal-btns button {
   flex: 1;
+  padding: 0.7rem 0.5rem;
+  font-size: 0.92rem;
+}
+.cm-modal-btns button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── 보드 패널 ── */
+.cm-board-panel {
+  position: relative;
+  /* 보드 영역 높이는 난이도(=풀 줄 수)와 무관하게 항상 같다.
+     화면 높이에만 비례하고, 아주 작거나 아주 큰 화면에서는 clamp로 묶는다. */
+  flex: 0 0 clamp(180px, 44dvh, 420px);
+  min-height: 0;
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.cm-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #eeddb6;
-  border-top-color: #e8994a;
-  border-radius: 50%;
-  animation: cmSpin 0.75s linear infinite;
-}
-
-@keyframes cmSpin {
-  to { transform: rotate(360deg); }
-}
-
-.cm-generating p {
-  color: #a17c45;
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
-/* ── 보드 ── */
-.cm-board-wrap {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  width: 100%;
-  padding: 0.75rem;
-  overflow: auto;
-}
-
-.cm-board-card {
   background: #fffaef;
   border: 3px solid #e2c68a;
   border-radius: 20px;
   padding: 14px;
   box-shadow: 0 4px 0 #e2c68a, 0 10px 24px rgba(120, 85, 30, 0.15);
+}
+
+.cm-board-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cm-board-scroll {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  overflow: auto;
 }
 
 .cm-board {
   display: grid;
   gap: 1px;
+  flex-shrink: 0;
+  margin: auto; /* 확대 후 스크롤 영역보다 작을 때도 가운데 유지 */
 }
 
+/* 보드 하단 도구 줄 — 현재 미사용. 되돌리기/확대 버튼을 다른 위치로 옮길 때 재사용 */
+.cm-board-tools {
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.15rem;
+}
+
+.cm-tool-btn {
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid #e8cf9c;
+  background: #fff8ea;
+  color: #8a5a1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 12px;
+  box-shadow: 0 2px 0 rgba(160, 110, 40, 0.15);
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+}
+.cm-tool-btn:hover:not(:disabled) {
+  background: #fff1d0;
+  transform: translateY(-1px);
+}
+.cm-tool-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 0 rgba(160, 110, 40, 0.15);
+}
+.cm-tool-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.cm-tool-btn-on {
+  background: #ffe9a8;
+  border-color: #e8994a;
+  color: #8a5a1e;
+}
+
+/* ── 셀 ── */
 .cm-cell {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,41 +288,126 @@
   transform: scale(1.05);
 }
 
-.cm-cell-correct {
-  background: #d9f2d4;
-  border: 2px solid #6bbf59;
-  color: #2e7d32;
+/* 힌트 대기 중 — 고를 수 있는 빈칸을 전부 깜빡여 알린다 */
+.cm-cell-hintable {
+  background: #fff1cf;
+  border: 2px solid #e8994a;
+  animation: cmHintPulse 1.1s ease-in-out infinite;
+}
+@keyframes cmHintPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 153, 74, 0.55); }
+  50%      { box-shadow: 0 0 0 4px rgba(232, 153, 74, 0.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cm-cell-hintable { animation: none; box-shadow: 0 0 0 3px rgba(232, 153, 74, 0.3); }
 }
 
-.cm-cell-wrong {
+/* 드래그 중 커서 아래에 있는 빈칸 */
+.cm-cell-dropover {
+  background: #cdf0c4;
+  border: 2px solid #4ea63c;
+  transform: scale(1.08);
+}
+
+/* 숫자를 고르기 전에 먼저 선택해 둔 빈칸 — 풀 타일의 선택 표시와 같은 색 */
+.cm-cell-picked {
+  background: #ffe9a8;
+  border: 2px solid #e8994a;
+  box-shadow: 0 0 0 2px rgba(232, 153, 74, 0.35);
+}
+
+/* 놓았지만 아직 줄이 완성되지 않은 칸 — 풀 타일과 같은 녹색 계열 (맞고 틀림 판정 없음) */
+.cm-cell-placed {
+  background: #cdf0c4;
+  border: 2px solid #6bbf59;
+  color: #2e6b26;
+}
+
+/* 줄이 완성되고 계산이 맞음 — 그 줄의 모든 칸(숫자·연산자·등호)에 붙는다 */
+.cm-cell-solved {
+  background: #a9e59a;
+  border: 2px solid #4ea63c;
+  color: #1f5c17;
+}
+
+/* 놓을 수 없는 칸(주어진 숫자·연산자·등호)은 테두리를 얇게 — 직접 채운 칸이 도드라진다 */
+.cm-cell-solved:not(.cm-cell-blank) {
+  border-width: 1px;
+}
+
+/* 줄이 완성됐는데 계산이 틀림 */
+.cm-cell-broken {
   background: #fbdcd8;
   border: 2px solid #e0776b;
   color: #b33a2e;
 }
 
-/* ── 숫자 풀 ── */
-.cm-pool {
+/* 자릿수가 늘어나도 칸 크기는 그대로, 글자만 줄어든다.
+   .cm-tile / .cm-cell-* 쪽에도 font-size 선언이 있어 우선순위가 같으면 뒤에 온 쪽이 이긴다.
+   그래서 클래스를 겹쳐 특이도를 한 단계 올려 둔다. */
+.cm-cell.cm-d3, .cm-tile.cm-d3 { font-size: 0.78em; }
+.cm-cell.cm-d4, .cm-tile.cm-d4 { font-size: 0.6em; }
+
+/* ── 숫자 풀 패널 ── */
+.cm-pool-panel {
+  /* 내용 높이만큼만 차지하고, 자리가 모자라면 안에서 스크롤한다 (보드 높이는 건드리지 않는다) */
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   width: 100%;
   max-width: 480px;
-  min-height: 76px;
+  box-sizing: border-box;
+  background: #fffaef;
+  border: 3px solid #e2c68a;
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 4px 0 #e2c68a;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
+  align-items: flex-start;
   justify-content: center;
-  align-items: center;
-  padding: 1rem 1.25rem 1.75rem;
+}
+
+/* 타일 폭은 1fr, 높이는 aspect-ratio로 따라온다 → 화면 너비에 그대로 반응한다.
+   글자 크기는 컨테이너 폭(cqw) 기준이라 칸이 줄면 함께 줄어든다. */
+.cm-pool {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  min-width: 0; /* flex 자식의 기본 min-width:auto 때문에 넘치는 것 방지 */
+  container-type: inline-size;
+  font-size: clamp(0.6rem, 4.4cqw, 1.05rem);
+}
+
+.cm-tile,
+.cm-tile-hole {
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1;
+  /* 칸이 작아질수록 반지름도 함께 줄어 네모난 형태를 유지한다 */
+  border-radius: clamp(5px, 16%, 12px);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 보드에 놓인 타일이 비워 둔 자리 */
+.cm-tile-hole {
+  display: block;
+  background: #fdf6e3;
+  border: 2px dashed #e8d8ae;
 }
 
 .cm-tile {
-  min-width: 48px;
-  height: 48px;
-  padding: 0 0.6rem;
-  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  touch-action: none; /* 드래그 중 화면이 같이 스크롤되지 않게 */
   border: 2px solid #6bbf59;
   background: #cdf0c4;
   color: #2e6b26;
-  font-size: 1.1rem;
+  font-size: 1em;
   font-weight: 900;
+  line-height: 1;
   cursor: pointer;
   transition: transform 0.12s, background 0.12s, box-shadow 0.12s;
   box-shadow: 0 3px 0 #6bbf59;
@@ -307,6 +420,35 @@
   transform: translateY(1px);
   box-shadow: 0 1px 0 #6bbf59;
 }
+.cm-tile-dragging {
+  opacity: 0.35;
+}
+
+/* 포인터를 따라다니는 고스트 */
+.cm-drag-ghost {
+  position: fixed;
+  z-index: 1500;
+  pointer-events: none;
+  /* 포인터를 그대로 따라간다. 밑에 있는 칸의 강조가 비쳐 보이도록 약간 투명하게 둔다 */
+  transform: translate(-50%, -50%) scale(1.15);
+  opacity: 0.88;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 2px solid #6bbf59;
+  background: #cdf0c4;
+  color: #2e6b26;
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 6px 14px rgba(60, 100, 40, 0.35);
+}
+.cm-drag-ghost.cm-d3 { font-size: 0.9rem; }
+.cm-drag-ghost.cm-d4 { font-size: 0.72rem; }
+
 .cm-tile-selected {
   background: #ffe9a8;
   border-color: #e8994a;
@@ -314,9 +456,144 @@
   color: #8a5a1e;
 }
 
-.cm-pool-empty {
-  color: #b79b6c;
+/* 모드 화면의 오류 메시지 */
+.cm-error {
+  color: #d1453b;
   font-size: 0.85rem;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* ── 하단 액션바 ── */
+.cm-actionbar {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 78px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75rem;
+}
+
+.cm-action-btn {
+  background: none;
+  border: none;
+  color: #8a5a1e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  cursor: pointer;
+  padding: 0.4rem 0.7rem;
+  border-radius: 12px;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+}
+.cm-action-btn span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #a17c45;
+}
+.cm-action-btn:hover:not(:disabled) {
+  background: #fff1d0;
+}
+.cm-action-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.cm-action-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.cm-action-btn-accent {
+  color: #e8994a;
+}
+.cm-action-btn-on {
+  background: #ffe9a8;
+}
+
+/* 힌트 대기 중 액션바에 뜨는 안내 */
+.cm-hint-guide {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #e8994a;
+}
+
+/* ── 모드 선택 ── */
+
+/* localhost 전용 스테이지 바로가기 */
+.cm-devbox {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1.5px dashed #e2c68a;
+  background: #fffcf4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cm-devbox h4 {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #8a6a3a;
+}
+.cm-devbox-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.cm-devbox input {
+  width: 90px;
+  padding: 0.45rem;
+  text-align: center;
+  border-radius: 8px;
+  border: 1.5px solid #e8cf9c;
+  background: #fff8ea;
+  color: #6b4416;
+  font-weight: 700;
+}
+.cm-devbox button {
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: #e8994a;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ── 생성 중 ── */
+.cm-generating {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.cm-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #eeddb6;
+  border-top-color: #e8994a;
+  border-radius: 50%;
+  animation: cmSpin 0.75s linear infinite;
+}
+
+@keyframes cmSpin {
+  to { transform: rotate(360deg); }
+}
+
+.cm-generating p {
+  color: #a17c45;
+  font-size: 0.92rem;
   font-weight: 700;
 }
 
@@ -331,6 +608,7 @@
   backdrop-filter: blur(6px);
   border-radius: 16px;
   animation: cmFadeIn 0.3s ease;
+  z-index: 10;
 }
 
 @keyframes cmFadeIn {

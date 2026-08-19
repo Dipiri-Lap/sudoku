@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "generate-stages": "tsx scripts/generate-stages.ts",
+    "generate-cross-math-stages": "tsx scripts/generate-cross-math-stages.ts",
     "generate-queens": "tsx scripts/generate-queens.ts",
     "generate-big-sudoku": "tsx scripts/generate-big-sudoku.ts"
   },

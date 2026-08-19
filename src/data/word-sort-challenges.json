@@ -25,7 +25,7 @@
       "target": 10
     },
     "reward": {
-      "puzzle_power": 20,
+      "puzzle_power": 10,
       "coin": 25
     }
   },
@@ -40,7 +40,7 @@
       "target": 25
     },
     "reward": {
-      "puzzle_power": 40,
+      "puzzle_power": 10,
       "coin": 50
     }
   },
@@ -55,7 +55,7 @@
       "target": 50
     },
     "reward": {
-      "puzzle_power": 80,
+      "puzzle_power": 10,
       "coin": 100
     }
   },
@@ -70,7 +70,7 @@
       "target": 75
     },
     "reward": {
-      "puzzle_power": 100,
+      "puzzle_power": 10,
       "coin": 150
     }
   },
@@ -85,7 +85,7 @@
       "target": 100
     },
     "reward": {
-      "puzzle_power": 125,
+      "puzzle_power": 10,
       "coin": 200
     }
   },
@@ -100,7 +100,7 @@
       "target": 150
     },
     "reward": {
-      "puzzle_power": 150,
+      "puzzle_power": 10,
       "coin": 250
     }
   },
@@ -115,7 +115,7 @@
       "target": 200
     },
     "reward": {
-      "puzzle_power": 175,
+      "puzzle_power": 10,
       "coin": 300
     }
   },
@@ -130,7 +130,7 @@
       "target": 250
     },
     "reward": {
-      "puzzle_power": 200,
+      "puzzle_power": 10,
       "coin": 350
     }
   },
@@ -145,7 +145,7 @@
       "target": 300
     },
     "reward": {
-      "puzzle_power": 225,
+      "puzzle_power": 10,
       "coin": 400
     }
   },
@@ -160,7 +160,7 @@
       "target": 1
     },
     "reward": {
-      "puzzle_power": 30,
+      "puzzle_power": 10,
       "coin": 50
     }
   },
@@ -175,7 +175,7 @@
       "target": 50
     },
     "reward": {
-      "puzzle_power": 50,
+      "puzzle_power": 10,
       "coin": 100
     }
   },
@@ -190,7 +190,7 @@
       "target": 100
     },
     "reward": {
-      "puzzle_power": 100,
+      "puzzle_power": 10,
       "coin": 200
     }
   },
@@ -205,7 +205,7 @@
       "target": 150
     },
     "reward": {
-      "puzzle_power": 200,
+      "puzzle_power": 10,
       "coin": 250
     }
   },
@@ -220,7 +220,7 @@
       "target": 200
     },
     "reward": {
-      "puzzle_power": 250,
+      "puzzle_power": 10,
       "coin": 300
     }
   }

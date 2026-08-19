@@ -30,6 +30,17 @@ const adminMigrateLegacyCoins = httpsCallable<void, { migratedCount: number }>(
     functions,
     'adminMigrateLegacyCoins'
 );
+interface RecalcResult {
+    dryRun: boolean;
+    scanned: number;
+    changed: number;
+    totalDelta: number;
+    samples: Array<{ uid: string; before: number; after: number }>;
+}
+const adminRecalcPuzzlePower = httpsCallable<{ dryRun: boolean }, RecalcResult>(
+    functions,
+    'adminRecalcPuzzlePower'
+);
 
 const ADMIN_EMAIL = 'ehrbs50@gmail.com';
 
@@ -272,6 +283,8 @@ const AdminPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
     const [migrating, setMigrating] = useState(false);
+    const [recalcRunning, setRecalcRunning] = useState(false);
+    const [recalcResult, setRecalcResult] = useState<RecalcResult | null>(null);
     const [topStages, setTopStages] = useState<Record<string, TopStageEntry | null>>({});
     const [topStagesLoading, setTopStagesLoading] = useState(false);
 
@@ -307,6 +320,38 @@ const AdminPage: React.FC = () => {
             showToast(`마이그레이션 실패: ${String(e)}`, false);
         } finally {
             setMigrating(false);
+        }
+    };
+
+    // 도전과제 퍼즐력 재계산 — 먼저 dryRun 으로 규모를 확인하고, 확인 후에만 반영한다
+    const handleRecalcPuzzlePower = async (dryRun: boolean) => {
+        if (!dryRun) {
+            const d = recalcResult;
+            if (!d || d.dryRun !== true) {
+                showToast('먼저 "규모 확인"을 실행하세요.', false);
+                return;
+            }
+            if (!window.confirm(`${d.changed}명의 퍼즐력을 조정합니다 (합계 ${d.totalDelta}). 진행할까요?`)) return;
+        }
+        setRecalcRunning(true);
+        try {
+            const result = await adminRecalcPuzzlePower({ dryRun });
+            setRecalcResult(result.data);
+            showToast(dryRun
+                ? `확인 완료 — ${result.data.changed}명 변경 예정 (합계 ${result.data.totalDelta})`
+                : `반영 완료 — ${result.data.changed}명 조정`);
+        } catch (e) {
+            // FirebaseError 는 code 를 봐야 원인이 보인다.
+            // 배포 안 된 콜러블은 404 가 HttpsError 로 해석되지 않아 'internal' 로만 나온다.
+            const err = e as { code?: string; message?: string };
+            const code = err.code ?? '';
+            const hint = code === 'functions/internal' || code === 'internal'
+                ? ' (함수가 배포되지 않았을 수 있습니다)'
+                : '';
+            showToast(`실패: ${code || 'error'} ${err.message ?? String(e)}${hint}`, false);
+            console.error('adminRecalcPuzzlePower 실패:', e);
+        } finally {
+            setRecalcRunning(false);
         }
     };
 
@@ -552,6 +597,42 @@ const AdminPage: React.FC = () => {
                     >
                         {migrating ? '처리 중...' : '코인 마이그레이션'}
                     </button>
+                </div>
+
+                {/* 도전과제 퍼즐력 재계산 */}
+                <div style={{ padding: '10px 12px', borderBottom: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 700 }}>퍼즐력 재계산</div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                            style={S.btnSmall('#0ea5e9')}
+                            disabled={recalcRunning}
+                            onClick={() => handleRecalcPuzzlePower(true)}
+                            title="아무것도 바꾸지 않고 영향 규모만 집계합니다"
+                        >
+                            {recalcRunning ? '처리 중...' : '규모 확인'}
+                        </button>
+                        <button
+                            style={S.btnSmall(recalcResult?.dryRun ? '#dc2626' : '#475569')}
+                            disabled={recalcRunning || !recalcResult?.dryRun}
+                            onClick={() => handleRecalcPuzzlePower(false)}
+                            title="집계 결과를 확인한 뒤에만 활성화됩니다"
+                        >
+                            반영
+                        </button>
+                    </div>
+                    {recalcResult && (
+                        <div style={{ fontSize: 11, color: '#cbd5e1', lineHeight: 1.6 }}>
+                            <div>{recalcResult.dryRun ? '미리보기' : '반영됨'} · 조회 {recalcResult.scanned}명</div>
+                            <div>변경 {recalcResult.changed}명 · 합계 {recalcResult.totalDelta}</div>
+                            {recalcResult.samples.length > 0 && (
+                                <div style={{ marginTop: 4, color: '#94a3b8' }}>
+                                    {recalcResult.samples.map(sm => (
+                                        <div key={sm.uid}>{sm.uid.slice(0, 10)} : {sm.before} → {sm.after}</div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
                 <div style={{ display: 'flex', borderBottom: '1px solid #1e293b' }}>
                     <input

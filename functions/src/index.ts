@@ -291,3 +291,93 @@ export const adminMigrateLegacyCoins = onCall(async (request) => {
 
   return { migratedCount: targets.length };
 });
+
+/**
+ * 도전과제 퍼즐력 재계산.
+ *
+ * 퍼즐력은 '수령한 도전과제 보상의 합'과 같으므로 claimedIds 에서 다시 계산할 수 있다.
+ * 보상을 전부 10으로 통일하면서, 이미 옛 보상을 받은 사용자의 값을 내리기 위한 것이다.
+ * 여러 번 실행해도 같은 결과가 나온다(멱등).
+ *
+ * dryRun 기본값은 true — 먼저 몇 명이 얼마나 바뀌는지 확인하고 나서 {dryRun:false} 로 실행한다.
+ */
+const PUZZLE_POWER_PER_CHALLENGE = 10;
+
+// src/data/*-challenges.json 의 id 목록. 도전과제를 추가·삭제하면 여기도 갱신해야 한다.
+const VALID_CHALLENGE_IDS = new Set([
+  "stage_001", "stage_005", "stage_5", "stage_10", "stage_25", "stage_50",
+  "stage_100", "stage_200", "stage_300", "stage_400", "stage_500", "stage_1000",
+  "word_st_1", "word_st_10", "word_st_25", "word_st_50", "word_st_75", "word_st_100",
+  "word_st_150", "word_st_200", "word_st_250", "word_st_300", "word_hard_1", "word_hard_50",
+  "word_hard_100", "word_hard_150", "word_hard_200", "cq_1", "cq_10", "cq_25",
+  "cq_50", "cq_100", "cq_200", "cq_300", "cq_400", "cq_500",
+  "cq_1000", "ss_1", "ss_10", "ss_30", "ss_50", "ss_100",
+  "ss_200", "ss_300", "ss_500",
+]);
+
+export const adminRecalcPuzzlePower = onCall(
+  {timeoutSeconds: 540, memory: "512MiB"},
+  async (request) => {
+    assertAdmin(request);
+    const dryRun = request.data?.dryRun !== false;
+
+    try {
+      // 사용자마다 하위 문서를 하나씩 읽으면 왕복이 사용자 수만큼 생겨 60초를 넘긴다.
+      // challenges 하위 컬렉션을 collectionGroup 으로 한 번에 가져온다.
+      const challengeDocs = await db.collectionGroup("challenges").get();
+
+      let changed = 0;
+      let totalDelta = 0;
+      const samples: Array<{uid: string; before: number; after: number}> = [];
+      const updates: Array<{
+        uid: string; ref: FirebaseFirestore.DocumentReference; newPP: number; delta: number;
+      }> = [];
+
+      for (const snap of challengeDocs.docs) {
+        const userRef = snap.ref.parent.parent;
+        if (!userRef) continue;
+
+        const data = snap.data() ?? {};
+        const claimed: string[] = data.claimedIds ?? [];
+        const syncedPP: number = data.mainDocSyncedPP ?? 0;
+
+        const validCount = claimed.filter((id) => VALID_CHALLENGE_IDS.has(id)).length;
+        const newPP = validCount * PUZZLE_POWER_PER_CHALLENGE;
+        const delta = newPP - syncedPP;
+        if (delta === 0 && data.puzzlePower === newPP) continue;
+
+        changed++;
+        totalDelta += delta;
+        if (samples.length < 10) {
+          samples.push({uid: userRef.id, before: syncedPP, after: newPP});
+        }
+        updates.push({uid: userRef.id, ref: snap.ref, newPP, delta});
+      }
+
+      if (!dryRun) {
+        const BATCH_SIZE = 200;
+        for (let i = 0; i < updates.length; i += BATCH_SIZE) {
+          const batch = db.batch();
+          for (const u of updates.slice(i, i + BATCH_SIZE)) {
+            batch.set(u.ref, {puzzlePower: u.newPP, mainDocSyncedPP: u.newPP}, {merge: true});
+            if (u.delta !== 0) {
+              batch.set(
+                db.collection("users").doc(u.uid),
+                {puzzlePower: FieldValue.increment(u.delta)},
+                {merge: true}
+              );
+            }
+          }
+          await batch.commit();
+        }
+      }
+
+      return {dryRun, scanned: challengeDocs.size, changed, totalDelta, samples};
+    } catch (e) {
+      // 그냥 던지면 클라이언트에 'internal' 로만 보여 원인을 알 수 없다.
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("adminRecalcPuzzlePower 실패:", e);
+      throw new HttpsError("internal", `재계산 실패: ${msg}`);
+    }
+  }
+);

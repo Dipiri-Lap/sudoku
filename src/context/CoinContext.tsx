@@ -30,7 +30,12 @@ const readInt = (key: string): number => parseInt(localStorage.getItem(key) ?? '
 export const CoinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     // 무료 코인(광고 시청, 게임 보상 등) - 환불 대상 아님
     const [freeCoins, setFreeCoins] = useState<number>(() => {
-        if (import.meta.env.DEV) return 99999;
+        // 개발 중에는 코인을 넉넉히 준다. 다만 코인 부족 → 광고 흐름을 로컬에서 확인해야 할 때가 있어서,
+        // localStorage 에 dev_coins 를 넣어두면 그 값을 쓴다. (예: localStorage.dev_coins = '0')
+        if (import.meta.env.DEV) {
+            const override = localStorage.getItem('dev_coins');
+            return override !== null ? parseInt(override, 10) || 0 : 99999;
+        }
         const stored = localStorage.getItem(FREE_LS_KEY);
         if (stored !== null) return parseInt(stored, 10) || 0;
         // 레거시 단일 잔액을 무료 코인으로 마이그레이션 (유료로 잘못 간주하지 않도록 보수적으로 처리)

@@ -47,9 +47,15 @@ function saveSet(key: string, set: Set<string>) {
     localStorage.setItem(key, JSON.stringify([...set]));
 }
 
-function loadPuzzlePower(): number {
-    const raw = localStorage.getItem(LS_PUZZLE_POWER_KEY);
-    return raw ? parseInt(raw, 10) || 0 : 0;
+/**
+ * 퍼즐력은 '수령한 도전과제 보상의 합'과 항상 같다 — 늘어나는 곳이 claimReward 한 곳뿐이다.
+ * 그래서 저장된 숫자를 믿지 않고 claimedIds 에서 다시 계산한다.
+ * 보상 금액을 바꾸거나 도전과제를 없애도 이 계산만으로 값이 알아서 맞춰진다.
+ */
+function computePuzzlePower(claimed: Set<string>): number {
+    let sum = 0;
+    for (const id of claimed) sum += CHALLENGE_MAP[id]?.reward.puzzle_power ?? 0;
+    return sum;
 }
 
 function savePuzzlePower(value: number) {
@@ -63,8 +69,14 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     const [clearedIds, setClearedIds] = useState<Set<string>>(() => loadSet(LS_CLEARED_KEY));
     const [claimedIds, setClaimedIds] = useState<Set<string>>(() => loadSet(LS_CLAIMED_KEY));
-    const [puzzlePower, setPuzzlePower] = useState<number>(loadPuzzlePower);
+    const [puzzlePower, setPuzzlePower] = useState<number>(() => computePuzzlePower(loadSet(LS_CLAIMED_KEY)));
     const syncedRef = useRef(false);
+
+    // 재계산한 값을 저장소에도 반영해 둔다. 이게 없으면 비로그인 사용자의
+    // localStorage 에 옛 값이 그대로 남아 다른 곳에서 참조할 때 어긋난다.
+    useEffect(() => {
+        savePuzzlePower(puzzlePower);
+    }, [puzzlePower]);
 
     // Sync with Firestore on auth
     useEffect(() => {
@@ -78,9 +90,10 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
                 const localCleared = loadSet(LS_CLEARED_KEY);
                 const localClaimed = loadSet(LS_CLAIMED_KEY);
-                const localPP = loadPuzzlePower();
 
-                let mergedPP = localPP;
+                // 클라우드/로컬 중 큰 값을 쓰면 보상을 낮췄을 때 옛 값이 되살아난다.
+                // 수령 목록만 합치고 퍼즐력은 언제나 그 목록에서 다시 계산한다.
+                let mergedPP = computePuzzlePower(localClaimed);
 
                 if (snap.exists()) {
                     const data = snap.data();
@@ -90,7 +103,7 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
                     const mergedCleared = new Set([...localCleared, ...cloudCleared]);
                     const mergedClaimed = new Set([...localClaimed, ...cloudClaimed]);
-                    mergedPP = Math.max(localPP, cloudPP);
+                    mergedPP = computePuzzlePower(mergedClaimed);
 
                     saveSet(LS_CLEARED_KEY, mergedCleared);
                     saveSet(LS_CLAIMED_KEY, mergedClaimed);
@@ -107,20 +120,21 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                             puzzlePower: mergedPP,
                         }, { merge: true });
                     }
-                } else if (localClaimed.size > 0 || localCleared.size > 0 || localPP > 0) {
+                } else if (localClaimed.size > 0 || localCleared.size > 0) {
                     // No Firestore doc yet — upload local data
                     await setDoc(ref, {
                         clearedIds: [...localCleared],
                         claimedIds: [...localClaimed],
-                        puzzlePower: localPP,
+                        puzzlePower: mergedPP,
                     });
                 }
 
                 // Sync challenge PP delta to main user document (used by ranking/landing page)
                 // mainDocSyncedPP tracks how much challenge PP has already been added to main doc
                 const alreadySynced: number = snap.exists() ? (snap.data()?.mainDocSyncedPP ?? 0) : 0;
+                // 감소분(음수)도 반영해야 보상을 낮췄을 때 랭킹에 적용된다
                 const delta = mergedPP - alreadySynced;
-                if (delta > 0) {
+                if (delta !== 0) {
                     const userRef = doc(db, 'users', user.uid);
                     await updateDoc(userRef, { puzzlePower: increment(delta) });
                     await setDoc(ref, { mainDocSyncedPP: mergedPP }, { merge: true });
@@ -174,7 +188,7 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (challenge.progressConfig.source === 'time_attack' && !clearedIds.has(id)) return null;
 
         const nextClaimed = new Set(claimedIds).add(id);
-        const nextPP = puzzlePower + challenge.reward.puzzle_power;
+        const nextPP = computePuzzlePower(nextClaimed);
 
         saveSet(LS_CLAIMED_KEY, nextClaimed);
         savePuzzlePower(nextPP);
@@ -202,7 +216,7 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
 
         return challenge;
-    }, [clearedIds, claimedIds, puzzlePower, addCoins, persistToFirestore]);
+    }, [clearedIds, claimedIds, addCoins, persistToFirestore]);
 
     const isChallengeCleared = useCallback(
         (id: string) => clearedIds.has(id) && !claimedIds.has(id),
