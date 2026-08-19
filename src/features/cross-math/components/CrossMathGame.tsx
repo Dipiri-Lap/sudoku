@@ -54,6 +54,41 @@ const hoverOff = (e: React.MouseEvent<HTMLElement>) => {
 /** 힌트 1회 비용 */
 const HINT_COST = 50;
 
+/** 규칙 설명용 미니 수식 — 'B' 는 빈칸 */
+function MiniRow({ cells }: { cells: string[] }) {
+  const isOp = (v: string) => ['+', '-', '×', '÷', '='].includes(v);
+  return (
+    <div className="cm-rule-row">
+      {cells.map((v, i) => (
+        <span key={i} className={`cm-rule-cell ${v === 'B' ? 'cm-rule-blank' : isOp(v) ? 'cm-rule-op' : ''}`}>
+          {v === 'B' ? '' : v}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+const RULES = [
+  {
+    label: '규칙 1',
+    title: '빈칸을 채워 식을 완성',
+    desc: '아래 숫자 타일을 골라 빈칸에 넣습니다. 탭해서 놓거나 끌어다 놓아도 됩니다.',
+    visual: <MiniRow cells={['12', '+', 'B', '=', '19']} />,
+  },
+  {
+    label: '규칙 2',
+    title: '가로와 세로가 함께 맞아야 함',
+    desc: '한 숫자가 가로 식과 세로 식에 동시에 쓰입니다. 한 칸을 정하면 이어진 칸이 연쇄적으로 풀려요.',
+    visual: <MiniRow cells={['B', '×', '3', '=', '24']} />,
+  },
+  {
+    label: '규칙 3',
+    title: '숫자가 넷인 식도 등장',
+    desc: '501스테이지부터는 세 수를 계산하는 긴 식이 섞여 나옵니다. 왼쪽부터 차례로 계산해요.',
+    visual: <MiniRow cells={['7', '+', 'B', '-', '4', '=', '11']} />,
+  },
+];
+
 const POOL_COLS = 8;
 const MIN_CELL_PX = 16;
 const MAX_CELL_PX = 54;
@@ -69,6 +104,7 @@ const CrossMathGame: React.FC = () => {
   const { stageProgress, clearStage } = useCrossumProgress();
   const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
   const [testStage, setTestStage] = useState('1');
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const { coins, spendCoins } = useCoins();
   /** 힌트 안내 창 — confirm(코인 사용) / ad(광고 시청) / insufficient(코인 부족) */
@@ -456,6 +492,34 @@ const CrossMathGame: React.FC = () => {
           </div>
 
         </div>
+
+        <details className="cm-about" onToggle={e => setAboutOpen((e.currentTarget as HTMLDetailsElement).open)}>
+          <summary>
+            <span className={`cm-about-arrow ${aboutOpen ? 'cm-about-arrow-open' : ''}`}>▶</span>
+            크로썸 게임이란?
+          </summary>
+          <div className="cm-about-body">
+            <p className="cm-about-lead">
+              크로썸은 십자말풀이처럼 <strong>가로·세로로 얽힌 수식</strong>의 빈칸을 숫자 타일로 채우는 계산 퍼즐이에요.
+              어려운 암산이 필요한 게임이 아니라, <strong>어느 칸부터 풀 수 있는지 찾아내는 것</strong>이 핵심입니다.
+              스테이지가 올라갈수록 격자가 넓어지고 곱셈·나눗셈이 차례로 등장해요.
+            </p>
+            {RULES.map(rule => (
+              <div key={rule.label} className="cm-rule-card">
+                <div className="cm-rule-visual">{rule.visual}</div>
+                <div>
+                  <div className="cm-rule-label">{rule.label}</div>
+                  <div className="cm-rule-title">{rule.title}</div>
+                  <div className="cm-rule-desc">{rule.desc}</div>
+                </div>
+              </div>
+            ))}
+            <p className="cm-about-tip">
+              💡 25스테이지마다 <strong>부호만 주어지는 관문 문제</strong>가 나옵니다. 숫자가 하나도 없는 줄은
+              교차하는 다른 식으로 풀어야 해요.
+            </p>
+          </div>
+        </details>
 
         {isDev && (
           <div className="cm-devbox">

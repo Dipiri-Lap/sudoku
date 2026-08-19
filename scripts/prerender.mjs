@@ -106,6 +106,26 @@ const routes = [
     faqSchema: null,
     seoContent: '',
   },
+  {
+    path: 'cross-math',
+    title: '크로썸 - 십자말풀이 수식 퍼즐 | 퍼즐 가든',
+    description: '가로·세로로 얽힌 수식의 빈칸을 숫자로 채우는 계산 퍼즐. 사칙연산으로 즐기는 두뇌 트레이닝, 1200 스테이지 무료 제공.',
+    canonical: `${BASE_URL}/cross-math`,
+    breadcrumbSchema: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"크로썸","item":"https://puzzles.tmhub.co.kr/cross-math"}]}),
+    softwareSchema: JSON.stringify({"@context":"https://schema.org","@type":"SoftwareApplication","name":"크로썸 - 퍼즐 가든","applicationCategory":"GameApplication","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}),
+    faqSchema: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"크로썸은 어떤 게임인가요?","acceptedAnswer":{"@type":"Answer","text":"크로썸(Crossum)은 십자말풀이처럼 가로·세로로 얽힌 수식의 빈칸을 숫자 타일로 채우는 계산 퍼즐입니다. 한 숫자가 가로 식과 세로 식에 동시에 쓰이기 때문에 한 칸을 정하면 다른 칸이 연쇄적으로 정해집니다."}},{"@type":"Question","name":"크로썸은 무료인가요?","acceptedAnswer":{"@type":"Answer","text":"네, 퍼즐 가든의 크로썸은 완전 무료입니다. 회원가입 없이 바로 플레이할 수 있으며 1200개의 스테이지를 제공합니다."}},{"@type":"Question","name":"어떤 연산이 나오나요?","acceptedAnswer":{"@type":"Answer","text":"덧셈과 뺄셈으로 시작해 곱셈, 나눗셈이 차례로 등장합니다. 501스테이지부터는 1+1+1=3 처럼 숫자 네 개짜리 3항 식도 섞여 나옵니다."}},{"@type":"Question","name":"암산 실력이 없어도 할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 초반 스테이지는 한 자리 덧셈·뺄셈으로 시작하고 난이도가 아주 천천히 올라갑니다. 계산보다 어느 칸부터 풀지 찾아내는 추리가 더 중요한 게임입니다."}}]}),
+    seoContent: `
+      <section style="padding:2rem 1.5rem 3rem;max-width:680px;margin:0 auto;color:#555;line-height:1.8;text-align:left">
+        <h2 style="font-size:1.15rem;font-weight:700;color:#333;margin-bottom:1rem">크로썸 - 십자말풀이 수식 퍼즐</h2>
+        <p style="margin-bottom:1.25rem;font-size:.9rem">크로썸은 십자말풀이처럼 가로·세로로 얽힌 수식의 빈칸을 숫자 타일로 채우는 <strong>계산 퍼즐</strong>입니다. 한 숫자가 가로 식과 세로 식에 동시에 쓰이므로, 한 칸을 정하면 이어진 칸들이 연쇄적으로 풀립니다.</p>
+        <h3 style="font-size:1.05rem;font-weight:700;color:#444;margin-bottom:.5rem">천천히 올라가는 난이도</h3>
+        <p style="margin-bottom:1.25rem;font-size:.9rem">한 자리 덧셈·뺄셈으로 시작해 곱셈과 나눗셈이 차례로 등장합니다. 501스테이지부터는 <strong>1+1+1=3</strong> 처럼 숫자 네 개가 들어가는 3항 식이 섞여 나오고, 25스테이지마다 부호만 주어지는 관문 문제가 기다립니다.</p>
+        <h3 style="font-size:1.05rem;font-weight:700;color:#444;margin-bottom:.5rem">계산보다 추리</h3>
+        <p style="margin-bottom:1.25rem;font-size:.9rem">어려운 암산이 필요한 게임이 아닙니다. <strong>어느 칸부터 풀 수 있는지 찾아내는 것</strong>이 핵심입니다. 확정할 수 있는 칸 하나를 찾으면 그 숫자가 다른 식의 실마리가 되어 도미노처럼 이어집니다.</p>
+        <h3 style="font-size:1.05rem;font-weight:700;color:#444;margin-bottom:.5rem">1200 스테이지 무료</h3>
+        <p style="font-size:.9rem">회원가입 없이 바로 시작할 수 있고 진행 상황은 자동 저장됩니다. 사칙연산 감각과 논리적 추론을 함께 훈련할 수 있어 어린이 학습용으로도 좋습니다.</p>
+      </section>`,
+  },
 ];
 
 const indexHtml = readFileSync(join(distDir, 'index.html'), 'utf-8');

@@ -743,6 +743,13 @@ const LandingPage: React.FC = () => {
                         간단한 규칙이지만 깊은 사고가 필요해 체스 퍼즐의 묘미를 느낄 수 있습니다.
                     </p>
 
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>➕ 크로썸</h3>
+                    <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
+                        십자말풀이처럼 가로·세로로 얽힌 수식의 빈칸을 숫자 타일로 채우는 <strong>계산 퍼즐</strong>.
+                        한 숫자가 가로 식과 세로 식에 동시에 쓰이기 때문에, 한 칸을 정하면 이어진 칸들이 연쇄적으로 풀립니다.
+                        어려운 암산보다 <strong>어느 칸부터 풀 수 있는지 찾아내는 추리</strong>가 핵심이라 사칙연산 감각과 논리력을 함께 기를 수 있습니다.
+                    </p>
+
                     <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>퍼즐 게임의 효과</h3>
                     <p style={{ fontSize: '0.9rem' }}>
                         퍼즐 게임은 단순한 오락을 넘어 <strong>뇌 건강</strong>에 실질적인 도움을 줍니다.

@@ -568,6 +568,119 @@
   cursor: pointer;
 }
 
+/* ── 게임 설명 (모드 선택 화면) ── */
+.cm-about {
+  width: 100%;
+  max-width: 480px;
+  margin: 1.5rem auto 0;
+  color: #555;
+  line-height: 1.8;
+  text-align: left;
+}
+.cm-about > summary {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #444;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  user-select: none;
+}
+.cm-about > summary::-webkit-details-marker {
+  display: none;
+}
+.cm-about-arrow {
+  font-size: 0.75rem;
+  color: #888;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+.cm-about-arrow-open {
+  transform: rotate(90deg);
+}
+
+.cm-about-body {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cm-about-lead,
+.cm-about-tip {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.7;
+  padding: 0.75rem 1rem;
+  background: #f1f5f9;
+  border-radius: 12px;
+  border-left: 3px solid #94a3b8;
+}
+.cm-about-tip {
+  background: #fff7e6;
+  border-left-color: #e8994a;
+}
+
+.cm-rule-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+.cm-rule-visual {
+  flex-shrink: 0;
+}
+.cm-rule-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+.cm-rule-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.3rem;
+}
+.cm-rule-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* 규칙 카드 안의 미니 수식 — 실제 보드와 같은 색으로 */
+.cm-rule-row {
+  display: flex;
+  gap: 3px;
+}
+.cm-rule-cell {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #ffd873;
+  border: 1px solid #e8b94f;
+  color: #6b4416;
+  box-sizing: border-box;
+}
+.cm-rule-blank {
+  background: #cdf0c4;
+  border: 2px solid #6bbf59;
+}
+
 /* ── 생성 중 ── */
 .cm-generating {
   flex: 1;
