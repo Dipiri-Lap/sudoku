@@ -6,7 +6,7 @@ import type { UserProfile as UserProfileType } from '../../services/rankingServi
 import { Trophy, Users } from 'lucide-react';
 import { useCoins } from '../../context/CoinContext';
 import { useChallenges } from '../../context/ChallengeContext';
-import { ALL_CHALLENGES, CHALLENGE_MAP, type Challenge } from '../../data/challenges';
+import { ALL_CHALLENGES, CHALLENGE_MAP, type Challenge, type GameKey } from '../../data/challenges';
 import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
 import { useWordSortHardProgress } from '../../context/WordSortHardProgressContext';
@@ -31,6 +31,18 @@ export const getAvatarUrl = (seed: string) => {
     const num = parseInt(seed, 10);
     const validSeed = (!isNaN(num) && num >= 1 && num <= 40) ? seed : '1';
     return `/assets/profiles/${validSeed}.png`;
+};
+
+/**
+ * 게임 표시 이름. Record<GameKey, string> 이라 게임을 추가하면
+ * 여기에 안 넣었을 때 타입 에러로 잡힌다 (예전엔 else 로 흘러 워드스택으로 표시됐다).
+ */
+const GAME_LABELS: Record<GameKey, string> = {
+    sudoku: '스도쿠',
+    'word-sort': '워드스택',
+    queens: '크라운 퀘스트',
+    snapspot: '스냅스팟',
+    crossum: '크로썸',
 };
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -604,7 +616,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                             >
                                                 <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: expandedGames.has(game) ? 'rotate(0deg)' : 'rotate(-90deg)', flexShrink: 0 }} />
                                                 <span style={{ fontSize: '0.72rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                                    {game === 'sudoku' ? '스도쿠' : game === 'queens' ? '크라운 퀘스트' : game === 'snapspot' ? '스냅스팟' : '워드스택'}
+                                                    {GAME_LABELS[game as GameKey] ?? game}
                                                     <span style={{ marginLeft: '5px', fontSize: '0.65rem', color: '#64748b' }}>
                                                         ({list.filter(c => challenges.isChallengeCompleted(c.id)).length}/{list.length})
                                                     </span>
