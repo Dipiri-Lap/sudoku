@@ -41,6 +41,20 @@ const adminRecalcPuzzlePower = httpsCallable<{ dryRun: boolean }, RecalcResult>(
     functions,
     'adminRecalcPuzzlePower'
 );
+interface RebalanceResult {
+    dryRun: boolean;
+    totalFakes: number;
+    threshold: number;
+    overBefore: number;
+    overAfter: number;
+    changed: number;
+    range: { min: number; max: number };
+    samples: Array<{ uid: string; before: number; after: number }>;
+}
+const adminRebalanceFakeUsers = httpsCallable<
+    { dryRun: boolean; threshold: number; min: number },
+    RebalanceResult
+>(functions, 'adminRebalanceFakeUsers');
 
 const ADMIN_EMAIL = 'ehrbs50@gmail.com';
 
@@ -285,6 +299,9 @@ const AdminPage: React.FC = () => {
     const [migrating, setMigrating] = useState(false);
     const [recalcRunning, setRecalcRunning] = useState(false);
     const [recalcResult, setRecalcResult] = useState<RecalcResult | null>(null);
+    const [rebalRunning, setRebalRunning] = useState(false);
+    const [rebalResult, setRebalResult] = useState<RebalanceResult | null>(null);
+    const [rebalThreshold, setRebalThreshold] = useState('300');
     const [topStages, setTopStages] = useState<Record<string, TopStageEntry | null>>({});
     const [topStagesLoading, setTopStagesLoading] = useState(false);
 
@@ -352,6 +369,36 @@ const AdminPage: React.FC = () => {
             console.error('adminRecalcPuzzlePower 실패:', e);
         } finally {
             setRecalcRunning(false);
+        }
+    };
+
+    // 가짜 유저 상위권 퍼즐력 재조정 (서버에서 처리 — 보안 규칙상 브라우저는 남의 문서를 못 씀)
+    const handleRebalanceFakes = async (dryRun: boolean) => {
+        const threshold = parseInt(rebalThreshold, 10);
+        if (!Number.isFinite(threshold) || threshold <= 1) {
+            showToast('기준 점수를 확인하세요.', false);
+            return;
+        }
+        if (!dryRun) {
+            if (!rebalResult?.dryRun) {
+                showToast('먼저 "미리보기"를 실행하세요.', false);
+                return;
+            }
+            if (!window.confirm(`${rebalResult.threshold} 이상인 가짜 유저 ${rebalResult.changed}명을 ${rebalResult.range.min}~${rebalResult.range.max}로 재배치합니다. 진행할까요?`)) return;
+        }
+        setRebalRunning(true);
+        try {
+            const r = await adminRebalanceFakeUsers({ dryRun, threshold, min: Math.max(1, Math.round(threshold / 2)) });
+            setRebalResult(r.data);
+            showToast(dryRun
+                ? `미리보기 — ${r.data.threshold} 이상 ${r.data.overBefore}명 → ${r.data.overAfter}명`
+                : `재배치 완료 — ${r.data.changed}명`);
+        } catch (e) {
+            const err = e as { code?: string; message?: string };
+            showToast(`실패: ${err.code ?? 'error'} ${err.message ?? String(e)}`, false);
+            console.error('adminRebalanceFakeUsers 실패:', e);
+        } finally {
+            setRebalRunning(false);
         }
     };
 
@@ -631,6 +678,46 @@ const AdminPage: React.FC = () => {
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    )}
+                </div>
+
+                {/* 가짜 유저 상위권 재조정 */}
+                <div style={{ padding: '10px 12px', borderBottom: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 700 }}>가짜 유저 재조정</div>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <input
+                            value={rebalThreshold}
+                            onChange={e => setRebalThreshold(e.target.value)}
+                            style={{ width: 48, padding: '3px 6px', background: '#0f172a', border: '1px solid #334155', color: '#e2e8f0', borderRadius: 4, fontSize: 12 }}
+                            title="이 점수 이상인 가짜 유저를 전부 그 아래로 내립니다"
+                        />
+                        <span style={{ fontSize: 11, color: '#64748b' }}>이상</span>
+                        <button
+                            style={S.btnSmall('#0ea5e9')}
+                            disabled={rebalRunning}
+                            onClick={() => handleRebalanceFakes(true)}
+                        >
+                            {rebalRunning ? '처리 중...' : '미리보기'}
+                        </button>
+                        <button
+                            style={S.btnSmall(rebalResult?.dryRun ? '#dc2626' : '#475569')}
+                            disabled={rebalRunning || !rebalResult?.dryRun}
+                            onClick={() => handleRebalanceFakes(false)}
+                        >
+                            반영
+                        </button>
+                    </div>
+                    {rebalResult && (
+                        <div style={{ fontSize: 11, color: '#cbd5e1', lineHeight: 1.6 }}>
+                            <div>{rebalResult.dryRun ? '미리보기' : '반영됨'} · 가짜 {rebalResult.totalFakes}명</div>
+                            <div>{rebalResult.threshold} 이상 {rebalResult.overBefore} → {rebalResult.overAfter}명</div>
+                            <div>재배치 {rebalResult.changed}명 → {rebalResult.range.min}~{rebalResult.range.max}</div>
+                            <div style={{ marginTop: 4, color: '#94a3b8' }}>
+                                {rebalResult.samples.map(sm => (
+                                    <div key={sm.uid}>{sm.uid} : {sm.before} → {sm.after}</div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

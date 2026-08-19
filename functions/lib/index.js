@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.adminRecalcPuzzlePower = exports.adminMigrateLegacyCoins = exports.refundPortOnePayment = exports.adminGetPayments = exports.adminSaveUserData = exports.adminGetUserData = exports.verifyPortOnePayment = void 0;
+exports.adminRebalanceFakeUsers = exports.adminRecalcPuzzlePower = exports.adminMigrateLegacyCoins = exports.refundPortOnePayment = exports.adminGetPayments = exports.adminSaveUserData = exports.adminGetUserData = exports.verifyPortOnePayment = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const params_1 = require("firebase-functions/params");
 const app_1 = require("firebase-admin/app");
@@ -288,5 +288,65 @@ exports.adminRecalcPuzzlePower = (0, https_1.onCall)({ timeoutSeconds: 540, memo
         const msg = e instanceof Error ? e.message : String(e);
         console.error("adminRecalcPuzzlePower 실패:", e);
         throw new https_1.HttpsError("internal", `재계산 실패: ${msg}`);
+    }
+});
+/**
+ * 가짜 유저 퍼즐력 재조정.
+ *
+ * 보안 규칙상 브라우저에서는 남의 users 문서를 쓸 수 없어 서버에서 처리한다.
+ * threshold 이상인 가짜 유저를 모두 골라 [min, threshold-1] 범위에 순위를 유지한 채 고르게 배분한다.
+ * dryRun 기본값은 true.
+ */
+exports.adminRebalanceFakeUsers = (0, https_1.onCall)({ timeoutSeconds: 300, memory: "512MiB" }, async (request) => {
+    assertAdmin(request);
+    const dryRun = request.data?.dryRun !== false;
+    const threshold = request.data?.threshold ?? 300;
+    const min = request.data?.min ?? 150;
+    const max = threshold - 1;
+    if (min > max) {
+        throw new https_1.HttpsError("invalid-argument", `min(${min}) 이 상한(${max}) 보다 큽니다.`);
+    }
+    try {
+        const snap = await db.collection("users")
+            .where("uid", ">=", "fake_user_")
+            .where("uid", "<=", "fake_user_")
+            .get();
+        const fakes = snap.docs
+            .map((d) => ({ uid: d.id, pp: d.data().puzzlePower ?? 0 }))
+            .sort((a, b) => b.pp - a.pp);
+        // 임계값 이상인 유저 전부가 대상
+        const targets = fakes.filter((f) => f.pp >= threshold);
+        const planned = targets.map((t, i) => ({
+            uid: t.uid,
+            before: t.pp,
+            after: targets.length <= 1
+                ? max
+                : Math.round(max - (i / (targets.length - 1)) * (max - min)),
+        }));
+        if (!dryRun) {
+            const BATCH_SIZE = 400;
+            for (let i = 0; i < planned.length; i += BATCH_SIZE) {
+                const batch = db.batch();
+                for (const p of planned.slice(i, i + BATCH_SIZE)) {
+                    batch.set(db.collection("users").doc(p.uid), { puzzlePower: p.after }, { merge: true });
+                }
+                await batch.commit();
+            }
+        }
+        return {
+            dryRun,
+            totalFakes: fakes.length,
+            threshold,
+            overBefore: targets.length,
+            overAfter: planned.filter((p) => p.after >= threshold).length,
+            changed: planned.length,
+            range: { min, max },
+            samples: planned.slice(0, 10),
+        };
+    }
+    catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("adminRebalanceFakeUsers 실패:", e);
+        throw new https_1.HttpsError("internal", `재배치 실패: ${msg}`);
     }
 });
