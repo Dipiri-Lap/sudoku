@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
   Lightbulb,
+  Undo2,
+  ZoomIn,
 } from 'lucide-react';
 import {
   DIFFICULTY_CONFIGS,
@@ -135,6 +137,8 @@ const CrossMathGame: React.FC = () => {
   const [selectedCellKey, setSelectedCellKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState(false);
+  /** 놓은 순서. 되돌리기가 마지막 것부터 빼낸다 */
+  const [history, setHistory] = useState<string[]>([]);
 
   // 모드 선택 화면에서만 공통 배경(퍼즐 타일)을 쓴다 — 다른 게임의 모드 선택과 동일
   useEffect(() => {
@@ -248,6 +252,7 @@ const CrossMathGame: React.FC = () => {
     setSelectedTileId(null);
     setSelectedCellKey(null);
     setZoomed(false);
+    setHistory([]);
     setAdUsedThisStage(false);
     setHintPrompt(null);
     setHintMode(false);
@@ -281,6 +286,7 @@ const CrossMathGame: React.FC = () => {
   /** 빈칸에 타일을 놓고 선택 상태를 모두 푼다 */
   const place = useCallback((key: string, tile: Tile) => {
     setPlacements(prev => ({ ...prev, [key]: tile }));
+    setHistory(prev => [...prev.filter(k => k !== key), key]);
     setSelectedTileId(null);
     setSelectedCellKey(null);
   }, []);
@@ -302,7 +308,14 @@ const CrossMathGame: React.FC = () => {
       delete next[key];
       return next;
     });
+    setHistory(prev => prev.filter(k => k !== key));
   }, []);
+
+  /** 마지막에 놓은 타일을 빼낸다 */
+  const handleUndo = useCallback(() => {
+    const last = history[history.length - 1];
+    if (last) takeBack(last);
+  }, [history, takeBack]);
 
   /**
    * 고른 빈칸을 정답으로 채운다.
@@ -325,6 +338,7 @@ const CrossMathGame: React.FC = () => {
       next[key] = misplaced[1];
       return next;
     });
+    setHistory(prev => [...prev.filter(k => k !== misplaced[0] && k !== key), key]);
     setSelectedTileId(null);
     setSelectedCellKey(null);
     return true;
@@ -515,8 +529,8 @@ const CrossMathGame: React.FC = () => {
               </div>
             ))}
             <p className="cm-about-tip">
-              💡 25스테이지마다 <strong>부호만 주어지는 관문 문제</strong>가 나옵니다. 숫자가 하나도 없는 줄은
-              교차하는 다른 식으로 풀어야 해요.
+              💡 <strong>숫자 없이 부호만 있는 줄</strong>은 어느 스테이지에서나 나옵니다. 그 줄만 봐서는 풀 수 없고,
+              교차하는 다른 식으로 한 칸씩 확정해 나가야 해요. 25스테이지마다 오는 관문에서는 이런 줄이 특히 많이 나옵니다.
             </p>
           </div>
         </details>
@@ -714,6 +728,17 @@ const CrossMathGame: React.FC = () => {
       </section>
 
       <nav className="cm-actionbar">
+        <button className="cm-action-btn" onClick={handleUndo} disabled={history.length === 0}>
+          <Undo2 size={22} />
+          <span>되돌리기</span>
+        </button>
+        <button
+          className={`cm-action-btn ${zoomed ? 'cm-action-btn-on' : ''}`}
+          onClick={() => setZoomed(z => !z)}
+        >
+          <ZoomIn size={22} />
+          <span>{zoomed ? '축소' : '확대'}</span>
+        </button>
         <button
           className={`cm-action-btn cm-action-btn-accent ${hintMode ? 'cm-action-btn-on' : ''}`}
           onClick={handleHint}

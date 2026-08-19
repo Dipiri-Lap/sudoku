@@ -119,7 +119,7 @@ const routes = [
         <h2 style="font-size:1.15rem;font-weight:700;color:#333;margin-bottom:1rem">크로썸 - 십자말풀이 수식 퍼즐</h2>
         <p style="margin-bottom:1.25rem;font-size:.9rem">크로썸은 십자말풀이처럼 가로·세로로 얽힌 수식의 빈칸을 숫자 타일로 채우는 <strong>계산 퍼즐</strong>입니다. 한 숫자가 가로 식과 세로 식에 동시에 쓰이므로, 한 칸을 정하면 이어진 칸들이 연쇄적으로 풀립니다.</p>
         <h3 style="font-size:1.05rem;font-weight:700;color:#444;margin-bottom:.5rem">천천히 올라가는 난이도</h3>
-        <p style="margin-bottom:1.25rem;font-size:.9rem">한 자리 덧셈·뺄셈으로 시작해 곱셈과 나눗셈이 차례로 등장합니다. 501스테이지부터는 <strong>1+1+1=3</strong> 처럼 숫자 네 개가 들어가는 3항 식이 섞여 나오고, 25스테이지마다 부호만 주어지는 관문 문제가 기다립니다.</p>
+        <p style="margin-bottom:1.25rem;font-size:.9rem">한 자리 덧셈·뺄셈으로 시작해 곱셈과 나눗셈이 차례로 등장합니다. 501스테이지부터는 <strong>1+1+1=3</strong> 처럼 숫자 네 개가 들어가는 3항 식이 섞여 나옵니다. 숫자 없이 <strong>부호만 있는 줄</strong>은 어느 스테이지에서나 등장하며, 25스테이지마다 오는 관문에서는 그런 줄이 특히 많아집니다.</p>
         <h3 style="font-size:1.05rem;font-weight:700;color:#444;margin-bottom:.5rem">계산보다 추리</h3>
         <p style="margin-bottom:1.25rem;font-size:.9rem">어려운 암산이 필요한 게임이 아닙니다. <strong>어느 칸부터 풀 수 있는지 찾아내는 것</strong>이 핵심입니다. 확정할 수 있는 칸 하나를 찾으면 그 숫자가 다른 식의 실마리가 되어 도미노처럼 이어집니다.</p>
         <h3 style="font-size:1.05rem;font-weight:700;color:#444;margin-bottom:.5rem">1200 스테이지 무료</h3>

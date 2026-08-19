@@ -816,7 +816,9 @@ body.landing-bg::before {
 
 .mode-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* min(300px, 100%) — 컨테이너가 300px 보다 좁으면 트랙도 같이 줄어든다.
+     그냥 minmax(300px, 1fr) 이면 좁은 화면에서 트랙이 300px 로 고정돼 버튼이 밖으로 삐져나간다. */
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 2rem;
 }
 
