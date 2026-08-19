@@ -12,6 +12,7 @@ import { useWordSortProgress } from '../../context/WordSortProgressContext';
 import { useWordSortHardProgress } from '../../context/WordSortHardProgressContext';
 import { useQueensProgress } from '../../context/QueensProgressContext';
 import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
+import { useCrossumProgress } from '../../features/cross-math/stage/progress';
 
 interface ProfileModalProps {
     uid: string;
@@ -55,6 +56,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const { wordSortHardProgress } = useWordSortHardProgress();
     const { queensProgress } = useQueensProgress();
     const { snapSpotProgress } = useSnapSpotProgress();
+    const { stageProgress: crossumProgress } = useCrossumProgress();
 
     /** Returns { current, target } for the challenge's progress bar */
     const getProgress = (challenge: Challenge): { current: number; target: number } => {
@@ -72,6 +74,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 return { current: Math.min(queensProgress, target), target };
             case 'snapspot_stage':
                 return { current: Math.min(snapSpotProgress, target), target };
+            case 'crossum_stage':
+                // crossumProgress 는 '도전 중인 스테이지' 라 클리어 수는 -1
+                return { current: Math.min(crossumProgress - 1, target), target };
             case 'time_attack': {
                 const cleared = challenges.isChallengeCleared(challenge.id) || challenges.isChallengeCompleted(challenge.id);
                 return { current: cleared ? 1 : 0, target: 1 };

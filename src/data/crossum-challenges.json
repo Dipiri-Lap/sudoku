@@ -1,0 +1,137 @@
+[
+  {
+    "id": "crossum_stage_5",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "🧮 첫 수식",
+    "condition": "스테이지 5 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 5
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
+  },
+  {
+    "id": "crossum_stage_10",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "✏️ 빈칸을 채우다",
+    "condition": "스테이지 10 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 10
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 25
+    }
+  },
+  {
+    "id": "crossum_stage_25",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "🚦 첫 관문 돌파",
+    "condition": "스테이지 25 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 25
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 50
+    }
+  },
+  {
+    "id": "crossum_stage_50",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "➗ 사칙연산 견습생",
+    "condition": "스테이지 50 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 50
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 75
+    }
+  },
+  {
+    "id": "crossum_stage_100",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "📐 수식 설계자",
+    "condition": "스테이지 100 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 100
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 100
+    }
+  },
+  {
+    "id": "crossum_stage_300",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "🧠 암산의 경지",
+    "condition": "스테이지 300 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 300
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 300
+    }
+  },
+  {
+    "id": "crossum_stage_500",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "⚖️ 등호의 균형",
+    "condition": "스테이지 500 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 500
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 400
+    }
+  },
+  {
+    "id": "crossum_stage_700",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "🌀 세 수의 조율자",
+    "condition": "스테이지 700 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 700
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 500
+    }
+  },
+  {
+    "id": "crossum_stage_1000",
+    "type": "STAGE",
+    "game": "crossum",
+    "title": "🏆 크로썸 마스터",
+    "condition": "스테이지 1000 클리어",
+    "progressConfig": {
+      "source": "crossum_stage",
+      "target": 1000
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 500
+    }
+  }
+]

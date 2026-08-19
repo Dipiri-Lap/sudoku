@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Play, Download, LogIn, LogOut, Share2, ShoppingBag } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
+import { useCrossumProgress } from '../../features/cross-math/stage/progress';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { auth } from '../../firebase';
 import { signOut } from '../../services/authService';
@@ -34,6 +35,7 @@ const LandingPage: React.FC = () => {
     const { wordSortProgress } = useWordSortProgress();
     const { wordSortHardProgress } = useWordSortHardProgress();
     const { snapSpotProgress } = useSnapSpotProgress();
+    const { stageProgress: crossumProgress } = useCrossumProgress();
     const hasUnclaimed = Object.values(ALL_CHALLENGES).flat().some(c => {
         if (challenges.isChallengeCompleted(c.id)) return false;
         const { source, target } = c.progressConfig;
@@ -43,6 +45,7 @@ const LandingPage: React.FC = () => {
         if (source === 'word_sort_stage') return Math.min(wordSortProgress, target) >= target;
         if (source === 'word_sort_hard_stage') return Math.min(wordSortHardProgress, target) >= target;
         if (source === 'snapspot_stage') return Math.min(snapSpotProgress, target) >= target;
+        if (source === 'crossum_stage') return Math.min(crossumProgress - 1, target) >= target;
         return false;
     });
     const [showLoginModal, setShowLoginModal] = useState(false);

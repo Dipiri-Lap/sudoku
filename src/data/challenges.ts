@@ -2,12 +2,13 @@ import sudokuChallenges from './sudoku-challenges.json';
 import wordSortChallenges from './word-sort-challenges.json';
 import queensChallenges from './queens-challenges.json';
 import snapspotChallenges from './snapspot-challenges.json';
+import crossumChallenges from './crossum-challenges.json';
 
 export type ChallengeType = 'STAGE' | 'TIME_ATTACK';
 
-export type GameKey = 'sudoku' | 'word-sort' | 'queens' | 'snapspot';
+export type GameKey = 'sudoku' | 'word-sort' | 'queens' | 'snapspot' | 'crossum';
 
-export type ProgressSource = 'regular_stage' | 'beginner_stage' | 'time_attack' | 'word_sort_stage' | 'word_sort_hard_stage' | 'queens_stage' | 'snapspot_stage';
+export type ProgressSource = 'regular_stage' | 'beginner_stage' | 'time_attack' | 'word_sort_stage' | 'word_sort_hard_stage' | 'queens_stage' | 'snapspot_stage' | 'crossum_stage';
 
 export interface ChallengeProgressConfig {
     source: ProgressSource;
@@ -34,6 +35,7 @@ export const SUDOKU_CHALLENGES: Challenge[] = sudokuChallenges as Challenge[];
 export const WORD_SORT_CHALLENGES: Challenge[] = wordSortChallenges as Challenge[];
 export const QUEENS_CHALLENGES: Challenge[] = queensChallenges as Challenge[];
 export const SNAPSPOT_CHALLENGES: Challenge[] = snapspotChallenges as Challenge[];
+export const CROSSUM_CHALLENGES: Challenge[] = crossumChallenges as Challenge[];
 
 /** 게임별 도전과제 목록 — 게임 추가 시 여기에 등록 */
 export const ALL_CHALLENGES: Record<GameKey, Challenge[]> = {
@@ -41,6 +43,7 @@ export const ALL_CHALLENGES: Record<GameKey, Challenge[]> = {
     'word-sort': WORD_SORT_CHALLENGES,
     queens: QUEENS_CHALLENGES,
     snapspot: SNAPSPOT_CHALLENGES,
+    crossum: CROSSUM_CHALLENGES,
 };
 
 /** id → Challenge 빠른 조회 */
