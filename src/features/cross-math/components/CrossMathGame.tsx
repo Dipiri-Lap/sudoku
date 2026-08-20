@@ -7,6 +7,8 @@ import {
   ZoomIn,
   House,
   ArrowRight,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import {
   DIFFICULTY_CONFIGS,
@@ -19,6 +21,7 @@ import { stageLevel, TOTAL_STAGES } from '../stage/schedule';
 import { useCrossumProgress } from '../stage/progress';
 import { extractEquations, evaluate } from '../stage/board';
 import { useCoins } from '../../../context/CoinContext';
+import { playSfx, isMuted, setMuted, warmUpSfx, startBgm, stopBgm } from '../utils/sound';
 import '../styles/CrossMath.css';
 
 interface Tile {
@@ -92,6 +95,17 @@ const RULES = [
     visual: <MiniRow cells={['7', '+', 'B', '-', '4', '=', '11']} />,
   },
 ];
+
+/** 방금 놓은 칸의 상하좌우 이웃이면 바깥으로 밀리는 클래스를 준다 */
+function nudgeClass(placedKey: string, key: string): string {
+  const [pr, pc] = placedKey.split(',').map(Number);
+  const [r, c] = key.split(',').map(Number);
+  if (r === pr && c === pc - 1) return 'cm-cell-nudge-l';
+  if (r === pr && c === pc + 1) return 'cm-cell-nudge-r';
+  if (c === pc && r === pr - 1) return 'cm-cell-nudge-u';
+  if (c === pc && r === pr + 1) return 'cm-cell-nudge-d';
+  return '';
+}
 
 const POOL_COLS = 8;
 const MIN_CELL_PX = 16;
@@ -181,6 +195,24 @@ const CrossMathGame: React.FC = () => {
   const [history, setHistory] = useState<string[]>([]);
   /** 보상을 이미 지급한 스테이지 — 중복 지급 방지 */
   const awardedRef = useRef<number | null>(null);
+
+  /** 방금 놓은 칸 — 착지 애니메이션과 이웃 밀림에 쓰고 잠시 뒤 지운다 */
+  const [muted, setMutedState] = useState(isMuted);
+  const [lastPlaced, setLastPlaced] = useState<string | null>(null);
+  /** 막 완성된 줄의 칸별 지연(ms). 왼쪽부터 번져나가게 한다 */
+  const [flash, setFlash] = useState<Record<string, number>>({});
+  const prevSolvedRef = useRef<Set<string>>(new Set());
+
+  /**
+   * 배경음은 플레이 화면에서만.
+   * 'generating' 은 스테이지를 넘길 때 잠깐 거치는 화면이라 여기서 끄면 곡이 매번 끊긴다.
+   * 모드 화면으로 나갈 때만 정지한다.
+   */
+  useEffect(() => {
+    if (screen === 'playing') startBgm();
+    else if (screen === 'mode') stopBgm();
+  }, [screen]);
+  useEffect(() => () => stopBgm(), []);
 
   // 모드 선택 화면에서만 공통 배경(퍼즐 타일)을 쓴다 — 다른 게임의 모드 선택과 동일
   useEffect(() => {
@@ -301,6 +333,36 @@ const CrossMathGame: React.FC = () => {
     setAdHintCredit(false);
   }, []);
 
+  /** 방금 완성된 줄을 찾아 왼쪽(위)부터 차례로 번지게 한다 */
+  useEffect(() => {
+    const prev = prevSolvedRef.current;
+    const now = cellState.solved;
+    const justSolved = equations.filter(
+      eq => eq.cellKeys.every(k => now.has(k)) && !eq.cellKeys.every(k => prev.has(k))
+    );
+    prevSolvedRef.current = new Set(now);
+    if (justSolved.length === 0) return;
+
+    const next: Record<string, number> = {};
+    for (const eq of justSolved) {
+      eq.cellKeys.forEach((k, i) => {
+        next[k] = Math.min(next[k] ?? Infinity, i * 40);
+      });
+    }
+    setFlash(next);
+    if (!isWinner) playSfx('complete');
+    const t = setTimeout(() => setFlash({}), 700);
+    return () => clearTimeout(t);
+  }, [cellState.solved, equations, isWinner]);
+
+  /** 줄을 다 채웠는데 계산이 틀렸을 때 */
+  const prevBrokenRef = useRef(0);
+  useEffect(() => {
+    const n = cellState.broken.size;
+    if (n > prevBrokenRef.current) playSfx('fail');
+    prevBrokenRef.current = n;
+  }, [cellState.broken]);
+
   // 스테이지를 깨면 진행도를 한 칸 올린다. 렌더 중 상태를 바꾸지 않도록 effect에서 처리한다.
   useEffect(() => {
     if (!isWinner || stage === null) return;
@@ -310,6 +372,11 @@ const CrossMathGame: React.FC = () => {
     if (awardedRef.current === stage) return;
     awardedRef.current = stage;
     void addCoins(STAGE_CLEAR_COIN);
+    navigator.vibrate?.([20, 40, 30]);
+    playSfx('complete');
+    import('canvas-confetti').then(({ default: confetti }) => {
+      confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 }, disableForReducedMotion: true });
+    });
     import('../../../firebase').then(({ auth }) => {
       const uid = auth.currentUser?.uid;
       if (!uid) return;
@@ -320,6 +387,7 @@ const CrossMathGame: React.FC = () => {
   }, [isWinner, stage, clearStage, addCoins]);
 
   const runStage = useCallback(async (n: number) => {
+    warmUpSfx();
     setStage(n);
     setDifficulty(`lv${stageLevel(n)}` as Difficulty);
     setScreen('generating');
@@ -338,10 +406,20 @@ const CrossMathGame: React.FC = () => {
   /** 빈칸에 타일을 놓고 선택 상태를 모두 푼다 */
   const place = useCallback((key: string, tile: Tile) => {
     setPlacements(prev => ({ ...prev, [key]: tile }));
+    // 짧을수록 날카롭게 느껴진다
+    navigator.vibrate?.(15);
+    playSfx('insert');
+    setLastPlaced(key);
     setHistory(prev => [...prev.filter(k => k !== key), key]);
     setSelectedTileId(null);
     setSelectedCellKey(null);
   }, []);
+
+  useEffect(() => {
+    if (!lastPlaced) return;
+    const t = setTimeout(() => setLastPlaced(null), 260);
+    return () => clearTimeout(t);
+  }, [lastPlaced]);
 
   const handleTileClick = useCallback((tile: Tile) => {
     // 빈칸을 먼저 골라 둔 상태면 바로 놓는다 (칸 → 숫자 순서)
@@ -349,6 +427,7 @@ const CrossMathGame: React.FC = () => {
       place(selectedCellKey, tile);
       return;
     }
+    playSfx('select');
     setSelectedTileId(prev => (prev === tile.id ? null : tile.id));
   }, [selectedCellKey, place]);
 
@@ -361,6 +440,7 @@ const CrossMathGame: React.FC = () => {
       return next;
     });
     setHistory(prev => prev.filter(k => k !== key));
+    playSfx('remove');
   }, []);
 
   /** 마지막에 놓은 타일을 빼낸다 */
@@ -555,6 +635,7 @@ const CrossMathGame: React.FC = () => {
       return;
     }
     // 아무것도 고르지 않았으면 이 칸을 골라 둔다
+    playSfx('select');
     setSelectedCellKey(prev => (prev === key ? null : key));
   }, [hintMode, applyHintTo, placements, pool, selectedTileId, takeBack, place]);
 
@@ -743,15 +824,19 @@ const CrossMathGame: React.FC = () => {
           >
             <ChevronLeft size={20} />
           </button>
+          <button
+            className="cm-icon-btn cm-mute-btn"
+            onClick={() => { const next = !muted; setMuted(next); setMutedState(next); if (!next) warmUpSfx(); }}
+            aria-label={muted ? '소리 켜기' : '소리 끄기'}
+            title={muted ? '소리 켜기' : '소리 끄기'}
+          >
+            {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
         </div>
 
         <span className="cm-topbar-title">{stage !== null ? `스테이지 ${stage}` : 'Crossum'}</span>
 
         <div className="cm-topbar-side cm-topbar-side-right">
-          <span className="cm-coin" title="보유 코인">
-            <img src="/coin_Icon.png" alt="" />
-            {coins}
-          </span>
         </div>
       </header>
 
@@ -785,6 +870,16 @@ const CrossMathGame: React.FC = () => {
               const cell = cellMap.get(key);
               if (!cell) return <div key={idx} className="cm-cell cm-cell-empty" />;
 
+              // 방금 놓은 칸과 그 이웃에 반응을 준다. 놓인 칸만 움직이면 밋밋하다.
+              const fxCls = [
+                lastPlaced === key ? 'cm-cell-pop' : '',
+                lastPlaced && nudgeClass(lastPlaced, key),
+                flash[key] !== undefined ? 'cm-cell-flash' : '',
+              ].filter(Boolean).join(' ');
+              const fxStyle = flash[key] !== undefined
+                ? ({ '--cm-flash-delay': `${flash[key]}ms` } as React.CSSProperties)
+                : undefined;
+
               // 완성된 줄은 빨강(틀림)이 녹색(맞음)보다 우선한다 — 가로·세로에 동시에 속할 수 있다
               const lineCls = cellState.broken.has(key)
                 ? 'cm-cell-broken'
@@ -793,14 +888,14 @@ const CrossMathGame: React.FC = () => {
                   : '';
 
               if (cell.type === 'op') {
-                return <div key={idx} className={`cm-cell cm-cell-op ${lineCls}`}>{cell.operator}</div>;
+                return <div key={idx} className={`cm-cell cm-cell-op ${lineCls} ${fxCls}`} style={fxStyle}>{cell.operator}</div>;
               }
               if (cell.type === 'eq') {
-                return <div key={idx} className={`cm-cell cm-cell-eq ${lineCls}`}>=</div>;
+                return <div key={idx} className={`cm-cell cm-cell-eq ${lineCls} ${fxCls}`} style={fxStyle}>=</div>;
               }
               if (!cell.isBlank) {
                 return (
-                  <div key={idx} className={`cm-cell cm-cell-given ${lineCls} ${digitClass(cell.value!)}`}>
+                  <div key={idx} className={`cm-cell cm-cell-given ${lineCls} ${fxCls} ${digitClass(cell.value!)}`} style={fxStyle}>
                     {cell.value}
                   </div>
                 );
@@ -815,10 +910,12 @@ const CrossMathGame: React.FC = () => {
                 <div
                   key={idx}
                   data-cell={key}
-                  className={`cm-cell cm-cell-blank ${cls} ${filled ? digitClass(placed.value) : ''}`}
+                  className={`cm-cell cm-cell-blank ${cls} ${fxCls} ${filled ? digitClass(placed.value) : ''}`}
+                  style={fxStyle}
                   onClick={() => handleCellClick(key)}
                 >
                   {filled ? placed.value : ''}
+                  {lastPlaced === key && <span className="cm-impact-ring" aria-hidden="true" />}
                 </div>
               );
             })}
