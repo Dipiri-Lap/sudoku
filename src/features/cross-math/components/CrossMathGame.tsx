@@ -5,6 +5,8 @@ import {
   Lightbulb,
   Undo2,
   ZoomIn,
+  House,
+  ArrowRight,
 } from 'lucide-react';
 import {
   DIFFICULTY_CONFIGS,
@@ -125,6 +127,9 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 3;
 /** 확대 버튼을 눌렀을 때의 배율 */
 const BUTTON_SCALE = 2;
+/** 스테이지 클리어 보상 — 워드스택과 동일 */
+const STAGE_CLEAR_COIN = 10;
+const STAGE_CLEAR_PUZZLE_POWER = 1;
 
 const CrossMathGame: React.FC = () => {
   const navigate = useNavigate();
@@ -138,7 +143,7 @@ const CrossMathGame: React.FC = () => {
   const [testStage, setTestStage] = useState('1');
   const [aboutOpen, setAboutOpen] = useState(false);
 
-  const { coins, spendCoins } = useCoins();
+  const { coins, spendCoins, addCoins } = useCoins();
   /** 힌트 안내 창 — confirm(코인 사용) / ad(광고 시청) / insufficient(코인 부족) */
   const [hintPrompt, setHintPrompt] = useState<'confirm' | 'ad' | 'insufficient' | null>(null);
   const [adWatching, setAdWatching] = useState(false);
@@ -174,6 +179,8 @@ const CrossMathGame: React.FC = () => {
   const zoomed = view.scale > 1;
   /** 놓은 순서. 되돌리기가 마지막 것부터 빼낸다 */
   const [history, setHistory] = useState<string[]>([]);
+  /** 보상을 이미 지급한 스테이지 — 중복 지급 방지 */
+  const awardedRef = useRef<number | null>(null);
 
   // 모드 선택 화면에서만 공통 배경(퍼즐 타일)을 쓴다 — 다른 게임의 모드 선택과 동일
   useEffect(() => {
@@ -296,8 +303,21 @@ const CrossMathGame: React.FC = () => {
 
   // 스테이지를 깨면 진행도를 한 칸 올린다. 렌더 중 상태를 바꾸지 않도록 effect에서 처리한다.
   useEffect(() => {
-    if (isWinner && stage !== null) clearStage(stage);
-  }, [isWinner, stage, clearStage]);
+    if (!isWinner || stage === null) return;
+    clearStage(stage);
+
+    // 한 판에 한 번만 지급한다. 워드스택과 같은 보상량.
+    if (awardedRef.current === stage) return;
+    awardedRef.current = stage;
+    void addCoins(STAGE_CLEAR_COIN);
+    import('../../../firebase').then(({ auth }) => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      import('../../../services/rankingService').then(m =>
+        m.incrementPuzzlePower(uid).catch(console.error)
+      );
+    });
+  }, [isWinner, stage, clearStage, addCoins]);
 
   const runStage = useCallback(async (n: number) => {
     setStage(n);
@@ -314,9 +334,6 @@ const CrossMathGame: React.FC = () => {
     }
   }, [loadLevel]);
 
-  const handleReset = useCallback(() => {
-    if (level) loadLevel(level);
-  }, [level, loadLevel]);
 
   /** 빈칸에 타일을 놓고 선택 상태를 모두 푼다 */
   const place = useCallback((key: string, tile: Tile) => {
@@ -815,22 +832,25 @@ const CrossMathGame: React.FC = () => {
             <div className="cm-clear-card">
               <div className="cm-clear-emoji">🎉</div>
               <h2>클리어!</h2>
-              <p>스테이지 {stage} · Lv.{cfg?.level} {cfg?.label} 완료</p>
+              <p>스테이지 {stage} · Lv.{cfg?.level} {cfg?.label}</p>
+
+              <div className="cm-reward-row">
+                <span className="cm-reward cm-reward-coin">🪙 +{STAGE_CLEAR_COIN}</span>
+                <span className="cm-reward cm-reward-power">⚡ 퍼즐력 +{STAGE_CLEAR_PUZZLE_POWER}</span>
+              </div>
+
               <div className="cm-clear-btns">
+                <button className="cm-btn-home" onClick={() => setScreen('mode')} aria-label="홈으로">
+                  <House size={22} />
+                </button>
                 <button
                   className="cm-btn-primary"
                   onClick={() => stage !== null && runStage(stage + 1)}
                   disabled={stage === null || stage >= TOTAL_STAGES}
                 >
-                  다음 스테이지
-                </button>
-                <button className="cm-btn-secondary" onClick={handleReset}>
-                  다시 시도
+                  다음 스테이지 <ArrowRight size={20} />
                 </button>
               </div>
-              <button className="cm-btn-text" onClick={() => setScreen('mode')}>
-                모드 선택
-              </button>
             </div>
           </div>
         )}
