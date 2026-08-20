@@ -1,0 +1,163 @@
+/* ──────────────────────────────────────────────────────────────
+   크로썸 테마
+   CrossMath.css 의 .cm-page 에 정의된 색상 토큰 위에, 필요한 것만 덮어쓴다.
+   덮어쓰지 않은 토큰은 기본값이 그대로 쓰인다.
+
+   어느 테마든 지켜야 할 것:
+   solved(맞음)와 broken(틀림)은 서로, 그리고 배경과 확실히 구분되어야 한다.
+   이 둘이 묻히면 게임이 성립하지 않는다.
+   ────────────────────────────────────────────────────────────── */
+
+/* 다크 — 검정 배경에 회색 칸 */
+.cm-page.cm-theme-dark {
+  --cm-bg-1: #000000; --cm-bg-2: #0c0c0d;
+  --cm-panel: #0c0c0d; --cm-panel-border: #2c2c2e;
+  --cm-text: #e5e5e7; --cm-text-strong: #ffffff; --cm-text-muted: #8e8e93;
+  --cm-btn-bg: #1c1c1e; --cm-btn-border: #3a3a3c; --cm-btn-text: #e5e5e7; --cm-btn-hover: #2c2c2e;
+  --cm-accent: #0a9cf5; --cm-accent-2: #38b6ff; --cm-accent-soft: #123a52; --cm-accent-shadow: #06699f;
+  --cm-given-bg: #3a3a3c; --cm-given-border: #4a4a4d; --cm-op-text: #ffffff;
+  --cm-slot-bg: #1c1c1e; --cm-slot-border: #3a3a3c;
+  --cm-tile-bg: #3a3a3c; --cm-tile-hover: #4a4a4d; --cm-tile-border: #5a5a5d; --cm-tile-text: #ffffff;
+  --cm-solved-bg: #1f5c2e; --cm-solved-border: #34c759; --cm-solved-text: #9ff5b4;
+  --cm-broken-bg: #5c1f22; --cm-broken-border: #ff453a; --cm-broken-text: #ff9d96;
+}
+
+/* 모눈종이 — 수학 공책 */
+.cm-page.cm-theme-grid {
+  --cm-bg-1: #f7fbff; --cm-bg-2: #eaf2fb;
+  --cm-panel: #ffffff; --cm-panel-border: #c3d7ee;
+  --cm-text: #2b3a4a; --cm-text-strong: #1b2a3a; --cm-text-muted: #90a4bb;
+  --cm-btn-bg: #ffffff; --cm-btn-border: #c3d7ee; --cm-btn-text: #3a5b80; --cm-btn-hover: #eaf2fb;
+  --cm-accent: #4a86d8; --cm-accent-2: #6ba1e8; --cm-accent-soft: #dce9fa; --cm-accent-shadow: #2f6ab8;
+  --cm-given-bg: #dce9fa; --cm-given-border: #a9c8ec; --cm-op-text: #2f6ab8;
+  --cm-slot-bg: #fbfdff; --cm-slot-border: #cddff2;
+  --cm-tile-bg: #eef6e9; --cm-tile-hover: #e2efd9; --cm-tile-border: #7fb069; --cm-tile-text: #3d6b2c;
+  --cm-solved-bg: #cbe8bd; --cm-solved-border: #4f9236; --cm-solved-text: #2c5a1e;
+  --cm-broken-bg: #fbdcdc; --cm-broken-border: #d9534f; --cm-broken-text: #9b2c28;
+}
+
+/* 칠판 — 분필 글씨 */
+.cm-page.cm-theme-chalk {
+  --cm-bg-1: #26372a; --cm-bg-2: #1e2c21;
+  --cm-panel: #2b3d2e; --cm-panel-border: #47614a;
+  --cm-text: #ede9d8; --cm-text-strong: #ffffff; --cm-text-muted: #9aab97;
+  --cm-btn-bg: #354a38; --cm-btn-border: #527054; --cm-btn-text: #ede9d8; --cm-btn-hover: #405840;
+  --cm-accent: #f2d06b; --cm-accent-2: #ffe08a; --cm-accent-soft: #4a5d3f; --cm-accent-shadow: #b89b3e;
+  --cm-given-bg: #3d5440; --cm-given-border: #5d7a5f; --cm-op-text: #ffe9a8;
+  --cm-slot-bg: #253526; --cm-slot-border: #46603f;
+  --cm-tile-bg: #435c45; --cm-tile-hover: #4f6b51; --cm-tile-border: #83a97f; --cm-tile-text: #f2f5e8;
+  --cm-solved-bg: #4d7a45; --cm-solved-border: #a8e08f; --cm-solved-text: #f0ffe6;
+  --cm-broken-bg: #6b3330; --cm-broken-border: #e88a80; --cm-broken-text: #ffdedb;
+}
+
+/* 벚꽃 */
+.cm-page.cm-theme-blossom {
+  --cm-bg-1: #fff5f8; --cm-bg-2: #fce4ec;
+  --cm-panel: #fffafc; --cm-panel-border: #f3bcd0;
+  --cm-text: #6a2440; --cm-text-strong: #880e4f; --cm-text-muted: #c78ba4;
+  --cm-btn-bg: #fff0f5; --cm-btn-border: #f3bcd0; --cm-btn-text: #a3395f; --cm-btn-hover: #fde1ea;
+  --cm-accent: #e2679a; --cm-accent-2: #f286b3; --cm-accent-soft: #fbd8e6; --cm-accent-shadow: #b64878;
+  --cm-given-bg: #fbd0de; --cm-given-border: #eda6bf; --cm-op-text: #a3395f;
+  --cm-slot-bg: #fffafc; --cm-slot-border: #f2ccda;
+  --cm-tile-bg: #e8f3dd; --cm-tile-hover: #dbecca; --cm-tile-border: #86ba6a; --cm-tile-text: #3f6b2c;
+  --cm-solved-bg: #bfe4a8; --cm-solved-border: #4f9236; --cm-solved-text: #2c5a1e;
+  --cm-broken-bg: #ffd6d0; --cm-broken-border: #d9534f; --cm-broken-text: #96231f;
+}
+
+/* 오션 */
+.cm-page.cm-theme-ocean {
+  --cm-bg-1: #eaf6f8; --cm-bg-2: #d3ebef;
+  --cm-panel: #f6fcfd; --cm-panel-border: #a8d3db;
+  --cm-text: #10394a; --cm-text-strong: #08293a; --cm-text-muted: #7fa6b2;
+  --cm-btn-bg: #f0fafb; --cm-btn-border: #a8d3db; --cm-btn-text: #1d6076; --cm-btn-hover: #ddf1f4;
+  --cm-accent: #1f92ad; --cm-accent-2: #3fb0c9; --cm-accent-soft: #cdecf2; --cm-accent-shadow: #146f86;
+  --cm-given-bg: #bfe6ee; --cm-given-border: #86c5d3; --cm-op-text: #0f5f77;
+  --cm-slot-bg: #f6fcfd; --cm-slot-border: #bcdfe6;
+  --cm-tile-bg: #d6f0dd; --cm-tile-hover: #c4e8ce; --cm-tile-border: #4fae74; --cm-tile-text: #1c5f38;
+  --cm-solved-bg: #a9e5c0; --cm-solved-border: #2f9257; --cm-solved-text: #14512f;
+  --cm-broken-bg: #ffd9d4; --cm-broken-border: #e0655c; --cm-broken-text: #96271f;
+}
+
+/* 주판 — 나무틀에 붉은 알 */
+.cm-page.cm-theme-abacus {
+  --cm-bg-1: #e8d3b5; --cm-bg-2: #d8bd97;
+  --cm-panel: #7b4a24; --cm-panel-border: #5a3416;
+  --cm-text: #f5e6d0; --cm-text-strong: #fff6e8; --cm-text-muted: #c9a882;
+  --cm-btn-bg: #8d5a2e; --cm-btn-border: #5a3416; --cm-btn-text: #ffeeda; --cm-btn-hover: #a06a38;
+  --cm-accent: #c0392b; --cm-accent-2: #d94f40; --cm-accent-soft: #5f2e1c; --cm-accent-shadow: #8c2a1f;
+  --cm-given-bg: #b5763c; --cm-given-border: #8a5628; --cm-op-text: #fff2e0;
+  --cm-slot-bg: #6a3f1d; --cm-slot-border: #8a5628;
+  --cm-tile-bg: #c0392b; --cm-tile-hover: #d04a3c; --cm-tile-border: #7e2318; --cm-tile-text: #fff0ec;
+  --cm-solved-bg: #3f7d3a; --cm-solved-border: #8fd47f; --cm-solved-text: #eaffe2;
+  --cm-broken-bg: #4a2020; --cm-broken-border: #ff8377; --cm-broken-text: #ffd9d4;
+}
+
+/* 신문지 — 십자말풀이 원조 */
+.cm-page.cm-theme-newspaper {
+  --cm-bg-1: #efeade; --cm-bg-2: #e2dbc9;
+  --cm-panel: #f6f2e7; --cm-panel-border: #b9b19c;
+  --cm-text: #1f1d19; --cm-text-strong: #000000; --cm-text-muted: #8b8577;
+  --cm-btn-bg: #f6f2e7; --cm-btn-border: #b9b19c; --cm-btn-text: #2b2822; --cm-btn-hover: #e8e2d2;
+  --cm-accent: #2b2822; --cm-accent-2: #514c42; --cm-accent-soft: #ddd6c3; --cm-accent-shadow: #14120f;
+  --cm-given-bg: #ded7c4; --cm-given-border: #a9a08a; --cm-op-text: #1f1d19;
+  --cm-slot-bg: #fbf9f2; --cm-slot-border: #c8c0ac;
+  --cm-tile-bg: #e6e0cf; --cm-tile-hover: #d9d2be; --cm-tile-border: #6d6857; --cm-tile-text: #14120f;
+  --cm-solved-bg: #b9d6a8; --cm-solved-border: #3f6b2c; --cm-solved-text: #21401a;
+  --cm-broken-bg: #eec3bd; --cm-broken-border: #a63a30; --cm-broken-text: #6d211a;
+}
+
+/* 한지 — 미색 종이에 먹색 */
+.cm-page.cm-theme-hanji {
+  --cm-bg-1: #eadfc6; --cm-bg-2: #ddceac;
+  --cm-panel: #f1e7d2; --cm-panel-border: #bda87f;
+  --cm-text: #2c1810; --cm-text-strong: #1a0f08; --cm-text-muted: #9c8763;
+  --cm-btn-bg: #f6eeda; --cm-btn-border: #bda87f; --cm-btn-text: #4a3218; --cm-btn-hover: #eadfc6;
+  --cm-accent: #8c6239; --cm-accent-2: #a87a4c; --cm-accent-soft: #e2d1ad; --cm-accent-shadow: #63431f;
+  --cm-given-bg: #e0cea6; --cm-given-border: #b9a077; --cm-op-text: #33200f;
+  --cm-slot-bg: #f7f0de; --cm-slot-border: #cdb992;
+  --cm-tile-bg: #d9e3c4; --cm-tile-hover: #cbd8b2; --cm-tile-border: #6d8248; --cm-tile-text: #33461c;
+  --cm-solved-bg: #bcd39a; --cm-solved-border: #4d6b2b; --cm-solved-text: #263a12;
+  --cm-broken-bg: #e8c3b6; --cm-broken-border: #a34a32; --cm-broken-text: #6b2617;
+}
+
+/* 계산기 — 액정 */
+.cm-page.cm-theme-lcd {
+  --cm-bg-1: #3b4a3a; --cm-bg-2: #2b3729;
+  --cm-panel: #adc178; --cm-panel-border: #6b7f45;
+  --cm-text: #16250f; --cm-text-strong: #0b1707; --cm-text-muted: #5c7040;
+  --cm-btn-bg: #4a5a46; --cm-btn-border: #2b3729; --cm-btn-text: #d6e6a8; --cm-btn-hover: #5a6b55;
+  --cm-accent: #7a9134; --cm-accent-2: #94ad46; --cm-accent-soft: #c6d795; --cm-accent-shadow: #4e6018;
+  --cm-given-bg: #9cb268; --cm-given-border: #748c46; --cm-op-text: #0b1707;
+  --cm-slot-bg: #bccd8d; --cm-slot-border: #86a055;
+  --cm-tile-bg: #4a5a46; --cm-tile-hover: #5a6b55; --cm-tile-border: #24301f; --cm-tile-text: #d6e6a8;
+  --cm-solved-bg: #6d9a3f; --cm-solved-border: #16250f; --cm-solved-text: #0b1707;
+  --cm-broken-bg: #b5624f; --cm-broken-border: #5e1f14; --cm-broken-text: #2c0b06;
+}
+
+/* 설계도 — 청사진 */
+.cm-page.cm-theme-blueprint {
+  --cm-bg-1: #00305f; --cm-bg-2: #002548;
+  --cm-panel: #003b73; --cm-panel-border: #4d86bf;
+  --cm-text: #dceaf7; --cm-text-strong: #ffffff; --cm-text-muted: #7fa5c8;
+  --cm-btn-bg: #004a8f; --cm-btn-border: #4d86bf; --cm-btn-text: #ffffff; --cm-btn-hover: #005ba8;
+  --cm-accent: #66c7ff; --cm-accent-2: #8ad5ff; --cm-accent-soft: #01477f; --cm-accent-shadow: #0b6ba3;
+  --cm-given-bg: #004f96; --cm-given-border: #6e9ecd; --cm-op-text: #ffffff;
+  --cm-slot-bg: #002a52; --cm-slot-border: #3d6f9e;
+  --cm-tile-bg: #005ba8; --cm-tile-hover: #0069c0; --cm-tile-border: #9fd0f5; --cm-tile-text: #ffffff;
+  --cm-solved-bg: #1d6e4a; --cm-solved-border: #6ff0ad; --cm-solved-text: #ddfff0;
+  --cm-broken-bg: #6e2129; --cm-broken-border: #ff8f96; --cm-broken-text: #ffdde0;
+}
+
+/* 네온 */
+.cm-page.cm-theme-neon {
+  --cm-bg-1: #0a0a12; --cm-bg-2: #12122a;
+  --cm-panel: #16162e; --cm-panel-border: #37375e;
+  --cm-text: #dfe4ff; --cm-text-strong: #ffffff; --cm-text-muted: #7a7fae;
+  --cm-btn-bg: #1e1e3c; --cm-btn-border: #43438a; --cm-btn-text: #b7c0ff; --cm-btn-hover: #2a2a52;
+  --cm-accent: #ff43a1; --cm-accent-2: #ff6cb8; --cm-accent-soft: #3d1330; --cm-accent-shadow: #b81f70;
+  --cm-given-bg: #23234a; --cm-given-border: #4d4d96; --cm-op-text: #63f5ff;
+  --cm-slot-bg: #101026; --cm-slot-border: #3a3a72;
+  --cm-tile-bg: #16384a; --cm-tile-hover: #1d4a5e; --cm-tile-border: #21e6ff; --cm-tile-text: #b6f8ff;
+  --cm-solved-bg: #10513c; --cm-solved-border: #2bffb0; --cm-solved-text: #c9fff0;
+  --cm-broken-bg: #4d1030; --cm-broken-border: #ff3d8a; --cm-broken-text: #ffd0e4;
+}

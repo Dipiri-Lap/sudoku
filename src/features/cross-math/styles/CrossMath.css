@@ -3,17 +3,66 @@
    구조: 상단바 / 보드 패널(+도구줄) / 숫자 풀 패널 / 하단 액션바
    ────────────────────────────────────────────────────────────── */
 
+/* ──────────────────────────────────────────────────────────────
+   색상 토큰
+   기본값은 .cm-page 에 두고, 테마 클래스가 필요한 것만 덮어쓴다.
+   덮어쓰지 않은 값은 아래 기본값이 그대로 쓰인다.
+   ────────────────────────────────────────────────────────────── */
+.cm-page {
+  --cm-bg-1: #fbf1de;
+  --cm-bg-2: #f6e6c8;
+
+  --cm-panel: #fffaef;
+  --cm-panel-border: #e2c68a;
+
+  --cm-text: #4a3418;
+  --cm-text-strong: #6b4416;
+  --cm-text-muted: #b79b6c;
+
+  --cm-btn-bg: #fff8ea;
+  --cm-btn-border: #e8cf9c;
+  --cm-btn-text: #8a5a1e;
+  --cm-btn-hover: #fff1d0;
+
+  --cm-accent: #e8994a;
+  --cm-accent-2: #f5a442;
+  --cm-accent-soft: #ffe9a8;
+  --cm-accent-shadow: #c97a2e;
+  --cm-on-accent: #ffffff;
+
+  /* 보드 칸 */
+  --cm-given-bg: #ffd873;
+  --cm-given-border: #e8b94f;
+  --cm-op-text: #7a4415;
+  --cm-slot-bg: #fdf6e3;
+  --cm-slot-border: #e8d8ae;
+
+  /* 숫자 타일 */
+  --cm-tile-bg: #cdf0c4;
+  --cm-tile-hover: #bdeab1;
+  --cm-tile-border: #6bbf59;
+  --cm-tile-text: #2e6b26;
+
+  /* 판정 — 테마가 바뀌어도 맞음/틀림 대비는 반드시 유지해야 한다 */
+  --cm-solved-bg: #a9e59a;
+  --cm-solved-border: #4ea63c;
+  --cm-solved-text: #1f5c17;
+  --cm-broken-bg: #fbdcd8;
+  --cm-broken-border: #e0776b;
+  --cm-broken-text: #b33a2e;
+}
+
 .cm-page {
   height: 100dvh;
   overflow: hidden;
-  background: linear-gradient(180deg, #fbf1de 0%, #f6e6c8 100%);
+  background: linear-gradient(180deg, var(--cm-bg-1) 0%, var(--cm-bg-2) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
   padding: 0 12px;
   box-sizing: border-box;
-  color: #4a3418;
+  color: var(--cm-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Pretendard, sans-serif;
 }
 
@@ -45,17 +94,17 @@
 .cm-topbar-title {
   font-size: 1.05rem;
   font-weight: 800;
-  color: #7a4f18;
+  color: var(--cm-text-strong);
   white-space: nowrap;
   letter-spacing: 0.02em;
 }
 
 .cm-icon-btn {
   position: relative;
-  background: #fff8ea;
-  border: 1.5px solid #e8cf9c;
+  background: var(--cm-btn-bg);
+  border: 1.5px solid var(--cm-btn-border);
   border-radius: 12px;
-  color: #8a5a1e;
+  color: var(--cm-btn-text);
   width: 42px;
   height: 42px;
   flex-shrink: 0;
@@ -67,7 +116,7 @@
   box-shadow: 0 2px 0 rgba(160, 110, 40, 0.15);
 }
 .cm-icon-btn:hover {
-  background: #fff1d0;
+  background: var(--cm-btn-hover);
   transform: translateY(-1px);
 }
 .cm-icon-btn:active {
@@ -90,17 +139,17 @@
   right: 0.7rem;
   width: 32px;
   height: 32px;
-  border: 1.5px solid #e8cf9c;
+  border: 1.5px solid var(--cm-btn-border);
   border-radius: 50%;
-  background: #fff8ea;
-  color: #8a5a1e;
+  background: var(--cm-btn-bg);
+  color: var(--cm-btn-text);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 .cm-settings-close:hover {
-  background: #fff1d0;
+  background: var(--cm-btn-hover);
 }
 
 .cm-vol-row {
@@ -116,8 +165,8 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #fff1d0;
-  color: #b07a2e;
+  background: var(--cm-btn-hover);
+  color: var(--cm-btn-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,19 +175,19 @@
 .cm-vol-name {
   font-weight: 700;
   font-size: 0.98rem;
-  color: #6b4416;
+  color: var(--cm-text-strong);
 }
 .cm-vol-value {
   margin-left: auto;
   font-size: 0.88rem;
   font-weight: 700;
-  color: #b79b6c;
+  color: var(--cm-text-muted);
   font-variant-numeric: tabular-nums;
 }
 .cm-vol-slider {
   width: 100%;
   cursor: pointer;
-  accent-color: #e8994a;
+  accent-color: var(--cm-accent);
 }
 
 /* ── 보드 패널 ── */
@@ -153,11 +202,11 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  background: #fffaef;
-  border: 3px solid #e2c68a;
+  background: var(--cm-panel);
+  border: 3px solid var(--cm-panel-border);
   border-radius: 20px;
   padding: 14px;
-  box-shadow: 0 4px 0 #e2c68a, 0 10px 24px rgba(120, 85, 30, 0.15);
+  box-shadow: 0 4px 0 var(--cm-panel-border), 0 10px 24px rgba(120, 85, 30, 0.15);
 }
 
 .cm-board-viewport {
@@ -210,23 +259,23 @@
 }
 
 .cm-cell-given {
-  background: #ffd873;
-  color: #6b4416;
-  border: 1px solid #e8b94f;
+  background: var(--cm-given-bg);
+  color: var(--cm-text-strong);
+  border: 1px solid var(--cm-given-border);
 }
 
 .cm-cell-op {
-  color: #7a4415;
-  background: #ffd873;
-  border: 1px solid #e8b94f;
+  color: var(--cm-op-text);
+  background: var(--cm-given-bg);
+  border: 1px solid var(--cm-given-border);
   font-size: 1.1em;
   font-weight: 900;
 }
 
 .cm-cell-eq {
-  color: #6b4416;
-  background: #ffd873;
-  border: 1px solid #e8b94f;
+  color: var(--cm-text-strong);
+  background: var(--cm-given-bg);
+  border: 1px solid var(--cm-given-border);
   font-size: 1em;
   font-weight: 900;
 }
@@ -237,12 +286,12 @@
 }
 
 .cm-cell-slot {
-  background: #fdf6e3;
-  border: 1px solid #e8d8ae;
+  background: var(--cm-slot-bg);
+  border: 1px solid var(--cm-slot-border);
 }
 .cm-cell-slot:hover {
-  background: #fff1cf;
-  border-color: #e8994a;
+  background: var(--cm-accent-soft);
+  border-color: var(--cm-accent);
   transform: scale(1.05);
 }
 
@@ -269,7 +318,7 @@
   position: absolute;
   inset: 0;
   border-radius: 6px;
-  border: 2px solid #4ea63c;
+  border: 2px solid var(--cm-solved-border);
   pointer-events: none;
   animation: cmRing 320ms ease-out forwards;
 }
@@ -310,8 +359,8 @@
 
 /* 힌트 대기 중 — 고를 수 있는 빈칸을 전부 깜빡여 알린다 */
 .cm-cell-hintable {
-  background: #fff1cf;
-  border: 2px solid #e8994a;
+  background: var(--cm-accent-soft);
+  border: 2px solid var(--cm-accent);
   animation: cmHintPulse 1.1s ease-in-out infinite;
 }
 @keyframes cmHintPulse {
@@ -324,30 +373,30 @@
 
 /* 드래그 중 커서 아래에 있는 빈칸 */
 .cm-cell-dropover {
-  background: #cdf0c4;
-  border: 2px solid #4ea63c;
+  background: var(--cm-tile-bg);
+  border: 2px solid var(--cm-solved-border);
   transform: scale(1.08);
 }
 
 /* 숫자를 고르기 전에 먼저 선택해 둔 빈칸 — 풀 타일의 선택 표시와 같은 색 */
 .cm-cell-picked {
-  background: #ffe9a8;
-  border: 2px solid #e8994a;
+  background: var(--cm-accent-soft);
+  border: 2px solid var(--cm-accent);
   box-shadow: 0 0 0 2px rgba(232, 153, 74, 0.35);
 }
 
 /* 놓았지만 아직 줄이 완성되지 않은 칸 — 풀 타일과 같은 녹색 계열 (맞고 틀림 판정 없음) */
 .cm-cell-placed {
-  background: #cdf0c4;
-  border: 2px solid #6bbf59;
-  color: #2e6b26;
+  background: var(--cm-tile-bg);
+  border: 2px solid var(--cm-tile-border);
+  color: var(--cm-tile-text);
 }
 
 /* 줄이 완성되고 계산이 맞음 — 그 줄의 모든 칸(숫자·연산자·등호)에 붙는다 */
 .cm-cell-solved {
-  background: #a9e59a;
-  border: 2px solid #4ea63c;
-  color: #1f5c17;
+  background: var(--cm-solved-bg);
+  border: 2px solid var(--cm-solved-border);
+  color: var(--cm-solved-text);
 }
 
 /* 놓을 수 없는 칸(주어진 숫자·연산자·등호)은 테두리를 얇게 — 직접 채운 칸이 도드라진다 */
@@ -357,9 +406,9 @@
 
 /* 줄이 완성됐는데 계산이 틀림 */
 .cm-cell-broken {
-  background: #fbdcd8;
-  border: 2px solid #e0776b;
-  color: #b33a2e;
+  background: var(--cm-broken-bg);
+  border: 2px solid var(--cm-broken-border);
+  color: var(--cm-broken-text);
 }
 
 /* 자릿수가 늘어나도 칸 크기는 그대로, 글자만 줄어든다.
@@ -377,11 +426,11 @@
   width: 100%;
   max-width: 480px;
   box-sizing: border-box;
-  background: #fffaef;
-  border: 3px solid #e2c68a;
+  background: var(--cm-panel);
+  border: 3px solid var(--cm-panel-border);
   border-radius: 20px;
   padding: 10px;
-  box-shadow: 0 4px 0 #e2c68a;
+  box-shadow: 0 4px 0 var(--cm-panel-border);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -412,8 +461,8 @@
 /* 보드에 놓인 타일이 비워 둔 자리 */
 .cm-tile-hole {
   display: block;
-  background: #fdf6e3;
-  border: 2px dashed #e8d8ae;
+  background: var(--cm-slot-bg);
+  border: 2px dashed var(--cm-slot-border);
 }
 
 .cm-tile {
@@ -422,23 +471,23 @@
   justify-content: center;
   padding: 0;
   touch-action: none; /* 드래그 중 화면이 같이 스크롤되지 않게 */
-  border: 2px solid #6bbf59;
-  background: #cdf0c4;
-  color: #2e6b26;
+  border: 2px solid var(--cm-tile-border);
+  background: var(--cm-tile-bg);
+  color: var(--cm-tile-text);
   font-size: 1em;
   font-weight: 900;
   line-height: 1;
   cursor: pointer;
   transition: transform 0.12s, background 0.12s, box-shadow 0.12s;
-  box-shadow: 0 3px 0 #6bbf59;
+  box-shadow: 0 3px 0 var(--cm-tile-border);
 }
 .cm-tile:hover {
   transform: translateY(-2px);
-  background: #bdeab1;
+  background: var(--cm-tile-hover);
 }
 .cm-tile:active {
   transform: translateY(1px);
-  box-shadow: 0 1px 0 #6bbf59;
+  box-shadow: 0 1px 0 var(--cm-tile-border);
 }
 .cm-tile-dragging {
   opacity: 0.35;
@@ -458,9 +507,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  border: 2px solid #6bbf59;
-  background: #cdf0c4;
-  color: #2e6b26;
+  border: 2px solid var(--cm-tile-border);
+  background: var(--cm-tile-bg);
+  color: var(--cm-tile-text);
   font-size: 1.1rem;
   font-weight: 900;
   line-height: 1;
@@ -470,15 +519,15 @@
 .cm-drag-ghost.cm-d4 { font-size: 0.72rem; }
 
 .cm-tile-selected {
-  background: #ffe9a8;
-  border-color: #e8994a;
-  box-shadow: 0 3px 0 #e8994a, 0 0 0 3px rgba(232, 153, 74, 0.28);
-  color: #8a5a1e;
+  background: var(--cm-accent-soft);
+  border-color: var(--cm-accent);
+  box-shadow: 0 3px 0 var(--cm-accent), 0 0 0 3px rgba(232, 153, 74, 0.28);
+  color: var(--cm-btn-text);
 }
 
 /* 모드 화면의 오류 메시지 */
 .cm-error {
-  color: #d1453b;
+  color: var(--cm-broken-text);
   font-size: 0.85rem;
   text-align: center;
   font-weight: 700;
@@ -501,7 +550,7 @@
 .cm-action-btn {
   background: none;
   border: none;
-  color: #8a5a1e;
+  color: var(--cm-btn-text);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -514,10 +563,10 @@
 .cm-action-btn span {
   font-size: 0.7rem;
   font-weight: 700;
-  color: #a17c45;
+  color: var(--cm-text-muted);
 }
 .cm-action-btn:hover:not(:disabled) {
-  background: #fff1d0;
+  background: var(--cm-btn-hover);
 }
 .cm-action-btn:active:not(:disabled) {
   transform: translateY(1px);
@@ -527,10 +576,10 @@
   cursor: default;
 }
 .cm-action-btn-accent {
-  color: #e8994a;
+  color: var(--cm-accent);
 }
 .cm-action-btn-on {
-  background: #ffe9a8;
+  background: var(--cm-accent-soft);
 }
 
 /* 힌트 대기 중 액션바에 뜨는 안내 */
@@ -542,7 +591,7 @@
   text-align: center;
   font-size: 0.72rem;
   font-weight: 800;
-  color: #e8994a;
+  color: var(--cm-accent);
 }
 
 /* ── 모드 선택 ── */
@@ -552,8 +601,8 @@
   margin-top: 1.5rem;
   padding: 1rem;
   border-radius: 12px;
-  border: 1.5px dashed #e2c68a;
-  background: #fffcf4;
+  border: 1.5px dashed var(--cm-panel-border);
+  background: var(--cm-panel);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -562,7 +611,7 @@
 .cm-devbox h4 {
   margin: 0;
   font-size: 0.85rem;
-  color: #8a6a3a;
+  color: var(--cm-text-muted);
 }
 .cm-devbox-row {
   display: flex;
@@ -573,17 +622,17 @@
   padding: 0.45rem;
   text-align: center;
   border-radius: 8px;
-  border: 1.5px solid #e8cf9c;
-  background: #fff8ea;
-  color: #6b4416;
+  border: 1.5px solid var(--cm-btn-border);
+  background: var(--cm-btn-bg);
+  color: var(--cm-text-strong);
   font-weight: 700;
 }
 .cm-devbox button {
   padding: 0.45rem 1rem;
   border-radius: 8px;
   border: none;
-  background: #e8994a;
-  color: #fff;
+  background: var(--cm-accent);
+  color: var(--cm-on-accent);
   font-weight: 800;
   cursor: pointer;
 }
@@ -641,7 +690,7 @@
 }
 .cm-about-tip {
   background: #fff7e6;
-  border-left-color: #e8994a;
+  border-left-color: var(--cm-accent);
 }
 
 .cm-rule-card {
@@ -691,9 +740,9 @@
   border-radius: 5px;
   font-size: 0.72rem;
   font-weight: 800;
-  background: #ffd873;
-  border: 1px solid #e8b94f;
-  color: #6b4416;
+  background: var(--cm-given-bg);
+  border: 1px solid var(--cm-given-border);
+  color: var(--cm-text-strong);
   box-sizing: border-box;
 }
 /* 실제 보드처럼 연산자 글자를 조금 크게 */
@@ -702,8 +751,8 @@
   font-weight: 900;
 }
 .cm-rule-blank {
-  background: #cdf0c4;
-  border: 2px solid #6bbf59;
+  background: var(--cm-tile-bg);
+  border: 2px solid var(--cm-tile-border);
 }
 
 /* ── 생성 중 ── */
@@ -719,8 +768,8 @@
 .cm-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #eeddb6;
-  border-top-color: #e8994a;
+  border: 4px solid var(--cm-panel-border);
+  border-top-color: var(--cm-accent);
   border-radius: 50%;
   animation: cmSpin 0.75s linear infinite;
 }
@@ -730,7 +779,7 @@
 }
 
 .cm-generating p {
-  color: #a17c45;
+  color: var(--cm-text-muted);
   font-size: 0.92rem;
   font-weight: 700;
 }
@@ -755,8 +804,8 @@
 }
 
 .cm-clear-card {
-  background: #fffaef;
-  border: 3px solid #e2c68a;
+  background: var(--cm-panel);
+  border: 3px solid var(--cm-panel-border);
   border-radius: 22px;
   padding: 2.4rem 2.2rem;
   text-align: center;
@@ -764,7 +813,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.6rem;
-  box-shadow: 0 6px 0 #e2c68a;
+  box-shadow: 0 6px 0 var(--cm-panel-border);
 }
 
 .cm-clear-emoji {
@@ -776,11 +825,11 @@
   font-size: 1.8rem;
   font-weight: 900;
   margin: 0;
-  color: #6b4416;
+  color: var(--cm-text-strong);
 }
 
 .cm-clear-card p {
-  color: #a17c45;
+  color: var(--cm-text-muted);
   margin: 0;
   font-size: 0.92rem;
   font-weight: 700;
@@ -823,15 +872,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff8ea;
-  border: 2px solid #e8cf9c;
+  background: var(--cm-btn-bg);
+  border: 2px solid var(--cm-btn-border);
   border-radius: 14px;
-  color: #8a5a1e;
+  color: var(--cm-btn-text);
   cursor: pointer;
   transition: background 0.15s;
 }
 .cm-btn-home:hover {
-  background: #fff1d0;
+  background: var(--cm-btn-hover);
 }
 
 .cm-clear-btns {
@@ -851,30 +900,30 @@
 }
 
 .cm-btn-primary {
-  background: linear-gradient(135deg, #f5a442, #e8994a);
+  background: linear-gradient(135deg, var(--cm-accent-2), var(--cm-accent));
   border: none;
   border-radius: 14px;
-  color: #fff;
+  color: var(--cm-on-accent);
   font-size: 1rem;
   font-weight: 800;
   padding: 0.8rem 2.2rem;
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
-  box-shadow: 0 3px 0 #c97a2e;
+  box-shadow: 0 3px 0 var(--cm-accent-shadow);
 }
 .cm-btn-primary:hover {
   transform: translateY(-2px);
 }
 .cm-btn-primary:active {
   transform: translateY(1px);
-  box-shadow: 0 1px 0 #c97a2e;
+  box-shadow: 0 1px 0 var(--cm-accent-shadow);
 }
 
 .cm-btn-secondary {
-  background: #fff8ea;
-  border: 2px solid #e8cf9c;
+  background: var(--cm-btn-bg);
+  border: 2px solid var(--cm-btn-border);
   border-radius: 14px;
-  color: #8a5a1e;
+  color: var(--cm-btn-text);
   font-size: 1rem;
   font-weight: 800;
   padding: 0.8rem 1.6rem;
@@ -882,5 +931,199 @@
   transition: background 0.15s;
 }
 .cm-btn-secondary:hover {
-  background: #fff1d0;
+  background: var(--cm-btn-hover);
+}
+
+/* ── 모달 공통 ── */
+.cm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 9000;
+}
+.cm-modal {
+  position: relative;
+  background: var(--cm-panel);
+  border: 2px solid var(--cm-panel-border);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  color: var(--cm-text);
+  width: 100%;
+  max-width: 360px;
+  max-height: 88dvh;
+  overflow-y: auto;
+  padding: 1.4rem 1.2rem 1.2rem;
+  text-align: center;
+}
+.cm-modal h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--cm-text-strong);
+}
+.cm-modal-sub {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--cm-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+.cm-modal-sub img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.cm-modal-btns,
+.cm-modal-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.cm-modal-btn {
+  flex: 1 1 0;
+  min-width: 96px;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--cm-btn-border);
+  background: var(--cm-btn-bg);
+  color: var(--cm-btn-text);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cm-modal-btn:hover:not(:disabled) {
+  background: var(--cm-btn-hover);
+}
+.cm-modal-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.cm-modal-btn-primary {
+  background: var(--cm-accent);
+  border-color: var(--cm-accent-shadow);
+  color: var(--cm-on-accent);
+}
+.cm-modal-btn-primary:hover:not(:disabled) {
+  background: var(--cm-accent-2);
+}
+
+/* ── 테마 상점 ── */
+.cm-theme-shop {
+  max-width: 420px;
+  text-align: left;
+}
+.cm-theme-shop h3,
+.cm-theme-shop .cm-modal-sub {
+  text-align: center;
+}
+.cm-theme-list section {
+  margin-bottom: 1.1rem;
+}
+.cm-theme-list h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.cm-theme-price {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cm-text-muted);
+}
+.cm-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+.cm-theme-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.3rem;
+  border-radius: 12px;
+  border: 2px solid var(--cm-panel-border);
+  background: var(--cm-btn-bg);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.cm-theme-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+.cm-theme-card.is-active {
+  border-color: var(--cm-accent);
+  box-shadow: 0 0 0 2px var(--cm-accent-soft);
+}
+.cm-theme-card.is-locked {
+  opacity: 0.45;
+  cursor: default;
+}
+.cm-theme-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cm-btn-text);
+}
+.cm-theme-preview {
+  width: 100%;
+  aspect-ratio: 5 / 2;
+  border-radius: 7px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 2px;
+  padding: 3px;
+  box-sizing: border-box;
+}
+.cm-theme-preview span {
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: rgba(128, 128, 128, 0.9);
+}
+.cm-theme-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cm-accent);
+  color: var(--cm-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cm-theme-badge-lock {
+  background: var(--cm-text-muted);
+}
+
+.cm-theme-open {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.5rem;
+  margin-top: 0.4rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--cm-btn-border);
+  background: var(--cm-btn-bg);
+  cursor: pointer;
+}
+.cm-theme-open:hover {
+  background: var(--cm-btn-hover);
 }

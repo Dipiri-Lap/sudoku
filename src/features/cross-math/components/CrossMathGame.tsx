@@ -10,6 +10,7 @@ import {
   Volume2,
   Music,
   Settings,
+  Palette,
   X,
 } from 'lucide-react';
 import {
@@ -27,7 +28,10 @@ import {
   playSfx, warmUpSfx, startBgm, stopBgm, pauseBgm, resumeBgm,
   getBgmVolume, getSfxVolume, setBgmVolume, setSfxVolume,
 } from '../utils/sound';
+import { useCrossumTheme } from '../stage/theme';
+import CrossumThemeModal from './CrossumThemeModal';
 import '../styles/CrossMath.css';
+import '../styles/CrossMathThemes.css';
 
 interface Tile {
   id: number;
@@ -204,6 +208,8 @@ const CrossMathGame: React.FC = () => {
   /** 방금 놓은 칸 — 착지 애니메이션과 이웃 밀림에 쓰고 잠시 뒤 지운다 */
   const runStageRef = useRef<((n: number) => Promise<void>) | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showThemes, setShowThemes] = useState(false);
+  const { themeId, theme, hasUnlocked, selectTheme, unlockTheme } = useCrossumTheme();
   const [bgmVol, setBgmVol] = useState(getBgmVolume);
   const [sfxVol, setSfxVol] = useState(getSfxVolume);
   const [lastPlaced, setLastPlaced] = useState<string | null>(null);
@@ -809,7 +815,7 @@ const CrossMathGame: React.FC = () => {
   if (screen === 'generating' || !level) {
     const cfg = difficulty ? DIFFICULTY_CONFIGS[difficulty] : null;
     return (
-      <div className="cm-page">
+      <div className={`cm-page ${theme.cssClass}`}>
         <div className="cm-generating">
           <div className="cm-spinner" style={cfg ? ({ borderTopColor: cfg.color } as React.CSSProperties) : undefined} />
           <p>{stage !== null ? `스테이지 ${stage} 불러오는 중…` : '불러오는 중…'}</p>
@@ -838,7 +844,7 @@ const CrossMathGame: React.FC = () => {
   const fontPx = Math.max(11, Math.floor(cellPx * 0.46));
 
   return (
-    <div className="cm-page">
+    <div className={`cm-page ${theme.cssClass}`}>
       <header className="cm-topbar">
         <div className="cm-topbar-side">
           <button
@@ -853,6 +859,14 @@ const CrossMathGame: React.FC = () => {
         <span className="cm-topbar-title">{stage !== null ? `스테이지 ${stage}` : 'Crossum'}</span>
 
         <div className="cm-topbar-side cm-topbar-side-right">
+          <button
+            className="cm-icon-btn"
+            onClick={() => setShowThemes(true)}
+            aria-label="테마"
+            title="테마"
+          >
+            <Palette size={18} />
+          </button>
           <button
             className="cm-icon-btn"
             onClick={() => setShowSettings(true)}
@@ -1071,6 +1085,17 @@ const CrossMathGame: React.FC = () => {
             />
           </div>
         </div>
+      )}
+
+      {showThemes && (
+        <CrossumThemeModal
+          themeId={themeId}
+          coins={coins}
+          hasUnlocked={hasUnlocked}
+          selectTheme={selectTheme}
+          unlockTheme={unlockTheme}
+          onClose={() => setShowThemes(false)}
+        />
       )}
 
       {hintPrompt && (
