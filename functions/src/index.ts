@@ -450,3 +450,261 @@ export const adminRebalanceFakeUsers = onCall(
     }
   }
 );
+
+/**
+ * 스테이지 진행도 기준 퍼즐력 재계산.
+ *
+ * 퍼즐력 지급이 로그인 상태에서만 일어나기 때문에, 비로그인으로 진행하다가
+ * 나중에 로그인한 사용자는 진행도만 앞서 있고 퍼즐력이 그만큼 쌓여 있지 않다.
+ * 진행도 문서를 근거로 퍼즐력 = 클리어한 스테이지 수 + 도전과제 퍼즐력 로 다시 맞춘다.
+ *
+ * 여러 번 실행해도 같은 결과가 나온다(멱등). dryRun 기본값은 true.
+ */
+
+/** 진행도 서브컬렉션 이름 → 그 문서에서 '클리어한 판 수'를 뽑는 함수 */
+const STAGE_PROGRESS_SOURCES: Array<{
+  collection: string;
+  cleared: (data: FirebaseFirestore.DocumentData) => number;
+}> = [
+  {
+    collection: "sudokuProgress",
+    // 스도쿠 일반 스테이지는 옛 저장 위치가 따로 있어 sudokuRegularCleared 에서 처리한다.
+    // beginnerProgress 는 클리어한 판의 번호(=개수) 그대로,
+    // sudokuBigProgress 는 '도전 중인 판' 이라 -1.
+    cleared: (d) =>
+      Math.max(0, Number(d.beginnerProgress) || 0) +
+      Math.max(0, (Number(d.sudokuBigProgress) || 1) - 1),
+  },
+  {collection: "wordSortProgress", cleared: (d) => Math.max(0, Number(d.clearedLevel) || 0)},
+  {collection: "wordSortHardProgress", cleared: (d) => Math.max(0, Number(d.clearedLevel) || 0)},
+  {collection: "queensProgress", cleared: (d) => Math.max(0, Number(d.clearedLevel) || 0)},
+  {collection: "snapspotProgress", cleared: (d) => Math.max(0, Number(d.clearedStage) || 0)},
+  {
+    collection: "crossumProgress",
+    cleared: (d) => Math.max(0, (Number(d.stageProgress) || 1) - 1),
+  },
+];
+
+/**
+ * 스도쿠 일반 스테이지 진행도는 저장 위치가 세 군데다.
+ *  - users/{uid}/sudokuProgress/data.sudokuStageProgress  (현재 위치)
+ *  - users/{uid}.sudokuStageProgress                      (예전 위치. 서브컬렉션 문서가 없으면 여기를 읽는다)
+ *  - users/{uid}.guestProgress.sudoku_stage_progress      (게스트 데이터 이관본)
+ * 한 곳만 보면 오래된 사용자의 진행도를 통째로 놓쳐 퍼즐력이 깎인다. 가장 앞선 값을 쓴다.
+ */
+function sudokuRegularCleared(
+  progressData: FirebaseFirestore.DocumentData | undefined,
+  userData: FirebaseFirestore.DocumentData | undefined
+): number {
+  const candidates = [
+    Number(progressData?.sudokuStageProgress),
+    Number(userData?.sudokuStageProgress),
+    Number(userData?.guestProgress?.sudoku_stage_progress),
+  ].filter((n) => Number.isFinite(n) && n > 0);
+  if (candidates.length === 0) return 0;
+  return Math.max(0, Math.max(...candidates) - 1);
+}
+
+interface RecomputedUser {
+  uid: string;
+  stagePP: number;
+  challengePP: number;
+  newPP: number;
+}
+
+/**
+ * 전체 사용자의 퍼즐력을 다시 계산한다.
+ * 서브컬렉션을 사용자마다 읽으면 왕복이 사용자 수만큼 생기므로 collectionGroup 으로 한 번에 훑는다.
+ */
+async function recomputeAllPuzzlePower(
+  userDocs: Map<string, FirebaseFirestore.DocumentData>
+): Promise<{
+  users: Map<string, RecomputedUser>;
+  scanned: number;
+}> {
+  const stagePP = new Map<string, number>();
+  const challengePP = new Map<string, number>();
+  /** 서브컬렉션에 들어 있는 스도쿠 일반 진행도 (옛 위치와 비교해 큰 쪽을 쓴다) */
+  const sudokuProgressDocs = new Map<string, FirebaseFirestore.DocumentData>();
+
+  const snaps = await Promise.all([
+    ...STAGE_PROGRESS_SOURCES.map((s) => db.collectionGroup(s.collection).get()),
+    db.collectionGroup("challenges").get(),
+  ]);
+
+  STAGE_PROGRESS_SOURCES.forEach((source, i) => {
+    for (const doc of snaps[i].docs) {
+      const uid = doc.ref.parent.parent?.id;
+      if (!uid || uid.startsWith("fake_user_")) continue;
+      const data = doc.data() ?? {};
+      if (source.collection === "sudokuProgress") sudokuProgressDocs.set(uid, data);
+      stagePP.set(uid, (stagePP.get(uid) ?? 0) + source.cleared(data));
+    }
+  });
+
+  // 스도쿠 일반 스테이지는 서브컬렉션에 없을 수도 있으므로 사용자 문서까지 보고 더한다
+  for (const uid of new Set([...userDocs.keys(), ...sudokuProgressDocs.keys()])) {
+    if (uid.startsWith("fake_user_")) continue;
+    const cleared = sudokuRegularCleared(sudokuProgressDocs.get(uid), userDocs.get(uid));
+    if (cleared > 0) stagePP.set(uid, (stagePP.get(uid) ?? 0) + cleared);
+  }
+
+  for (const doc of snaps[snaps.length - 1].docs) {
+    const uid = doc.ref.parent.parent?.id;
+    if (!uid || uid.startsWith("fake_user_")) continue;
+    const claimed: string[] = doc.data()?.claimedIds ?? [];
+    const valid = claimed.filter((id) => VALID_CHALLENGE_IDS.has(id)).length;
+    challengePP.set(uid, valid * PUZZLE_POWER_PER_CHALLENGE);
+  }
+
+  const users = new Map<string, RecomputedUser>();
+  for (const uid of new Set([...stagePP.keys(), ...challengePP.keys()])) {
+    const s = stagePP.get(uid) ?? 0;
+    const c = challengePP.get(uid) ?? 0;
+    users.set(uid, {uid, stagePP: s, challengePP: c, newPP: s + c});
+  }
+  return {users, scanned: snaps.reduce((n, s) => n + s.size, 0)};
+}
+
+export const adminRecalcStagePuzzlePower = onCall(
+  {timeoutSeconds: 540, memory: "512MiB"},
+  async (request) => {
+    assertAdmin(request);
+    const dryRun = request.data?.dryRun !== false;
+
+    try {
+      // 현재 값과 옛 저장 위치는 users 문서를 통째로 한 번만 읽어 확인한다
+      // (사용자마다 읽으면 왕복이 사용자 수만큼 생긴다)
+      const userSnap = await db.collection("users")
+        .select("puzzlePower", "sudokuStageProgress", "guestProgress")
+        .get();
+      const userDocs = new Map<string, FirebaseFirestore.DocumentData>(
+        userSnap.docs.map((d) => [d.id, d.data()])
+      );
+      const current = new Map<string, number>(
+        userSnap.docs.map((d) => [d.id, (d.data().puzzlePower as number) ?? 0])
+      );
+
+      const {users, scanned} = await recomputeAllPuzzlePower(userDocs);
+
+      let raised = 0;
+      let lowered = 0;
+      let totalDelta = 0;
+      const planned: RecomputedUser[] = [];
+      // 미리보기에서 전부 확인할 수 있게 변경 대상을 모두 담는다.
+      // 응답 크기 제한(10MB)에 걸리지 않도록 상한만 둔다.
+      const SAMPLE_LIMIT = 2000;
+      const samples: Array<{
+        uid: string; before: number; after: number; stagePP: number; challengePP: number;
+      }> = [];
+
+      for (const u of users.values()) {
+        if (!current.has(u.uid)) continue; // 프로필 문서가 없는 유령 진행도는 건너뛴다
+        const before = current.get(u.uid) ?? 0;
+        if (before === u.newPP) continue;
+
+        if (u.newPP > before) raised++;
+        else lowered++;
+        totalDelta += u.newPP - before;
+        planned.push(u);
+        if (samples.length < SAMPLE_LIMIT) {
+          samples.push({
+            uid: u.uid, before, after: u.newPP,
+            stagePP: u.stagePP, challengePP: u.challengePP,
+          });
+        }
+      }
+
+      if (!dryRun) {
+        const BATCH_SIZE = 200;
+        for (let i = 0; i < planned.length; i += BATCH_SIZE) {
+          const batch = db.batch();
+          for (const u of planned.slice(i, i + BATCH_SIZE)) {
+            batch.set(
+              db.collection("users").doc(u.uid),
+              {puzzlePower: u.newPP},
+              {merge: true}
+            );
+            // 클라이언트는 (도전과제 PP - mainDocSyncedPP) 만큼을 다시 더한다.
+            // 여기서 맞춰 두지 않으면 다음 로그인 때 중복으로 더해진다.
+            batch.set(
+              db.collection("users").doc(u.uid).collection("challenges").doc("data"),
+              {mainDocSyncedPP: u.challengePP},
+              {merge: true}
+            );
+          }
+          await batch.commit();
+        }
+      }
+
+      return {
+        dryRun,
+        scanned,
+        candidates: users.size,
+        changed: planned.length,
+        raised,
+        lowered,
+        totalDelta,
+        // 변화가 큰 순으로 보여 준다 — 이상한 값이 있으면 위쪽에 걸린다
+        samples: samples.sort((a, b) => Math.abs(b.after - b.before) - Math.abs(a.after - a.before)),
+        truncated: planned.length > SAMPLE_LIMIT,
+      };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("adminRecalcStagePuzzlePower 실패:", e);
+      throw new HttpsError("internal", `스테이지 퍼즐력 재계산 실패: ${msg}`);
+    }
+  }
+);
+
+/**
+ * 본인 퍼즐력 재동기화.
+ *
+ * 퍼즐력은 판을 깰 때마다 +1 씩 더해지지만 로그인 상태에서만 더해진다.
+ * 비로그인으로 진행한 뒤 로그인하거나 기기를 옮기면 진행도만 앞서고 퍼즐력이 모자라므로,
+ * 로그인할 때 진행도를 근거로 한 번 맞춰 준다. 관리자 일괄 재계산과 같은 규칙을 쓴다.
+ */
+export const syncMyPuzzlePower = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
+  if (uid.startsWith("fake_user_")) return {changed: false};
+
+  const userRef = db.collection("users").doc(uid);
+  const challengeRef = userRef.collection("challenges").doc("data");
+
+  const [userSnap, challengeSnap, ...progressSnaps] = await Promise.all([
+    userRef.get(),
+    challengeRef.get(),
+    ...STAGE_PROGRESS_SOURCES.map((s) => userRef.collection(s.collection).doc("data").get()),
+  ]);
+
+  if (!userSnap.exists) return {changed: false};
+
+  let stagePP = 0;
+  STAGE_PROGRESS_SOURCES.forEach((source, i) => {
+    const snap = progressSnaps[i];
+    if (snap.exists) stagePP += source.cleared(snap.data() ?? {});
+  });
+
+  const sudokuSnap = progressSnaps[
+    STAGE_PROGRESS_SOURCES.findIndex((s) => s.collection === "sudokuProgress")
+  ];
+  stagePP += sudokuRegularCleared(
+    sudokuSnap?.exists ? sudokuSnap.data() : undefined,
+    userSnap.data()
+  );
+
+  const claimed: string[] = challengeSnap.exists ? (challengeSnap.data()?.claimedIds ?? []) : [];
+  const challengePP =
+    claimed.filter((id) => VALID_CHALLENGE_IDS.has(id)).length * PUZZLE_POWER_PER_CHALLENGE;
+
+  const newPP = stagePP + challengePP;
+  const before = (userSnap.data()?.puzzlePower as number) ?? 0;
+  if (before === newPP) return {changed: false, puzzlePower: newPP};
+
+  await userRef.set({puzzlePower: newPP}, {merge: true});
+  // 클라이언트가 (도전과제 PP - mainDocSyncedPP) 를 다시 더하지 않도록 함께 맞춘다
+  await challengeRef.set({mainDocSyncedPP: challengePP}, {merge: true});
+
+  return {changed: true, before, puzzlePower: newPP, stagePP, challengePP};
+});

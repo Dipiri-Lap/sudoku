@@ -41,6 +41,21 @@ const adminRecalcPuzzlePower = httpsCallable<{ dryRun: boolean }, RecalcResult>(
     functions,
     'adminRecalcPuzzlePower'
 );
+interface StageRecalcResult {
+    dryRun: boolean;
+    scanned: number;
+    candidates: number;
+    changed: number;
+    raised: number;
+    lowered: number;
+    totalDelta: number;
+    samples: Array<{ uid: string; before: number; after: number; stagePP: number; challengePP: number }>;
+    truncated?: boolean;
+}
+const adminRecalcStagePuzzlePower = httpsCallable<{ dryRun: boolean }, StageRecalcResult>(
+    functions,
+    'adminRecalcStagePuzzlePower'
+);
 interface RebalanceResult {
     dryRun: boolean;
     totalFakes: number;
@@ -299,6 +314,8 @@ const AdminPage: React.FC = () => {
     const [migrating, setMigrating] = useState(false);
     const [recalcRunning, setRecalcRunning] = useState(false);
     const [recalcResult, setRecalcResult] = useState<RecalcResult | null>(null);
+    const [stageRecalcRunning, setStageRecalcRunning] = useState(false);
+    const [stageRecalcResult, setStageRecalcResult] = useState<StageRecalcResult | null>(null);
     const [rebalRunning, setRebalRunning] = useState(false);
     const [rebalResult, setRebalResult] = useState<RebalanceResult | null>(null);
     const [rebalThreshold, setRebalThreshold] = useState('300');
@@ -369,6 +386,39 @@ const AdminPage: React.FC = () => {
             console.error('adminRecalcPuzzlePower 실패:', e);
         } finally {
             setRecalcRunning(false);
+        }
+    };
+
+    // 스테이지 진행도 기준 퍼즐력 재계산 — 퍼즐력 = 클리어한 판 수 + 도전과제 퍼즐력
+    const handleRecalcStagePP = async (dryRun: boolean) => {
+        if (!dryRun) {
+            const d = stageRecalcResult;
+            if (!d || d.dryRun !== true) {
+                showToast('먼저 "규모 확인"을 실행하세요.', false);
+                return;
+            }
+            if (!window.confirm(
+                `${d.changed}명의 퍼즐력을 다시 계산합니다.
+올라감 ${d.raised}명 / 내려감 ${d.lowered}명 (합계 ${d.totalDelta}). 진행할까요?`
+            )) return;
+        }
+        setStageRecalcRunning(true);
+        try {
+            const result = await adminRecalcStagePuzzlePower({ dryRun });
+            setStageRecalcResult(result.data);
+            showToast(dryRun
+                ? `확인 완료 — ${result.data.changed}명 변경 예정 (합계 ${result.data.totalDelta})`
+                : `반영 완료 — ${result.data.changed}명 조정`);
+        } catch (e) {
+            const err = e as { code?: string; message?: string };
+            const code = err.code ?? '';
+            const hint = code === 'functions/internal' || code === 'internal'
+                ? ' (함수가 배포되지 않았을 수 있습니다)'
+                : '';
+            showToast(`실패: ${code || 'error'} ${err.message ?? String(e)}${hint}`, false);
+            console.error('adminRecalcStagePuzzlePower 실패:', e);
+        } finally {
+            setStageRecalcRunning(false);
         }
     };
 
@@ -676,6 +726,66 @@ const AdminPage: React.FC = () => {
                                     {recalcResult.samples.map(sm => (
                                         <div key={sm.uid}>{sm.uid.slice(0, 10)} : {sm.before} → {sm.after}</div>
                                     ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* 스테이지 진행도 기준 퍼즐력 재계산 */}
+                <div style={{ padding: '10px 12px', borderBottom: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 700 }}>스테이지 퍼즐력 재계산</div>
+                    <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.5 }}>
+                        퍼즐력 = 클리어한 판 수(스도쿠 일반·입문·대형 + 워드스택 일반·하드 + 퀸즈 + 스냅스팟 + 크로썸) + 도전과제 퍼즐력
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                            style={S.btnSmall('#0ea5e9')}
+                            disabled={stageRecalcRunning}
+                            onClick={() => handleRecalcStagePP(true)}
+                            title="아무것도 바꾸지 않고 영향 규모만 집계합니다"
+                        >
+                            {stageRecalcRunning ? '처리 중...' : '규모 확인'}
+                        </button>
+                        <button
+                            style={S.btnSmall(stageRecalcResult?.dryRun ? '#dc2626' : '#475569')}
+                            disabled={stageRecalcRunning || !stageRecalcResult?.dryRun}
+                            onClick={() => handleRecalcStagePP(false)}
+                            title="집계 결과를 확인한 뒤에만 활성화됩니다"
+                        >
+                            반영
+                        </button>
+                    </div>
+                    {stageRecalcResult && (
+                        <div style={{ fontSize: 11, color: '#cbd5e1', lineHeight: 1.6 }}>
+                            <div>{stageRecalcResult.dryRun ? '미리보기' : '반영됨'} · 진행도 문서 {stageRecalcResult.scanned}건 · 대상 {stageRecalcResult.candidates}명</div>
+                            <div>변경 {stageRecalcResult.changed}명 (▲{stageRecalcResult.raised} / ▼{stageRecalcResult.lowered}) · 합계 {stageRecalcResult.totalDelta}</div>
+                            {stageRecalcResult.samples.length > 0 && (
+                                <div style={{
+                                    marginTop: 4,
+                                    maxHeight: 280,
+                                    overflowY: 'auto',
+                                    border: '1px solid #1e293b',
+                                    borderRadius: 6,
+                                    padding: '4px 6px',
+                                    background: '#0b1220',
+                                }}>
+                                    <div style={{ color: '#64748b', fontSize: 10, marginBottom: 2 }}>
+                                        변화가 큰 순 · {stageRecalcResult.samples.length}명
+                                        {stageRecalcResult.truncated && ' (일부만 표시)'}
+                                    </div>
+                                    {stageRecalcResult.samples.map(sm => {
+                                        const up = sm.after > sm.before;
+                                        return (
+                                            <div key={sm.uid} style={{ display: 'flex', gap: 4, alignItems: 'baseline' }}>
+                                                <span style={{ color: '#64748b', width: 78, flexShrink: 0 }}>{sm.uid.slice(0, 10)}</span>
+                                                <span style={{ color: up ? '#4ade80' : '#f87171', flexShrink: 0 }}>
+                                                    {sm.before} → {sm.after}
+                                                </span>
+                                                <span style={{ color: '#475569' }}>(판 {sm.stagePP} + 과제 {sm.challengePP})</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>

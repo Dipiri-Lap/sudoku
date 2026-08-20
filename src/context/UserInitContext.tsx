@@ -1,7 +1,18 @@
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db, signInAnonymously } from '../firebase';
+import { httpsCallable } from 'firebase/functions';
+import { auth, db, functions, signInAnonymously } from '../firebase';
+
+/**
+ * 퍼즐력은 판을 깰 때 +1 씩 더해지지만 로그인 상태에서만 더해진다.
+ * 비로그인으로 진행하다 로그인했거나 기기를 옮긴 사용자는 진행도만 앞서 있으므로,
+ * 로그인할 때 서버가 진행도를 근거로 한 번 맞춰 준다.
+ */
+const syncMyPuzzlePower = httpsCallable<void, { changed: boolean }>(functions, 'syncMyPuzzlePower');
+
+/** 게임별 진행도 동기화(각 Context 가 로그인 직후 수행)가 끝난 뒤에 맞춰야 한다 */
+const PP_SYNC_DELAY_MS = 6000;
 
 interface UserInitContextValue {
     isInitialized: boolean;
@@ -65,6 +76,10 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             } finally {
                 setIsInitialized(true);
             }
+
+            window.setTimeout(() => {
+                syncMyPuzzlePower().catch(console.error);
+            }, PP_SYNC_DELAY_MS);
         });
 
         return unsubscribe;
