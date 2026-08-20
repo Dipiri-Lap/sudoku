@@ -1016,18 +1016,18 @@
 }
 
 /* ── 테마 상점 ── */
-.cm-theme-shop {
+.cm-shop {
   max-width: 420px;
   text-align: left;
 }
-.cm-theme-shop h3,
-.cm-theme-shop .cm-modal-sub {
+.cm-shop h3,
+.cm-shop .cm-modal-sub {
   text-align: center;
 }
-.cm-theme-list section {
+.cm-shop-list section {
   margin-bottom: 1.1rem;
 }
-.cm-theme-list h4 {
+.cm-shop-list h4 {
   margin: 0 0 0.5rem;
   font-size: 0.85rem;
   font-weight: 800;
@@ -1035,18 +1035,18 @@
   align-items: center;
   gap: 0.4rem;
 }
-.cm-theme-price {
+.cm-shop-price {
   margin-left: auto;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--cm-text-muted);
 }
-.cm-theme-grid {
+.cm-shop-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.55rem;
 }
-.cm-theme-card {
+.cm-shop-card {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1059,23 +1059,23 @@
   cursor: pointer;
   transition: border-color 0.15s, transform 0.1s;
 }
-.cm-theme-card:hover:not(:disabled) {
+.cm-shop-card:hover:not(:disabled) {
   transform: translateY(-2px);
 }
-.cm-theme-card.is-active {
+.cm-shop-card.is-active {
   border-color: var(--cm-accent);
   box-shadow: 0 0 0 2px var(--cm-accent-soft);
 }
-.cm-theme-card.is-locked {
+.cm-shop-card.is-locked {
   opacity: 0.45;
   cursor: default;
 }
-.cm-theme-name {
+.cm-shop-name {
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--cm-btn-text);
 }
-.cm-theme-preview {
+.cm-shop-preview {
   width: 100%;
   aspect-ratio: 5 / 2;
   border-radius: 7px;
@@ -1086,7 +1086,7 @@
   padding: 3px;
   box-sizing: border-box;
 }
-.cm-theme-preview span {
+.cm-shop-preview span {
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -1095,7 +1095,7 @@
   font-weight: 800;
   color: rgba(128, 128, 128, 0.9);
 }
-.cm-theme-badge {
+.cm-shop-badge {
   position: absolute;
   top: -6px;
   right: -6px;
@@ -1108,22 +1108,6 @@
   align-items: center;
   justify-content: center;
 }
-.cm-theme-badge-lock {
+.cm-shop-badge-lock {
   background: var(--cm-text-muted);
-}
-
-.cm-theme-open {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.45rem 0.5rem;
-  margin-top: 0.4rem;
-  border-radius: 12px;
-  border: 1.5px solid var(--cm-btn-border);
-  background: var(--cm-btn-bg);
-  cursor: pointer;
-}
-.cm-theme-open:hover {
-  background: var(--cm-btn-hover);
 }

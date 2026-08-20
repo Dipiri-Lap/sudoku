@@ -18,7 +18,7 @@ import {
 const Preview: React.FC<{ theme: CrossumTheme }> = ({ theme }) => {
   const p = theme.preview;
   return (
-    <div className="cm-theme-preview" style={{ background: p.bg }}>
+    <div className="cm-shop-preview" style={{ background: p.bg }}>
       <span style={{ background: p.given }} />
       <span style={{ background: 'transparent' }}>+</span>
       <span style={{ background: p.tile }} />
@@ -61,7 +61,7 @@ const CrossumThemeModal: React.FC<Props> = ({
 
   return (
     <div className="cm-modal-backdrop" onClick={onClose}>
-      <div className="cm-modal cm-theme-shop" onClick={e => e.stopPropagation()}>
+      <div className="cm-modal cm-shop" onClick={e => e.stopPropagation()}>
         <button className="cm-settings-close" onClick={onClose} aria-label="닫기">
           <X size={20} />
         </button>
@@ -71,7 +71,7 @@ const CrossumThemeModal: React.FC<Props> = ({
           보유 {coins}개
         </p>
 
-        <div className="cm-theme-list">
+        <div className="cm-shop-list">
           {GRADE_ORDER.map((grade: ThemeGrade) => {
             const themes = CROSSUM_THEMES.filter(t => t.grade === grade);
             if (themes.length === 0) return null;
@@ -80,9 +80,9 @@ const CrossumThemeModal: React.FC<Props> = ({
               <section key={grade}>
                 <h4 style={{ color: cfg.color }}>
                   {cfg.label}
-                  {cfg.cost > 0 && <span className="cm-theme-price">{cfg.cost} 코인</span>}
+                  {cfg.cost > 0 && <span className="cm-shop-price">{cfg.cost} 코인</span>}
                 </h4>
-                <div className="cm-theme-grid">
+                <div className="cm-shop-grid">
                   {themes.map(theme => {
                     const owned = hasUnlocked(theme.id);
                     const active = theme.id === themeId;
@@ -91,14 +91,14 @@ const CrossumThemeModal: React.FC<Props> = ({
                       <button
                         key={theme.id}
                         type="button"
-                        className={`cm-theme-card${active ? ' is-active' : ''}${affordable ? '' : ' is-locked'}`}
+                        className={`cm-shop-card${active ? ' is-active' : ''}${affordable ? '' : ' is-locked'}`}
                         onClick={() => handlePick(theme)}
                         disabled={!affordable}
                       >
                         <Preview theme={theme} />
-                        <span className="cm-theme-name">{theme.name}</span>
-                        {active && <span className="cm-theme-badge"><Check size={12} /></span>}
-                        {!owned && <span className="cm-theme-badge cm-theme-badge-lock"><Lock size={12} /></span>}
+                        <span className="cm-shop-name">{theme.name}</span>
+                        {active && <span className="cm-shop-badge"><Check size={12} /></span>}
+                        {!owned && <span className="cm-shop-badge cm-shop-badge-lock"><Lock size={12} /></span>}
                       </button>
                     );
                   })}
