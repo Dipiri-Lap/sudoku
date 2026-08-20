@@ -8,7 +8,9 @@ import {
   House,
   ArrowRight,
   Volume2,
-  VolumeX,
+  Music,
+  Settings,
+  X,
 } from 'lucide-react';
 import {
   DIFFICULTY_CONFIGS,
@@ -21,7 +23,10 @@ import { stageLevel, TOTAL_STAGES } from '../stage/schedule';
 import { useCrossumProgress } from '../stage/progress';
 import { extractEquations, evaluate } from '../stage/board';
 import { useCoins } from '../../../context/CoinContext';
-import { playSfx, isMuted, setMuted, warmUpSfx, startBgm, stopBgm } from '../utils/sound';
+import {
+  playSfx, warmUpSfx, startBgm, stopBgm, pauseBgm, resumeBgm,
+  getBgmVolume, getSfxVolume, setBgmVolume, setSfxVolume,
+} from '../utils/sound';
 import '../styles/CrossMath.css';
 
 interface Tile {
@@ -197,7 +202,10 @@ const CrossMathGame: React.FC = () => {
   const awardedRef = useRef<number | null>(null);
 
   /** 방금 놓은 칸 — 착지 애니메이션과 이웃 밀림에 쓰고 잠시 뒤 지운다 */
-  const [muted, setMutedState] = useState(isMuted);
+  const runStageRef = useRef<((n: number) => Promise<void>) | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [bgmVol, setBgmVol] = useState(getBgmVolume);
+  const [sfxVol, setSfxVol] = useState(getSfxVolume);
   const [lastPlaced, setLastPlaced] = useState<string | null>(null);
   /** 막 완성된 줄의 칸별 지연(ms). 왼쪽부터 번져나가게 한다 */
   const [flash, setFlash] = useState<Record<string, number>>({});
@@ -373,7 +381,9 @@ const CrossMathGame: React.FC = () => {
     awardedRef.current = stage;
     void addCoins(STAGE_CLEAR_COIN);
     navigator.vibrate?.([20, 40, 30]);
-    playSfx('complete');
+    // 클리어 연출 동안에는 배경음을 잠시 내린다. 다음 스테이지에서 이어서 재생된다.
+    pauseBgm();
+    playSfx('clear');
     import('canvas-confetti').then(({ default: confetti }) => {
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 }, disableForReducedMotion: true });
     });
@@ -386,8 +396,19 @@ const CrossMathGame: React.FC = () => {
     });
   }, [isWinner, stage, clearStage, addCoins]);
 
+  /** 스테이지를 깬 뒤 다음으로 넘어갈 때 — 전면 광고를 한 번 띄운다 */
+  const goNextStage = useCallback((n: number) => {
+    const proceed = () => { resumeBgm(); void runStageRef.current?.(n); };
+    if (import.meta.env.DEV || !window.adBreak) { proceed(); return; }
+    window.adBreak({ type: 'next', name: 'crossum-stage-complete', adBreakDone: proceed });
+  }, []);
+
   const runStage = useCallback(async (n: number) => {
     warmUpSfx();
+    // 새 번호를 먼저 넣으면 이전 판의 '승리' 상태가 그대로 남아 클리어 처리가 한 번 더 돈다
+    // (클리어음 재생 + 코인·퍼즐력 중복 지급). 판을 먼저 비운다.
+    setPlacements({});
+    setLevel(null);
     setStage(n);
     setDifficulty(`lv${stageLevel(n)}` as Difficulty);
     setScreen('generating');
@@ -402,6 +423,9 @@ const CrossMathGame: React.FC = () => {
     }
   }, [loadLevel]);
 
+  // goNextStage 가 runStage 보다 먼저 선언되므로 ref 로 연결한다.
+  // 렌더 중 ref 를 건드리지 않도록 effect 에서 최신 함수를 넣는다.
+  useEffect(() => { runStageRef.current = runStage; }, [runStage]);
 
   /** 빈칸에 타일을 놓고 선택 상태를 모두 푼다 */
   const place = useCallback((key: string, tile: Tile) => {
@@ -824,19 +848,19 @@ const CrossMathGame: React.FC = () => {
           >
             <ChevronLeft size={20} />
           </button>
-          <button
-            className="cm-icon-btn cm-mute-btn"
-            onClick={() => { const next = !muted; setMuted(next); setMutedState(next); if (!next) warmUpSfx(); }}
-            aria-label={muted ? '소리 켜기' : '소리 끄기'}
-            title={muted ? '소리 켜기' : '소리 끄기'}
-          >
-            {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          </button>
         </div>
 
         <span className="cm-topbar-title">{stage !== null ? `스테이지 ${stage}` : 'Crossum'}</span>
 
         <div className="cm-topbar-side cm-topbar-side-right">
+          <button
+            className="cm-icon-btn"
+            onClick={() => setShowSettings(true)}
+            aria-label="설정"
+            title="설정"
+          >
+            <Settings size={18} />
+          </button>
         </div>
       </header>
 
@@ -942,7 +966,7 @@ const CrossMathGame: React.FC = () => {
                 </button>
                 <button
                   className="cm-btn-primary"
-                  onClick={() => stage !== null && runStage(stage + 1)}
+                  onClick={() => stage !== null && goNextStage(stage + 1)}
                   disabled={stage === null || stage >= TOTAL_STAGES}
                 >
                   다음 스테이지 <ArrowRight size={20} />
@@ -1001,6 +1025,51 @@ const CrossMathGame: React.FC = () => {
       {drag && (
         <div className={`cm-drag-ghost ${digitClass(drag.tile.value)}`} style={{ left: drag.x, top: drag.y }}>
           {drag.tile.value}
+        </div>
+      )}
+
+      {showSettings && (
+        <div className="cm-modal-backdrop" onClick={() => setShowSettings(false)}>
+          <div className="cm-modal cm-settings" onClick={e => e.stopPropagation()}>
+            <button className="cm-settings-close" onClick={() => setShowSettings(false)} aria-label="닫기">
+              <X size={20} />
+            </button>
+            <h3>설정</h3>
+
+            <div className="cm-vol-row">
+              <span className="cm-vol-icon"><Music size={18} /></span>
+              <span className="cm-vol-name">배경음</span>
+              <span className="cm-vol-value">{Math.round(bgmVol * 100)}%</span>
+            </div>
+            <input
+              className="cm-vol-slider"
+              type="range" min={0} max={1} step={0.05}
+              value={bgmVol}
+              onChange={e => {
+                const v = parseFloat(e.target.value);
+                setBgmVol(v);
+                setBgmVolume(v);
+              }}
+            />
+
+            <div className="cm-vol-row">
+              <span className="cm-vol-icon"><Volume2 size={18} /></span>
+              <span className="cm-vol-name">효과음</span>
+              <span className="cm-vol-value">{Math.round(sfxVol * 100)}%</span>
+            </div>
+            <input
+              className="cm-vol-slider"
+              type="range" min={0} max={1} step={0.05}
+              value={sfxVol}
+              onChange={e => {
+                const v = parseFloat(e.target.value);
+                setSfxVol(v);
+                setSfxVolume(v);
+                // 움직이는 즉시 크기를 귀로 확인할 수 있게 한 번 들려준다
+                if (v > 0) playSfx('insert');
+              }}
+            />
+          </div>
         </div>
       )}
 

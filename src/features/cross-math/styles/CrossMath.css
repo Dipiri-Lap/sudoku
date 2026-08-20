@@ -75,67 +75,70 @@
   box-shadow: 0 1px 0 rgba(160, 110, 40, 0.15);
 }
 
-/* 음소거 토글 — 코인 표시 옆 */
-.cm-mute-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+/* ── 설정 모달 ── */
+.cm-settings {
+  position: relative;
+  text-align: left;
 }
-
-/* ── 힌트 안내 모달 ── */
-.cm-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-  background: rgba(80, 55, 20, 0.4);
-  backdrop-filter: blur(4px);
+.cm-settings h3 {
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+.cm-settings-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid #e8cf9c;
+  border-radius: 50%;
+  background: #fff8ea;
+  color: #8a5a1e;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  cursor: pointer;
+}
+.cm-settings-close:hover {
+  background: #fff1d0;
 }
 
-.cm-modal {
-  width: 100%;
-  max-width: 320px;
-  background: #fffaef;
-  border: 3px solid #e2c68a;
-  border-radius: 20px;
-  padding: 1.6rem 1.4rem 1.3rem;
-  text-align: center;
-  box-shadow: 0 6px 0 #e2c68a;
+.cm-vol-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
 }
-.cm-modal h3 {
-  margin: 0 0 0.7rem;
-  font-size: 1.15rem;
-  font-weight: 900;
+.cm-vol-row + .cm-vol-slider {
+  margin-bottom: 1.4rem;
+}
+.cm-vol-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #fff1d0;
+  color: #b07a2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cm-vol-name {
+  font-weight: 700;
+  font-size: 0.98rem;
   color: #6b4416;
 }
-.cm-modal p {
-  margin: 0 0 0.35rem;
+.cm-vol-value {
+  margin-left: auto;
   font-size: 0.88rem;
-  font-weight: 600;
-  color: #8a6a3a;
-  line-height: 1.5;
+  font-weight: 700;
+  color: #b79b6c;
+  font-variant-numeric: tabular-nums;
 }
-.cm-modal-sub {
-  color: #b79b6c !important;
-  font-size: 0.78rem !important;
-}
-.cm-modal-btns {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-.cm-modal-btns button {
-  flex: 1;
-  padding: 0.7rem 0.5rem;
-  font-size: 0.92rem;
-}
-.cm-modal-btns button:disabled {
-  opacity: 0.5;
-  cursor: default;
+.cm-vol-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: #e8994a;
 }
 
 /* ── 보드 패널 ── */
