@@ -3,11 +3,21 @@ import { Crown, RotateCcw, Sparkles, XCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { RoyalMatchProvider, useRoyalMatch } from '../context/RoyalMatchContext';
 import { BOARD_SIZE, GEM_ICONS } from '../utils/boardEngine';
+import {
+  CLEAR_ANIM_MS,
+  CLEAR_HOLD_MS,
+  SWAP_ANIM_MS,
+  fallDurationMs,
+} from '../constants';
 import type { Position } from '../types';
 import '../styles/RoyalMatchGame.css';
 
-const SWAP_ANIM_MS = 320;
 const CELL_PCT = 100 / BOARD_SIZE;
+const SWAP_EASE = 'cubic-bezier(0.34, 1.4, 0.64, 1)';
+// y = x^2 에 가까운 ease-in 곡선. 낙하 시간이 거리의 제곱근에 비례하므로(fallDurationMs)
+// 이 곡선과 조합하면 모든 타일이 "같은 중력가속도"로 떨어진다 - 그래서 한 컬럼 안에서
+// 낙하 거리가 서로 달라도 타일끼리 서로를 추월하거나 겹치지 않는다.
+const GRAVITY_EASE = 'cubic-bezier(0.11, 0, 0.5, 0)';
 const COMMIT_RATIO = 0.6; // 셀 크기의 60% 이상 끌어야 방향이 확정되어 스왑이 트리거된다.
 
 interface DragState {
@@ -25,6 +35,8 @@ const RoyalMatchContent: React.FC = () => {
   const boardRef = useRef<HTMLDivElement>(null);
   const tileElsRef = useRef<Map<number, HTMLButtonElement>>(new Map());
   const prevPosRef = useRef<Map<number, Position>>(new Map());
+  const landCleanupRef = useRef<(() => void)[]>([]);
+  const fallDurationRef = useRef(0);
 
   useEffect(() => {
     if (state.status === 'won') {
@@ -37,28 +49,52 @@ const RoyalMatchContent: React.FC = () => {
     }
   }, [state.status]);
 
-  // 타일이 서로 자리를 바꾸는 슬라이드 애니메이션이 끝난 뒤에 매치 판정을 하고,
-  // 매치가 없으면 되돌리는 애니메이션까지 마친 뒤 상태를 정리한다.
+  // 각 단계의 애니메이션이 끝나는 시점에 다음 단계로 넘긴다.
+  // 스왑 -> (매치 판정) -> 터짐 -> 중력 낙하 -> 연쇄 판정 -> ... -> 종료.
   useEffect(() => {
-    if (state.swapStatus === 'swapping') {
-      const timer = setTimeout(() => dispatch({ type: 'RESOLVE_SWAP' }), SWAP_ANIM_MS);
-      return () => clearTimeout(timer);
+    let delay: number;
+    let next: 'RESOLVE_SWAP' | 'CLEAR_REVERT' | 'APPLY_GRAVITY' | 'SETTLE';
+
+    switch (state.phase) {
+      case 'swapping':
+        delay = SWAP_ANIM_MS;
+        next = 'RESOLVE_SWAP';
+        break;
+      case 'reverting':
+        delay = SWAP_ANIM_MS;
+        next = 'CLEAR_REVERT';
+        break;
+      case 'clearing':
+        // 터지는 애니메이션 + 빈칸을 보여주는 정지 구간이 모두 끝난 뒤에 낙하를 시작한다.
+        delay = CLEAR_ANIM_MS + CLEAR_HOLD_MS;
+        next = 'APPLY_GRAVITY';
+        break;
+      case 'falling':
+        // 실제로 가장 멀리 떨어지는 타일의 낙하 시간(FLIP 단계에서 계산)만큼 기다린다.
+        delay = fallDurationRef.current + 40;
+        next = 'SETTLE';
+        break;
+      default:
+        return;
     }
-    if (state.swapStatus === 'reverting') {
-      const timer = setTimeout(() => dispatch({ type: 'CLEAR_REVERT' }), SWAP_ANIM_MS);
-      return () => clearTimeout(timer);
-    }
-  }, [state.swapStatus, dispatch]);
+
+    const timer = setTimeout(() => dispatch({ type: next }), delay);
+    return () => clearTimeout(timer);
+  }, [state.phase, state.board, dispatch]);
 
   // FLIP 기법: 타일의 그리드 좌표(row/col)가 바뀌면, 바뀌기 직전 화면 위치와의
   // 차이만큼 즉시 transform으로 되돌려놓은 뒤(트랜지션 없이) 강제로 리플로우시키고,
   // transform을 0으로 되돌려 트랜지션이 그 차이만큼 자연스럽게 슬라이드하게 만든다.
-  // React 상태 변경만으로 left/top 트랜지션에 의존하면 이벤트 우선순위/배치 타이밍에
-  // 따라 애니메이션이 씹히는 경우가 있어, 항상 확실히 재생되도록 직접 제어한다.
+  // 새로 생성된 타일은 이전 위치가 없으므로 tile.spawnRow(보드 위쪽 가상 행)를
+  // 출발점으로 삼아 천장 위에서 떨어져 들어오게 한다.
   useLayoutEffect(() => {
     const boardEl = boardRef.current;
     if (!boardEl) return;
     const cellSize = boardEl.clientWidth / BOARD_SIZE;
+    const isFalling = state.phase === 'falling';
+
+    landCleanupRef.current.forEach(fn => fn());
+    landCleanupRef.current = [];
 
     const nextPositions = new Map<number, Position>();
     state.board.forEach((row, r) => {
@@ -67,28 +103,75 @@ const RoyalMatchContent: React.FC = () => {
       });
     });
 
-    nextPositions.forEach((pos, id) => {
-      const prev = prevPosRef.current.get(id);
-      const el = tileElsRef.current.get(id);
-      if (!prev || !el || (prev.row === pos.row && prev.col === pos.col)) return;
+    let longestFall = 0;
 
-      const dx = (prev.col - pos.col) * cellSize;
-      const dy = (prev.row - pos.row) * cellSize;
-      el.style.transition = 'none';
-      el.style.transform = `translate(${dx}px, ${dy}px)`;
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      el.offsetWidth; // 강제 리플로우 - 위 transform이 실제로 반영된 뒤에 트랜지션을 켠다.
-      el.style.transition = '';
-      el.style.transform = '';
+    state.board.forEach(row => {
+      row.forEach(tile => {
+        const pos = nextPositions.get(tile.id) as Position;
+        const el = tileElsRef.current.get(tile.id);
+        if (!el) return;
+
+        const prev =
+          prevPosRef.current.get(tile.id) ??
+          (tile.spawnRow !== undefined ? { row: tile.spawnRow, col: pos.col } : undefined);
+        if (!prev || (prev.row === pos.row && prev.col === pos.col)) return;
+
+        const dx = (prev.col - pos.col) * cellSize;
+        const dy = (prev.row - pos.row) * cellSize;
+
+        const falling = isFalling && dy < 0;
+        const duration = falling ? fallDurationMs(pos.row - prev.row) : SWAP_ANIM_MS;
+        if (falling) longestFall = Math.max(longestFall, duration);
+
+        // CSS 애니메이션은 인라인 transform보다 우선한다. 이전 착지 스쿼시가 남아 있으면
+        // 아래 FLIP transform이 통째로 무시되어 타일이 슬라이드 없이 순간이동해버린다.
+        el.classList.remove('landed');
+        el.style.transition = 'none';
+        el.style.transform = `translate(${dx}px, ${dy}px)`;
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        el.offsetWidth; // 강제 리플로우 - 위 transform이 실제로 반영된 뒤에 트랜지션을 켠다.
+        el.style.transition = `transform ${duration}ms ${falling ? GRAVITY_EASE : SWAP_EASE}`;
+        el.style.transform = '';
+
+        if (!falling) return;
+        // 착지하는 순간(= transform 트랜지션이 실제로 끝나는 순간) 살짝 찌그러졌다
+        // 펴지게 해서 무게감을 준다. 타이머가 아니라 트랜지션 종료 이벤트에 걸어야
+        // 애니메이션이 중간에 바뀌어도 어긋나지 않는다.
+        const onLand = (ev: TransitionEvent) => {
+          if (ev.propertyName !== 'transform') return;
+          el.removeEventListener('transitionend', onLand);
+          el.classList.add('landed');
+        };
+        el.addEventListener('transitionend', onLand);
+        landCleanupRef.current.push(() => el.removeEventListener('transitionend', onLand));
+      });
     });
 
+    fallDurationRef.current = longestFall;
     prevPosRef.current = nextPositions;
-  }, [state.board]);
+  }, [state.board, state.phase]);
+
+  // 스쿼시가 끝나면 클래스를 걷어낸다(이벤트 위임). 클래스가 남아 있으면 다음 낙하 때
+  // 같은 애니메이션이 다시 재생되지 않고, transform 충돌도 생긴다.
+  useEffect(() => {
+    const boardEl = boardRef.current;
+    if (!boardEl) return;
+    const onAnimEnd = (ev: AnimationEvent) => {
+      if (ev.animationName === 'royal-match-land') {
+        (ev.target as HTMLElement).classList.remove('landed');
+      }
+    };
+    boardEl.addEventListener('animationend', onAnimEnd);
+    return () => {
+      boardEl.removeEventListener('animationend', onAnimEnd);
+      landCleanupRef.current.forEach(fn => fn());
+    };
+  }, []);
 
   const handleNewGame = () => dispatch({ type: 'NEW_GAME' });
 
   const handlePointerDown = (pos: Position) => (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (state.swapStatus !== 'none' || state.status !== 'playing') return;
+    if (state.phase !== 'idle' || state.status !== 'playing') return;
     e.currentTarget.setPointerCapture(e.pointerId);
     const rect = e.currentTarget.getBoundingClientRect();
     dragRef.current = { pos, x: e.clientX, y: e.clientY, cellSize: rect.width };
@@ -169,7 +252,11 @@ const RoyalMatchContent: React.FC = () => {
           {state.board.flatMap((row, r) =>
             row.map((tile, c) => {
               const isGrabbed = grabbedPos?.row === r && grabbedPos?.col === c;
-              const isReverting = state.swapStatus === 'reverting' && isPendingPos({ row: r, col: c });
+              const isReverting = state.phase === 'reverting' && isPendingPos({ row: r, col: c });
+              const key = `${r},${c}`;
+              const isClearing = state.clearing.has(key);
+              const special = tile.special ? ` ${tile.special}` : '';
+              const isSpawning = state.spawnedSpecials.has(key) ? ' spawning' : '';
               return (
                 <button
                   key={tile.id}
@@ -178,7 +265,7 @@ const RoyalMatchContent: React.FC = () => {
                     if (el) tileElsRef.current.set(tile.id, el);
                     else tileElsRef.current.delete(tile.id);
                   }}
-                  className={`royal-match-tile${isGrabbed ? ' selected' : ''}${isReverting ? ' invalid' : ''}`}
+                  className={`royal-match-tile${isGrabbed ? ' selected' : ''}${isReverting ? ' invalid' : ''}${isClearing ? ' clearing' : ''}${special}${isSpawning}`}
                   style={{
                     left: `calc(${c * CELL_PCT}% + 2px)`,
                     top: `calc(${r * CELL_PCT}% + 2px)`,
