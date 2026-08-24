@@ -2,7 +2,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Crown, RotateCcw, Sparkles, XCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { RoyalMatchProvider, useRoyalMatch } from '../context/RoyalMatchContext';
-import { BOARD_SIZE, GEM_ICONS } from '../utils/boardEngine';
+import RoyalMatchEffects from './RoyalMatchEffects';
+import { BOARD_SIZE, GEM_IMAGES } from '../utils/boardEngine';
 import {
   CLEAR_ANIM_MS,
   CLEAR_HOLD_MS,
@@ -238,7 +239,11 @@ const RoyalMatchContent: React.FC = () => {
         </div>
       </div>
 
-      <div className="royal-match-board-outer">
+      <div
+        className={`royal-match-board-outer${
+          state.phase === 'clearing' && state.blasts.length > 0 ? ' shaking' : ''
+        }`}
+      >
         <div
           ref={boardRef}
           className="royal-match-board"
@@ -274,10 +279,24 @@ const RoyalMatchContent: React.FC = () => {
                   }}
                   onPointerDown={handlePointerDown({ row: r, col: c })}
                 >
-                  {GEM_ICONS[tile.type]}
+                  <img
+                    className="royal-match-gem"
+                    src={GEM_IMAGES[tile.type]}
+                    alt=""
+                    draggable={false}
+                  />
                 </button>
               );
             })
+          )}
+
+          {state.phase === 'clearing' && (
+            <RoyalMatchEffects
+              clearing={state.clearing}
+              spawned={state.spawnedSpecials}
+              blasts={state.blasts}
+              round={state.clearId}
+            />
           )}
         </div>
       </div>

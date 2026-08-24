@@ -13,7 +13,8 @@
     "generate-stages": "tsx scripts/generate-stages.ts",
     "generate-cross-math-stages": "tsx scripts/generate-cross-math-stages.ts",
     "generate-queens": "tsx scripts/generate-queens.ts",
-    "generate-big-sudoku": "tsx scripts/generate-big-sudoku.ts"
+    "generate-big-sudoku": "tsx scripts/generate-big-sudoku.ts",
+    "extract-jewels": "node scripts/extract-jewels.mjs"
   },
   "dependencies": {
     "@portone/browser-sdk": "^0.1.3",

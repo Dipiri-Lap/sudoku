@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useMatch } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import LandingPage from './common/components/LandingPage';
 import SudokuModeSelect from './features/sudoku/components/SudokuModeSelect';
@@ -21,6 +21,7 @@ import DiffTool from './features/diff-tool/DiffTool';
 import CrosswordGame from './features/crossword/components/CrosswordGame';
 import CrossMathGame from './features/cross-math/components/CrossMathGame';
 import RoyalMatchGame from './features/royal-match/components/RoyalMatchGame';
+import JewelKingdomGame from './features/jewel-kingdom/ui/JewelKingdomGame';
 import GardenMap from './features/garden/components/GardenMap';
 
 import AdminPage from './features/admin/AdminPage';
@@ -43,6 +44,12 @@ import './index.css';
 
 const AppContent: React.FC = () => {
   const { isInitialized } = useUserInit();
+  // 사용자 데이터를 쓰지 않는 화면은 초기화를 기다리지 않는다.
+  // 헤드리스 브라우저(시각 회귀 테스트)에서는 Firebase 익명 로그인이 끝나지 않아
+  // 아래 게이트에서 영영 멈춘다. 진행도를 저장하게 되면 이 목록에서 빼야 한다.
+  const standalone = useMatch('/jewel-kingdom');
+
+  if (standalone) return <JewelKingdomGame />;
 
   if (!isInitialized) {
     return (
@@ -129,6 +136,7 @@ const AppContent: React.FC = () => {
           <Route path="/crossword" element={<CrosswordGame />} />
           <Route path="/cross-math" element={<CrossMathGame />} />
           <Route path="/royal-match" element={<RoyalMatchGame />} />
+          <Route path="/jewel-kingdom" element={<JewelKingdomGame />} />
           {window.location.hostname === 'localhost' && (
             <Route path="/garden" element={<GardenMap />} />
           )}

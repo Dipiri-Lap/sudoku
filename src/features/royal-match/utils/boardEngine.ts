@@ -1,8 +1,17 @@
-import type { Board, GemType, Position, SpecialKind, Tile } from '../types';
+import type { Blast, Board, GemType, Position, SpecialKind, Tile } from '../types';
 
 export const BOARD_SIZE = 8;
 export const GEM_TYPE_COUNT = 6;
-export const GEM_ICONS = ['🍎', '🍇', '🍋', '🍊', '🍉', '🍓'];
+// public/assets/3match/jewelTile.png(8열 x 5행 시트)의 육각형 행에서 잘라낸 보석들.
+// scripts 없이 다시 뽑고 싶으면 시트의 다른 행(팔각/다이아/삼각/별)을 써도 된다.
+export const GEM_IMAGES = [
+  '/assets/3match/gems/gem-0.png',
+  '/assets/3match/gems/gem-1.png',
+  '/assets/3match/gems/gem-2.png',
+  '/assets/3match/gems/gem-3.png',
+  '/assets/3match/gems/gem-4.png',
+  '/assets/3match/gems/gem-5.png',
+];
 
 let tileIdCounter = 0;
 function nextTileId(): number {
@@ -181,14 +190,20 @@ export function planSpecials(groups: MatchGroup[], preferred: Position[] = []): 
 
 // 삭제 대상에 로켓이 포함돼 있으면 그 행/열을 통째로 삭제 대상에 더한다.
 // 새로 딸려 들어온 칸에 또 로켓이 있으면 그것도 터진다(연쇄 발사).
-export function expandSpecials(board: Board, cells: Set<string>): Set<string> {
+// 실제로 발사된 로켓 목록도 같이 돌려준다 - 궤적 이펙트를 그리려면 필요하다.
+export function expandSpecials(
+  board: Board,
+  cells: Set<string>,
+): { cells: Set<string>; blasts: Blast[] } {
   const out = new Set(cells);
+  const blasts: Blast[] = [];
   const queue = [...cells];
 
   while (queue.length > 0) {
     const { row, col } = parseCellKey(queue.pop() as string);
     const kind = board[row][col].special;
     if (!kind) continue;
+    blasts.push({ row, col, kind });
 
     const blast: string[] = [];
     if (kind === 'rocket-h') {
@@ -204,7 +219,7 @@ export function expandSpecials(board: Board, cells: Set<string>): Set<string> {
     });
   }
 
-  return out;
+  return { cells: out, blasts };
 }
 
 // 아이템이 생길 칸의 타일을 그 자리에서 로켓으로 바꾼다. id를 그대로 두어야

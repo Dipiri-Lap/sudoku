@@ -29,6 +29,8 @@ function createInitialState(): RoyalMatchState {
     phase: 'falling',
     clearing: new Set(),
     spawnedSpecials: new Set(),
+    blasts: [],
+    clearId: 0,
     combo: 0,
     lastCombo: 0,
     status: 'playing',
@@ -62,6 +64,7 @@ function finish(state: RoyalMatchState): RoyalMatchState {
     phase,
     clearing: new Set(),
     spawnedSpecials: new Set(),
+    blasts: [],
     pendingSwap: null,
     lastCombo: state.combo,
     combo: 0,
@@ -91,7 +94,7 @@ function enterClearing(
 
   // 이번에 새로 생기는 로켓은 이번 턴에 같이 터지지 않는다.
   // (markSpecials를 뒤에 하므로 expandSpecials 시점엔 아직 로켓이 아니다)
-  const cleared = expandSpecials(state.board, base);
+  const { cells: cleared, blasts } = expandSpecials(state.board, base);
   spawns.forEach(s => cleared.delete(s.key));
 
   const combo = state.combo + 1;
@@ -101,6 +104,8 @@ function enterClearing(
     phase: 'clearing',
     clearing: cleared,
     spawnedSpecials: new Set(spawns.map(s => s.key)),
+    blasts,
+    clearId: state.clearId + 1,
     combo,
     score: state.score + scoreForMatch(cleared.size, combo),
     pendingSwap: null,
@@ -157,6 +162,7 @@ function reducer(state: RoyalMatchState, action: Action): RoyalMatchState {
         board: applyGravity(state.board, state.clearing),
         clearing: new Set(),
         spawnedSpecials: new Set(),
+        blasts: [],
         phase: 'falling',
       };
     }

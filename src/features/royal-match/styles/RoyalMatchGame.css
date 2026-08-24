@@ -132,7 +132,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  padding: 0;
   cursor: grab;
   /* left/top은 그리드 좌표에 맞춰 즉시 이동하고, 실제 슬라이드/낙하는 FLIP 기법으로
      transform에 걸리는 트랜지션이 담당한다. 낙하는 거리마다 시간/이징이 달라야 해서
@@ -161,7 +161,19 @@
   z-index: 2;
 }
 
-/* 로켓 타일: 과일 종류는 그대로 유지하되(색 매치에 계속 참여한다) 발사 방향으로
+/* 보석 스프라이트. 포인터 이벤트를 끄지 않으면 img가 드래그 대상이 되어
+   타일의 pointerdown이 씹힌다. */
+.royal-match-gem {
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+
+/* 로켓 타일: 보석 종류는 그대로 유지하되(색 매치에 계속 참여한다) 발사 방향으로
    흐르는 줄무늬와 화살표를 얹어 "이 축으로 날아간다"를 읽히게 한다. */
 .royal-match-tile.rocket-h,
 .royal-match-tile.rocket-v {
@@ -284,4 +296,136 @@
   cursor: pointer;
   box-shadow: 0 4px 0 #b8860b;
   margin-top: 8px;
+}
+
+/* ===== 이펙트 레이어 =====
+   타일과 같은 좌표계(보드 기준 %)를 쓰되 타일 수명과 분리된 오버레이.
+   스프라이트 시트 에셋을 넣으면 .royal-match-fx-sprite 가, 없으면 아래
+   CSS로 만든 기본 이펙트(.ring / .flare / .trail)가 재생된다. */
+.royal-match-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.royal-match-fx > * {
+  position: absolute;
+}
+
+/* 구입한 스프라이트 시트 재생 - 가로 일렬 배열 시트를 steps()로 넘긴다.
+   프레임 수/길이/배율은 인라인 스타일(effects.ts)이 주입한다. */
+.royal-match-fx-sprite {
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  animation-name: royal-match-fx-play;
+  animation-fill-mode: forwards;
+}
+
+@keyframes royal-match-fx-play {
+  to {
+    background-position: calc(var(--fx-frames) * -100%) 0;
+  }
+}
+
+/* 기본 이펙트 1: 터진 칸에서 퍼지는 충격파 링 */
+.royal-match-fx-ring {
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 12px rgba(253, 224, 71, 0.8);
+  animation: royal-match-ring 0.36s ease-out forwards;
+}
+
+@keyframes royal-match-ring {
+  0% { transform: scale(0.35); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: scale(1.9); opacity: 0; border-width: 0.5px; }
+}
+
+/* 기본 이펙트 2: 아이템 생성 섬광 */
+.royal-match-fx-flare {
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(147, 197, 253, 0.6) 30%,
+    rgba(59, 130, 246, 0) 70%
+  );
+  animation: royal-match-flare 0.45s ease-out forwards;
+}
+
+@keyframes royal-match-flare {
+  0% { transform: scale(0.2) rotate(0deg); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: scale(1.5) rotate(120deg); opacity: 0; }
+}
+
+/* 기본 이펙트 3: 로켓 궤적. transform-origin이 로켓이 있던 칸이라
+   scale이 0->1로 커지면 그 지점에서 양쪽으로 뻗어나가는 것처럼 보인다. */
+.royal-match-fx-trail {
+  border-radius: 6px;
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+}
+
+.royal-match-fx-trail.h {
+  background: linear-gradient(
+    90deg,
+    rgba(147, 197, 253, 0) 0%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(147, 197, 253, 0) 100%
+  );
+  box-shadow: 0 0 18px rgba(96, 165, 250, 0.9);
+}
+
+.royal-match-fx-trail.v {
+  background: linear-gradient(
+    180deg,
+    rgba(147, 197, 253, 0) 0%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(147, 197, 253, 0) 100%
+  );
+  box-shadow: 0 0 18px rgba(96, 165, 250, 0.9);
+}
+
+/* 뻗어나가는 축만 scale한다. scale()로 양축을 함께 줄이면 가로 궤적이
+   세로로도 납작해져서 선이 아니라 점에서 커지는 모양이 되어버린다. */
+.royal-match-fx-trail.h {
+  transform: scaleX(0);
+  animation-name: royal-match-trail-h;
+}
+
+.royal-match-fx-trail.v {
+  transform: scaleY(0);
+  animation-name: royal-match-trail-v;
+}
+
+@keyframes royal-match-trail-h {
+  0% { transform: scaleX(0); opacity: 1; }
+  45% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+@keyframes royal-match-trail-v {
+  0% { transform: scaleY(0); opacity: 1; }
+  45% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+
+/* 로켓이 터질 때 보드가 살짝 흔들린다. */
+.royal-match-board-outer.shaking {
+  animation: royal-match-shake 0.34s ease-in-out;
+}
+
+@keyframes royal-match-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 2px); }
+  40% { transform: translate(3px, -2px); }
+  60% { transform: translate(-2px, -1px); }
+  80% { transform: translate(2px, 1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .royal-match-fx { display: none; }
+  .royal-match-board-outer.shaking { animation: none; }
 }

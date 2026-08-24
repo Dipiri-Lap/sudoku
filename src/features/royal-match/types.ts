@@ -29,6 +29,13 @@ export type GameStatus = 'playing' | 'won' | 'lost';
 // falling   - 중력 낙하 + 상단 리필 낙하 중
 export type Phase = 'idle' | 'swapping' | 'reverting' | 'clearing' | 'falling';
 
+// 실제로 발사된 로켓 - 궤적 이펙트를 어디에 어떤 방향으로 그릴지의 근거.
+export interface Blast {
+  row: number;
+  col: number;
+  kind: SpecialKind;
+}
+
 export interface PendingSwap {
   a: Position;
   b: Position;
@@ -46,6 +53,11 @@ export interface RoyalMatchState {
   clearing: Set<string>;
   /** 이번 clearing에서 새로 생겨난 아이템 칸 키 - 등장 연출용. */
   spawnedSpecials: Set<string>;
+  /** 이번 clearing에서 발사된 로켓들 - 궤적 연출용. */
+  blasts: Blast[];
+  /** clearing이 일어날 때마다 증가. 이펙트 엘리먼트의 React key를 갈아끼워
+      같은 칸에서 연속으로 터져도 애니메이션이 처음부터 다시 재생되게 한다. */
+  clearId: number;
   combo: number;
   lastCombo: number;
   status: GameStatus;

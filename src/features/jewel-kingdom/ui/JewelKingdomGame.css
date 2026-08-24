@@ -1,0 +1,278 @@
+.jk-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #1a1442 0%, #2b1e63 55%, #3a2178 100%);
+  color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  font-family: 'Inter', system-ui, sans-serif;
+  box-sizing: border-box;
+}
+
+.jk-header {
+  width: min(100%, 520px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.jk-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.jk-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jk-moves {
+  font-size: 0.8rem;
+  color: #c4b5fd;
+  min-width: 3.5em;
+  text-align: right;
+}
+
+.jk-actions button {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: inherit;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.jk-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.jk-board-outer {
+  width: min(100%, 520px);
+  aspect-ratio: 1 / 1;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 16px;
+  padding: 8px;
+  box-sizing: border-box;
+  box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.4);
+  /* 새 보석은 판 위쪽(음수 행)에서 떨어져 들어온다. 잘라내지 않으면
+     헤더 위로 보석이 지나가는 게 보인다. */
+  overflow: hidden;
+}
+
+.jk-board {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.jk-cell {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 칸 바닥. 보석과 분리해야 보석이 떨어질 때 바닥이 같이 움직이지 않는다. */
+.jk-plate {
+  padding: 3px;
+}
+
+.jk-plate::after {
+  content: '';
+  width: 100%;
+  height: 100%;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 판의 일부가 아닌 칸 - 아무것도 그리지 않는다 */
+.jk-void {
+  background: none;
+}
+
+.jk-gem {
+  padding: 3px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+}
+
+.jk-gem img {
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
+  /* 없으면 img가 드래그 대상이 되어 pointerdown이 씹힌다 */
+  pointer-events: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+
+.jk-gem.grabbed {
+  z-index: 3;
+}
+
+.jk-gem.grabbed img {
+  filter: drop-shadow(0 0 10px rgba(253, 224, 71, 0.9));
+}
+
+/* 아이템 종류 표시. 보석 가운데를 가리지 않게 구석에 둔다 -
+   줄무늬만으로는 한눈에 구분이 안 된다. */
+.jk-mark {
+  position: absolute;
+  right: 8%;
+  bottom: 4%;
+  font-size: 0.62em;
+  line-height: 1;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.9), 0 0 10px rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+.jk-cover {
+  position: absolute;
+  inset: 3px;
+  border-radius: 9px;
+  background: rgba(186, 230, 253, 0.45);
+  border: 2px solid rgba(224, 242, 254, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7em;
+  font-weight: 800;
+  color: #0c4a6e;
+  pointer-events: none;
+}
+
+.jk-blocker {
+  padding: 3px;
+  font-weight: 800;
+  font-size: 0.8em;
+  color: #451a03;
+}
+
+.jk-blocker::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #b45309, #78350f);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25);
+}
+
+.jk-blocker.damaged::before {
+  animation: jk-hit 0.24s ease-out;
+}
+
+@keyframes jk-hit {
+  0% { transform: scale(1); filter: brightness(1); }
+  40% { transform: scale(0.9); filter: brightness(2); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* 로켓: 발사 축 방향으로 흐르는 줄무늬 */
+.jk-gem.sp-rocket-h img,
+.jk-gem.sp-rocket-v img {
+  filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.95));
+}
+
+/* 줄무늬는 보석 위에 얇게 얹는다. 불투명하게 덮으면 무슨 색 보석인지
+   안 보이는데, 로켓도 색 매치에 계속 참여하므로 색이 보여야 한다. */
+.jk-gem.sp-rocket-h::after,
+.jk-gem.sp-rocket-v::after {
+  content: '';
+  position: absolute;
+  inset: 26% 10%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    var(--jk-angle, 90deg),
+    rgba(255, 255, 255, 0) 0 5px,
+    rgba(255, 255, 255, 0.55) 5px 7px
+  );
+  -webkit-mask-image: linear-gradient(var(--jk-angle, 90deg), #000, transparent 45%, transparent 55%, #000);
+  mask-image: linear-gradient(var(--jk-angle, 90deg), #000, transparent 45%, transparent 55%, #000);
+}
+
+.jk-gem.sp-rocket-h { --jk-angle: 90deg; }
+.jk-gem.sp-rocket-v { --jk-angle: 0deg; }
+.jk-gem.sp-rocket-v::after { inset: 10% 26%; }
+
+.jk-gem.sp-tnt img {
+  filter: drop-shadow(0 0 10px rgba(248, 113, 113, 0.95));
+}
+
+.jk-gem.sp-lightball {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(167, 139, 250, 0.2) 65%, transparent 72%);
+  border-radius: 50%;
+}
+
+/* 매치가 안 돼서 되돌아가는 중 */
+.jk-gem.invalid img {
+  filter: drop-shadow(0 0 9px rgba(248, 113, 113, 0.95));
+}
+
+/* 터지는 중 */
+.jk-gem.clearing {
+  animation: jk-pop 0.24s ease-in forwards;
+  z-index: 4;
+  pointer-events: none;
+}
+
+@keyframes jk-pop {
+  0% { transform: scale(1); opacity: 1; }
+  35% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.1); opacity: 0; }
+}
+
+/* 아이템이 생기는 순간 */
+.jk-gem.spawning {
+  animation: jk-charge 0.4s ease-out;
+  z-index: 5;
+}
+
+@keyframes jk-charge {
+  0% { transform: scale(1); filter: brightness(1); }
+  45% { transform: scale(1.35); filter: brightness(2.4); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* 착지 스쿼시 */
+.jk-gem.landed {
+  animation: jk-land 0.17s ease-out;
+}
+
+@keyframes jk-land {
+  0% { transform: scaleY(0.82) scaleX(1.14); }
+  55% { transform: scaleY(1.06) scaleX(0.96); }
+  100% { transform: scale(1); }
+}
+
+.jk-note {
+  margin-top: 14px;
+  font-size: 0.72rem;
+  color: #a5b4fc;
+  text-align: center;
+  max-width: 34em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jk-gem,
+  .jk-gem.clearing,
+  .jk-gem.landed,
+  .jk-gem.spawning {
+    animation-duration: 0.01ms;
+    transition-duration: 0.01ms;
+  }
+}
