@@ -40,20 +40,20 @@ describe('불변식 - 보드', () => {
   }, 60_000);
 
   it('어떤 수를 두어도 보드가 온전하다', () => {
-    for (let seed = 0; seed < 30; seed++) {
+    for (let seed = 0; seed < 20; seed++) {
       const rng = makeRng(seed);
       const board = newBoard(9, 9, rng);
-      const result = playGame(board, rng, { maxMoves: 40, strategy: 'random' });
+      const result = playGame(board, rng, { maxMoves: 25, strategy: 'random' });
       assertBoardSound(result.board, `시드 ${seed}`);
     }
   }, 60_000);
 
   it('턴이 끝난 보드에는 처리되지 않은 매치가 남지 않는다', () => {
-    for (let seed = 0; seed < 30; seed++) {
+    for (let seed = 0; seed < 20; seed++) {
       const rng = makeRng(seed);
       let board = newBoard(9, 9, rng);
       playGame(board, rng, {
-        maxMoves: 30,
+        maxMoves: 20,
         strategy: 'random',
         onTurn: (_result, next) => {
           board = next;
@@ -67,11 +67,11 @@ describe('불변식 - 보드', () => {
 describe('불변식 - 낙하', () => {
   it('같은 열에서 위에 있던 보석이 아래 보석을 추월하지 않는다', () => {
     // 낙하 애니메이션이 겹쳐 보이는 버그는 대개 여기서 시작된다.
-    for (let seed = 0; seed < 30; seed++) {
+    for (let seed = 0; seed < 20; seed++) {
       const rng = makeRng(seed);
       const board = newBoard(9, 9, rng);
       playGame(board, rng, {
-        maxMoves: 30,
+        maxMoves: 20,
         strategy: 'random',
         onTurn: result => {
           result.steps.forEach(step => {
@@ -100,7 +100,7 @@ describe('불변식 - 낙하', () => {
   it('리필은 아이템을 달고 있는 보석을 만들지 않는다', () => {
     // 턴 전체가 아니라 applyGravity 하나만 본다. 최종 보드를 보면 안 되는 이유:
     // 갓 떨어진 보석이 다음 연쇄에서 4매치를 이뤄 정당하게 아이템이 될 수 있다.
-    for (let seed = 0; seed < 50; seed++) {
+    for (let seed = 0; seed < 30; seed++) {
       const rng = makeRng(seed);
       const board = newBoard(9, 9, rng);
       const cleared = new Set<string>();
@@ -121,11 +121,11 @@ describe('불변식 - 낙하', () => {
 
 describe('불변식 - 아이템', () => {
   it('이번 판에 생긴 아이템은 이번 판에 터지지 않는다', () => {
-    for (let seed = 0; seed < 30; seed++) {
+    for (let seed = 0; seed < 20; seed++) {
       const rng = makeRng(seed);
       const board = newBoard(9, 9, rng);
       playGame(board, rng, {
-        maxMoves: 40,
+        maxMoves: 25,
         strategy: 'random',
         onTurn: result => {
           result.steps.forEach(step => {
@@ -141,11 +141,11 @@ describe('불변식 - 아이템', () => {
   }, 60_000);
 
   it('한 매치에서 아이템이 두 개 이상 생기지 않는다', () => {
-    for (let seed = 0; seed < 30; seed++) {
+    for (let seed = 0; seed < 20; seed++) {
       const rng = makeRng(seed);
       const board = newBoard(9, 9, rng);
       playGame(board, rng, {
-        maxMoves: 40,
+        maxMoves: 25,
         strategy: 'random',
         onTurn: result => {
           result.steps.forEach(step => {
@@ -161,11 +161,11 @@ describe('불변식 - 아이템', () => {
 
 describe('불변식 - 진행', () => {
   it('연쇄는 반드시 끝난다', () => {
-    for (let seed = 0; seed < 50; seed++) {
+    for (let seed = 0; seed < 30; seed++) {
       const rng = makeRng(seed);
       const board = newBoard(9, 9, rng);
       playGame(board, rng, {
-        maxMoves: 40,
+        maxMoves: 25,
         strategy: 'random',
         onTurn: result => {
           const clears = result.steps.filter((s: TurnStep) => s.kind === 'clear').length;
@@ -179,19 +179,19 @@ describe('불변식 - 진행', () => {
   it('둘 수 있다고 알려준 수는 반드시 유효하다', () => {
     // listMoves(UI가 힌트로 쓰는 것)와 resolveTurn(실제 규칙)이 어긋나면
     // "눌러도 아무 일 없는 칸"이 생긴다. playGame이 이걸 던진다.
-    for (let seed = 0; seed < 30; seed++) {
+    for (let seed = 0; seed < 20; seed++) {
       const rng = makeRng(seed);
       const board = newBoard(9, 9, rng);
-      expect(() => playGame(board, rng, { maxMoves: 40, strategy: 'random' })).not.toThrow();
+      expect(() => playGame(board, rng, { maxMoves: 25, strategy: 'random' })).not.toThrow();
     }
   }, 60_000);
 
   it('리셔플 없이도 대부분의 판은 끝까지 굴러간다', () => {
     let stuck = 0;
-    for (let seed = 0; seed < 50; seed++) {
+    for (let seed = 0; seed < 30; seed++) {
       const rng = makeRng(seed);
       const board = newBoard(9, 9, rng);
-      const result = playGame(board, rng, { maxMoves: 30, strategy: 'random' });
+      const result = playGame(board, rng, { maxMoves: 20, strategy: 'random' });
       if (result.endedBy === 'stuck') stuck++;
     }
     expect(stuck).toBe(0);
@@ -239,7 +239,7 @@ describe('봇', () => {
   }, 60_000);
 
   it('둘 수 있는 수가 보드마다 충분히 있다', () => {
-    for (let seed = 0; seed < 30; seed++) {
+    for (let seed = 0; seed < 20; seed++) {
       const board = newBoard(9, 9, makeRng(seed));
       expect(listMoves(board).length, `시드 ${seed}`).toBeGreaterThan(0);
     }

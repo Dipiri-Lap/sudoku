@@ -14,7 +14,9 @@
     "generate-cross-math-stages": "tsx scripts/generate-cross-math-stages.ts",
     "generate-queens": "tsx scripts/generate-queens.ts",
     "generate-big-sudoku": "tsx scripts/generate-big-sudoku.ts",
-    "extract-jewels": "node scripts/extract-jewels.mjs"
+    "extract-jewels": "node scripts/extract-jewels.mjs",
+    "generate-jewel-levels": "tsx scripts/generate-jewel-levels.ts",
+    "bake-jewel-levels": "bash scripts/bake-jewel-levels.sh"
   },
   "dependencies": {
     "@portone/browser-sdk": "^0.1.3",

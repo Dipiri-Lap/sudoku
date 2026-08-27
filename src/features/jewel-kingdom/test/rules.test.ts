@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseBoard, renderBoard } from './fixture';
+import { parseBoard, renderBoard } from '../engine/notation';
+import { at } from '../engine/board';
 import { findMatchGroups } from '../engine/match';
 import { planSpecials } from '../engine/specials';
 import { resolveTurn, listMoves, hasAnyMove, type TurnStep } from '../engine/resolve';
@@ -235,15 +236,32 @@ describe('중력', () => {
     expect(spawns.map(m => m.fromRow)).toEqual([-3, -2, -1]);
   });
 
-  it('장애물은 열을 끊는다 - 아래 구간은 새 보석을 받지 못한다', () => {
+  it('장애물 아래 칸도 대각선으로 흘러들어와 채워진다', () => {
+    // 장애물은 위에서 내려오는 길만 막는다. 옆에서 돌아 들어오는 길까지
+    // 막으면 그 칸이 영영 비어 있게 되고, 실제로 화면에 구멍으로 보였다.
     const board = parseBoard(`
       R G B
       # B G
       G Y R
     `);
     const { moves, board: after } = applyGravity(board, new Set(['2,0']), rng());
-    expect(moves.filter(m => m.col === 0)).toHaveLength(0);
-    expect(after.cells[2 * 3 + 0].gem).toBeNull();
+    expect(at(after, 1, 0).blocker).not.toBeNull(); // 장애물은 제자리
+    expect(at(after, 2, 0).gem, '장애물 아래가 빈 채로 남았다').not.toBeNull();
+
+    const filler = moves.find(m => m.col === 0 && m.toRow === 2);
+    expect(filler!.fromCol).not.toBe(0);
+  });
+
+  it('새 보석은 맨 윗줄로만 들어온다 - 장애물 아래에서 솟아나지 않는다', () => {
+    const board = parseBoard(`
+      R G B
+      # B G
+      G Y R
+    `);
+    const { moves } = applyGravity(board, new Set(['2,0']), rng());
+    moves.filter(m => m.spawned).forEach(m => {
+      expect(at(board, 0, m.col).exists).toBe(true);
+    });
   });
 });
 

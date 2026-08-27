@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseBoard, renderBoard } from './fixture';
+import { parseBoard, renderBoard } from '../engine/notation';
 import { resolveTurn } from '../engine/resolve';
 import { makeRng } from '../engine/rng';
 import { newBoard, playGame } from '../bot/bot';

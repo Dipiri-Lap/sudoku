@@ -1,7 +1,7 @@
 import type { Board, Position } from './types';
-import { at, isPlayable, key } from './board';
+import { at, isPlayable, key, matchColorOf } from './board';
 
-export type MatchShape = 'row' | 'col';
+export type MatchShape = 'row' | 'col' | 'square';
 
 export interface MatchGroup {
   cells: string[];
@@ -22,8 +22,8 @@ export function findMatchGroups(board: Board): MatchGroup[] {
 
   const colorAt = (r: number, c: number): number | null => {
     const cell = at(board, r, c);
-    if (!isPlayable(cell) || !cell.gem) return null;
-    return cell.gem.color;
+    if (!isPlayable(cell)) return null;
+    return matchColorOf(cell.gem);
   };
 
   const scan = (
@@ -56,6 +56,27 @@ export function findMatchGroups(board: Board): MatchGroup[] {
   }
   for (let c = 0; c < board.width; c++) {
     scan(c, board.height, (o, i) => ({ row: i, col: o }), 'col');
+  }
+
+  // 2x2 정사각형도 매치다(SPEC 2.5). 줄 매치와 달리 길이가 항상 4로 고정이고,
+  // 프로펠러를 만든다.
+  for (let r = 0; r < board.height - 1; r++) {
+    for (let c = 0; c < board.width - 1; c++) {
+      const color = colorAt(r, c);
+      if (color === null) continue;
+      if (
+        colorAt(r, c + 1) !== color ||
+        colorAt(r + 1, c) !== color ||
+        colorAt(r + 1, c + 1) !== color
+      ) {
+        continue;
+      }
+      groups.push({
+        cells: [key(r, c), key(r, c + 1), key(r + 1, c), key(r + 1, c + 1)],
+        shape: 'square',
+        color,
+      });
+    }
   }
 
   return groups;

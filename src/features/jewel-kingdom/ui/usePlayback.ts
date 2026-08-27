@@ -3,7 +3,7 @@ import type { Board } from '../engine/types';
 import type { TurnStep } from '../engine/resolve';
 import type { FallMove } from '../engine/gravity';
 import { key } from '../engine/board';
-import { CLEAR_HOLD_MS, CLEAR_MS, EFFECT_MS, SWAP_MS, fallDurationMs } from './constants';
+import { CLEAR_HOLD_MS, CLEAR_MS, COLLECT_MS, EFFECT_MS, SWAP_MS, fallDurationMs } from './constants';
 
 /**
  * 단계 목록 재생기.
@@ -27,6 +27,8 @@ export interface PlaybackView {
   falling: FallMove[];
   /** 매치가 안 돼서 되돌아가는 중인 두 칸 */
   invalid: Set<string>;
+  /** 지금 그릇으로 빨려 들어가는 수집물 칸 -> 목적지 그릇 칸 */
+  collecting: Map<string, string>;
   /** 재생 위치. 같은 칸이 연속으로 터져도 애니메이션이 다시 시작되게 하는 key */
   tick: number;
   playing: boolean;
@@ -38,6 +40,7 @@ const NONE = {
   damaged: new Set<string>(),
   falling: [] as FallMove[],
   invalid: new Set<string>(),
+  collecting: new Map<string, string>(),
 };
 
 /** 그 단계를 보여주는 데 필요한 시간 */
@@ -53,6 +56,8 @@ export function stepDurationMs(step: TurnStep): number {
       const longest = Math.max(...step.moves.map(m => fallDurationMs(m.toRow - m.fromRow)));
       return longest + 40;
     }
+    case 'collect':
+      return COLLECT_MS;
     case 'board-effect':
       return EFFECT_MS;
   }
@@ -63,12 +68,16 @@ function viewOf(step: TurnStep, tick: number): PlaybackView {
     board: step.board,
     clearing: step.kind === 'clear' ? new Set(step.cells) : NONE.clearing,
     spawned: step.kind === 'clear' ? new Set(step.spawned.map(s => s.key)) : NONE.spawned,
-    damaged: step.kind === 'clear' ? new Set(step.damaged) : NONE.damaged,
+    damaged: step.kind === 'clear' ? new Set(step.damage.map(e => e.key)) : NONE.damaged,
     falling: step.kind === 'fall' ? step.moves : NONE.falling,
     invalid:
       step.kind === 'revert'
         ? new Set([key(step.a.row, step.a.col), key(step.b.row, step.b.col)])
         : NONE.invalid,
+    collecting:
+      step.kind === 'collect'
+        ? new Map(step.collects.map(e => [e.from, e.key]))
+        : NONE.collecting,
     tick,
     playing: true,
   };

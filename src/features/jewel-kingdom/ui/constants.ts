@@ -9,6 +9,8 @@ export const CLEAR_MS = 240;
 /** 터진 뒤 빈칸을 보여주는 정지 구간. 없으면 "터지자마자 이미 내려와 있는" 느낌이 난다. */
 export const CLEAR_HOLD_MS = 120;
 export const EFFECT_MS = 260;
+/** 수집물이 그릇으로 빨려 들어가는 시간 */
+export const COLLECT_MS = 300;
 
 // 낙하: 시간이 거리의 제곱근에 비례하고 이징이 이차 ease-in이면
 // d·(t/T)² 가 상수가 되어 모든 보석이 같은 가속도로 떨어진다.

@@ -1,6 +1,12 @@
 .jk-page {
   min-height: 100vh;
-  background: linear-gradient(160deg, #1a1442 0%, #2b1e63 55%, #3a2178 100%);
+  /* 배경은 겹으로 쌓는다: 위쪽 달빛 → 아래쪽 깊은 남색 → 은은한 광점.
+     통짜 그림 하나를 넣을 자리는 theme.ts의 ART.background 다. */
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(196, 181, 253, 0.28), transparent 60%),
+    radial-gradient(80% 50% at 10% 100%, rgba(59, 130, 246, 0.18), transparent 70%),
+    radial-gradient(70% 45% at 92% 88%, rgba(217, 70, 239, 0.14), transparent 70%),
+    linear-gradient(165deg, #150f38 0%, #241a56 48%, #150f38 100%);
   color: #f1f5f9;
   display: flex;
   flex-direction: column;
@@ -20,15 +26,32 @@
 
 .jk-header h1 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 800;
   letter-spacing: 0.02em;
+  /* 레벨 버튼이 늘어나면서 제목이 세로로 깨졌다. 줄바꿈을 막는다. */
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 레벨 버튼은 따로 묶어 가로로 흐르게 한다 - 개수가 늘어도 헤더가 안 깨진다 */
+.jk-levels {
+  display: flex;
+  gap: 3px;
+  overflow-x: auto;
+  max-width: 42vw;
+  scrollbar-width: none;
+}
+
+.jk-levels::-webkit-scrollbar {
+  display: none;
 }
 
 .jk-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
 }
 
 .jk-moves {
@@ -58,11 +81,19 @@
 .jk-board-outer {
   width: min(100%, 520px);
   aspect-ratio: 1 / 1;
-  background: rgba(0, 0, 0, 0.28);
-  border-radius: 16px;
-  padding: 8px;
+  /* 금테를 두른 석판. 테두리는 border-image 없이 겹 그림자로 만든다 -
+     이미지가 없어도 두께와 재질이 보이게. */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0.1)),
+    linear-gradient(160deg, #221a4d, #171040);
+  border: 3px solid #a98029;
+  border-radius: 20px;
+  padding: 10px;
   box-sizing: border-box;
-  box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 0 2px rgba(253, 224, 71, 0.25),
+    inset 0 6px 18px rgba(0, 0, 0, 0.55),
+    0 14px 30px rgba(0, 0, 0, 0.45);
   /* 새 보석은 판 위쪽(음수 행)에서 떨어져 들어온다. 잘라내지 않으면
      헤더 위로 보석이 지나가는 게 보인다. */
   overflow: hidden;
@@ -91,8 +122,70 @@
   content: '';
   width: 100%;
   height: 100%;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -2px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* 하단 레이어는 보석 아래 깔린다 - 칸 바닥을 통째로 덮는다 */
+.jk-ground-sprite {
+  position: absolute;
+  inset: 3px;
+  width: auto;
+  height: auto;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+/* 벽은 칸 경계에 놓인다. 칸 안이 아니라 칸과 칸 사이라는 게 보여야 한다. */
+.jk-wall {
+  pointer-events: none;
+  z-index: 6;
+}
+
+.jk-wall::after {
+  content: '';
+  position: absolute;
+  background: linear-gradient(180deg, #d6b25a, #8a6a1f);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+  border-radius: 3px;
+}
+
+.jk-wall.top::after {
+  left: 4%;
+  right: 4%;
+  top: -3px;
+  height: 6px;
+}
+
+.jk-wall.left::after {
+  top: 4%;
+  bottom: 4%;
+  left: -3px;
+  width: 6px;
+}
+
+/* 그릇은 보석 아래 깔리고, 투입구는 보석 위에 얹힌다.
+   보석이 그릇으로 "들어가는" 것처럼 보이려면 순서가 이래야 한다. */
+.jk-collector {
+  padding: 2px;
+  z-index: 0;
+}
+
+/* 투입구는 칸 위쪽 가장자리에 걸친다. 보석을 덮지 않아야
+   그 칸도 둘 수 있는 칸이라는 게 보인다. */
+.jk-spawner {
+  z-index: 6;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.jk-spawner-sprite {
+  width: 72%;
+  height: auto;
+  /* 판 맨 윗줄이라 위로 삐져나가면 보드 테두리에 잘린다. */
+  margin-top: 3%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
 /* 판의 일부가 아닌 칸 - 아무것도 그리지 않는다 */
@@ -143,16 +236,10 @@
 
 .jk-cover {
   position: absolute;
-  inset: 3px;
-  border-radius: 9px;
-  background: rgba(186, 230, 253, 0.45);
-  border: 2px solid rgba(224, 242, 254, 0.85);
+  inset: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7em;
-  font-weight: 800;
-  color: #0c4a6e;
   pointer-events: none;
 }
 
@@ -163,17 +250,17 @@
   color: #451a03;
 }
 
-.jk-blocker::before {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border-radius: 9px;
-  background: linear-gradient(180deg, #b45309, #78350f);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25);
+.jk-blocker.damaged .jk-sprite {
+  animation: jk-hit 0.24s ease-out;
 }
 
-.jk-blocker.damaged::before {
-  animation: jk-hit 0.24s ease-out;
+/* 코드로 그린 장애물 그림. 칸에 꼭 맞고 기기마다 같다 -
+   이모지로 두면 브라우저마다 모양과 크기가 달라진다. */
+.jk-sprite {
+  width: 88%;
+  height: 88%;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
 
 @keyframes jk-hit {
@@ -218,6 +305,27 @@
   border-radius: 50%;
 }
 
+/* 수집물은 집을 수 없다 - 커서로도 알린다 */
+.jk-gem.cargo {
+  cursor: default;
+}
+
+.jk-gem.cargo .jk-sprite {
+  filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.75));
+}
+
+/* 그릇으로 빨려 들어가는 중 - 아래로 쑥 내려가며 작아진다 */
+.jk-gem.collecting {
+  animation: jk-collect 0.3s cubic-bezier(0.5, 0, 0.75, 0) forwards;
+  z-index: 4;
+}
+
+@keyframes jk-collect {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  70% { transform: translateY(70%) scale(0.7); opacity: 1; }
+  100% { transform: translateY(100%) scale(0.35); opacity: 0; }
+}
+
 /* 매치가 안 돼서 되돌아가는 중 */
 .jk-gem.invalid img {
   filter: drop-shadow(0 0 9px rgba(248, 113, 113, 0.95));
@@ -248,31 +356,445 @@
   100% { transform: scale(1); filter: brightness(1); }
 }
 
-/* 착지 스쿼시 */
-.jk-gem.landed {
-  animation: jk-land 0.17s ease-out;
-}
-
-@keyframes jk-land {
-  0% { transform: scaleY(0.82) scaleX(1.14); }
-  55% { transform: scaleY(1.06) scaleX(0.96); }
-  100% { transform: scale(1); }
-}
-
-.jk-note {
-  margin-top: 14px;
-  font-size: 0.72rem;
-  color: #a5b4fc;
-  text-align: center;
-  max-width: 34em;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .jk-gem,
   .jk-gem.clearing,
-  .jk-gem.landed,
   .jk-gem.spawning {
     animation-duration: 0.01ms;
     transition-duration: 0.01ms;
   }
+}
+
+/* ===== 레벨 HUD ===== */
+.jk-hud {
+  width: min(100%, 520px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  background: rgba(0, 0, 0, 0.24);
+  border-radius: 12px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
+.jk-moves {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3.4em;
+}
+
+.jk-moves .n {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fde047;
+  line-height: 1;
+}
+
+.jk-moves .label {
+  font-size: 0.6rem;
+  color: #a5b4fc;
+}
+
+.jk-goals {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.jk-goal {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  padding: 3px 9px 3px 4px;
+}
+
+.jk-goal img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.jk-goal-icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 칸 안에서 쓰는 스프라이트를 그대로 가져다 쓴다. 그것들은 position:absolute라
+     기준이 될 상자가 없으면 페이지 전체로 퍼진다 - 실제로 젤리 목표에서
+     판 뒤에 거대한 보라 덩어리가 깔렸다. */
+  position: relative;
+  overflow: hidden;
+}
+
+.jk-goal-n {
+  font-size: 0.9rem;
+  font-weight: 800;
+  min-width: 1.2em;
+  text-align: center;
+}
+
+.jk-goal.done {
+  background: rgba(74, 222, 128, 0.22);
+}
+
+.jk-goal.done .jk-goal-n {
+  color: #4ade80;
+}
+
+.jk-lv {
+  min-width: 1.9em;
+  flex-shrink: 0;
+  justify-content: center;
+  opacity: 0.55;
+}
+
+.jk-lv.active {
+  opacity: 1;
+  background: rgba(253, 224, 71, 0.28);
+  color: #fde047;
+  font-weight: 800;
+}
+
+/* ===== 장애물 얼굴 ===== */
+.jk-layers {
+  position: absolute;
+  right: 14%;
+  bottom: 8%;
+  font-size: 0.6em;
+  font-weight: 900;
+  color: #fff7ed;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+}
+
+/* 아직 정체를 모르는 장애물 */
+.jk-blocker.unrevealed::before {
+  background: linear-gradient(180deg, #475569, #1e293b);
+}
+
+.jk-blocker.unrevealed .jk-blocker-face {
+  color: #cbd5e1;
+  font-weight: 900;
+}
+
+/* ===== 승패 ===== */
+.jk-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: rgba(15, 10, 40, 0.86);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  z-index: 10;
+}
+
+.jk-overlay h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.jk-overlay-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.jk-overlay-actions button {
+  background: rgba(255, 255, 255, 0.14);
+  border: none;
+  color: inherit;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.jk-overlay-actions button.primary {
+  background: #fde047;
+  color: #1a1442;
+  font-weight: 800;
+}
+
+.jk-board-outer {
+  position: relative;
+}
+
+/* ===== 하단 부스터 바 ===== */
+.jk-boosters {
+  width: min(100%, 520px);
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.jk-booster {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 3px solid #a98029;
+  background: linear-gradient(180deg, #2e2263, #1a1442);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.jk-booster .jk-sprite {
+  width: 70%;
+  height: 70%;
+}
+
+/* 개수 뱃지 - 레퍼런스처럼 오른쪽 아래에 붙인다 */
+.jk-booster-n {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 겨누는 중 */
+.jk-booster.armed {
+  border-color: #fde047;
+  box-shadow: 0 0 0 3px rgba(253, 224, 71, 0.4), 0 4px 10px rgba(0, 0, 0, 0.45);
+  transform: translateY(-4px);
+}
+
+.jk-booster.locked,
+.jk-booster:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.jk-booster.locked .jk-booster-n {
+  background: #475569;
+}
+
+/* 부스터를 겨누는 중에 쓸 수 있는 칸을 알려준다 */
+.jk-gem.targetable {
+  cursor: crosshair;
+}
+
+.jk-gem.targetable img {
+  filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.85));
+}
+
+.jk-aim {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(253, 224, 71, 0.5);
+  color: #fde047;
+  font-size: 0.75rem;
+  padding: 5px 14px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 9;
+}
+
+/* ===== 샌드박스 팔레트 ===== */
+.jk-palette {
+  width: min(100%, 520px);
+  margin-top: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.jk-palette-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.jk-palette-tabs button {
+  flex: 1;
+  min-width: 5em;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #c4b5fd;
+  border-radius: 7px;
+  padding: 5px 6px;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.jk-palette-tabs button.active {
+  background: rgba(253, 224, 71, 0.25);
+  color: #fde047;
+  font-weight: 800;
+}
+
+.jk-palette-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 6px;
+  max-height: 190px;
+  overflow-y: auto;
+}
+
+.jk-palette-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid transparent;
+  border-radius: 9px;
+  padding: 4px 2px 2px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: inherit;
+}
+
+.jk-palette-item .jk-sprite {
+  width: 34px;
+  height: 34px;
+}
+
+.jk-palette-label {
+  font-size: 0.6rem;
+  line-height: 1.1;
+  color: #cbd5e1;
+  text-align: center;
+}
+
+/* 동작을 아직 레퍼런스로 확인 못 한 요소 표시 */
+.jk-palette-label i {
+  color: #fbbf24;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.jk-palette-item.active {
+  border-color: #fde047;
+  background: rgba(253, 224, 71, 0.18);
+}
+
+.jk-palette-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.jk-palette-tools label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  color: #c4b5fd;
+}
+
+.jk-palette-tools input[type='range'] {
+  width: 90px;
+}
+
+.jk-palette-tools button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  color: inherit;
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.jk-palette-tools button.active {
+  border-color: #fde047;
+  color: #fde047;
+}
+
+/* 요소별 시험 레벨 목록 — 카탈로그만큼 길어지므로 가로로 흐르게 둔다 */
+.jk-testbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  /* 폭을 안 묶으면 flex 아이템이 내용만큼 부풀어 페이지를 통째로 밀어낸다 */
+  width: 100%;
+  align-self: stretch;
+  min-width: 0;
+}
+.jk-testbar-title {
+  flex: none;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #9d93c8;
+  white-space: nowrap;
+}
+.jk-testbar-list {
+  display: flex;
+  gap: 4px;
+  /* 줄이 안 줄어들면 목록이 가로로 흐르는 대신 페이지 전체를 밀어낸다 */
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 2px;
+}
+.jk-testbar-list .jk-lv {
+  flex: none;
+  width: auto;
+  padding: 4px 9px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.jk-unverified {
+  color: #ffd166;
+  font-style: normal;
+  font-weight: 700;
+}
+.jk-testnote {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #b9b0dd;
+}
+.jk-testnote b {
+  color: #fff;
+}
+
+/* 버튼 글자가 세로로 접히지 않게 - 레벨 목록이 길어지면 여기가 먼저 눌린다 */
+.jk-actions > button {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* 붙잡힌 보석 표시 - 못 옮긴다는 걸 집기 전에 알아야 한다 */
+.jk-lock {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font-size: 11px;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
 }

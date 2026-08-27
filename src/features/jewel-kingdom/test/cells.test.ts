@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseBoard, renderBoard } from './fixture';
+import { parseBoard, renderBoard } from '../engine/notation';
 import { at } from '../engine/board';
 import { findMatchGroups } from '../engine/match';
 import { applyGravity } from '../engine/gravity';
@@ -39,17 +39,22 @@ describe('구멍(판의 일부가 아닌 칸)', () => {
     expect(findMatchGroups(parseBoard('R R _ R R'))).toHaveLength(0);
   });
 
-  it('구멍에는 보석이 떨어져 들어오지 않는다', () => {
+  it('구멍 아래 칸은 옆에서 대각선으로 흘러들어와 채워진다', () => {
+    // 구멍이 위를 막고 있어도 그 아래가 비어 있으면 안 된다.
+    // 위에서 못 내려오면 대각선으로 돌아 들어온다.
     const board = parseBoard(`
       R G B
       _ B G
       G Y R
     `);
     const { board: after, moves } = applyGravity(board, new Set(['2,0']), rng());
-    // 0열은 구멍에 막혀 아래 구간이 새 보석을 받지 못한다
-    expect(moves.filter(m => m.col === 0)).toHaveLength(0);
-    expect(at(after, 1, 0).gem).toBeNull();
-    expect(at(after, 1, 0).exists).toBe(false);
+    expect(at(after, 1, 0).exists).toBe(false); // 구멍은 그대로 비어 있고
+    expect(at(after, 2, 0).gem, '구멍 아래가 빈 채로 남았다').not.toBeNull();
+
+    // 그 자리를 채운 보석은 옆 열에서 왔다
+    const filler = moves.find(m => m.col === 0 && m.toRow === 2);
+    expect(filler).toBeDefined();
+    expect(filler!.fromCol).not.toBe(0);
   });
 
   it('구멍이 있는 칸으로는 수를 둘 수 없다', () => {
@@ -76,8 +81,9 @@ describe('장애물 피해', () => {
     expect(clear).toBeUndefined();
 
     const result = applyDamage(board, new Set(['0,1', '0,2', '0,3']));
-    expect(result.damaged).toEqual(['0,0']);
-    expect(result.destroyed).toEqual([]);
+    expect(result.events).toEqual([
+      { key: '0,0', kind: 'box', target: 'blocker', destroyed: false },
+    ]);
     expect(at(result.board, 0, 0).blocker?.layers).toBe(1);
   });
 
@@ -87,7 +93,9 @@ describe('장애물 피해', () => {
       G  B G B
     `);
     const result = applyDamage(board, new Set(['0,1']));
-    expect(result.destroyed).toEqual(['0,0']);
+    expect(result.events).toEqual([
+      { key: '0,0', kind: 'box', target: 'blocker', destroyed: true },
+    ]);
     expect(at(result.board, 0, 0).blocker).toBeNull();
   });
 
@@ -100,7 +108,7 @@ describe('장애물 피해', () => {
       G  R  G
     `);
     const result = applyDamage(board, new Set(['0,1', '1,0', '1,2', '2,1']));
-    expect(result.damaged).toEqual(['1,1']);
+    expect(result.events.map(e => e.key)).toEqual(['1,1']);
     expect(at(result.board, 1, 1).blocker?.layers).toBe(2);
   });
 
@@ -110,7 +118,7 @@ describe('장애물 피해', () => {
       G #
     `);
     const result = applyDamage(board, new Set(['0,0']));
-    expect(result.damaged).toEqual([]);
+    expect(result.events).toEqual([]);
   });
 
   it('아이템 전용 장애물은 일반 매치로는 안 깎이고 폭발로만 깎인다', () => {
@@ -121,10 +129,10 @@ describe('장애물 피해', () => {
     at(board, 0, 0).blocker = { kind: 'steel', layers: 2, powerUpOnly: true };
 
     const byMatch = applyDamage(board, new Set(['0,1']), new Set());
-    expect(byMatch.damaged).toEqual([]);
+    expect(byMatch.events).toEqual([]);
 
     const byBlast = applyDamage(board, new Set(['0,1']), new Set(['0,1']));
-    expect(byBlast.damaged).toEqual(['0,0']);
+    expect(byBlast.events.map(e => e.key)).toEqual(['0,0']);
   });
 
   it('색 지정 장애물은 그 색 매치로만 깎인다', () => {
@@ -134,8 +142,8 @@ describe('장애물 피해', () => {
     `);
     at(board, 0, 0).blocker = { kind: 'redlock', layers: 1, color: 1 }; // 1 = G
 
-    expect(applyDamage(board, new Set(['0,1'])).damaged).toEqual([]); // 옆은 R
-    expect(applyDamage(board, new Set(['1,0'])).damaged).toEqual(['0,0']); // 아래는 G
+    expect(applyDamage(board, new Set(['0,1'])).events).toEqual([]); // 옆은 R
+    expect(applyDamage(board, new Set(['1,0'])).events.map(e => e.key)).toEqual(['0,0']); // 아래는 G
   });
 });
 
@@ -186,8 +194,8 @@ describe('턴 안에서의 피해 처리', () => {
     const { clear } = clearStep(board, [0, 3], [1, 3]);
     expect(clear).toBeDefined();
     expect(clear!.cells).toEqual(['0,1', '0,2', '0,3']);
-    expect(clear!.damaged).toContain('0,0');
-    expect(clear!.destroyed).toEqual([]);
+    expect(clear!.damage.map(e => e.key)).toContain('0,0');
+    expect(clear!.damage.every(e => !e.destroyed)).toBe(true);
   });
 
   it('덮개가 막아준 칸은 clear 단계의 삭제 목록에 들어가지 않는다', () => {
@@ -201,7 +209,8 @@ describe('턴 안에서의 피해 처리', () => {
     expect(clear).toBeDefined();
     // 덮개가 막아준 (1,0)은 삭제 목록에 없고, 대신 damaged에 잡힌다
     expect(clear!.cells).not.toContain('1,0');
-    expect(clear!.damaged).toContain('1,0');
+    expect(clear!.damage.map(e => e.key)).toContain('1,0');
+    expect(clear!.damage.find(e => e.key === '1,0')?.target).toBe('cover');
   });
 });
 
