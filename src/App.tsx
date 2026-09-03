@@ -17,6 +17,7 @@ import ArrowPuzzleGame from './features/arrow-puzzle/components/ArrowPuzzleGame'
 import ArrowLevelEditor from './features/arrow-puzzle/components/ArrowLevelEditor';
 import SnakeEscapeGame from './features/snake-escape/components/SnakeEscapeGame';
 import WormEscapeGame from './features/worm-escape/components/WormEscapeGame';
+import NonogramGame from './features/nonogram/components/NonogramGame';
 import DiffTool from './features/diff-tool/DiffTool';
 import CrosswordGame from './features/crossword/components/CrosswordGame';
 import CrossMathGame from './features/cross-math/components/CrossMathGame';
@@ -47,9 +48,11 @@ const AppContent: React.FC = () => {
   // 사용자 데이터를 쓰지 않는 화면은 초기화를 기다리지 않는다.
   // 헤드리스 브라우저(시각 회귀 테스트)에서는 Firebase 익명 로그인이 끝나지 않아
   // 아래 게이트에서 영영 멈춘다. 진행도를 저장하게 되면 이 목록에서 빼야 한다.
-  const standalone = useMatch('/jewel-kingdom');
+  const standaloneJewel = useMatch('/jewel-kingdom');
+  const standaloneNonogram = useMatch('/nonogram');
 
-  if (standalone) return <JewelKingdomGame />;
+  if (standaloneJewel) return <JewelKingdomGame />;
+  if (standaloneNonogram) return <NonogramGame />;
 
   if (!isInitialized) {
     return (
@@ -133,6 +136,7 @@ const AppContent: React.FC = () => {
           <Route path="/arrow-puzzle" element={<ArrowPuzzleGame />} />
           <Route path="/snake-escape" element={<SnakeEscapeGame />} />
           <Route path="/worm-escape" element={<WormEscapeGame />} />
+          <Route path="/nonogram" element={<NonogramGame />} />
           <Route path="/crossword" element={<CrosswordGame />} />
           <Route path="/cross-math" element={<CrossMathGame />} />
           <Route path="/royal-match" element={<RoyalMatchGame />} />

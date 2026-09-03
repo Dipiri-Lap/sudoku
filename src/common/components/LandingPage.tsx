@@ -586,6 +586,23 @@ const LandingPage: React.FC = () => {
                 )}
 
                 {window.location.hostname === 'localhost' && (
+                    <a href="/nonogram" className="game-card animate-fade-in" style={{ '--delay': '0.48s', textDecoration: 'none', color: 'inherit' } as any}>
+                        <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
+                            🔲
+                        </div>
+                        <div className="game-card-content">
+                            <h3>노노그램</h3>
+                            <p>숫자 힌트를 보고 칸을 채워 숨은 그림을 완성하는 퍼즐</p>
+                            <div className="game-card-footer">
+                                <span className="play-now">
+                                    <Play size={16} fill="currentColor" /> 플레이하기
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                )}
+
+                {window.location.hostname === 'localhost' && (
                     <a href="/arrow-puzzle" className="game-card animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             🏹

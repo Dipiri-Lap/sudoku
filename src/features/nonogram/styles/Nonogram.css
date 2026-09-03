@@ -1,0 +1,407 @@
+.ng-page {
+  /* #root 의 0.5rem 패딩(위아래 합 1rem)을 빼야 스크롤 없이 한 화면에 들어감 */
+  min-height: calc(100dvh - 1rem);
+  /* 셀 크기 계산에 뷰포트(100vw)가 아닌 이 컨테이너 폭(100cqw)을 쓴다 — 데스크톱에서 #root 가 좁아도 넘치지 않도록 */
+  container-type: inline-size;
+  background: linear-gradient(180deg, #eef2f7 0%, #dfe6ef 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #23303f;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.ng-header {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem 0.5rem;
+}
+
+.ng-icon-btn {
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  color: #3b6fb6;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(35, 48, 63, 0.18);
+  transition: transform 0.1s;
+}
+.ng-icon-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(35, 48, 63, 0.18);
+}
+.ng-icon-btn:disabled {
+  color: #b7c2d0;
+  cursor: default;
+  transform: none;
+}
+
+.ng-stage-no {
+  color: #3b6fb6;
+  margin-right: 0.15em;
+}
+
+.ng-title-badge,
+.ng-timer-badge {
+  font-size: 0.9rem;
+  font-weight: 800;
+  background: #fff;
+  border-radius: 20px;
+  padding: 0.4rem 0.7rem;
+  box-shadow: 0 3px 0 rgba(35, 48, 63, 0.18);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+/* 제목은 남는 폭을 쓰고, 길면 말줄임 — 스킵 버튼이 밀려나지 않도록 */
+.ng-title-badge {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  text-align: center;
+}
+
+/* 보드: [코너][열 힌트] / [행 힌트][그리드] */
+.ng-board-wrap {
+  /* 화면 폭 - (패딩/마진/간격) 을 열 수 + 행 힌트 폭(셀의 약 0.5배 × 힌트 개수)로 나눠 셀 크기 결정 */
+  --cell: min(
+    44px,
+    calc((100cqw - 70px - var(--cols) * 2px) / (var(--cols) + var(--row-clue) * 0.65 + 0.5)),
+    /* 세로: 헤더 + 보드 여백 + 하단 도구/결과 패널(약 320px)을 빼고 행 수 + 열 힌트 높이로 나눔 */
+    calc((100dvh - 320px - var(--rows) * 2px) / (var(--rows) + var(--col-clue) * 0.65 + 0.5))
+  );
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  background: #fff;
+  border-radius: 16px;
+  padding: 0.75rem;
+  margin: 0.5rem 1rem;
+  box-shadow: 0 6px 0 rgba(35, 48, 63, 0.15);
+}
+
+.ng-col-clues {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--cell));
+  gap: 2px;
+  align-items: end;
+  margin-bottom: 4px;
+}
+.ng-col-clue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: calc(var(--col-clue) * 1.2em + 4px);
+  font-weight: 800;
+  font-size: max(9px, calc(var(--cell) * 0.4));
+  color: #3b6fb6;
+}
+
+.ng-row-clues {
+  display: grid;
+  grid-template-rows: repeat(var(--rows), var(--cell));
+  gap: 2px;
+  margin-right: 4px;
+}
+.ng-row-clue {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75em; /* "1 3"과 "13"이 구분되도록 숫자 사이를 넉넉히 */
+  min-width: calc(var(--row-clue) * 1.5em + 4px);
+  padding-right: 4px;
+  font-weight: 800;
+  font-size: max(9px, calc(var(--cell) * 0.4));
+  color: #3b6fb6;
+}
+
+.ng-grid {
+  position: relative;
+  /* 부모 1fr 트랙이 테두리(2px×2)를 뺀 폭으로 잡아 마지막 열이 잘리는 것을 막기 위해 내용 크기로 고정 */
+  width: max-content;
+  height: max-content;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--cell));
+  grid-template-rows: repeat(var(--rows), var(--cell));
+  gap: 2px;
+  background: #c7d1de;
+  border: 2px solid #8ea2bb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ng-cell {
+  background: #f7f9fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0bccb;
+  cursor: pointer;
+  transition: background 0.08s;
+}
+.ng-cell--1 {
+  background: #23303f;
+}
+.ng-cell--2 {
+  background: #edf1f6;
+}
+/* 정답 보기 모드: 정답 칸을 주황빛으로 표시해 플레이어 입력과 구분 */
+.ng-grid--solution .ng-cell {
+  cursor: default;
+}
+.ng-grid--solution .ng-cell--1 {
+  background: #e8873a;
+}
+
+/* 편집 모드: 정답 칸을 살짝 투명하게 그려 위에 깔린 원본 이미지와 겹쳐 보이게 */
+.ng-grid--edit .ng-cell--1 { background: rgba(230, 57, 70, 0.8); }
+.ng-grid--edit .ng-cell--0 { background: rgba(247, 249, 252, 0.6); }
+.ng-edit-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 2;
+}
+.ng-tools--edit { align-items: center; }
+.ng-edit-status {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #2e8b57;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.6rem 0.9rem;
+  box-shadow: 0 3px 0 rgba(35, 48, 63, 0.18);
+}
+.ng-edit-status.bad { color: #c0392b; }
+.ng-tool-btn--save { border-color: #3b6fb6; color: #3b6fb6; background: #eaf2ff; }
+.ng-tool-btn:disabled { opacity: 0.6; cursor: default; }
+
+.ng-cell--vsep { border-right: 2px solid #8ea2bb; }
+.ng-cell--hsep { border-bottom: 2px solid #8ea2bb; }
+
+/* ── 완성 연출: 셀이 대각선 순서로 색을 입고 격자선이 사라지며 픽셀아트로 변함 ── */
+/* 간격(gap)은 유지해 행/열 힌트와의 정렬을 지키고, 셀 그림자를 살짝 넓혀 틈을 덮는다 */
+.ng-grid--won {
+  border-color: transparent;
+  background: transparent;
+  overflow: visible;
+  transition: border-color 0.4s ease, background 0.4s ease;
+}
+.ng-grid--won .ng-cell {
+  cursor: default;
+  animation: ng-reveal var(--reveal-dur, 350ms) cubic-bezier(0.34, 1.56, 0.64, 1) var(--reveal-delay, 0ms) forwards;
+  border-color: transparent;
+}
+.ng-grid--won .ng-cell-x {
+  animation: ng-fade-out 0.25s ease var(--reveal-delay, 0ms) forwards;
+}
+@keyframes ng-reveal {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.75); background: var(--art); }
+  100% { transform: scale(1);   background: var(--art); box-shadow: 0 0 0 1.5px var(--art); }
+}
+@keyframes ng-fade-out {
+  to { opacity: 0; }
+}
+
+/* 고해상도 일러스트: 셀 연출(r+c 대각선 순서)과 같은 속도로 좌상단에서 대각선 와이프 */
+.ng-art-image {
+  position: absolute;
+  inset: -3px; /* 셀 그림자(1.5px)와 투명 테두리(2px)까지 덮도록 살짝 크게 */
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  object-fit: cover;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 2;
+  /* 삼각형 clip-path 의 빗변이 x/W + y/H = 2p 선을 따라 이동 → 셀의 (r+c) 순서와 일치 */
+  animation: ng-art-wipe var(--reveal-total, 2.5s) linear both;
+}
+@keyframes ng-art-wipe {
+  from { clip-path: polygon(0 0, 0 0, 0 0); }
+  to   { clip-path: polygon(0 0, 200% 0, 0 200%); }
+}
+
+/* 승리 후 힌트는 흐릿하게 물러남 */
+.ng-page--won .ng-col-clue,
+.ng-page--won .ng-row-clue {
+  opacity: 0.25;
+  transition: opacity 0.6s ease 0.3s;
+}
+.ng-page--won .ng-board-wrap {
+  position: relative;
+}
+
+/* ── 클리어 단계: 연출이 끝나면 힌트가 사라지고 그리드만 화면 중앙으로 줄어들며 흰 프레임 카드가 됨 ──
+   레이아웃(크기·마진·패딩)은 전혀 애니메이션하지 않고 transform/opacity 만 전환해 수백 개 셀의 리플로우를 피한다 */
+.ng-board-wrap {
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s ease, box-shadow 0.4s ease;
+  will-change: transform;
+}
+.ng-board-wrap--clear {
+  --clear-scale: 0.5;
+  /* 보드 중심 기준으로 줄이되, 힌트 때문에 치우친 그리드 중심을 보드 중심으로 끌어옴 */
+  transform: translate(calc(var(--clear-dx, 0px) * -1 * var(--clear-scale)), calc(var(--clear-dy, 0px) * -1 * var(--clear-scale)))
+    scale(var(--clear-scale));
+  background: transparent;
+  box-shadow: none;
+  /* scale 은 레이아웃 공간을 줄이지 않으므로 아래쪽 남는 공간만큼 결과 패널을 당김 (즉시 적용, 전환 없음) */
+  margin-bottom: calc(var(--wrap-h, 0px) * (var(--clear-scale) - 1) / 2 + 2.25rem);
+}
+.ng-board-wrap--clear .ng-col-clue,
+.ng-board-wrap--clear .ng-row-clue { opacity: 0; transition: opacity 0.25s ease; }
+/* 흰 프레임은 그리드 바깥 box-shadow 로 그린다 (패딩 변경 없음) */
+.ng-board-wrap--clear .ng-grid {
+  border-radius: 14px;
+  box-shadow: 0 0 0 20px #fff, 0 18px 0 20px rgba(35, 48, 63, 0.18);
+  transition: box-shadow 0.4s ease;
+}
+.ng-board-wrap--clear .ng-art-image { border-radius: 14px; }
+/* 이름 배지는 카드와 함께 줄지 않도록 역스케일 */
+.ng-board-wrap--clear .ng-art-name.show {
+  transform: translate(-50%, 0) scale(calc(1 / var(--clear-scale)));
+  bottom: calc(-24px / var(--clear-scale));
+}
+
+/* 색종이 */
+.ng-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.ng-confetti span {
+  position: absolute;
+  left: var(--x);
+  top: -20px;
+  width: 10px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--c);
+  opacity: 0.9;
+  animation: ng-confetti-fall 2.8s ease-in var(--d) both;
+}
+@keyframes ng-confetti-fall {
+  0%   { transform: translateY(0) rotate(var(--r)); opacity: 0; }
+  10%  { opacity: 0.9; }
+  100% { transform: translateY(110vh) rotate(calc(var(--r) + 540deg)); opacity: 0.6; }
+}
+.ng-page--clear .ng-header,
+.ng-page--clear .ng-board-wrap,
+.ng-page--clear .ng-result {
+  position: relative;
+  z-index: 1;
+}
+
+/* 그림 이름 배지 (레퍼런스처럼 보드 하단 중앙에 걸침) */
+.ng-art-name {
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  z-index: 3;
+  transform: translate(-50%, 10px) scale(0.8);
+  opacity: 0;
+  background: #fff;
+  border-radius: 20px;
+  padding: 0.45rem 1.4rem;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: #23303f;
+  box-shadow: 0 4px 0 rgba(35, 48, 63, 0.18);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  pointer-events: none;
+}
+.ng-art-name.show {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+/* 결과 패널: 그림을 가리지 않도록 보드 아래에 표시 */
+.ng-result {
+  margin: 0.25rem 1rem 1rem;
+  background: #fff;
+  border-radius: 20px;
+  padding: 0.9rem 1.5rem;
+  text-align: center;
+  min-width: 260px;
+  box-shadow: 0 6px 0 rgba(35, 48, 63, 0.15);
+  animation: ng-pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s both; /* 카드 축소가 끝난 뒤 등장 */
+}
+@keyframes ng-pop-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ng-result h2 { margin: 0 0 0.2rem; font-size: 1.3rem; }
+.ng-result p { margin: 0 0 0.7rem; color: #5a6b80; font-weight: 700; }
+.ng-result-actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+
+.ng-tools {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.75rem 1rem 1.5rem;
+}
+.ng-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 0.6rem 1.1rem;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #5a6b80;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(35, 48, 63, 0.18);
+}
+.ng-tool-btn.active {
+  border-color: #3b6fb6;
+  color: #3b6fb6;
+  background: #eaf2ff;
+}
+.ng-tool-btn--solution.active {
+  border-color: #e8873a;
+  color: #c96a1f;
+  background: #fff1e6;
+}
+.ng-tools {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ng-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 0.65rem 1.1rem;
+  font-weight: 800;
+  background: #eef2f7;
+  color: #23303f;
+  cursor: pointer;
+}
+.ng-btn--primary { background: #3b6fb6; color: #fff; }

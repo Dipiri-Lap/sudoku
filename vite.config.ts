@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import nonogramSave from './scripts/vite-nonogram-save'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -15,6 +16,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    nonogramSave(),
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
