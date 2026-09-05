@@ -56,8 +56,9 @@ const modeOf = (list: RGB[]) => { const cnt = new Map<number,number>(); for (con
 const art = cellPixels.map(row => row.map(list => list ? charOf.get(modeOf(list))! : '.').join(''));
 const empty = emptyArg ?? '';
 const grid = art.map(row => [...row].map(c => c==='.' || empty.includes(c) ? 0 : 1));
-const res = solveNonogram(grid.map(lineClues), grid[0].map((_,c) => lineClues(grid.map(rw => rw[c]))));
-const status = res.solutions === 1 ? (res.logicOnly ? 'UNIQUE+LOGIC' : 'UNIQUE(guess)') : `MULTI(${res.solutions})`;
+// NOSOLVE=1 이면 솔버를 건너뛴다 (큰 격자에서 복수해 탐색이 오래 걸릴 때 미리보기용)
+const res = process.env.NOSOLVE ? { solutions: 0, logicOnly: false, grid: null } : solveNonogram(grid.map(lineClues), grid[0].map((_,c) => lineClues(grid.map(rw => rw[c]))), 5000);
+const status = process.env.NOSOLVE ? 'NOSOLVE' : res.solutions === 1 ? (res.logicOnly ? 'UNIQUE+LOGIC' : 'UNIQUE(guess)') : `MULTI(${res.solutions})`;
 const fill = grid.flat().reduce((s,v)=>s+v,0)/(NX*NY);
 console.log(`${NX}x${NY} ${status} fill ${(fill*100).toFixed(0)}%`);
 order.forEach((pi,k) => { const cnt = art.join('').split(CH[k]).length-1; console.log(`  ${CH[k]} ${hex(palette[pi])} luma ${luma(palette[pi]).toFixed(2)} n=${cnt}`); });

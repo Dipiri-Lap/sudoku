@@ -235,6 +235,7 @@ const NonogramGame: React.FC = () => {
         </button>
         <div className="ng-title-badge">
           <span className="ng-stage-no">{levelIndex + 1}/{levels.length}</span> {level.name}
+          {level.difficulty === 'hard' && <span className="ng-diff">어려움</span>}
         </div>
         <div className="ng-timer-badge"><Timer size={16} /> {formatTime(elapsed)}</div>
         <button

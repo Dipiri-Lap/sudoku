@@ -19,10 +19,14 @@ for (const level of levels) {
   const size = `${grid.length}×${grid[0].length}`;
   const matches = res.grid && res.grid.every((row, r) => row.every((v, c) => v === grid[r][c]));
   if (res.solutions === 1 && matches) {
-    console.log(`✓ ${level.id} (${size}) 유일해 · ${res.logicOnly ? '줄 전파만으로 풀림' : '추측 필요'} · ${ms}ms`);
+    const want = res.logicOnly ? 'normal' : 'hard';
+    const have = level.difficulty ?? 'normal';
+    const warn = want === have ? '' : `  ⚠ difficulty: '${have}' → '${want}' 로 고치세요`;
+    console.log(`✓ ${level.id} (${size}) 유일해 · ${res.logicOnly ? '줄 전파만으로 풀림' : `추측 필요(가정 ${res.branches}회)`} · ${ms}ms${warn}`);
   } else {
     failed = true;
-    console.log(`✗ ${level.id} (${size}) 해 개수: ${res.solutions}${res.solutions === 1 && !matches ? ' (정답과 불일치)' : ''} · ${ms}ms`);
+    const why = res.exhausted ? '판정불가(탐색한도 초과)' : `해 개수: ${res.solutions}${res.solutions === 1 && !matches ? ' (정답과 불일치)' : ''}`;
+    console.log(`✗ ${level.id} (${size}) ${why} · ${ms}ms`);
     if (res.solutions >= 2 && res.grid) {
       console.log('  다른 해 예시:');
       res.grid.forEach((row, r) => {

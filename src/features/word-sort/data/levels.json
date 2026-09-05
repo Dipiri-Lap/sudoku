@@ -28782,5 +28782,213 @@
                 ]
             }
         ]
+    },
+    {
+        "id": 259,
+        "maxMoves": 96,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "pigeon_bird",
+                "name": "비둘기",
+                "target": 3,
+                "words": [
+                    "평화의상징",
+                    "구구울음소리",
+                    "광장모이주기"
+                ]
+            },
+            {
+                "id": "epl_football_teams",
+                "name": "EPL팀",
+                "target": 8,
+                "words": [
+                    "토트넘",
+                    "아스널",
+                    "첼시",
+                    "리버풀",
+                    "맨시티",
+                    "맨유",
+                    "뉴캐슬",
+                    "애스턴빌라"
+                ]
+            },
+            {
+                "id": "heredity_genetics",
+                "name": "유전",
+                "target": 5,
+                "words": [
+                    "DNA염기서열",
+                    "염색체조합",
+                    "멘델의법칙",
+                    "우성과열성",
+                    "부모혈통"
+                ]
+            },
+            {
+                "id": "initiative_dominance",
+                "name": "주도권",
+                "target": 6,
+                "words": [
+                    "판세지배",
+                    "협상우위",
+                    "통제력확보",
+                    "주도적입지",
+                    "경기흐름리드",
+                    "상황인도"
+                ]
+            },
+            {
+                "id": "santa_claus",
+                "name": "산타클로스",
+                "target": 5,
+                "words": [
+                    "루돌프썰매",
+                    "굴뚝선물전달",
+                    "빨간옷",
+                    "크리스마스",
+                    "양말"
+                ]
+            },
+            {
+                "id": "jewelry_ornament",
+                "name": "장신구",
+                "target": 6,
+                "words": [
+                    "다이아반지",
+                    "금목걸이",
+                    "은귀걸이",
+                    "보석팔찌",
+                    "치장용품",
+                    "브로치"
+                ]
+            },
+            {
+                "id": "noise_pollution",
+                "name": "소음",
+                "target": 4,
+                "words": [
+                    "층간데시벨",
+                    "귀를찢는소리",
+                    "데시벨측정",
+                    "불쾌한음향"
+                ]
+            },
+            {
+                "id": "pension_annuity",
+                "name": "연금",
+                "target": 4,
+                "words": [
+                    "노후수령액",
+                    "국민공제",
+                    "매달정기지급",
+                    "퇴직자산"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 260,
+        "maxMoves": 99,
+        "slots": 4,
+        "categories": [
+            {
+                "id": "alcoholic_beverages",
+                "name": "술",
+                "target": 8,
+                "words": [
+                    "소주",
+                    "맥주",
+                    "막걸리",
+                    "와인",
+                    "위스키",
+                    "보드카",
+                    "하이볼",
+                    "사케"
+                ]
+            },
+            {
+                "id": "alchemy_transmutation",
+                "name": "연금술",
+                "target": 6,
+                "words": [
+                    "현자의돌",
+                    "황금변환",
+                    "등가교환법칙",
+                    "연성진그리기",
+                    "중세비법",
+                    "시약합성"
+                ]
+            },
+            {
+                "id": "banana_fruit",
+                "name": "바나나",
+                "target": 3,
+                "words": [
+                    "열대과일",
+                    "껍질",
+                    "원숭이먹이"
+                ]
+            },
+            {
+                "id": "advertising_commercial",
+                "name": "광고",
+                "target": 6,
+                "words": [
+                    "TVCF영상",
+                    "마케팅홍보",
+                    "스폰서협찬",
+                    "브랜드",
+                    "포스터전단지",
+                    "조회수유도"
+                ]
+            },
+            {
+                "id": "mosquito_insect",
+                "name": "모기",
+                "target": 4,
+                "words": [
+                    "흡혈곤충",
+                    "가려움증유발",
+                    "웅웅소리",
+                    "물파스"
+                ]
+            },
+            {
+                "id": "statue_sculpture",
+                "name": "조각상",
+                "target": 5,
+                "words": [
+                    "대리석입상",
+                    "청동상전시",
+                    "다비드",
+                    "조각도작업",
+                    "입체예술품"
+                ]
+            },
+            {
+                "id": "dopamine_neurotransmitter",
+                "name": "도파민",
+                "target": 5,
+                "words": [
+                    "쾌락신경물질",
+                    "보상회로",
+                    "중독성",
+                    "호르몬",
+                    "숏폼중독"
+                ]
+            },
+            {
+                "id": "earthquake_disaster",
+                "name": "지진",
+                "target": 4,
+                "words": [
+                    "진앙지진원",
+                    "리히터규모",
+                    "지각판충돌",
+                    "건물균열"
+                ]
+            }
+        ]
     }
 ]

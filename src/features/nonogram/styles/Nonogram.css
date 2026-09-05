@@ -50,6 +50,18 @@
   transform: none;
 }
 
+/* 어려움 배지: 줄 논리만으로는 막히는 구간이 있어 가정이 필요한 스테이지 */
+.ng-diff {
+  margin-left: 0.4em;
+  font-size: 0.75em;
+  font-weight: 900;
+  color: #c0392b;
+  background: #ffe9e5;
+  border-radius: 8px;
+  padding: 0.1em 0.45em;
+  vertical-align: 0.1em;
+}
+
 .ng-stage-no {
   color: #3b6fb6;
   margin-right: 0.15em;
