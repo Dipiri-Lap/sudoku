@@ -129,7 +129,7 @@ const WordSortModeSelect: React.FC = () => {
             <div className="mode-grid">
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                     <img
-                        src="/images/wordstack/stageBtn.png"
+                        src="/images/wordstack/stageBtn.webp"
                         alt="스테이지 모드"
                         className="animate-fade-in"
                         style={btnStyle('0.1s', isSynced)}

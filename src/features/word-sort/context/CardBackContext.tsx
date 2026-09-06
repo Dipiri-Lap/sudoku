@@ -18,7 +18,7 @@ export const cardBackDesigns: CardBackDesign[] = Array.from({ length: 20 }, (_, 
     id: String(i + 1),
     name: `디자인 ${i + 1}`,
     description: `카드 뒷면 디자인 ${i + 1}`,
-    pattern: `url('/assets/word-sort/${i + 1}.png')`,
+    pattern: `url('/assets/word-sort/${i + 1}.webp')`,
     isImage: true,
 }));
 
