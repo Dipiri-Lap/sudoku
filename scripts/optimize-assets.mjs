@@ -45,6 +45,26 @@ const JOBS = [
     quality: 80,
   },
   {
+    name: '오늘의 퍼즐 타이틀 카드',
+    from: 'source-assets/daily',
+    to: 'public/images/daily',
+    match: /^title\.png$/,
+    // 랜딩 그리드에서 카드 한 장은 최대 180px. 다른 게임 title.webp 와 같은 결로 맞춘다.
+    width: 540,
+    height: 540,
+    quality: 82,
+  },
+  {
+    name: '스타터 팩 배너',
+    from: 'source-assets/shop',
+    to: 'public/images/shop',
+    match: /^starterPack\.png$/,
+    // 상점 모달 안쪽 폭은 340px 정도. 3배로 잡아 1020이면 넉넉하다.
+    width: 1020,
+    height: 510,
+    quality: 82,
+  },
+  {
     name: '코인 아이콘',
     from: 'source-assets/icons',
     to: 'public',

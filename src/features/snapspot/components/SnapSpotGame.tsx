@@ -16,6 +16,7 @@ export type SnapSpotMode = 'normal' | 'time-attack' | 'stage' | 'arcade';
 const MAX_HEARTS = 3;
 const ARCADE_CDN_BASE = 'https://images.tmhub.co.kr/spot-the-difference/arcade';
 const ARCADE_TOTAL = 150;
+const HINT_COST = 50;
 const ARCADE_INITIAL_TIME = 60;
 const ARCADE_BONUS_TIME = 5;
 const ARCADE_MIN_WAIT = 1000; // 스테이지 모드보다 짧게
@@ -86,6 +87,11 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const { snapSpotProgress, saveSnapSpotProgress: saveProgress } = useSnapSpotProgress();
   const { selectedMarkerId } = useSnapSpotMarker();
   const [showMarkerShop, setShowMarkerShop] = useState(false);
+  // 힌트 코인이 모자랄 때 - 광고로 대체할 수 있게 안내한다(판당 1회)
+  const [hintPrompt, setHintPrompt] = useState<'ad' | 'insufficient' | null>(null);
+  const [adWatching, setAdWatching] = useState(false);
+  const [pendingShowAd, setPendingShowAd] = useState<(() => void) | null>(null);
+  const [adUsedThisStage, setAdUsedThisStage] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [bgmVolume, setBgmVolume] = useState(() => parseFloat(localStorage.getItem('snapspot_bgmVolume') ?? '0.3'));
   const [sfxVolume, setSfxVolume] = useState(() => parseFloat(localStorage.getItem('snapspot_sfxVolume') ?? '1'));
@@ -235,6 +241,9 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
     setHintIdx(null);
+    // 광고 무료 힌트는 판당 1회 - 새 판에서 다시 열어 준다.
+    setAdUsedThisStage(false);
+    setHintPrompt(null);
     setCurtainOpen(false);
     setImgsLoaded({ orig: false, mod: false });
     setMinWaitDone(false);
@@ -593,15 +602,52 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     setHintIdx(idx);
   }, [found]);
 
+  /** 크로썸과 같은 흐름: 코인이 있으면 차감, 없으면 광고 시청(판당 1회) */
+  const handleWatchHintAd = useCallback(() => {
+    if (adWatching) return;
+
+    const proceed = () => {
+      setAdUsedThisStage(true);
+      setHintPrompt(null);
+      activateHint();
+    };
+
+    if (IS_DEV || !window.adBreak) {
+      setAdWatching(true);
+      setTimeout(() => { proceed(); setAdWatching(false); }, 1000);
+      return;
+    }
+
+    window.adBreak({
+      type: 'reward',
+      name: 'snapspot-hint',
+      beforeReward: (showAdFn: () => void) => { setPendingShowAd(() => showAdFn); },
+      beforeAd: () => { setAdWatching(true); setPendingShowAd(null); },
+      afterAd: () => { setAdWatching(false); },
+      adViewed: proceed,
+      adDismissed: () => { alert('광고를 끝까지 시청해야 힌트를 쓸 수 있어요.'); },
+      adBreakDone: (info: { status: string }) => {
+        setAdWatching(false);
+        setPendingShowAd(null);
+        if (info.status === 'noAdPreloaded') alert('현재 준비된 광고가 없습니다. 잠시 후 시도해주세요.');
+      },
+    });
+  }, [adWatching, activateHint]);
+
   const handleHint = useCallback(() => {
     if (hintIdx !== null) return;
     playBtnSfx();
     if (IS_DEV) {
       activateHint();
-    } else if (coins >= 50) {
-      spendCoins(50).then(() => activateHint());
+      return;
     }
-  }, [hintIdx, coins, spendCoins, activateHint, playBtnSfx]);
+    if (coins >= HINT_COST) {
+      spendCoins(HINT_COST).then(() => activateHint());
+      return;
+    }
+    // 예전에는 버튼이 그냥 죽어서 왜 안 되는지 알 수 없었다.
+    setHintPrompt(adUsedThisStage ? 'insufficient' : 'ad');
+  }, [hintIdx, coins, spendCoins, activateHint, playBtnSfx, adUsedThisStage]);
 
   // ── Ad-gated actions ────────────────────────────────────────────────────────
   const handleNextStage = useCallback(() => {
@@ -845,10 +891,10 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           <button
             className="snapspot-hint-btn"
             onClick={handleHint}
-            disabled={hintIdx !== null || (!IS_DEV && coins < 50)}
+            disabled={hintIdx !== null}
           >
             <Search size={22} />
-            <span>{IS_DEV ? 'HINT ∞' : '50🪙'}</span>
+            <span>{IS_DEV ? 'HINT ∞' : `${HINT_COST}🪙`}</span>
           </button>
         </div>
       )}
@@ -972,6 +1018,50 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         </div>
       )}
     </div>
+      {hintPrompt && (
+        <div className="snapspot-win-overlay" onClick={() => !adWatching && setHintPrompt(null)}>
+          <div className="snapspot-win-card" onClick={e => e.stopPropagation()}>
+            <div className="snapspot-win-emoji">🪙</div>
+            <h2 style={{ fontSize: '1.3rem' }}>코인이 부족해요</h2>
+            <p style={{ fontSize: '0.9rem', color: '#374151', margin: '0.4rem 0 0' }}>
+              {hintPrompt === 'ad'
+                ? '광고를 시청하면 힌트를 한 번 쓸 수 있어요'
+                : '이번 판에서는 광고를 이미 시청했습니다'}
+            </p>
+            <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '0.3rem 0 0.9rem' }}>
+              보유 {coins}🪙 · 필요 {HINT_COST}🪙
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+              {hintPrompt === 'ad' ? (
+                <>
+                  <button
+                    onClick={() => { playBtnSfx(); setHintPrompt(null); }}
+                    disabled={adWatching}
+                    style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={() => { playBtnSfx(); if (pendingShowAd) pendingShowAd(); else handleWatchHintAd(); }}
+                    disabled={adWatching}
+                    style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#22c55e', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+                  >
+                    {adWatching ? '로딩…' : '광고 시청'}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => { playBtnSfx(); setHintPrompt(null); }}
+                  style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#6366f1', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+                >
+                  확인
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {showMarkerShop && <SnapSpotMarkerShopModal onClose={() => setShowMarkerShop(false)} onPlayBtnSfx={playBtnSfx} />}
       {showSettings && (
         <SnapSpotSettingsModal

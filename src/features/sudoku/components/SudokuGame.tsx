@@ -12,14 +12,19 @@ import SudokuThemeModal from './SudokuThemeModal';
 import { auth } from '../../../firebase';
 import { getUserProfile, saveRecord, updateProfileInfo } from '../../../services/rankingService';
 import { useCoins } from '../../../context/CoinContext';
+import { HINT_COST } from './Controls';
 import { useSudokuProgress } from '../../../context/SudokuProgressContext';
+import { useDailyPuzzle, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
+import { getDailyPuzzle, todayKey } from '../../daily/data/loader';
+import { CalendarDays } from 'lucide-react';
 
 const SudokuGame: React.FC = () => {
     const { state, dispatch } = useGame();
     const navigate = useNavigate();
     const location = useLocation();
-    const { addCoins } = useCoins();
+    const { addCoins, coins } = useCoins();
     const { stageProgress, saveBeginnerProgress, bigProgress } = useSudokuProgress();
+    const { clearDaily } = useDailyPuzzle();
     const hasAwardedCoins = useRef(false);
     const { selectedTheme } = useSudokuTheme();
     const [showThemeModal, setShowThemeModal] = useState(false);
@@ -83,7 +88,11 @@ const SudokuGame: React.FC = () => {
     useEffect(() => {
         if (state.isWinner && !hasAwardedCoins.current) {
             hasAwardedCoins.current = true;
-            if (state.gameMode !== 'TimeAttack') {
+            // 오늘의 퍼즐은 보상 체계가 따로다(코인 100 + 퍼즐력 30).
+            // 일반 클리어 보상과 겹쳐 주지 않는다.
+            if (state.gameMode === 'Daily') {
+                if (state.currentDate) clearDaily(state.currentDate);
+            } else if (state.gameMode !== 'TimeAttack') {
                 addCoins(10);
                 if (auth.currentUser) {
                     import('../../../services/rankingService').then(m => m.incrementPuzzlePower(auth.currentUser!.uid)).catch(console.error);
@@ -101,7 +110,7 @@ const SudokuGame: React.FC = () => {
                 }
             }
         }
-    }, [state.isWinner, addCoins, state.gameMode]);
+    }, [state.isWinner, addCoins, state.gameMode, state.currentDate, clearDaily]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -173,14 +182,20 @@ const SudokuGame: React.FC = () => {
                 dispatch({ type: 'TOGGLE_NOTE_MODE' });
             } else if (key === 'u') {
                 dispatch({ type: 'UNDO' });
-            } else if (key === 'h' && state.gameMode === 'Stage') {
-                dispatch({ type: 'HINT' });
+            } else if (key === 'h' && state.gameMode !== 'Daily') {
+                // 예전에는 여기서 바로 무작위 힌트를 줬는데 코인을 안 받았다.
+                // 지금은 모드만 켜고, 코인은 칸을 고를 때 빠진다.
+                if (state.hintMode) {
+                    dispatch({ type: 'SET_HINT_MODE', on: false });
+                } else if (state.hintCredit || coins >= HINT_COST) {
+                    dispatch({ type: 'SET_HINT_MODE', on: true });
+                }
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [state.selectedCell, state.isNoteMode, state.isPaused, state.isGameOver, state.isWinner, state.gameMode, dispatch]);
+    }, [state.selectedCell, state.isNoteMode, state.isPaused, state.isGameOver, state.isWinner, state.gameMode, state.hintMode, state.hintCredit, coins, dispatch]);
 
     useEffect(() => {
         const handleWin = async () => {
@@ -193,7 +208,32 @@ const SudokuGame: React.FC = () => {
         handleWin();
     }, [state.isWinner, state.gameMode, state.difficulty, state.timer]);
 
+    // 오늘의 퍼즐: 월별 청크를 비동기로 읽어 온 뒤 보드를 세운다.
     useEffect(() => {
+        if (!location.pathname.startsWith('/daily')) return;
+        const date = new URLSearchParams(location.search).get('date') || todayKey();
+        if (state.gameMode === 'Daily' && state.currentDate === date) return;
+
+        let cancelled = false;
+        getDailyPuzzle(date).then(puzzle => {
+            if (cancelled) return;
+            if (!puzzle) {
+                navigate('/daily', { replace: true });
+                return;
+            }
+            dispatch({
+                type: 'START_DAILY',
+                date,
+                board: puzzle.board.map(r => [...r]),
+                solution: puzzle.solution.map(r => [...r]),
+                difficulty: puzzle.difficulty,
+            });
+        });
+        return () => { cancelled = true; };
+    }, [location.pathname, location.search, state.gameMode, state.currentDate, dispatch, navigate]);
+
+    useEffect(() => {
+        if (location.pathname.startsWith('/daily')) return;
         const params = new URLSearchParams(location.search);
         const mode = params.get('mode');
         const levelStr = params.get('level');
@@ -249,7 +289,7 @@ const SudokuGame: React.FC = () => {
                 dispatch({ type: 'START_GAME', difficulty: diffParam });
             }
         }
-    }, [dispatch, location.search, state.solution]);
+    }, [dispatch, location.pathname, location.search, state.solution]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -263,7 +303,9 @@ const SudokuGame: React.FC = () => {
     };
 
     const handleBack = () => {
-        if (state.gameMode === 'TimeAttack') {
+        if (state.gameMode === 'Daily') {
+            navigate('/daily');
+        } else if (state.gameMode === 'TimeAttack') {
             navigate('/sudoku/time-attack');
         } else {
             navigate('/sudoku');
@@ -302,7 +344,12 @@ const SudokuGame: React.FC = () => {
                 {/* Info bar */}
                 <div className="game-info-bar">
                     <div className="info-left">
-                        {(state.gameMode === 'Stage' || state.gameMode === 'Beginner' || state.gameMode === 'BigSize') ? (
+                        {state.gameMode === 'Daily' ? (
+                            <div className="level-badge">
+                                <CalendarDays size={13} style={{ verticalAlign: '-2px', marginRight: '4px' }} />
+                                {state.currentDate && `${Number(state.currentDate.slice(5, 7))}월 ${Number(state.currentDate.slice(8))}일`}
+                            </div>
+                        ) : (state.gameMode === 'Stage' || state.gameMode === 'Beginner' || state.gameMode === 'BigSize') ? (
                             <div className="level-badge">
                                 {state.gameMode === 'Beginner' ? `입문 ${state.currentLevel}` : `Level ${state.currentLevel}`}
                                 {state.gameMode === 'Beginner' && state.boardSize === 6 && (
@@ -378,7 +425,7 @@ const SudokuGame: React.FC = () => {
                     </div>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                         <a
-                            href={state.gameMode === 'TimeAttack' ? '/sudoku/time-attack' : '/sudoku'}
+                            href={state.gameMode === 'Daily' ? '/daily' : state.gameMode === 'TimeAttack' ? '/sudoku/time-attack' : '/sudoku'}
                             style={{
                                 padding: '0.75rem 1.8rem', fontSize: '1rem', borderRadius: '30px',
                                 border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)',
@@ -389,7 +436,9 @@ const SudokuGame: React.FC = () => {
                             뒤로
                         </a>
                         <a
-                            href={state.gameMode === 'BigSize'
+                            href={state.gameMode === 'Daily'
+                                ? `/daily/play?date=${state.currentDate}`
+                                : state.gameMode === 'BigSize'
                                 ? `/sudoku/big?level=${state.currentLevel}`
                                 : state.gameMode === 'Stage'
                                     ? `/sudoku/stage?mode=stage&level=${state.currentLevel}`
@@ -413,7 +462,7 @@ const SudokuGame: React.FC = () => {
                     <div className="modal-content animate-fade-in">
                         {/* Header */}
                         <div className="modal-header">
-                            <h2>🎉 축하합니다!</h2>
+                            <h2>{state.gameMode === 'Daily' ? '📅 오늘의 퍼즐 완료!' : '🎉 축하합니다!'}</h2>
                         </div>
                         {/* Body */}
                         <div className="modal-body">
@@ -426,7 +475,17 @@ const SudokuGame: React.FC = () => {
                             <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 600 }}>
                                 소요 시간: <span style={{ color: '#e2e8f0' }}>{formatTime(state.timer)}</span>
                             </div>
-                            {state.gameMode !== 'TimeAttack' && (
+                            {state.gameMode === 'Daily' && (
+                                <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fef9e7', border: '1px solid #f4c430', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#b8860b', fontSize: '0.95rem' }}>
+                                        🪙 +{DAILY_REWARD_COIN}
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
+                                        ⚡ 퍼즐력 +{DAILY_REWARD_PUZZLE_POWER}
+                                    </div>
+                                </div>
+                            )}
+                            {state.gameMode !== 'TimeAttack' && state.gameMode !== 'Daily' && (
                                 <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fef9e7', border: '1px solid #f4c430', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#b8860b', fontSize: '0.95rem' }}>
                                         🪙 +10
@@ -459,10 +518,18 @@ const SudokuGame: React.FC = () => {
                         </div>
                         {/* Footer */}
                         <div className="modal-footer" style={{ flexDirection: 'row', gap: '0.5rem' }}>
-                            <a href="/sudoku" className="modal-home-btn" style={{ textDecoration: 'none' }}>
+                            <a href={state.gameMode === 'Daily' ? '/' : '/sudoku'} className="modal-home-btn" style={{ textDecoration: 'none' }}>
                                 <House size={22} />
                             </a>
-                            {state.gameMode === 'BigSize' ? (
+                            {state.gameMode === 'Daily' ? (
+                                <button
+                                    onClick={() => navigate('/daily')}
+                                    className="primary-btn bonus-btn"
+                                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
+                                >
+                                    <CalendarDays size={20} /> 캘린더로
+                                </button>
+                            ) : state.gameMode === 'BigSize' ? (
                                 state.currentLevel !== null && state.currentLevel < 200 ? (
                                     <button
                                         onClick={() => handleNextWithAd(`/sudoku/big?level=${state.currentLevel! + 1}`)}

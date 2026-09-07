@@ -24,6 +24,7 @@ import CrossMathGame from './features/cross-math/components/CrossMathGame';
 import RoyalMatchGame from './features/royal-match/components/RoyalMatchGame';
 import JewelKingdomGame from './features/jewel-kingdom/ui/JewelKingdomGame';
 import GardenMap from './features/garden/components/GardenMap';
+import DailyPuzzleCalendar from './features/daily/components/DailyPuzzleCalendar';
 
 import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
@@ -38,6 +39,7 @@ import { QueensIconProvider } from './features/queens/context/QueensIconContext'
 import { SnapSpotMarkerProvider } from './features/snapspot/context/SnapSpotMarkerContext';
 import { SudokuThemeProvider } from './features/sudoku/context/SudokuThemeContext';
 import { ChallengeProvider } from './context/ChallengeContext';
+import { DailyPuzzleProvider } from './context/DailyPuzzleContext';
 import { UserInitProvider, useUserInit } from './context/UserInitContext';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, signInAnonymously } from './firebase';
@@ -87,6 +89,7 @@ const AppContent: React.FC = () => {
   return (
     <CoinProvider>
       <ChallengeProvider>
+      <DailyPuzzleProvider>
       <SudokuProgressProvider>
       <WordSortProgressProvider>
       <WordSortHardProgressProvider>
@@ -123,6 +126,19 @@ const AppContent: React.FC = () => {
                   <Route path="play" element={<WordSortGame />} />
                 </Routes>
               </WordSortProvider>
+            }
+          />
+          <Route
+            path="/daily/*"
+            element={
+              <SudokuThemeProvider>
+              <SudokuProvider>
+                <Routes>
+                  <Route index element={<DailyPuzzleCalendar />} />
+                  <Route path="play" element={<SudokuGame />} />
+                </Routes>
+              </SudokuProvider>
+              </SudokuThemeProvider>
             }
           />
           <Route path="/tile-match" element={<TileMatchGame />} />
@@ -163,6 +179,7 @@ const AppContent: React.FC = () => {
       </WordSortHardProgressProvider>
       </WordSortProgressProvider>
       </SudokuProgressProvider>
+      </DailyPuzzleProvider>
       </ChallengeProvider>
     </CoinProvider>
   );

@@ -19,7 +19,8 @@
     "optimize-audio": "node scripts/optimize-audio.mjs",
     "audit-assets": "node scripts/audit-assets.mjs",
     "generate-jewel-levels": "tsx scripts/generate-jewel-levels.ts",
-    "bake-jewel-levels": "bash scripts/bake-jewel-levels.sh"
+    "bake-jewel-levels": "bash scripts/bake-jewel-levels.sh",
+    "generate-daily": "tsx scripts/generate-daily-sudoku.ts"
   },
   "dependencies": {
     "@portone/browser-sdk": "^0.1.3",

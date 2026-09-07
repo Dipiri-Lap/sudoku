@@ -3,8 +3,10 @@ import { X, Play } from 'lucide-react';
 import * as PortOne from '@portone/browser-sdk/v2';
 import { httpsCallable } from 'firebase/functions';
 const CoinImg = ({ size = 16 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { useCoins } from '../../context/CoinContext';
-import { auth, functions } from '../../firebase';
+import { auth, db, functions } from '../../firebase';
 
 const PORTONE_STORE_ID = 'store-5fe3aecd-4b34-4afd-8010-c04757231e1a';
 const PORTONE_CHANNEL_KEY = 'channel-key-67141cfa-6abd-40c7-8646-ea2e64b082ef'; // 실연동(퍼즐가든) 채널
@@ -15,6 +17,13 @@ const COIN_PACKAGES = [
     { coins: 3500,  price: '₩11,000', amount: 11000, label: null,     img: '/3500coin.png' },
     { coins: 10000, price: '₩25,000', amount: 25000, label: null,     img: '/10000coin.png' },
 ] as const;
+
+/**
+ * 첫 구매 전용 특가. ₩2,200짜리와 같은 500코인을 절반 값에 준다.
+ * 이득이 한눈에 보여야 첫 결제를 넘기므로 일부러 최고 할인보다도 싸게 잡았고,
+ * 그래서 계정당 1회로 막는다(실제 차단은 서버에서 한다).
+ */
+const STARTER_PACK = { coins: 500, price: '₩1,100', amount: 1100 } as const;
 
 const AD_COOLDOWN_MS = 30 * 60 * 1000; // 30분
 const AD_STORAGE_KEY = 'lastAdWatchTime';
@@ -30,6 +39,23 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
     const [adCooldownLeft, setAdCooldownLeft] = useState(0);
     const [adWatching, setAdWatching] = useState(false);
     const [pendingShowAd, setPendingShowAd] = useState<(() => void) | null>(null);
+    // null = 아직 모름(깜빡임 방지로 그동안 배너를 숨긴다)
+    const [starterPackUsed, setStarterPackUsed] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        // auth.currentUser 를 한 번만 읽으면 로그인 처리가 끝나기 전에 상점을 연
+        // 사용자에게는 배너가 영영 안 보인다. 상태를 구독해야 한다.
+        let cancelled = false;
+        const unsubscribe = onAuthStateChanged(auth, user => {
+            if (cancelled) return;
+            if (!user) { setStarterPackUsed(true); return; }
+            getDoc(doc(db, 'users', user.uid))
+                .then(snap => { if (!cancelled) setStarterPackUsed(snap.data()?.starterPackUsed === true); })
+                // 못 읽었으면 숨긴다 - 서버가 어차피 막으므로 실패할 결제를 띄우는 것보다 낫다.
+                .catch(() => { if (!cancelled) setStarterPackUsed(true); });
+        });
+        return () => { cancelled = true; unsubscribe(); };
+    }, []);
 
     const getAdCooldownLeft = useCallback(() => {
         const last = Number(localStorage.getItem(AD_STORAGE_KEY) || 0);
@@ -103,7 +129,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
 
     const [purchasing, setPurchasing] = useState(false);
 
-    const handlePurchase = async (pkg: typeof COIN_PACKAGES[number]) => {
+    const handlePurchase = async (pkg: { coins: number; amount: number }) => {
         if (purchasing) return;
         setPurchasing(true);
         try {
@@ -134,6 +160,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
             );
             const result = await verifyPortOnePayment({ paymentId: response.paymentId });
             applyServerGrant(result.data.coins);
+            if (pkg.amount === STARTER_PACK.amount) setStarterPackUsed(true);
             showToast(`🪙 ${result.data.coins.toLocaleString()} 코인 지급 완료!`);
             onClose();
         } catch (e) {
@@ -208,6 +235,62 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                             <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
                         </div>
                     </div>
+
+                    {/* 스타터 팩 - 계정당 1회. 이미 샀으면 자리를 비운다 */}
+                    {starterPackUsed === false && (
+                        <button
+                            onClick={() => handlePurchase(STARTER_PACK)}
+                            disabled={purchasing}
+                            style={{
+                                position: 'relative', display: 'block', width: '100%',
+                                aspectRatio: '1020 / 510',
+                                // 글자를 뷰포트가 아니라 배너 폭에 맞춘다.
+                                containerType: 'inline-size',
+                                padding: 0, border: 'none', borderRadius: '14px',
+                                overflow: 'hidden',
+                                backgroundImage: 'url(/images/shop/starterPack.webp)',
+                                backgroundSize: 'cover', backgroundPosition: 'center',
+                                cursor: purchasing ? 'default' : 'pointer',
+                                boxShadow: '0 6px 16px rgba(0,0,0,0.35)',
+                            }}
+                        >
+                            {/* 그림 왼쪽 아래가 비어 있어 글자를 얹는다 */}
+                            <div style={{
+                                // 그림에서 리본 아래·상자 왼쪽이 비어 있다. 그 안에만 들어가야 겹치지 않는다.
+                                position: 'absolute', left: '5%', right: '50%', bottom: '9%',
+                                textAlign: 'left',
+                            }}>
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.25em',
+                                    color: '#fde047', fontWeight: 900, fontSize: '5.4cqw',
+                                    textShadow: '0 2px 4px rgba(0,0,0,0.6)',
+                                }}>
+                                    <CoinImg size={15} />
+                                    {STARTER_PACK.coins.toLocaleString()}
+                                </div>
+                                <div style={{
+                                    display: 'flex', alignItems: 'baseline', gap: '0.4em',
+                                    marginTop: '0.25em',
+                                }}>
+                                    <span style={{
+                                        color: 'white', fontWeight: 900, fontSize: '6.4cqw',
+                                        textShadow: '0 2px 4px rgba(0,0,0,0.6)',
+                                    }}>{STARTER_PACK.price}</span>
+                                    <span style={{
+                                        color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: '3.6cqw',
+                                        textDecoration: 'line-through',
+                                    }}>₩2,200</span>
+                                </div>
+                                <div style={{
+                                    display: 'inline-block', marginTop: '0.4em',
+                                    padding: '0.25em 0.7em', borderRadius: '999px',
+                                    background: 'linear-gradient(to bottom, #ef4444, #b91c1c)',
+                                    color: 'white', fontWeight: 800, fontSize: '3.4cqw',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.4)',
+                                }}>50% 할인</div>
+                            </div>
+                        </button>
+                    )}
 
                     {/* 코인 구매 */}
                     <div style={{

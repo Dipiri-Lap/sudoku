@@ -1,5 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/SudokuContext';
+import { useCoins } from '../../../context/CoinContext';
+import { HINT_COST } from './Controls';
 
 interface CellProps {
     row: number;
@@ -8,6 +10,7 @@ interface CellProps {
 
 const Cell: React.FC<CellProps> = ({ row, col }) => {
     const { state, dispatch } = useGame();
+    const { spendCoins } = useCoins();
     const value = state.board[row][col];
     const isInitial = state.initialBoard[row][col] !== null;
     const isSelected = state.selectedCell?.row === row && state.selectedCell?.col === col;
@@ -24,7 +27,22 @@ const Cell: React.FC<CellProps> = ({ row, col }) => {
     const isAnimatingCol = state.animatingCols.includes(col);
     const isAnimatingSector = state.animatingSectors.includes(sectorIdx);
 
+    // 힌트 모드에서 채울 수 있는 칸인지 - 이 칸만 눌러서 힌트를 쓴다.
+    const isHintable = state.hintMode && !isInitial && value === null;
+
     const handleClick = () => {
+        if (state.hintMode) {
+            if (!isHintable) return;
+            // 코인은 칸을 실제로 고르는 순간에 빠진다 - 켜두고 취소해도 손해가 없다.
+            if (state.hintCredit) {
+                dispatch({ type: 'HINT_AT', row, col });
+                return;
+            }
+            spendCoins(HINT_COST).then(ok => {
+                if (ok) dispatch({ type: 'HINT_AT', row, col });
+            });
+            return;
+        }
         dispatch({ type: 'SELECT_CELL', row, col });
     };
 
@@ -36,7 +54,7 @@ const Cell: React.FC<CellProps> = ({ row, col }) => {
                 } ${isError ? 'error' : ''} ${state.mistakeCell?.row === row && state.mistakeCell?.col === col ? 'animate-mistake' : ''
                 } ${isAnimatingRow ? 'animate-sweep-row' : ''} ${isAnimatingCol ? 'animate-sweep-col' : ''
                 } ${isAnimatingSector ? 'animate-sweep-sector' : ''
-                } ${isHintCell ? 'animate-hint' : ''}`}
+                } ${isHintCell ? 'animate-hint' : ''} ${isHintable ? 'hintable' : ''}`}
             onClick={handleClick}
             onAnimationEnd={isHintCell ? () => dispatch({ type: 'CLEAR_HINT' }) : undefined}
             style={{

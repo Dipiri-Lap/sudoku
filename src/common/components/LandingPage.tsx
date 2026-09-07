@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Play, Download, LogIn, LogOut, Share2, ShoppingBag } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -15,6 +15,8 @@ import TermsModal, { type TermsType } from './TermsModal';
 import { db } from '../../firebase';
 import { doc, writeBatch, collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { CHALLENGE_MAP, ALL_CHALLENGES } from '../../data/challenges';
+import { useDailyPuzzle } from '../../context/DailyPuzzleContext';
+import { todayKey, toDateKey, loadMonth, type DailyPuzzle } from '../../features/daily/data/loader';
 import { useChallenges } from '../../context/ChallengeContext';
 import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
@@ -55,6 +57,49 @@ const LandingPage: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
     const [nickname, setNickname] = useState<string>('');
     const [puzzlePower, setPuzzlePower] = useState<number>(0);
+    const { clearedDates, isCleared: isDailyCleared } = useDailyPuzzle();
+    const dailyToday = todayKey();
+    const dailyDone = isDailyCleared(dailyToday);
+
+    // 이번 달 문제 목록 - 도장판 진행도를 랜딩에서 바로 보여 주려고 읽는다.
+    const [dailyMonth, setDailyMonth] = useState<DailyPuzzle[]>([]);
+    useEffect(() => {
+        let cancelled = false;
+        loadMonth(dailyToday.slice(0, 7)).then(list => { if (!cancelled) setDailyMonth(list); });
+        return () => { cancelled = true; };
+    }, [dailyToday]);
+
+    const dailyPuzzleDates = useMemo(() => new Set(dailyMonth.map(p => p.date)), [dailyMonth]);
+    const dailyTotalThisMonth = dailyMonth.length;
+    const dailyClearedThisMonth = useMemo(
+        () => [...clearedDates].filter(d => d.startsWith(dailyToday.slice(0, 7))).length,
+        [clearedDates, dailyToday]
+    );
+
+    const DIFFICULTY_KO: Record<string, string> = {
+        'Very Easy': '아주 쉬움', Easy: '쉬움', Beginner: '초급', Medium: '보통',
+        Hard: '어려움', Expert: '전문가', Master: '마스터',
+    };
+    const dailyTodayLabel = useMemo(() => {
+        const date = `${Number(dailyToday.slice(5, 7))}월 ${Number(dailyToday.slice(8))}일`;
+        const puzzle = dailyMonth.find(p => p.date === dailyToday);
+        return puzzle ? `${date} · ${DIFFICULTY_KO[puzzle.difficulty] ?? puzzle.difficulty}` : date;
+    }, [dailyToday, dailyMonth]);
+
+    // 오늘을 오른쪽 끝에 두고 최근 7일을 훑는다.
+    const dailyLast7 = useMemo(() => {
+        const base = new Date();
+        return Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(base);
+            d.setDate(base.getDate() - (6 - i));
+            const date = toDateKey(d);
+            const state = clearedDates.has(date) ? 'cleared'
+                : !dailyPuzzleDates.has(date) ? 'empty'
+                    : date === dailyToday ? 'today'
+                        : 'missed';
+            return { date, state };
+        });
+    }, [clearedDates, dailyPuzzleDates, dailyToday]);
     const [userRank, setUserRank] = useState<string>('');
     const [toast, setToast] = useState<string | null>(null);
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
@@ -263,7 +308,7 @@ const LandingPage: React.FC = () => {
                 </div>
             )}
 
-            <header className="landing-header" style={{ width: '100%' }}>
+            <header className="landing-header" style={{ width: '100%', marginBottom: '0.25rem' }}>
                 {/* 프로필 다크 바 */}
                 <div style={{
                     display: 'flex',
@@ -381,11 +426,45 @@ const LandingPage: React.FC = () => {
                             fontSize: '0.78rem',
                             cursor: 'pointer',
                             boxShadow: '0 2px 4px rgba(245,158,11,0.3)',
+                            whiteSpace: 'nowrap',
                         }}
                     >
                         <ShoppingBag size={14} />
                         상점
                     </button>
+                    {/* 공유/설치는 상점·로그아웃과 같은 성격(계정·설정)이라 한 줄로 모은다 */}
+                    <button
+                        onClick={handleShare}
+                        title="친구 초대하기"
+                        style={{
+                            padding: '0.5rem', borderRadius: '50%',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            color: '#fff', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        <Share2 size={16} />
+                    </button>
+                    {/* 설치가 끝난 버튼은 할 일이 없다 - 자리를 비운다 */}
+                    {!isInstalled && (
+                        <button
+                            onClick={promptToInstall}
+                            title={isMobile ? '홈화면에 바로가기 만들기' : '바탕화면에 바로가기 만들기'}
+                            style={{
+                                padding: '0.5rem', borderRadius: '50%',
+                                border: 'none',
+                                backgroundColor: '#4a90e2',
+                                color: 'white', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            <Download size={16} />
+                        </button>
+                    )}
                     {currentUser && !isGuest ? (
                         <button
                             onClick={handleSignOut}
@@ -421,7 +500,8 @@ const LandingPage: React.FC = () => {
                                 fontSize: '0.78rem',
                                 cursor: 'pointer',
                                 boxShadow: '0 2px 4px rgba(74,144,226,0.3)',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s',
+                                whiteSpace: 'nowrap',
                             }}
                         >
                             <LogIn size={15} />
@@ -430,57 +510,78 @@ const LandingPage: React.FC = () => {
                     )}
                 </div>
 
-                <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', letterSpacing: '0.02em' }}>
-                            친구에게 퍼즐력 자랑하기 💪
-                        </p>
-                        <button
-                            onClick={handleShare}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.6rem 1.4rem',
-                                borderRadius: '2rem',
-                                border: '1.5px solid #3b6b91',
-                                backgroundColor: 'transparent',
-                                color: '#3b6b91',
-                                fontWeight: 700,
-                                fontSize: '0.9rem',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            <Share2 size={15} />
-                            친구 초대하고 함께 즐기기
-                        </button>
+                {/* 오늘의 퍼즐 - 랜딩에서 바로 도장판이 보여야 빈칸이 눈에 밟힌다 */}
+                <a
+                    href="/daily"
+                    className="animate-fade-in"
+                    style={{
+                        '--delay': '0.05s',
+                        marginTop: '0.9rem', width: '100%',
+                        display: 'flex', gap: '0.75rem', alignItems: 'stretch',
+                        textDecoration: 'none',
+                    } as React.CSSProperties}
+                >
+                    <div style={{
+                        position: 'relative', flexShrink: 0, width: '36%', maxWidth: 150,
+                        aspectRatio: '1 / 1', borderRadius: '16px', overflow: 'hidden',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.15)',
+                    }}>
+                        <div style={{
+                            position: 'absolute', top: '6px', right: '6px',
+                            backgroundColor: dailyDone ? '#16a34a' : '#ef4444', color: 'white',
+                            fontSize: '0.6rem', fontWeight: 'bold', letterSpacing: '0.05em',
+                            padding: '2px 6px', borderRadius: '999px',
+                            boxShadow: dailyDone ? '0 2px 6px rgba(22,163,74,0.5)' : '0 2px 6px rgba(239,68,68,0.5)',
+                            zIndex: 1,
+                        }}>{dailyDone ? '완료' : '오늘'}</div>
+                        <img
+                            src="/images/daily/title.webp"
+                            alt="오늘의 퍼즐"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
                     </div>
 
-                <button
-                    onClick={isInstalled ? undefined : promptToInstall}
-                    className="install-button animate-fade-in"
-                    style={{
-                        marginTop: '1rem',
-                        padding: '0.75rem 1.5rem',
-                        borderRadius: '2rem',
-                        border: 'none',
-                        backgroundColor: isInstalled ? '#6b7280' : '#4a90e2',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        cursor: isInstalled ? 'default' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        margin: '1rem auto 0 auto',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                    }}
-                >
-                    {isInstalled ? (
-                        <>✅ 이미 설치되었습니다</>
-                    ) : (
-                        <><Download size={18} />{isMobile ? '홈화면에 바로가기 만들기' : '바탕화면에 바로가기 만들기'}</>
-                    )}
-                </button>
+                    <div style={{
+                        flex: 1, minWidth: 0,
+                        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                        gap: '0.45rem',
+                        background: 'white', border: '1px solid #e1e8ed',
+                        borderRadius: '16px', padding: '0.75rem 0.9rem',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.06)',
+                        // .landing-header 가 가운데 정렬이라 여기서 되돌린다.
+                        textAlign: 'left',
+                    }}>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
+                            {dailyTodayLabel}
+                        </div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e293b' }}>
+                            {dailyDone ? '오늘 완료!' : '오늘의 퍼즐 풀기'}
+                        </div>
+
+                        {/* 최근 7일 도장 - 빈칸이 보여야 돌아올 이유가 생긴다 */}
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            {dailyLast7.map(d => (
+                                <span
+                                    key={d.date}
+                                    title={d.date}
+                                    style={{
+                                        flex: 1, height: 8, borderRadius: 4,
+                                        background: d.state === 'cleared' ? '#22c55e'
+                                            : d.state === 'today' ? '#8b5cf6'
+                                                : d.state === 'missed' ? '#cbd5e1'
+                                                    : '#eef2f6',
+                                        boxShadow: d.state === 'today' ? '0 0 0 2px rgba(139,92,246,0.3)' : 'none',
+                                    }}
+                                />
+                            ))}
+                        </div>
+
+                        <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>
+                            이번 달 <span style={{ color: '#16a34a', fontWeight: 800 }}>{dailyClearedThisMonth}</span>
+                            {' / '}{dailyTotalThisMonth} 완료
+                        </div>
+                    </div>
+                </a>
             </header>
 
             <div className="game-grid">

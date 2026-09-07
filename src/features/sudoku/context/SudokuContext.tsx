@@ -27,9 +27,15 @@ interface GameState {
     animatingSectors: number[];
     mistakeCell: { row: number; col: number } | null;
     hintCell: { row: number; col: number } | null;
-    gameMode: 'TimeAttack' | 'Stage' | 'Beginner' | 'BigSize';
+    /** 힌트 모드 - 켜져 있으면 다음에 고른 칸이 채워진다 */
+    hintMode: boolean;
+    /** 광고를 보고 받아 둔 무료 힌트 1회 */
+    hintCredit: boolean;
+    gameMode: 'TimeAttack' | 'Stage' | 'Beginner' | 'BigSize' | 'Daily';
     boardSize: 6 | 9 | 16;
     currentLevel: number | null;
+    /** 오늘의 퍼즐에서 풀고 있는 날짜(YYYY-MM-DD). 그 외 모드에서는 null */
+    currentDate: string | null;
     hintsRemaining: number;
 }
 
@@ -41,7 +47,9 @@ type GameAction =
     | { type: 'TOGGLE_NOTE_MODE' }
     | { type: 'UNDO' }
     | { type: 'REDO' }
-    | { type: 'HINT' }
+    | { type: 'SET_HINT_MODE'; on: boolean }
+    | { type: 'GRANT_HINT_CREDIT' }
+    | { type: 'HINT_AT'; row: number; col: number }
     | { type: 'TICK_TIMER' }
     | { type: 'TOGGLE_PAUSE' }
     | { type: 'CLEAR_ANIMATIONS' }
@@ -49,7 +57,8 @@ type GameAction =
     | { type: 'CLEAR_HINT' }
     | { type: 'START_STAGE'; level: number }
     | { type: 'START_BEGINNER'; level: number }
-    | { type: 'START_BIG'; level: number };
+    | { type: 'START_BIG'; level: number }
+    | { type: 'START_DAILY'; date: string; board: Grid; solution: Grid; difficulty: Difficulty };
 
 const initialState: GameState = {
     board: Array(9).fill(null).map(() => Array(9).fill(null)),
@@ -71,9 +80,12 @@ const initialState: GameState = {
     animatingSectors: [],
     mistakeCell: null,
     hintCell: null,
+    hintMode: false,
+    hintCredit: false,
     gameMode: 'TimeAttack',
     boardSize: 9,
     currentLevel: null,
+    currentDate: null,
     hintsRemaining: 1,
 };
 
@@ -89,6 +101,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                 difficulty: action.difficulty,
                 gameMode: 'TimeAttack',
                 currentLevel: null,
+                hintsRemaining: 0,
+            };
+        }
+
+        case 'START_DAILY': {
+            // 문제 데이터는 월별 청크를 비동기로 읽어서 화면 쪽에서 넘겨준다.
+            // (리듀서에서 static import 하면 모든 달이 초기 번들에 들어간다)
+            return {
+                ...initialState,
+                board: action.board.map(r => [...r]),
+                initialBoard: action.board.map(r => [...r]),
+                solution: action.solution.map(r => [...r]),
+                difficulty: action.difficulty,
+                gameMode: 'Daily',
+                currentLevel: null,
+                currentDate: action.date,
                 hintsRemaining: 0,
             };
         }
@@ -356,21 +384,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             };
         }
 
-        case 'HINT': {
+        case 'SET_HINT_MODE':
+            return { ...state, hintMode: action.on };
+
+        case 'GRANT_HINT_CREDIT':
+            return { ...state, hintCredit: true };
+
+        // 무작위로 칸을 고르던 것을 사용자가 직접 고르는 방식으로 바꿨다.
+        // 막힌 칸에 쓸 수 있어야 힌트가 제값을 한다.
+        case 'HINT_AT': {
             if (state.isGameOver) return state;
-            const emptyCells: { row: number; col: number }[] = [];
-            for (let r = 0; r < state.boardSize; r++) {
-                for (let c = 0; c < state.boardSize; c++) {
-                    if (state.board[r][c] === null && state.initialBoard[r][c] === null) {
-                        emptyCells.push({ row: r, col: c });
-                    }
-                }
-            }
-            if (emptyCells.length === 0) return state;
-            const { row, col } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            const { row, col } = action;
+            if (state.initialBoard[row][col] !== null) return state;
+            if (state.board[row][col] !== null) return state;
             const value = state.solution[row][col];
             const nextState = gameReducer(state, { type: 'SET_CELL', row, col, value });
-            return { ...nextState, hintCell: { row, col } };
+            return { ...nextState, hintCell: { row, col }, hintMode: false, hintCredit: false };
         }
 
         case 'CLEAR_HINT':

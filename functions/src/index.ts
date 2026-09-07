@@ -18,11 +18,21 @@ function assertAdmin(request: CallableRequest): void {
 // 결제 금액(원) -> 지급 코인. 클라이언트가 보낸 금액이 아니라
 // PortOne에서 실제로 조회한 결제 금액을 기준으로 지급 코인을 결정한다.
 const AMOUNT_TO_COINS: Record<number, number> = {
+  1100: 500,   // 스타터 팩 - 계정당 1회만
   2200: 500,
   4400: 1200,
   11000: 3500,
   25000: 10000,
 };
+
+/**
+ * 첫 구매 전용 특가. 같은 500코인을 절반 값에 주므로 반복 구매를 허용하면
+ * 아무도 다른 패키지를 사지 않는다. 그래서 계정당 1회로 막는다.
+ *
+ * 검사는 반드시 지급 트랜잭션 안에서 해야 한다. 밖에서 확인하면 동시에 두 번
+ * 결제했을 때 둘 다 통과한다.
+ */
+const STARTER_PACK_AMOUNT = 1100;
 
 export const verifyPortOnePayment = onCall(
   { secrets: [PORTONE_API_SECRET] },
@@ -73,11 +83,25 @@ export const verifyPortOnePayment = onCall(
     const paymentRef = db.collection("processedPayments").doc(paymentId);
     const userRef = db.collection("users").doc(uid);
 
+    const isStarterPack = paidAmount === STARTER_PACK_AMOUNT;
+
     const result = await db.runTransaction(async (tx) => {
       const existing = await tx.get(paymentRef);
       if (existing.exists) {
         return { alreadyProcessed: true, coins: existing.data()?.coins ?? 0 };
       }
+
+      // 트랜잭션 안에서 읽고 같은 트랜잭션에서 표시해야 두 번 사지 못한다.
+      if (isStarterPack) {
+        const userSnap = await tx.get(userRef);
+        if (userSnap.data()?.starterPackUsed === true) {
+          throw new HttpsError(
+            "failed-precondition",
+            "스타터 팩은 계정당 한 번만 구매할 수 있습니다."
+          );
+        }
+      }
+
       tx.set(paymentRef, {
         uid,
         paymentId,
@@ -85,7 +109,13 @@ export const verifyPortOnePayment = onCall(
         coins: coinsToGrant,
         processedAt: FieldValue.serverTimestamp(),
       });
-      tx.set(userRef, { paidCoins: FieldValue.increment(coinsToGrant) }, { merge: true });
+      tx.set(
+        userRef,
+        isStarterPack
+          ? { paidCoins: FieldValue.increment(coinsToGrant), starterPackUsed: true }
+          : { paidCoins: FieldValue.increment(coinsToGrant) },
+        { merge: true }
+      );
       return { alreadyProcessed: false, coins: coinsToGrant };
     });
 
