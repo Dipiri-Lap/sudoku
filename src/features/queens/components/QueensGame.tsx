@@ -5,7 +5,7 @@ import confetti from 'canvas-confetti';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
 import { useCoins } from '../../../context/CoinContext';
-import { auth } from '../../../firebase';
+import { auth, logEvent } from '../../../firebase';
 import { solveLevel, solveDoubleLevel } from '../utils/solver';
 import DoubleIntroOverlay from './DoubleIntroOverlay';
 import QueensIconShopModal from './QueensIconShopModal';
@@ -238,6 +238,9 @@ function getCellTutClass(r: number, c: number, colorIdx: number, step: TutStep |
 }
 
 const QueensGame: React.FC = () => {
+  // 게임 진입을 한 번만 기록한다(레벨마다 세면 게임별 비교가 망가진다).
+  useEffect(() => { logEvent('game_play', { game: 'queens' }); }, []);
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { queensProgress, saveQueensProgress } = useQueensProgress();

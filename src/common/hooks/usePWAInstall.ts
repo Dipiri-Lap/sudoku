@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logEvent } from '../../firebase';
 
 interface BeforeInstallPromptEvent extends Event {
     readonly platforms: string[];
@@ -24,6 +25,8 @@ export function usePWAInstall() {
         const handleAppInstalled = () => {
             setIsInstalled(true);
             setDeferredPrompt(null);
+            // 설치는 재방문으로 이어지는 가장 강한 선행지표라 전환으로 쓴다.
+            logEvent('pwa_install');
         };
 
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);

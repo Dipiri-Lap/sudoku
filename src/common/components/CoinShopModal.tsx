@@ -6,7 +6,7 @@ const CoinImg = ({ size = 16 }: { size?: number }) => <img src="/coin_Icon.png" 
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useCoins } from '../../context/CoinContext';
-import { auth, db, functions } from '../../firebase';
+import { auth, db, functions, logEvent } from '../../firebase';
 
 const PORTONE_STORE_ID = 'store-5fe3aecd-4b34-4afd-8010-c04757231e1a';
 const PORTONE_CHANNEL_KEY = 'channel-key-67141cfa-6abd-40c7-8646-ea2e64b082ef'; // 실연동(퍼즐가든) 채널
@@ -161,6 +161,18 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
             const result = await verifyPortOnePayment({ paymentId: response.paymentId });
             applyServerGrant(result.data.coins);
             if (pkg.amount === STARTER_PACK.amount) setStarterPackUsed(true);
+
+            // GA4 표준 전자상거래 이벤트. Google Ads 전환으로 그대로 가져다 쓴다.
+            // 서버 검증을 통과한 뒤에만 보낸다 - 취소·실패 결제가 매출로 잡히면 안 된다.
+            if (!result.data.alreadyProcessed) {
+                logEvent('purchase', {
+                    transaction_id: response.paymentId,
+                    value: pkg.amount,
+                    currency: 'KRW',
+                    coins: result.data.coins,
+                    pack: pkg.amount === STARTER_PACK.amount ? 'starter' : `coin_${pkg.coins}`,
+                });
+            }
             showToast(`🪙 ${result.data.coins.toLocaleString()} 코인 지급 완료!`);
             onClose();
         } catch (e) {

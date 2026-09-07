@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import { auth, db, functions, signInAnonymously } from '../firebase';
+import { auth, db, functions, signInAnonymously, setAnalyticsUserId } from '../firebase';
 
 /**
  * 퍼즐력은 판을 깰 때 +1 씩 더해지지만 로그인 상태에서만 더해진다.
@@ -32,6 +32,8 @@ export const UserInitProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            // 기기/계정이 바뀌어도 같은 사람으로 묶이도록 uid를 애널리틱스에 심는다.
+            setAnalyticsUserId(user?.uid ?? null);
             if (!user) {
                 signInAnonymously(auth).catch(console.error);
                 return;

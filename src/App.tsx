@@ -42,7 +42,7 @@ import { ChallengeProvider } from './context/ChallengeContext';
 import { DailyPuzzleProvider } from './context/DailyPuzzleContext';
 import { UserInitProvider, useUserInit } from './context/UserInitContext';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth, signInAnonymously } from './firebase';
+import { auth, signInAnonymously, setAnalyticsUserProperties } from './firebase';
 import './index.css';
 
 const AppContent: React.FC = () => {
@@ -186,6 +186,16 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // 홈 화면에 설치한 채로 실행 중인지. iOS 는 설치 '순간'을 알 방법이 없어서
+    // (beforeinstallprompt/appinstalled 미지원) 실행 형태로 대신 센다.
+    // 설치 유저와 브라우저 유저의 리텐션·결제율을 GA4 에서 갈라 보려는 것.
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as unknown as { standalone?: boolean }).standalone === true;
+    setAnalyticsUserProperties({ app_mode: isStandalone ? 'standalone' : 'browser' });
+  }, []);
+
   useEffect(() => {
     const ua = navigator.userAgent;
     const isKakao = /KAKAOTALK/i.test(ua);

@@ -8,7 +8,7 @@ import SnapSpotMarkerShopModal from './SnapSpotMarkerShopModal';
 import SnapSpotSettingsModal from './SnapSpotSettingsModal';
 import { useCoins } from '../../../context/CoinContext';
 import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
-import { auth } from '../../../firebase';
+import { auth, logEvent } from '../../../firebase';
 import '../styles/SnapSpotGame.css';
 
 export type SnapSpotMode = 'normal' | 'time-attack' | 'stage' | 'arcade';
@@ -82,6 +82,12 @@ interface Props {
 
 const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const navigate = useNavigate();
+
+  // 게임 진입을 한 번만 기록한다(스테이지가 넘어갈 때마다 세면 게임별 비교가 망가진다).
+  useEffect(() => {
+    logEvent('game_play', { game: 'snapspot', mode });
+  }, [mode]);
+
   const [searchParams] = useSearchParams();
   const { addCoins, spendCoins, coins } = useCoins();
   const { snapSpotProgress, saveSnapSpotProgress: saveProgress } = useSnapSpotProgress();

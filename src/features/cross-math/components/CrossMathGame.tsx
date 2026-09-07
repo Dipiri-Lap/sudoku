@@ -24,6 +24,7 @@ import { stageLevel, TOTAL_STAGES } from '../stage/schedule';
 import { useCrossumProgress } from '../stage/progress';
 import { extractEquations, evaluate } from '../stage/board';
 import { useCoins } from '../../../context/CoinContext';
+import { logEvent } from '../../../firebase';
 import {
   playSfx, warmUpSfx, startBgm, stopBgm, pauseBgm, resumeBgm,
   getBgmVolume, getSfxVolume, setBgmVolume, setSfxVolume,
@@ -410,6 +411,7 @@ const CrossMathGame: React.FC = () => {
   }, []);
 
   const runStage = useCallback(async (n: number) => {
+    logEvent('game_play', { game: 'crossum', mode: 'stage' });
     warmUpSfx();
     // 새 번호를 먼저 넣으면 이전 판의 '승리' 상태가 그대로 남아 클리어 처리가 한 번 더 돈다
     // (클리어음 재생 + 코인·퍼즐력 중복 지급). 판을 먼저 비운다.

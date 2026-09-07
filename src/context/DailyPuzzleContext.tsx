@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, logEvent } from '../firebase';
 import { useCoins } from './CoinContext';
 
 const LS_CLEARED_KEY = 'daily_cleared_dates';
@@ -85,6 +85,8 @@ export const DailyPuzzleProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setClearedDates(next);
 
         await addCoins(DAILY_REWARD_COIN);
+        // 습관이 붙었는지 보는 지표. 누적 완료 수를 같이 보내 코호트를 나눈다.
+        logEvent('daily_clear', { date, total_cleared: next.size });
 
         const user = auth.currentUser;
         if (user) {
