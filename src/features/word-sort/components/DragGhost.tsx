@@ -14,6 +14,7 @@ export const DragGhost: React.FC = () => {
         stackCardStyle,
         faceDownPattern,
         cardTextSize,
+        cardBadgeSize,
         splitText,
     } = useWordSortUI();
 
@@ -74,20 +75,20 @@ export const DragGhost: React.FC = () => {
                                     width: '100%',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    justifyContent: isTop ? 'center' : 'flex-start',
+                                    justifyContent: card.type === 'category' ? 'flex-start' : (isTop ? 'center' : 'flex-start'),
                                     alignItems: 'center',
-                                    paddingTop: '0',
+                                    paddingTop: card.type === 'category' ? `${Math.round(finalCardWidth * 0.32)}px` : '0',
                                     position: 'relative'
                                 }}>
                                     {card.type === 'category' && (() => {
                                         const category = state.categories.find(c => c.id === card.cat);
                                         return (
                                             <>
-                                                <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
+                                                <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
                                                     0/{category?.words?.length ?? 5}
                                                 </div>
-                                                <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                                    <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                                <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2, lineHeight: 1 }}>
+                                                    <Crown size={Math.max(10, Math.round(finalCardWidth * 0.16))} fill="#ff9f43" fillOpacity={0.2} />
                                                 </div>
                                             </>
                                         );

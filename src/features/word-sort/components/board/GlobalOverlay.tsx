@@ -40,6 +40,8 @@ const GlobalOverlay: React.FC<GlobalOverlayProps> = ({
                 const { x, y, startX, startY, seq, card } = info;
                 const isMoving = seq <= gatherPhase;
                 const category = categories.find(c => c.id === card.cat);
+                const cardTextSize = Math.max(0.5, Math.min(0.92, finalCardWidth * 0.007 + 0.38));
+                const cardBadgeSize = `${(cardTextSize * 0.70).toFixed(2)}rem`;
 
                 return (
                     <div
@@ -58,10 +60,11 @@ const GlobalOverlay: React.FC<GlobalOverlayProps> = ({
                             color: '#333',
                             display: 'flex',
                             justifyContent: 'center',
-                            alignItems: 'center',
+                            alignItems: card.type === 'category' ? 'flex-start' : 'center',
                             zIndex: 20000 + seq,
                             padding: '5px',
-                            transform: isMoving 
+                            paddingTop: card.type === 'category' ? `${Math.round(finalCardWidth * 0.32)}px` : '5px',
+                            transform: isMoving
                                 ? `translate(${x - startX}px, ${y - startY}px) scale(1.15)` 
                                 : 'translate(0, 0) scale(1)',
                             transition: isMoving ? 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
@@ -78,17 +81,17 @@ const GlobalOverlay: React.FC<GlobalOverlayProps> = ({
                         }} />
                         {card.type === 'category' && (
                             <>
-                                <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
+                                <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
                                     0/{category?.words?.length ?? 5}
                                 </div>
-                                <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                    <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2, lineHeight: 1 }}>
+                                    <Crown size={Math.max(10, Math.round(finalCardWidth * 0.16))} fill="#ff9f43" fillOpacity={0.2} />
                                 </div>
                             </>
                         )}
                         <span style={{
                             fontWeight: '900',
-                            fontSize: finalCardWidth < 60 ? '0.75rem' : '0.9rem',
+                            fontSize: `${cardTextSize}rem`,
                             lineHeight: '1.2',
                             zIndex: 2,
                             textAlign: 'center'

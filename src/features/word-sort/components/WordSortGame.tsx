@@ -247,18 +247,38 @@ const WordSortGame: React.FC = () => {
             );
         }
 
+        // Korean (and other CJK without spaces): split into up to 3 lines by length,
+        // then additionally shrink the font if a line is still long for the current card size.
+        let lines: string[];
         if (textSizeMultiplier > 1) {
-            if (value.length <= 3) return <>{value}</>;
-            if (value.length <= 6) {
+            if (value.length <= 3) lines = [value];
+            else if (value.length <= 6) {
                 const mid = Math.ceil(value.length / 2);
-                return <>{value.slice(0, mid)}<br />{value.slice(mid)}</>;
+                lines = [value.slice(0, mid), value.slice(mid)];
+            } else {
+                const third = Math.ceil(value.length / 3);
+                lines = [value.slice(0, third), value.slice(third, third * 2), value.slice(third * 2)];
             }
-            const third = Math.ceil(value.length / 3);
-            return <>{value.slice(0, third)}<br />{value.slice(third, third * 2)}<br />{value.slice(third * 2)}</>;
+        } else if (value.length < 4) {
+            lines = [value];
+        } else {
+            const firstLine = Math.ceil(value.length / 2);
+            lines = [value.slice(0, firstLine), value.slice(firstLine)];
         }
-        if (value.length < 5) return <>{value}</>;
-        const firstLine = Math.ceil(value.length / 2);
-        return <>{value.slice(0, firstLine)}<br />{value.slice(firstLine)}</>;
+
+        const maxLineLen = Math.max(...lines.map((l) => l.length));
+        const scale = maxLineLen > 3 ? Math.max(0.65, 3.5 / maxLineLen) : 1;
+
+        return (
+            <span style={{
+                display: 'inline-block',
+                transform: `scale(${scale})`,
+                transformOrigin: 'center center',
+                width: '100%'
+            }}>
+                {lines.map((line, i) => <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>)}
+            </span>
+        );
     };
 
     const triggerDealing = (totalCards: number) => {
@@ -380,7 +400,7 @@ const WordSortGame: React.FC = () => {
             return levelData.fixedStacks.reduce((s: number, st: any[]) => s + st.length, 0);
         }
         const slots = levelData.slots || 4;
-        const counts = slots === 3 ? [3, 4, 5] : slots === 5 ? [3, 4, 5, 6, 7] : [3, 4, 5, 6];
+        const counts = Array.from({ length: slots }, (_, i) => i + 3);
         return counts.reduce((a: number, b: number) => a + b, 0);
     };
 
@@ -462,7 +482,8 @@ const WordSortGame: React.FC = () => {
 
             if (urlLevel !== null && !isNaN(urlLevel)) {
                 const maxAllowed = clearedLevel + 1;
-                if (urlLevel > maxAllowed) {
+                // 로컬 개발 환경에서는 진행도와 무관하게 원하는 레벨로 바로 테스트할 수 있게 허용한다.
+                if (urlLevel > maxAllowed && !import.meta.env.DEV) {
                     const modeQuery = isHardModeUrl ? '&mode=hard' : '';
                     alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${maxAllowed})`);
                     window.location.replace(`/word-sort/play?level=${maxAllowed}${modeQuery}`);
@@ -487,8 +508,7 @@ const WordSortGame: React.FC = () => {
                             // Validate stack count matches current level config
                             const savedLevelData = levels.find((l: any) => l.id === parsed.level);
                             const expectedSlots = savedLevelData?.slots || 4;
-                            const expectedStacks = expectedSlots === 3 ? 3 : expectedSlots === 5 ? 5 : 4;
-                            if (parsed.stacks.length === expectedStacks) {
+                            if (parsed.stacks.length === expectedSlots) {
                                 dispatch({ type: 'RESTORE_GAME', savedState: parsed });
                                 return;
                             }

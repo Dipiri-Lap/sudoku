@@ -12,6 +12,7 @@ export const StackArea: React.FC = () => {
         stackCardStyle,
         faceDownPattern,
         cardTextSize,
+        cardBadgeSize,
         draggingGroup,
         setDraggingGroup,
         setDragGhostPos,
@@ -89,9 +90,9 @@ export const StackArea: React.FC = () => {
                             cursor: blocked ? 'not-allowed' : 'pointer',
                             opacity: blocked ? 0.5 : 1,
                         }}>
-                            <span style={{ fontSize: '1.1rem' }}>{blocked ? '⛔' : '🔒'}</span>
-                            <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
-                            {!blocked && <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>}
+                            <span style={{ fontSize: `${(cardTextSize * 1.2).toFixed(2)}rem` }}>{blocked ? '⛔' : '🔒'}</span>
+                            <span style={{ fontSize: `${(cardTextSize * 0.6).toFixed(2)}rem`, textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
+                            {!blocked && <span style={{ fontSize: `${(cardTextSize * 0.65).toFixed(2)}rem`, color: '#fda085', fontWeight: '700' }}>🪙 50</span>}
                         </div>
                     </div>
                 );
@@ -221,20 +222,22 @@ export const StackArea: React.FC = () => {
                                                 width: '100%',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                justifyContent: (cIdx === stack.length - 1 || isGatheringTarget) ? 'center' : 'flex-start',
+                                                justifyContent: card.type === 'category'
+                                                    ? 'flex-start'
+                                                    : ((cIdx === stack.length - 1 || isGatheringTarget) ? 'center' : 'flex-start'),
                                                 alignItems: 'center',
-                                                paddingTop: '0',
+                                                paddingTop: card.type === 'category' ? `${Math.round(finalCardWidth * 0.32)}px` : '0',
                                                 position: 'relative'
                                             }}>
                                                 {card.type === 'category' && (() => {
                                                     const category = state.categories.find(c => c.id === card.cat);
                                                     return (
                                                         <>
-                                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
+                                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
                                                                 0/{category?.words?.length ?? 5}
                                                             </div>
-                                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                                                <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2, lineHeight: 1 }}>
+                                                                <Crown size={Math.max(10, Math.round(finalCardWidth * 0.16))} fill="#ff9f43" fillOpacity={0.2} />
                                                             </div>
                                                         </>
                                                     );

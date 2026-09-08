@@ -7,7 +7,7 @@ const levelStackTotal = (levelData: any): number => {
         return levelData.fixedStacks.reduce((s: number, st: any[]) => s + st.length, 0);
     }
     const slots = levelData.slots || 4;
-    const counts = slots === 3 ? [3, 4, 5] : slots === 5 ? [3, 4, 5, 6, 7] : [3, 4, 5, 6];
+    const counts = Array.from({ length: slots }, (_, i) => i + 3);
     return counts.reduce((a: number, b: number) => a + b, 0);
 };
 

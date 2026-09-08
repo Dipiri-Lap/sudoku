@@ -32,6 +32,7 @@ const hoverOff = (e: React.MouseEvent<HTMLImageElement>) => {
 
 const WordSortModeSelect: React.FC = () => {
     const navigate = useNavigate();
+    const [devLevelInput, setDevLevelInput] = React.useState('1');
 
     useEffect(() => {
         document.body.classList.add('landing-bg');
@@ -56,6 +57,14 @@ const WordSortModeSelect: React.FC = () => {
         const levelData = (levels as any[]).find((l) => l.id === nextLevel) || levels[0];
         dispatch({ type: 'START_LEVEL', levelData });
         navigate(`play?level=${nextLevel}`);
+    };
+
+    const handleDevPlay = (hardMode: boolean) => {
+        const levelId = parseInt(devLevelInput, 10);
+        if (!levelId || levelId < 1) return;
+        const levelData = (levels as any[]).find((l) => l.id === levelId) || levels[0];
+        dispatch({ type: 'START_LEVEL', levelData, hardMode });
+        navigate(`play?level=${levelData.id}${hardMode ? '&mode=hard' : ''}`);
     };
 
     const handleHardPlay = () => {
@@ -165,6 +174,34 @@ const WordSortModeSelect: React.FC = () => {
                     </span>
                 </div>
             </div>
+
+            {import.meta.env.DEV && (
+                <div style={{
+                    margin: '0 auto 2rem', maxWidth: '360px', padding: '1rem',
+                    border: '1px dashed #999', borderRadius: 12, background: 'rgba(255,255,255,0.6)',
+                    display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'center',
+                }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#666' }}>
+                        🛠 DEV: 스테이지 바로 테스트 (1~{maxLevel})
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                            type="number"
+                            min={1}
+                            max={maxLevel}
+                            value={devLevelInput}
+                            onChange={(e) => setDevLevelInput(e.target.value)}
+                            style={{ width: '80px', padding: '0.4rem', borderRadius: 8, border: '1px solid #ccc', textAlign: 'center' }}
+                        />
+                        <button onClick={() => handleDevPlay(false)} style={{ padding: '0.4rem 0.8rem', borderRadius: 8, border: 'none', background: '#fda085', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+                            일반
+                        </button>
+                        <button onClick={() => handleDevPlay(true)} style={{ padding: '0.4rem 0.8rem', borderRadius: 8, border: 'none', background: '#ff6b6b', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+                            하드
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* SEO 콘텐츠 섹션 */}
             <details style={{ padding: '2rem 1.5rem 3rem', maxWidth: '680px', margin: '0 auto', color: '#555', lineHeight: '1.8' }}>

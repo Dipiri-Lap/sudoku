@@ -11,6 +11,7 @@ export const SlotArea: React.FC = () => {
         cardBadgeSize,
         cardNameSize,
         cardWordSize,
+        cardTextSize,
         gatheringCat,
         gatherPhase,
         gatherOffsets,
@@ -67,9 +68,9 @@ export const SlotArea: React.FC = () => {
                                 opacity: blocked ? 0.5 : 1,
                             }}
                         >
-                            <span style={{ fontSize: '1.1rem' }}>{blocked ? '⛔' : '🔒'}</span>
-                            <span style={{ fontSize: '0.55rem', textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
-                            {!blocked && <span style={{ fontSize: '0.6rem', color: '#fda085', fontWeight: '700' }}>🪙 50</span>}
+                            <span style={{ fontSize: `${(cardTextSize * 1.2).toFixed(2)}rem` }}>{blocked ? '⛔' : '🔒'}</span>
+                            <span style={{ fontSize: `${(cardTextSize * 0.6).toFixed(2)}rem`, textAlign: 'center', lineHeight: 1.2 }}>잠금 해제</span>
+                            {!blocked && <span style={{ fontSize: `${(cardTextSize * 0.65).toFixed(2)}rem`, color: '#fda085', fontWeight: '700' }}>🪙 50</span>}
                         </div>
                     </div>
                 );

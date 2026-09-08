@@ -12,6 +12,8 @@ export const LandingAnimation: React.FC = () => {
         visibleHeight,
         stackCardStyle,
         splitText,
+        cardTextSize,
+        cardBadgeSize,
     } = useWordSortUI();
 
     if (!landingGroup?.isProxy || !landingGroup.movingCards) return null;
@@ -54,9 +56,11 @@ export const LandingAnimation: React.FC = () => {
                                 ? `${idx * 40}ms`
                                 : '0ms',
                             display: 'flex',
+                            flexDirection: 'column',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '5px'
+                            justifyContent: card.type === 'category' ? 'flex-start' : 'center',
+                            padding: '5px',
+                            paddingTop: card.type === 'category' ? `${Math.round(finalCardWidth * 0.32)}px` : '5px',
                         }}
                     >
                         <div style={{
@@ -71,21 +75,23 @@ export const LandingAnimation: React.FC = () => {
                             const category = state.categories.find((c: any) => c.id === card.cat);
                             return (
                                 <>
-                                    <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
+                                    <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
                                         0/{category?.words?.length ?? 5}
                                     </div>
-                                    <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                        <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                    <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2, lineHeight: 1 }}>
+                                        <Crown size={Math.max(10, Math.round(finalCardWidth * 0.16))} fill="#ff9f43" fillOpacity={0.2} />
                                     </div>
                                 </>
                             );
                         })()}
                         <span style={{
                             fontWeight: '900',
-                            fontSize: card.type === 'category' ? '0.9rem' : '0.85rem',
-                            zIndex: 2
+                            fontSize: `${cardTextSize}rem`,
+                            zIndex: 2,
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap'
                         }}>
-                            {card.value}
+                            {splitText(card.value)}
                         </span>
                     </div>
                 );

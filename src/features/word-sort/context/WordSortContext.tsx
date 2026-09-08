@@ -132,13 +132,13 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             shuffle(wordCards);
 
             // Determine stack counts based on slot count
-            const stackCounts = slotCount === 3 ? [3, 4, 5] : slotCount === 5 ? [3, 4, 5, 6, 7] : [3, 4, 5, 6];
+            const stackCounts = Array.from({ length: slotCount }, (_, i) => i + 3);
             const totalStackCards = stackCounts.reduce((a, b) => a + b, 0);
 
-            // Constraint: strictly less than half → floor((n-1)/2) gives correct max.
-            // e.g. 8장 → max 3,  9장 → max 4.  Then randomize between 2 and max (inclusive).
+            // Constraint: strictly less than half → floor((n-1)/2) gives correct max, +1 more to widen the range.
+            // e.g. 8장 → max 4,  9장 → max 5.  Then randomize between 2 and max (inclusive).
             const totalCatCards = categoryCards.length;
-            const maxCatInStack = Math.floor((totalCatCards - 1) / 2); // strictly < half
+            const maxCatInStack = Math.floor((totalCatCards - 1) / 2) + 1;
             const minCatInStack = 2;
             const catInStackCount = minCatInStack + Math.floor(Math.random() * (maxCatInStack - minCatInStack + 1));
 

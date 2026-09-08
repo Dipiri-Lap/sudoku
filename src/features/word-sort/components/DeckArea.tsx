@@ -11,6 +11,7 @@ export const DeckArea: React.FC = () => {
         slotCardStyle,
         faceDownPattern,
         cardTextSize,
+        cardBadgeSize,
         draggingGroup,
         setDraggingGroup,
         setDragGhostPos,
@@ -157,11 +158,11 @@ export const DeckArea: React.FC = () => {
 
                                     {isTop && card.type === 'category' && (
                                         <>
-                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: '0.65rem', fontWeight: '900', zIndex: 2 }}>
+                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
                                                 0/{category?.words?.length ?? 5}
                                             </div>
-                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2 }}>
-                                                <Crown size={14} fill="#ff9f43" fillOpacity={0.2} />
+                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2, lineHeight: 1 }}>
+                                                <Crown size={Math.max(10, Math.round(finalCardWidth * 0.16))} fill="#ff9f43" fillOpacity={0.2} />
                                             </div>
                                         </>
                                     )}
@@ -170,7 +171,8 @@ export const DeckArea: React.FC = () => {
                                         width: '100%',
                                         display: 'flex',
                                         justifyContent: 'center',
-                                        alignItems: 'center',
+                                        alignItems: (isTop && card.type === 'category') ? 'flex-start' : 'center',
+                                        paddingTop: (isTop && card.type === 'category') ? `${Math.round(finalCardWidth * 0.32)}px` : '0',
                                         position: 'relative'
                                     }}>
                                         <span style={{
