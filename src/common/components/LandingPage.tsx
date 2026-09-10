@@ -706,11 +706,11 @@ const LandingPage: React.FC = () => {
                 {window.location.hostname === 'localhost' && (
                     <a href="/arrow-puzzle" className="game-card animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
-                            🏹
+                            🚆
                         </div>
                         <div className="game-card-content">
-                            <h3>화살표 퍼즐</h3>
-                            <p>화살표를 올바른 순서로 탭해서 모두 탈출시키세요</p>
+                            <h3>열차 출발</h3>
+                            <p>선로가 빈 열차부터 탭해서 모두 출발시키세요</p>
                             <div className="game-card-footer">
                                 <span className="play-now">
                                     <Play size={16} fill="currentColor" /> 플레이하기

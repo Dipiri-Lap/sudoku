@@ -33,9 +33,25 @@ const PIECE_COLORS = COLOR_PALETTES[0];
 
 const ALL_DIRS: Direction[] = ['up', 'down', 'left', 'right'];
 
+function dirDelta(dir: Direction): [number, number] {
+  switch (dir) {
+    case 'right': return [1, 0];
+    case 'left':  return [-1, 0];
+    case 'up':    return [0, -1];
+    case 'down':  return [0, 1];
+  }
+}
+
 function isSelfBlockedCells(cells: [number, number][], exitDir: Direction): boolean {
   const n = cells.length;
   const [hc, hr] = cells[n - 1];
+
+  // 머리 바로 앞 칸이 자기 몸통이면 화살촉이 제 막대 위에 겹쳐 그려진다.
+  // 이동 규칙상으로는 몸통이 제때 비켜주므로 탈출 자체는 가능하지만
+  // 모양이 망가져 보이므로 생성 단계에서 제외한다.
+  const [ndc, ndr] = dirDelta(exitDir);
+  if (cells.some(([c, r]) => c === hc + ndc && r === hr + ndr)) return true;
+
   for (let i = 0; i < n - 1; i++) {
     const [bc, br] = cells[i];
     let dist = 0;
@@ -84,48 +100,46 @@ function weightedPickDir(cells: [number, number][], dirs: Direction[], cols: num
   return dirs[0];
 }
 
-function shuffleIndices(n: number): number[] {
-  const arr = Array.from({ length: n }, (_, i) => i);
-  for (let i = n - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
 // Constructive exit-direction assignment.
-// Picks a random escape order, then assigns each piece an exit direction that is
-// guaranteed clear given all pieces escaping after it. This is O(attempts × N)
-// and works reliably even for high piece counts where random sampling would fail.
+//
+// 실제 플레이 순서대로(먼저 나가는 피스부터) 방향을 확정한다.
+// 판이 가장 붐비는 첫 수를 고를 때 선택지가 가장 많고, 피스를 하나 치울수록
+// 남은 피스들의 길은 열리기만 하므로 — 지금 나갈 수 있는 피스를 아무거나
+// 골라도 뒤에 손해가 없다. 막히는 경우는 분할 자체가 나쁜 경우뿐이라
+// 그때는 다른 분할로 다시 시도한다.
 function assignExitDirsConstructive(
   layout: [number, number][][],
   cols: number,
   rows: number,
-  attempts = 300
+  attempts = 8
 ): Direction[] | null {
   const N = layout.length;
 
   for (let attempt = 0; attempt < attempts; attempt++) {
-    const escapeOrder = shuffleIndices(N);
     const dirs: Direction[] = new Array(N);
-
-    // Start with every cell occupied; remove each piece as it escapes.
+    const escaped = new Array<boolean>(N).fill(false);
+    // 아직 판 위에 남아있는 모든 칸
     const remaining = new Set<string>(layout.flat().map(([c, r]) => `${c},${r}`));
 
     let ok = true;
     for (let k = 0; k < N; k++) {
-      const idx = escapeOrder[k];
-      const cells = layout[idx];
+      const candidates: { idx: number; validDirs: Direction[] }[] = [];
 
-      // Remove this piece — it's "escaping" now, so its cells are no longer obstacles.
-      for (const [c, r] of cells) remaining.delete(`${c},${r}`);
+      for (let i = 0; i < N; i++) {
+        if (escaped[i]) continue;
+        // 자기 자신은 장애물이 아니다
+        for (const [c, r] of layout[i]) remaining.delete(`${c},${r}`);
+        const validDirs = ALL_DIRS.filter(d => canEscapeWithRemaining(layout[i], d, remaining, cols, rows));
+        for (const [c, r] of layout[i]) remaining.add(`${c},${r}`);
+        if (validDirs.length > 0) candidates.push({ idx: i, validDirs });
+      }
 
-      // remaining now = cells of pieces that escape after k → they block the exit path.
-      const validDirs = ALL_DIRS.filter(d => canEscapeWithRemaining(cells, d, remaining, cols, rows));
+      if (candidates.length === 0) { ok = false; break; }
 
-      if (validDirs.length === 0) { ok = false; break; }
-
-      dirs[idx] = weightedPickDir(cells, validDirs, cols, rows);
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      dirs[pick.idx] = weightedPickDir(layout[pick.idx], pick.validDirs, cols, rows);
+      escaped[pick.idx] = true;
+      for (const [c, r] of layout[pick.idx]) remaining.delete(`${c},${r}`);
     }
 
     if (ok) return dirs;
@@ -220,6 +234,111 @@ export function generateLevel(cols: number, rows: number, numPieces: number, var
   return null;
 }
 
+// -- 모양(마스크) 레벨 --------------------------------------------------------
+//
+// 직사각형 격자와 달리 임의 모양에서는 해밀턴 경로 탐색 성공률이 급격히 떨어진다.
+// 대신 마스크를 여러 뱀으로 "직접" 분할한다: 가장 갇힌 칸(막다른 골목)에서 시작해
+// Warnsdorff 방식으로 뻗어나가면 고립된 낱칸이 거의 남지 않는다.
+
+function neighborsOf(c: number, r: number): [number, number][] {
+  return [[c + 1, r], [c - 1, r], [c, r + 1], [c, r - 1]];
+}
+
+function partitionMaskIntoSnakes(
+  mask: [number, number][],
+  targetLen: number,
+  variance: number,
+  maxOrphans: number
+): [number, number][][] | null {
+  const remaining = new Set(mask.map(([c, r]) => `${c},${r}`));
+  const minLen = Math.max(2, Math.floor(targetLen * (1 - variance)));
+  const maxLen = Math.max(minLen, Math.ceil(targetLen * (1 + variance)));
+
+  const freeDeg = (c: number, r: number) =>
+    neighborsOf(c, r).filter(([nc, nr]) => remaining.has(`${nc},${nr}`)).length;
+
+  const pieces: [number, number][][] = [];
+  let orphans = 0;
+
+  while (remaining.size > 0) {
+    // 남은 칸 중 이웃이 가장 적은 칸에서 시작 -> 막다른 골목부터 소진
+    let bestDeg = Infinity;
+    let candidates: [number, number][] = [];
+    for (const key of remaining) {
+      const [c, r] = key.split(',').map(Number) as [number, number];
+      const deg = freeDeg(c, r);
+      if (deg < bestDeg) { bestDeg = deg; candidates = [[c, r]]; }
+      else if (deg === bestDeg) candidates.push([c, r]);
+    }
+
+    const start = candidates[Math.floor(Math.random() * candidates.length)];
+    const target = Math.min(
+      remaining.size,
+      minLen + Math.floor(Math.random() * (maxLen - minLen + 1))
+    );
+
+    const cells: [number, number][] = [start];
+    remaining.delete(`${start[0]},${start[1]}`);
+    let [cc, cr] = start;
+
+    while (cells.length < target) {
+      const nbrs = neighborsOf(cc, cr).filter(([nc, nr]) => remaining.has(`${nc},${nr}`));
+      if (nbrs.length === 0) break;
+      const scored = nbrs.map(([nc, nr]) => ({ nc, nr, deg: freeDeg(nc, nr) }));
+      const minDeg = Math.min(...scored.map(sc => sc.deg));
+      const tied = scored.filter(sc => sc.deg === minDeg);
+      const { nc, nr } = tied[Math.floor(Math.random() * tied.length)];
+      cells.push([nc, nr]);
+      remaining.delete(`${nc},${nr}`);
+      [cc, cr] = [nc, nr];
+    }
+
+    if (cells.length === 1) {
+      orphans++;
+      if (orphans > maxOrphans) return null;
+    }
+    pieces.push(cells);
+  }
+
+  return pieces;
+}
+
+/**
+ * 마스크(임의 모양) 위에 풀 수 있는 레벨을 생성한다.
+ * 마스크 밖 칸은 빈 공간이라 피스가 그대로 통과해 나간다 —
+ * 탈출 판정이 "남아있는 피스 칸"만 장애물로 보기 때문에 방향 배정 로직을 그대로 쓴다.
+ */
+export function generateShapedLevel(
+  mask: [number, number][],
+  cols: number,
+  rows: number,
+  numPieces: number,
+  variance = 0.3,
+  palette = PIECE_COLORS
+): LevelData | null {
+  if (mask.length < 2) return null;
+  const targetLen = Math.max(2, mask.length / Math.max(1, numPieces));
+
+  for (let attempt = 0; attempt < 40; attempt++) {
+    // 시도가 거듭될수록 낱칸 피스를 조금씩 허용해 준다.
+    const maxOrphans = Math.floor(attempt / 10);
+    const layout = partitionMaskIntoSnakes(mask, targetLen, variance, maxOrphans);
+    if (!layout) continue;
+
+    const dirs = assignExitDirsConstructive(layout, cols, rows);
+    if (!dirs) continue;
+
+    const pieces: PieceData[] = layout.map((cells, i) => ({
+      id: String(i + 1),
+      cells,
+      exitDir: dirs[i],
+      color: palette[i % palette.length],
+    }));
+    return { gridCols: cols, gridRows: rows, pieces, mask };
+  }
+  return null;
+}
+
 export function generateLevelForDifficulty(difficulty: Difficulty): LevelData | null {
   const cfg = DIFFICULTY_CONFIGS[difficulty];
   const numPieces = cfg.minPieces + Math.floor(Math.random() * (cfg.maxPieces - cfg.minPieces + 1));
@@ -234,7 +353,10 @@ export function formatLevelTs(level: LevelData): string {
       return `      { id: '${p.id}', cells: [${cells}], exitDir: '${p.exitDir}', color: '${p.color}' }`;
     })
     .join(',\n');
-  return `  {\n    gridCols: ${level.gridCols},\n    gridRows: ${level.gridRows},\n    pieces: [\n${pieces},\n    ],\n  }`;
+  const mask = level.mask
+    ? `    mask: [${level.mask.map(([c, r]) => `[${c},${r}]`).join(', ')}],\n`
+    : '';
+  return `  {\n    gridCols: ${level.gridCols},\n    gridRows: ${level.gridRows},\n${mask}    pieces: [\n${pieces},\n    ],\n  }`;
 }
 
 const EXTRACTION_PROMPT = `This is a screenshot from an Arrow Puzzle game.

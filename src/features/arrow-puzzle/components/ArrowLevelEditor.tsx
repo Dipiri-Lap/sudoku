@@ -2,7 +2,8 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import type { LevelData, Direction } from '../data/levels';
-import { type Difficulty, DIFFICULTY_CONFIGS, generateLevel, formatLevelTs, extractLevelFromImage } from '../utils/levelGenerator';
+import { type Difficulty, DIFFICULTY_CONFIGS, generateLevel, generateShapedLevel, formatLevelTs, extractLevelFromImage } from '../utils/levelGenerator';
+import { maskFromText, fitGridToMask, SHAPE_PRESETS } from '../utils/maskGenerator';
 import '../styles/ArrowLevelEditor.css';
 
 const DIFFICULTIES: Difficulty[] = ['lv1', 'lv2', 'lv3', 'lv4', 'lv5', 'lv6', 'lv7', 'lv8'];
@@ -65,14 +66,16 @@ const LevelPreview: React.FC<{ level: LevelData }> = ({ level }) => {
   const { gridCols: cols, gridRows: rows, pieces } = level;
   const W = PAD * 2 + cols * CS;
   const H = PAD * 2 + rows * CS;
+  const dotCells: [number, number][] = level.mask ?? Array.from(
+    { length: rows },
+    (_, r) => Array.from({ length: cols }, (_, c) => [c, r] as [number, number])
+  ).flat();
   return (
     <svg className="ale-preview-svg" viewBox={`0 0 ${W} ${H}`}>
-      {Array.from({ length: rows }, (_, r) =>
-        Array.from({ length: cols }, (_, c) => {
-          const [x, y] = previewCenter(c, r);
-          return <circle key={`${c},${r}`} cx={x} cy={y} r={2} fill="rgba(255,255,255,0.12)" />;
-        })
-      )}
+      {dotCells.map(([c, r]) => {
+        const [x, y] = previewCenter(c, r);
+        return <circle key={`${c},${r}`} cx={x} cy={y} r={2} fill="rgba(255,255,255,0.12)" />;
+      })}
       {pieces.map(p => {
         const head = p.cells[p.cells.length - 1];
         const d = buildPath(p.cells, p.exitDir);
@@ -94,7 +97,7 @@ const LevelPreview: React.FC<{ level: LevelData }> = ({ level }) => {
 
 const ArrowLevelEditor: React.FC = () => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<'generate' | 'image'>('generate');
+  const [tab, setTab] = useState<'generate' | 'shape' | 'image'>('generate');
 
   // Generate tab
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
@@ -102,6 +105,13 @@ const ArrowLevelEditor: React.FC = () => {
   const [rows, setRows] = useState(5);
   const [numPieces, setNumPieces] = useState(4);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Shape tab
+  const [shapeText, setShapeText] = useState('A');
+  const [shapeCols, setShapeCols] = useState(14);
+  const [shapeRows, setShapeRows] = useState(16);
+  const [shapePieces, setShapePieces] = useState(16);
+  const [maskInfo, setMaskInfo] = useState<number | null>(null);
 
   // Image tab
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('arrowLevelApiKey') ?? '');
@@ -139,6 +149,27 @@ const ArrowLevelEditor: React.FC = () => {
     } else {
       setError('레벨 생성 실패 — 파라미터를 조정하거나 다시 시도하세요.');
     }
+    setIsGenerating(false);
+  };
+
+  const handleGenerateShape = async () => {
+    setIsGenerating(true);
+    setError(null);
+    setLevel(null);
+    setMaskInfo(null);
+    await new Promise(r => setTimeout(r, 20));
+    const raw = maskFromText(shapeText, shapeCols, shapeRows);
+    setMaskInfo(raw.length);
+    if (raw.length < 4) {
+      setError('모양을 인식하지 못했습니다 — 다른 글자를 쓰거나 격자를 키워보세요.');
+      setIsGenerating(false);
+      return;
+    }
+    // 모양이 판을 꽉 채우도록 바운딩 박스로 자른다.
+    const { mask, cols, rows } = fitGridToMask(raw);
+    const result = generateShapedLevel(mask, cols, rows, shapePieces);
+    if (result) setLevel(result);
+    else setError('레벨 생성 실패 — 피스 수를 조정하거나 다시 시도하세요.');
     setIsGenerating(false);
   };
 
@@ -205,6 +236,9 @@ const ArrowLevelEditor: React.FC = () => {
             <button className={`ale-tab ${tab === 'generate' ? 'active' : ''}`} onClick={() => setTab('generate')}>
               자동 생성
             </button>
+            <button className={`ale-tab ${tab === 'shape' ? 'active' : ''}`} onClick={() => setTab('shape')}>
+              모양 생성
+            </button>
             <button className={`ale-tab ${tab === 'image' ? 'active' : ''}`} onClick={() => setTab('image')}>
               이미지 추출
             </button>
@@ -256,6 +290,64 @@ const ArrowLevelEditor: React.FC = () => {
               <button className="ale-btn-primary" onClick={handleGenerate} disabled={isGenerating}>
                 {isGenerating ? '생성 중...' : '레벨 생성'}
               </button>
+            </div>
+          )}
+
+          {tab === 'shape' && (
+            <div className="ale-section">
+              <div className="ale-field-col">
+                <label>모양 프리셋</label>
+                <div className="ale-diff-grid">
+                  {SHAPE_PRESETS.map(preset => (
+                    <button
+                      key={preset.label}
+                      className="ale-diff-btn"
+                      onClick={() => setShapeText(preset.text)}
+                      style={shapeText === preset.text ? { background: '#38bdf822', borderColor: '#38bdf8', color: '#38bdf8' } : undefined}
+                    >
+                      <span className="ale-diff-label">{preset.text}</span>
+                      <span className="ale-diff-desc">{preset.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="ale-field-row">
+                <label>글자 / 기호</label>
+                <input
+                  className="ale-input"
+                  value={shapeText}
+                  maxLength={4}
+                  onChange={e => setShapeText(e.target.value)}
+                  placeholder="A, ★, 가 ..."
+                />
+              </div>
+
+              <div className="ale-field-row">
+                <label>격자</label>
+                <div className="ale-num-row">
+                  <input type="number" className="ale-num" min={5} max={50} value={shapeCols}
+                    onChange={e => setShapeCols(Math.max(5, Math.min(50, +e.target.value)))} />
+                  <span>×</span>
+                  <input type="number" className="ale-num" min={5} max={50} value={shapeRows}
+                    onChange={e => setShapeRows(Math.max(5, Math.min(50, +e.target.value)))} />
+                </div>
+              </div>
+
+              <div className="ale-field-row">
+                <label>피스 수</label>
+                <input type="number" className="ale-num" min={2} max={200} value={shapePieces}
+                  onChange={e => setShapePieces(Math.max(2, +e.target.value))} />
+              </div>
+
+              <button className="ale-btn-primary" onClick={handleGenerateShape} disabled={isGenerating || !shapeText.trim()}>
+                {isGenerating ? '생성 중...' : '모양 레벨 생성'}
+              </button>
+              <p className="ale-hint">
+                {maskInfo !== null
+                  ? `모양이 ${maskInfo}칸을 차지 · 피스당 약 ${Math.round(maskInfo / shapePieces)}칸`
+                  : '글자를 격자에 렌더링해 채워진 칸만 판으로 씁니다. 빈 칸은 열차가 통과합니다.'}
+              </p>
             </div>
           )}
 

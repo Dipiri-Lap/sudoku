@@ -80,8 +80,10 @@ const DailyPuzzleCalendar: React.FC = () => {
     return (
         <div className="mode-select-page" style={{ maxWidth: 520 }}>
             <Helmet>
-                <title>오늘의 퍼즐 - 퍼즐 가든</title>
+                <title>오늘의 퍼즐 - 매일 새로운 데일리 스도쿠 | 퍼즐 가든</title>
                 <meta name="description" content="매일 새로운 스도쿠 한 문제. 클리어하면 코인 100과 퍼즐력 30을 받습니다." />
+                <link rel="canonical" href="https://puzzles.tmhub.co.kr/daily" />
+                <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"오늘의 퍼즐","item":"https://puzzles.tmhub.co.kr/daily"}]}`}</script>
             </Helmet>
 
             <header className="mode-header" style={{ marginBottom: '1.5rem' }}>

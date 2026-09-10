@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
@@ -122,6 +123,13 @@ const QueensModeSelect: React.FC = () => {
   }, []);
 
   return (
+    <>
+    <Helmet>
+      <title>크라운 퀘스트 - 퀸즈 퍼즐 무료 게임 | 퍼즐 가든</title>
+      <meta name="description" content="색깔 영역마다 퀸을 하나씩, 행·열이 겹치지 않게 배치하는 논리 퍼즐. 600개 스테이지를 무료로 즐기세요." />
+      <link rel="canonical" href="https://puzzles.tmhub.co.kr/queens" />
+      <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"크라운 퀘스트","item":"https://puzzles.tmhub.co.kr/queens"}]}`}</script>
+    </Helmet>
     <div className="mode-select-page">
       <header className="mode-header">
         <button className="back-btn" onClick={() => navigate('/')}>
@@ -194,6 +202,7 @@ const QueensModeSelect: React.FC = () => {
         </div>
       </details>
     </div>
+    </>
   );
 };
 

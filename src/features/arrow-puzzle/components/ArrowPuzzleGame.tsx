@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, RotateCcw, RefreshCw } from 'lucide-react';
-import { levels, type PieceData, type LevelData, type Direction } from '../data/levels';
+import { levels, stages, type PieceData, type LevelData, type Direction } from '../data/levels';
 import { type Difficulty, DIFFICULTY_CONFIGS, generateLevelForDifficulty } from '../utils/levelGenerator';
 import '../styles/ArrowPuzzle.css';
 
@@ -103,16 +103,28 @@ function neckTipAnimated(cells: [number, number][], dir: Direction, frac: number
   return [hx + dx, hy + dy];
 }
 
-function arrowPointsFromTip(tip: [number, number], dir: Direction): string {
-  const [nx, ny] = tip;
-  const fwd = CELL_SIZE * 0.28;
-  const spread = CELL_SIZE * 0.18;
-  switch (dir) {
-    case 'right': return `${nx},${ny - spread} ${nx + fwd},${ny} ${nx},${ny + spread}`;
-    case 'left':  return `${nx},${ny - spread} ${nx - fwd},${ny} ${nx},${ny + spread}`;
-    case 'up':    return `${nx - spread},${ny} ${nx},${ny - fwd} ${nx + spread},${ny}`;
-    case 'down':  return `${nx - spread},${ny} ${nx},${ny + fwd} ${nx + spread},${ny}`;
-  }
+/** 기관차 앞머리. 화살촉 대신 뭉툭한 사다리꼴이라 방향은 그대로 읽힌다. */
+function locoNose(tip: [number, number], dir: Direction): string {
+  const [tx, ty] = tip;
+  const fwd = CELL_SIZE * 0.26;
+  const wide = CELL_SIZE * 0.19;
+  const narrow = CELL_SIZE * 0.12;
+  const pts: [number, number][] = dir === 'right' || dir === 'left'
+    ? (() => { const sx = dir === 'right' ? 1 : -1; return [
+        [tx, ty - wide], [tx + sx * fwd, ty - narrow],
+        [tx + sx * fwd, ty + narrow], [tx, ty + wide],
+      ] as [number, number][]; })()
+    : (() => { const sy = dir === 'down' ? 1 : -1; return [
+        [tx - wide, ty], [tx - narrow, ty + sy * fwd],
+        [tx + narrow, ty + sy * fwd], [tx + wide, ty],
+      ] as [number, number][]; })();
+  return pts.map(pt => pt.join(',')).join(' ');
+}
+
+/** 전조등 — 앞머리 끝에 찍어 진행 방향을 한 번 더 알려준다. */
+function headlight(tip: [number, number], dir: Direction): [number, number] {
+  const [dx, dy] = dirOffset(dir, CELL_SIZE * 0.17);
+  return [tip[0] + dx, tip[1] + dy];
 }
 
 function isSelfBlocked(piece: PieceData): boolean {
@@ -144,8 +156,65 @@ function canEscape(piece: PieceData, others: PieceData[], cols: number, rows: nu
   }
 }
 
+/**
+ * 왜 못 나가는지 찾아낸다.
+ * 머리 앞 직선을 훑어 처음 만나는 칸을 돌려준다 — 자기 몸통일 수도 있다.
+ * 막는 게 없으면 null (탈출 가능).
+ */
+function findBlocker(
+  piece: PieceData,
+  others: PieceData[],
+  cols: number,
+  rows: number
+): { cell: [number, number]; blockerId: string } | null {
+  const [hc, hr] = piece.cells[piece.cells.length - 1];
+  const [dc, dr] = advance([0, 0], piece.exitDir);
+
+  const owner = new Map<string, string>();
+  for (const o of others) for (const [c, r] of o.cells) owner.set(`${c},${r}`, o.id);
+
+  // 자기 몸통이 제때 비켜주지 못하는 경우
+  if (isSelfBlocked(piece)) {
+    const n = piece.cells.length;
+    for (let i = 0; i < n - 1; i++) {
+      const [bc, br] = piece.cells[i];
+      let dist = 0;
+      switch (piece.exitDir) {
+        case 'right': if (br === hr && bc > hc) dist = bc - hc; break;
+        case 'left':  if (br === hr && bc < hc) dist = hc - bc; break;
+        case 'up':    if (bc === hc && br < hr) dist = hr - br; break;
+        case 'down':  if (bc === hc && br > hr) dist = br - hr; break;
+      }
+      if (dist > 0 && i >= dist) return { cell: [bc, br], blockerId: piece.id };
+    }
+  }
+
+  for (let c = hc + dc, r = hr + dr; onBoard(c, r, cols, rows); c += dc, r += dr) {
+    const id = owner.get(`${c},${r}`);
+    if (id) return { cell: [c, r], blockerId: id };
+  }
+  return null;
+}
+
 function onBoard(c: number, r: number, cols: number, rows: number) {
   return c >= 0 && c < cols && r >= 0 && r < rows;
+}
+
+const PROGRESS_KEY = 'arrowPuzzleProgress';
+
+/** 클리어한 최고 스테이지 번호. 다음 한 판까지 열어준다. */
+function loadProgress(): number {
+  try {
+    return Number(localStorage.getItem(PROGRESS_KEY) ?? 0) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function saveProgress(level: number) {
+  try {
+    if (level > loadProgress()) localStorage.setItem(PROGRESS_KEY, String(level));
+  } catch { /* 저장 실패는 무시 — 진행도는 편의 기능이다 */ }
 }
 
 const ArrowPuzzleGame: React.FC = () => {
@@ -160,9 +229,11 @@ const ArrowPuzzleGame: React.FC = () => {
     return null;
   });
 
-  type Screen = 'select' | 'generating' | 'playing';
+  type Screen = 'select' | 'stages' | 'generating' | 'playing';
   const [screen, setScreen] = useState<Screen>(testLevel ? 'playing' : 'select');
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
+  const [stageNo, setStageNo] = useState<number | null>(null);
+  const [progress, setProgress] = useState(loadProgress);
   const [levelData, setLevelData] = useState<LevelData>(testLevel ?? levels[0]);
 
   const { gridCols, gridRows } = levelData;
@@ -172,6 +243,13 @@ const ArrowPuzzleGame: React.FC = () => {
   );
   const [escapingPieces, setEscapingPieces] = useState<EscapingPiece[]>([]);
   const [wiggle, setWiggle] = useState<{ id: string; dir: Direction } | null>(null);
+  // 막혔을 때 "무엇이 막는지"를 보여주기 위한 정보
+  const [blockHint, setBlockHint] = useState<{
+    pieceId: string;
+    blockerId: string;
+    from: [number, number];
+    to: [number, number];
+  } | null>(null);
   const [isCleared, setIsCleared] = useState(false);
   const [moveCount, setMoveCount] = useState(0);
 
@@ -183,6 +261,14 @@ const ArrowPuzzleGame: React.FC = () => {
 
   const svgW = PADDING * 2 + gridCols * CELL_SIZE;
   const svgH = PADDING * 2 + gridRows * CELL_SIZE;
+
+  // 모양 레벨은 마스크 안쪽에만 배경 점을 찍는다. 마스크가 없으면 격자 전체.
+  const dotCells = useMemo<[number, number][]>(() => {
+    if (levelData.mask) return levelData.mask;
+    const all: [number, number][] = [];
+    for (let r = 0; r < gridRows; r++) for (let c = 0; c < gridCols; c++) all.push([c, r]);
+    return all;
+  }, [levelData.mask, gridCols, gridRows]);
 
   rafCallbackRef.current = (time: number) => {
     const delta = Math.min((time - lastTimeRef.current) / 1000, 0.1);
@@ -212,10 +298,16 @@ const ArrowPuzzleGame: React.FC = () => {
   useEffect(() => {
     if (!started.current) return;
     if (activePieces.length === 0 && escapingPieces.length === 0) {
-      const t = setTimeout(() => setIsCleared(true), 200);
+      const t = setTimeout(() => {
+        setIsCleared(true);
+        if (stageNo !== null) {
+          saveProgress(stageNo);
+          setProgress(p => Math.max(p, stageNo));
+        }
+      }, 200);
       return () => clearTimeout(t);
     }
-  }, [activePieces.length, escapingPieces.length]);
+  }, [activePieces.length, escapingPieces.length, stageNo]);
 
   useEffect(() => {
     return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
@@ -261,6 +353,15 @@ const ArrowPuzzleGame: React.FC = () => {
     loadLevel(levelData);
   }, [levelData, loadLevel]);
 
+  const handleSelectStage = useCallback((level: number) => {
+    const stage = stages[level - 1];
+    if (!stage) return;
+    setDifficulty(null);
+    setStageNo(level);
+    loadLevel(stage);
+    setScreen('playing');
+  }, [loadLevel]);
+
   const startEscape = useCallback((piece: PieceData) => {
     started.current = true;
     setMoveCount(n => n + 1);
@@ -278,9 +379,23 @@ const ArrowPuzzleGame: React.FC = () => {
     if (canEscape(piece, others, gridCols, gridRows)) {
       setActivePieces(others);
       startEscape(piece);
+      setBlockHint(null);
     } else {
       setWiggle({ id: piece.id, dir: piece.exitDir });
       setTimeout(() => setWiggle(null), 420);
+
+      // 선로를 그려 막는 열차를 짚어준다 — 직선을 눈으로 훑지 않아도 되게
+      const blocker = findBlocker(piece, others, gridCols, gridRows);
+      if (blocker) {
+        const head = piece.cells[piece.cells.length - 1];
+        setBlockHint({
+          pieceId: piece.id,
+          blockerId: blocker.blockerId,
+          from: neckTipStatic(head, piece.exitDir),
+          to: cellCenter(blocker.cell[0], blocker.cell[1]),
+        });
+        setTimeout(() => setBlockHint(null), 1100);
+      }
     }
   }, [activePieces, gridCols, gridRows, startEscape]);
 
@@ -296,18 +411,27 @@ const ArrowPuzzleGame: React.FC = () => {
     const arrowTip = isEscaping
       ? neckTipAnimated(piece.cells, piece.exitDir, frac)
       : neckTipStatic(head, piece.exitDir);
-    const showArrow = isEscaping || onBoard(head[0], head[1], gridCols, gridRows);
+    const showLoco = isEscaping || onBoard(head[0], head[1], gridCols, gridRows);
+    const isBlocker = blockHint?.blockerId === piece.id;
+    const [lightX, lightY] = headlight(arrowTip, piece.exitDir);
     return (
-      <g key={piece.id} className={`ap-piece ${wiggleClass}`}
+      <g key={piece.id} className={`ap-piece ${wiggleClass}${isBlocker ? ' ap-blocker' : ''}`}
         onClick={clickable ? () => handlePieceClick(piece as PieceData) : undefined}
         style={{ cursor: clickable ? 'pointer' : 'default' }}>
         <path d={pathD} stroke={piece.color} strokeWidth={STROKE_W + 4} fill="none"
           strokeLinecap="round" strokeLinejoin="round" opacity={0.25} />
         <path d={pathD} stroke={piece.color} strokeWidth={STROKE_W} fill="none"
           strokeLinecap="round" strokeLinejoin="round" filter="url(#glow)" />
-        {showArrow && (
-          <polygon points={arrowPointsFromTip(arrowTip, piece.exitDir)}
-            fill={piece.color} filter="url(#glow)" />
+        {/* 객차 이음매 — 같은 길을 배경색으로 끊어 그려 칸마다 마디를 만든다 */}
+        <path d={pathD} stroke="#0d1526" strokeWidth={STROKE_W + 0.5} fill="none"
+          strokeLinecap="butt" opacity={0.55}
+          strokeDasharray={`1.5 ${CELL_SIZE - 1.5}`} strokeDashoffset={CELL_SIZE * 0.5} />
+        {showLoco && (
+          <>
+            <polygon points={locoNose(arrowTip, piece.exitDir)}
+              fill={piece.color} filter="url(#glow)" />
+            <circle cx={lightX} cy={lightY} r={2.6} fill="#fffbe6" opacity={0.95} />
+          </>
         )}
       </g>
     );
@@ -322,14 +446,22 @@ const ArrowPuzzleGame: React.FC = () => {
           <button className="ap-icon-btn" onClick={() => navigate('/')}>
             <ChevronLeft size={20} />
           </button>
-          <span className="ap-level-badge">화살 퍼즐</span>
+          <span className="ap-level-badge">열차 출발</span>
           <div style={{ width: 42 }} />
         </header>
 
         <div className="ap-select-screen">
+          <button className="ap-campaign-card" onClick={() => setScreen('stages')}>
+            <div className="ap-campaign-main">
+              <span className="ap-campaign-title">스테이지</span>
+              <span className="ap-campaign-sub">1 → {stages.length} · 갈수록 복잡해집니다</span>
+            </div>
+            <span className="ap-campaign-progress">{Math.min(progress, stages.length)}/{stages.length}</span>
+          </button>
+
           <div className="ap-select-title">
-            <h1>난이도 선택</h1>
-            <p>퍼즐이 매번 다르게 자동 생성됩니다</p>
+            <h1>랜덤 퍼즐</h1>
+            <p>노선이 매번 다르게 자동 생성됩니다</p>
           </div>
           <div className="ap-diff-grid">
             {DIFFICULTIES.map(d => {
@@ -344,6 +476,45 @@ const ArrowPuzzleGame: React.FC = () => {
                   <span className="ap-diff-name">{cfg.label}</span>
                   <span className="ap-diff-grid-size">{cfg.cols}×{cfg.rows} · {piecesLabel(cfg.minPieces, cfg.maxPieces)}</span>
                   <span className="ap-diff-desc">{cfg.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Stage list screen ────────────────────────────────────────────────────────
+
+  if (screen === 'stages') {
+    // 클리어한 다음 한 판까지 열어둔다
+    const unlocked = Math.min(progress + 1, stages.length);
+    return (
+      <div className="ap-page">
+        <header className="ap-header">
+          <button className="ap-icon-btn" onClick={() => setScreen('select')}>
+            <ChevronLeft size={20} />
+          </button>
+          <span className="ap-level-badge">스테이지</span>
+          <div style={{ width: 42 }} />
+        </header>
+
+        <div className="ap-stage-screen">
+          <div className="ap-stage-grid">
+            {stages.map(st => {
+              const cleared = st.level <= progress;
+              const locked = st.level > unlocked;
+              return (
+                <button
+                  key={st.level}
+                  className={`ap-stage-btn${cleared ? ' cleared' : ''}${locked ? ' locked' : ''}`}
+                  disabled={locked}
+                  onClick={() => handleSelectStage(st.level)}
+                  title={`${st.gridCols}×${st.gridRows} · ${st.pieces.length}피스`}
+                >
+                  <span className="ap-stage-no">{st.level}</span>
+                  <span className="ap-stage-meta">{st.pieces.length}</span>
                 </button>
               );
             })}
@@ -374,11 +545,11 @@ const ArrowPuzzleGame: React.FC = () => {
   return (
     <div className="ap-page">
       <header className="ap-header">
-        <button className="ap-icon-btn" onClick={() => setScreen('select')}>
+        <button className="ap-icon-btn" onClick={() => setScreen(stageNo !== null ? 'stages' : 'select')}>
           <ChevronLeft size={20} />
         </button>
         <span className="ap-level-badge" style={diffMeta ? { color: diffMeta.color } as React.CSSProperties : undefined}>
-          {diffMeta ? diffMeta.label : 'Level 1'}
+          {diffMeta ? diffMeta.label : stageNo !== null ? `Level ${stageNo}` : 'Level 1'}
         </span>
         <div className="ap-header-btns">
           {difficulty && (
@@ -403,35 +574,58 @@ const ArrowPuzzleGame: React.FC = () => {
               </feMerge>
             </filter>
           </defs>
-          {Array.from({ length: gridRows }, (_, r) =>
-            Array.from({ length: gridCols }, (_, c) => {
-              const [x, y] = cellCenter(c, r);
-              return <circle key={`d${c}${r}`} cx={x} cy={y} r={2.5} fill="rgba(255,255,255,0.12)" />;
-            })
-          )}
+          {dotCells.map(([c, r]) => {
+            const [x, y] = cellCenter(c, r);
+            return <circle key={`d${c},${r}`} cx={x} cy={y} r={2.5} fill="rgba(255,255,255,0.12)" />;
+          })}
           {activePieces.map(p => renderPiece(p, true))}
           {escapingPieces.map(p => renderPiece(p, false))}
+          {blockHint && (
+            <g className="ap-block-hint" pointerEvents="none">
+              <line x1={blockHint.from[0]} y1={blockHint.from[1]}
+                x2={blockHint.to[0]} y2={blockHint.to[1]}
+                stroke="#ff6b6b" strokeWidth={2.5} strokeDasharray="6 5" opacity={0.9} />
+              <circle cx={blockHint.to[0]} cy={blockHint.to[1]} r={CELL_SIZE * 0.32}
+                fill="none" stroke="#ff6b6b" strokeWidth={2.5} />
+            </g>
+          )}
         </svg>
 
         {isCleared && (
           <div className="ap-clear-overlay">
             <div className="ap-clear-card">
-              <div className="ap-clear-emoji">🎉</div>
-              <h2>클리어!</h2>
-              <p>{moveCount}번 만에 클리어</p>
+              <div className="ap-clear-emoji">🚆</div>
+              <h2>전 편성 출발!</h2>
+              <p>열차 {moveCount}대를 모두 내보냈습니다</p>
               <div className="ap-clear-btns">
-                <button className="ap-btn-primary" onClick={handleReset}>
-                  다시 시도
-                </button>
+                {stageNo !== null && stageNo < stages.length ? (
+                  <button className="ap-btn-primary" onClick={() => handleSelectStage(stageNo + 1)}>
+                    다음 레벨
+                  </button>
+                ) : (
+                  <button className="ap-btn-primary" onClick={handleReset}>
+                    다시 시도
+                  </button>
+                )}
                 {difficulty && (
                   <button className="ap-btn-secondary" onClick={handleNewPuzzle}>
                     새 퍼즐
+                  </button>
+                )}
+                {stageNo !== null && (
+                  <button className="ap-btn-secondary" onClick={handleReset}>
+                    다시 시도
                   </button>
                 )}
               </div>
               {difficulty && (
                 <button className="ap-btn-text" onClick={() => setScreen('select')}>
                   난이도 변경
+                </button>
+              )}
+              {stageNo !== null && (
+                <button className="ap-btn-text" onClick={() => setScreen('stages')}>
+                  스테이지 목록
                 </button>
               )}
             </div>

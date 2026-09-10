@@ -23,8 +23,13 @@ const [TC, TR] = layoutArg.split('x').map(Number);
 const N = Number(nArg);
 const names = (namesArg ?? '').split(',').filter(Boolean);
 // MODE=dark: 어두운 색만 채움(윤곽 퍼즐) / MODE=silhouette(기본): 배경이 아니면 전부 채움(실루엣 퍼즐)
+const BG_WHITE_ONLY = process.env.BGWHITE === '1';
 const MODE = process.env.MODE ?? 'silhouette';
-const DARK_LUMA = MODE === 'dark' ? 0.45 : 2; // luma는 0~1이므로 2면 아무 색도 빈칸이 되지 않음
+// BGWHITE 모드에서는 아주 밝은 색(도넛 구멍·접시의 흰색)을 emptyChars 로 뺀다.
+// 배경이 흰색으로 고정되므로 그대로 두면 흰 영역까지 채워야 해서 그림이 통짜 덩어리가 된다.
+const DARK_LUMA = MODE === 'dark' ? 0.45 : BG_WHITE_ONLY ? Number(process.env.WHITE_EMPTY ?? 0.9) : 2;
+const INSET = Number(process.env.INSET ?? 0);
+const MIN_BLOB = Number(process.env.MIN_BLOB ?? 0);
 const BG_WHITE = 235;        // 이보다 밝으면 타일 바깥 여백(흰색)으로 간주
 const PALETTE_MAX = Number(process.env.PALETTE ?? 6); // 색이 많을수록 혼합색(안티앨리어싱)이 팔레트에 끼어든다
 const RARE_SHARE = 0.015;                               // 이 비율 미만으로 쓰인 색은 가까운 색으로 병합
@@ -84,8 +89,10 @@ const CHARS = 'abcdefghijklmnop';
 const out: string[] = [];
 let idx = 0;
 for (let tr = 0; tr < TR; tr++) for (let tc = 0; tc < TC; tc++, idx++) {
-  const x0 = Math.floor((tc * W) / TC), x1 = Math.floor(((tc + 1) * W) / TC);
-  const y0 = Math.floor((tr * H) / TR), y1 = Math.floor(((tr + 1) * H) / TR);
+  // INSET: 타일 경계에서 옆 아이콘이 몇 픽셀 물려 들어오면 점 얼룩으로 남는다. 타일 크기의 이 비율만큼 안쪽에서 자른다.
+  const insetX = Math.round((W / TC) * INSET), insetY = Math.round((H / TR) * INSET);
+  const x0 = Math.floor((tc * W) / TC) + insetX, x1 = Math.floor(((tc + 1) * W) / TC) - insetX;
+  const y0 = Math.floor((tr * H) / TR) + insetY, y1 = Math.floor(((tr + 1) * H) / TR) - insetY;
   // 여백 크롭
   let l = x1, r = x0, t = y1, b = y0;
   for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (!isWhite(x, y)) { if (x < l) l = x; if (x > r) r = x; if (y < t) t = y; if (y > b) b = y; }
@@ -179,10 +186,12 @@ for (let tr = 0; tr < TR; tr++) for (let tc = 0; tc < TC; tc++, idx++) {
     // 배경 = 타일 안쪽 테두리 링에서 가장 흔한 색 (몸통이 커도 배경으로 오인하지 않도록)
     const ringCounts = new Array(palette.length).fill(0);
     map.forEach((row, y) => row.forEach((i, x) => { if (i >= 0 && (y === 0 || y === NY - 1 || x === 0 || x === NX - 1)) ringCounts[i]++; }));
-    const bgIdx = ringCounts.indexOf(Math.max(...ringCounts));
+    // BGWHITE=1: 타일 바깥 흰 여백만 배경으로 두고, 팔레트 색은 (검은 외곽선 포함) 전부 채움으로 본다.
+    // 아이콘이 굵은 검은 테두리로 둘러싸여 있으면 테두리가 링을 점령해 배경으로 오인되므로 그때 쓴다.
+    const bgIdx = BG_WHITE_ONLY ? -1 : ringCounts.indexOf(Math.max(...ringCounts));
     // 배경과 비슷한 색(그라데이션·안티앨리어싱으로 쪼개진 것)은 배경으로 합침
     const BG_MERGE = 30 ** 2; // 너무 크면 귀 안쪽 분홍처럼 배경과 비슷한 원색까지 배경으로 먹힌다
-    const isBg = palette.map((p, i) => i === bgIdx || dist2(p, palette[bgIdx]) < BG_MERGE);
+    const isBg = palette.map((p, i) => bgIdx >= 0 && (i === bgIdx || dist2(p, palette[bgIdx]) < BG_MERGE));
     const charOf = new Map<number, string>();
     let ci = 0;
     palette.forEach((_, i) => { if (!isBg[i]) charOf.set(i, CHARS[ci++]); });
@@ -193,6 +202,25 @@ for (let tr = 0; tr < TR; tr++) for (let tc = 0; tc < TC; tc++, idx++) {
       const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dy, dx]) => artCells[y + dy]?.[x + dx] && artCells[y + dy][x + dx] !== '.');
       if (!nb) row[x] = '.';
     }));
+    // MIN_BLOB: 옆 타일에서 몇 픽셀 물려 들어온 얼룩은 본체와 떨어진 아주 작은 덩어리로 남는다.
+    // 채움 칸을 4-연결로 묶어 이 크기보다 작은 덩어리는 지운다 (0 이면 끄기).
+    if (MIN_BLOB > 0) {
+      const seen = artCells.map(row => row.map(() => false));
+      artCells.forEach((row, y0c) => row.forEach((ch0, x0c) => {
+        if (ch0 === '.' || seen[y0c][x0c]) return;
+        const comp: [number, number][] = [[y0c, x0c]];
+        seen[y0c][x0c] = true;
+        for (let qi = 0; qi < comp.length; qi++) {
+          const [cy, cx] = comp[qi];
+          for (const [dy, dx] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+            const ny = cy + dy, nx = cx + dx;
+            if (artCells[ny]?.[nx] === undefined || artCells[ny][nx] === '.' || seen[ny][nx]) continue;
+            seen[ny][nx] = true; comp.push([ny, nx]);
+          }
+        }
+        if (comp.length < MIN_BLOB) comp.forEach(([cy, cx]) => { artCells[cy][cx] = '.'; });
+      }));
+    }
     return { artCells, palette, bgIdx, charOf, cw, ch, NX, NY };
   };
 
@@ -227,6 +255,6 @@ for (let tr = 0; tr < TR; tr++) for (let tc = 0; tc < TC; tc++, idx++) {
   console.log(grid.map(rw => rw.map(v => (v ? '█' : '·')).join('')).join('\n'));
 
   const pal = [...charOf.entries()].map(([i, c]) => `${c}: '${hex(palette[i])}'`).join(', ');
-  out.push(`  {\n    id: '${name.replace(/[^a-z0-9]/gi, '') || 'tile' + idx}',\n    name: '${name}',\n    background: '${hex(palette[bgIdx])}',\n    palette: { ${pal} },\n${emptyChars ? `    emptyChars: '${emptyChars}',\n` : ''}    art: [\n${art.map(rw => `      '${rw}',`).join('\n')}\n    ],\n  }, // ${status}`);
+  out.push(`  {\n    id: '${name.replace(/[^a-z0-9]/gi, '') || 'tile' + idx}',\n    name: '${name}',\n    background: '${bgIdx >= 0 ? hex(palette[bgIdx]) : '#ffffff'}',\n    palette: { ${pal} },\n${emptyChars ? `    emptyChars: '${emptyChars}',\n` : ''}    art: [\n${art.map(rw => `      '${rw}',`).join('\n')}\n    ],\n  }, // ${status}`);
 }
 if (outFile) { fs.writeFileSync(outFile, out.join('\n')); console.log('written', outFile); }

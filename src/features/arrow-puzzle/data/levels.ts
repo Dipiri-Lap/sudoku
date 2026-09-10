@@ -1,3 +1,5 @@
+import stagesJson from './stages.json';
+
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
 export interface PieceData {
@@ -11,6 +13,12 @@ export interface LevelData {
   gridCols: number;
   gridRows: number;
   pieces: PieceData[];
+  /**
+   * 모양(실루엣) 레벨에서 실제로 사용하는 칸 목록.
+   * 생략하면 gridCols x gridRows 전체가 판이다.
+   * 마스크 밖 칸은 배경 점을 그리지 않고, 피스가 통과해 나가는 빈 공간이 된다.
+   */
+  mask?: [number, number][];
 }
 
 // Level 1 (5x5): 25칸 전부 채움, 정답 순서 2→1→(3,4 순서 자유)→5
@@ -62,3 +70,16 @@ export const levels: LevelData[] = [
     ],
   },
 ];
+
+/** 캠페인 스테이지 (scripts/generate-arrow-levels.ts 로 생성) */
+export interface StageData extends LevelData {
+  level: number;
+  /** 모양 레벨이면 마스크 이름, 직사각형이면 null */
+  shape: string | null;
+  /** 클리어에 필요한 최소 클릭 수 = 피스 수 */
+  minMoves: number;
+  /** 난이도 지표: 무작위로 누르는 플레이어의 기대 헛클릭 수 */
+  searchCost: number;
+}
+
+export const stages = stagesJson as StageData[];

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postbuild": "node scripts/prerender.mjs",
+    "postbuild": "node scripts/prerender.mjs && node scripts/generate-sitemap.mjs",
+    "generate-sitemap": "node scripts/generate-sitemap.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
@@ -20,7 +21,8 @@
     "audit-assets": "node scripts/audit-assets.mjs",
     "generate-jewel-levels": "tsx scripts/generate-jewel-levels.ts",
     "bake-jewel-levels": "bash scripts/bake-jewel-levels.sh",
-    "generate-daily": "tsx scripts/generate-daily-sudoku.ts"
+    "generate-daily": "tsx scripts/generate-daily-sudoku.ts",
+    "generate-arrow-levels": "tsx scripts/generate-arrow-levels.ts"
   },
   "dependencies": {
     "@portone/browser-sdk": "^0.1.3",
