@@ -12,6 +12,8 @@
 import { writeFileSync } from 'node:fs';
 import { generateLevel, generateShapedLevel } from '../src/features/arrow-puzzle/utils/levelGenerator';
 import type { LevelData, Direction, PieceData } from '../src/features/arrow-puzzle/data/levels';
+// 모양 정의는 공용 모듈에 있다 — 새 모양은 거기에 한 줄 추가하면 여기까지 따라온다.
+import { SHAPES, buildMask, fitMask } from '../src/features/arrow-puzzle/utils/shapes';
 
 // ── 난이도 측정 ──────────────────────────────────────────────────────────────
 
@@ -72,49 +74,18 @@ function measure(lv: LevelData, runs: number): number | null {
   return sum / runs;
 }
 
-// ── 모양 마스크 (노드에는 캔버스가 없으므로 기하학적으로 만든다) ──────────────
-
-type Mask = [number, number][];
-
-function build(cols: number, rows: number, f: (x: number, y: number) => boolean): Mask {
-  const out: Mask = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const x = (c - (cols - 1) / 2) / (cols / 2);
-      const y = (r - (rows - 1) / 2) / (rows / 2);
-      if (f(x, y)) out.push([c, r]);
-    }
-  }
-  return out;
-}
-
-const SHAPES: { name: string; make: (c: number, r: number) => Mask }[] = [
-  { name: '원', make: (c, r) => build(c, r, (x, y) => Math.hypot(x, y) <= 1) },
-  { name: '마름모', make: (c, r) => build(c, r, (x, y) => Math.abs(x) + Math.abs(y) <= 1) },
-  { name: '십자', make: (c, r) => build(c, r, (x, y) => Math.abs(x) <= 0.38 || Math.abs(y) <= 0.38) },
-  { name: '고리', make: (c, r) => build(c, r, (x, y) => { const d = Math.hypot(x, y); return d <= 1 && d >= 0.42; }) },
-  { name: '별', make: (c, r) => build(c, r, (x, y) => { const a = Math.atan2(y, x); return Math.hypot(x, y) <= 0.55 + 0.45 * Math.abs(Math.cos(2.5 * a)); }) },
-  { name: '모래시계', make: (c, r) => build(c, r, (x, y) => Math.abs(x) <= 0.25 + 0.75 * Math.abs(y)) },
-  { name: '나비', make: (c, r) => build(c, r, (x, y) => Math.abs(y) <= 0.25 + 0.75 * Math.abs(x)) },
-];
-
-/** 마스크를 바운딩 박스에 맞춰 자른다 */
-function fit(mask: Mask): { mask: Mask; cols: number; rows: number } {
-  const cs = mask.map(([c]) => c);
-  const rs = mask.map(([, r]) => r);
-  const minC = Math.min(...cs), maxC = Math.max(...cs);
-  const minR = Math.min(...rs), maxR = Math.max(...rs);
-  return {
-    mask: mask.map(([c, r]) => [c - minC, r - minR] as [number, number]),
-    cols: maxC - minC + 1,
-    rows: maxR - minR + 1,
-  };
-}
-
 // ── 곡선 ─────────────────────────────────────────────────────────────────────
 
 const COUNT = 50;
 const MAX_SIDE = 20;    // 폰 화면 기준 격자 상한
+
+// 모양 스테이지를 사이사이에 배치한다.
+// 비용만 보고 고르면 배치가 통제되지 않아 한쪽에 뭉친다(이전 결과: L17~21 연속, L1~11 전무).
+// 자리를 먼저 정하고 그 자리엔 모양 후보만 고른다.
+const SHAPE_FROM = 15;   // 이 레벨부터
+const SHAPE_EVERY = 5;   // 몇 판마다
+const isShapeStage = (level: number) =>
+  level >= SHAPE_FROM && (level - SHAPE_FROM) % SHAPE_EVERY === 0;
 
 interface Cfg { side: number; per: number; shape: number | null }
 
@@ -123,9 +94,9 @@ function makeCandidate(cfg: Cfg): LevelData | null {
     const n = Math.max(2, Math.round((cfg.side * cfg.side) / cfg.per));
     return generateLevel(cfg.side, cfg.side, n, 0.35);
   }
-  const raw = SHAPES[cfg.shape].make(cfg.side, cfg.side);
+  const raw = buildMask(SHAPES[cfg.shape], cfg.side, cfg.side);
   if (raw.length < 8) return null;
-  const { mask, cols, rows } = fit(raw);
+  const { mask, cols, rows } = fitMask(raw);
   const n = Math.max(2, Math.round(mask.length / cfg.per));
   return generateShapedLevel(mask, cols, rows, n, 0.35);
 }
@@ -165,11 +136,13 @@ for (let side = 4; side <= MAX_SIDE; side++) {
     addCandidates({ side, per, shape: null }, heavy ? 2 : 4, heavy ? 1 : 2);
   }
 }
-for (const side of [10, 12, 14, 16, 18, 20]) {
+// 모양 후보. 복잡한 실루엣은 칸이 적으면 뭉개지므로 shapes.ts 의 minSide 로 걸러진다.
+for (const side of [8, 9, 10, 12, 14, 16, 18, 20]) {
   for (let si = 0; si < SHAPES.length; si++) {
+    if (side < (SHAPES[si].minSide ?? 0)) continue;
     for (const per of [4, 5, 6, 8]) {
       const heavy = side >= 16;
-      addCandidates({ side, per, shape: si }, heavy ? 1 : 2, heavy ? 1 : 2);
+      addCandidates({ side, per, shape: si }, heavy ? 1 : 3, heavy ? 1 : 2);
     }
   }
 }
@@ -218,32 +191,64 @@ const lo = Math.max(intro[intro.length - 1].cost * 1.4, 1.5);
 // 최고 난이도는 이상치 하나에 끌려가지 않게 상위 5% 지점을 상한으로 쓴다.
 const hi = pool[Math.floor(pool.length * 0.95)].cost;
 const picks: typeof pool = [];
-let cursor = pool.findIndex(p => p.cost >= lo);
-if (cursor < 0) cursor = 0;
+const used = new Set<(typeof pool)[number]>();
+// 단조 증가는 "직전에 고른 것보다 비싼 것만 고른다"로 지킨다.
+// 정렬된 풀을 커서로 훑던 이전 방식은 종류를 골라 집을 수 없다.
+//
+// 중요한 건 고르는 시점에 정밀하게 재는 것이다. 예전에는 대충 잰 값으로 고르고
+// 나중에 다시 재서 정렬했는데, 그러면 모양 스테이지 자리가 흐트러진다.
+// 자리를 고정하려면 정렬을 없애야 하고, 그러려면 고를 때 값이 정확해야 한다.
+console.log('레벨 선정 중(후보를 정밀 측정)...');
+let lastCost = lo;
 
-for (let i = 0; i < REST; i++) {
-  const target = lo * Math.pow(hi / lo, i / (REST - 1));
-  const room = pool.length - cursor - (REST - i - 1);   // 뒤 레벨 몫은 남겨둔다
-  let bestIdx = cursor;
-  let bestScore = Infinity;
-  for (let j = cursor; j < cursor + Math.max(1, room); j++) {
-    const score = Math.abs(Math.log(pool[j].cost / target));
-    if (score < bestScore) { bestScore = score; bestIdx = j; }
-  }
-  picks.push(pool[bestIdx]);
-  cursor = bestIdx + 1;
+function accurate(lv: LevelData): number | null {
+  return measure(lv, lv.pieces.length > 80 ? 4 : 9);
 }
 
-// 4) 곡선 구간은 표본을 늘려 다시 측정하고 그 값으로 정렬한다.
-//    도입부는 수치가 아니라 피스 수로 진행하므로 순서를 그대로 둔다.
-console.log('선택한 레벨 재측정 중...');
-const rescored = picks.map(p => {
-  const runs = p.lv.pieces.length > 80 ? 4 : 10;
-  return { ...p, cost: measure(p.lv, runs) ?? p.cost };
-});
-rescored.sort((a, b) => a.cost - b.cost);
+for (let i = 0; i < REST; i++) {
+  const level = INTRO.length + i + 1;
+  const target = lo * Math.pow(hi / lo, i / (REST - 1));
+  const wantShape = isShapeStage(level);
 
-const out: Stage[] = [...intro, ...rescored].map((p, i) => ({
+  const sameKind = pool.filter(c => !used.has(c) && (c.cfg.shape !== null) === wantShape);
+  // 대충 잰 값 기준으로 목표에 가까운 것들만 추린 뒤 그것들만 정밀 측정한다.
+  // 풀 전체를 정밀 측정하기엔 너무 비싸다.
+  const shortlist = sameKind
+    .filter(c => c.cost > lastCost * 0.8)
+    .sort((a, b) => Math.abs(Math.log(a.cost / target)) - Math.abs(Math.log(b.cost / target)))
+    .slice(0, 8);
+
+  let best: (typeof pool)[number] | null = null;
+  let bestScore = Infinity;
+  for (const cand of shortlist) {
+    const acc = accurate(cand.lv);
+    if (acc === null || acc <= lastCost) continue;
+    const score = Math.abs(Math.log(acc / target));
+    if (score < bestScore) { bestScore = score; best = { ...cand, cost: acc }; }
+    used.add(cand);   // 정밀 측정까지 한 후보는 다시 쓰지 않는다
+  }
+
+  // 추린 범위에 쓸 만한 게 없으면 같은 종류 전체로 넓혀 다시 찾는다
+  if (!best) {
+    for (const cand of sameKind.sort((a, b) => a.cost - b.cost)) {
+      if (used.has(cand)) continue;
+      const acc = accurate(cand.lv);
+      used.add(cand);
+      if (acc !== null && acc > lastCost) { best = { ...cand, cost: acc }; break; }
+    }
+  }
+
+  if (!best) {
+    console.error(`L${level} 후보 없음 (모양=${wantShape}, 목표 ${target.toFixed(1)}, 직전 ${lastCost.toFixed(1)})`);
+    process.exit(1);
+  }
+  picks.push(best);
+  lastCost = best.cost;
+}
+
+const ordered = picks;
+
+const out: Stage[] = [...intro, ...ordered].map((p, i) => ({
   level: i + 1,
   ...p.lv,
   shape: p.cfg.shape === null ? null : SHAPES[p.cfg.shape].name,

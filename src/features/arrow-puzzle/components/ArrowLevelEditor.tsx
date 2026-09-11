@@ -346,7 +346,7 @@ const ArrowLevelEditor: React.FC = () => {
               <p className="ale-hint">
                 {maskInfo !== null
                   ? `모양이 ${maskInfo}칸을 차지 · 피스당 약 ${Math.round(maskInfo / shapePieces)}칸`
-                  : '글자를 격자에 렌더링해 채워진 칸만 판으로 씁니다. 빈 칸은 열차가 통과합니다.'}
+                  : '글자를 격자에 렌더링해 채워진 칸만 판으로 씁니다. 빈 칸은 젤리가 통과합니다.'}
               </p>
             </div>
           )}

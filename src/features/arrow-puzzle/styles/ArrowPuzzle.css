@@ -63,36 +63,6 @@
   transition: opacity 0.08s;
 }
 
-/* ── 방향별 wiggle 애니메이션 (막혔을 때 방향으로 튕김) ── */
-@keyframes wiggle-right {
-  0%   { transform: translateX(0); }
-  30%  { transform: translateX(10px); }
-  65%  { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
-@keyframes wiggle-left {
-  0%   { transform: translateX(0); }
-  30%  { transform: translateX(-10px); }
-  65%  { transform: translateX(5px); }
-  100% { transform: translateX(0); }
-}
-@keyframes wiggle-up {
-  0%   { transform: translateY(0); }
-  30%  { transform: translateY(-10px); }
-  65%  { transform: translateY(5px); }
-  100% { transform: translateY(0); }
-}
-@keyframes wiggle-down {
-  0%   { transform: translateY(0); }
-  30%  { transform: translateY(10px); }
-  65%  { transform: translateY(-5px); }
-  100% { transform: translateY(0); }
-}
-
-.ap-piece.wiggle-right { animation: wiggle-right 0.42s ease; }
-.ap-piece.wiggle-left  { animation: wiggle-left  0.42s ease; }
-.ap-piece.wiggle-up    { animation: wiggle-up    0.42s ease; }
-.ap-piece.wiggle-down  { animation: wiggle-down  0.42s ease; }
 
 /* ── 클리어 오버레이 ── */
 .ap-clear-overlay {
@@ -430,32 +400,60 @@
   line-height: 1;
 }
 
-/* ── 막힘 표시 ────────────────────────────────────────────────────────────── */
+/* ── 막힘 반응 ──────────────────────────────────────────────────────────── */
 
-/* 막는 열차를 짚어주는 선로와 표식 */
-.ap-block-hint {
-  animation: block-hint-in 0.18s ease-out;
-}
-@keyframes block-hint-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.ap-block-hint circle {
-  animation: block-hint-pulse 0.6s ease-in-out infinite alternate;
+/* 앞을 막고 있는 젤리도 부딪힌 것처럼 함께 출렁인다.
+   흐려지게 하면 색이 탁해져서, 색은 살리고 부피만 흔든다. */
+.ap-piece.ap-blocker {
+  animation: blocker-jiggle 0.28s ease-in-out 2;
   transform-box: fill-box;
   transform-origin: center;
 }
-@keyframes block-hint-pulse {
-  from { transform: scale(0.86); opacity: 0.75; }
-  to   { transform: scale(1.05); opacity: 1; }
+@keyframes blocker-jiggle {
+  0%, 100% { transform: scale(1, 1); }
+  30%      { transform: scale(1.06, 0.94); }
+  65%      { transform: scale(0.96, 1.05); }
 }
 
-/* 앞을 막고 있는 열차 자신도 함께 깜빡인다 */
-.ap-piece.ap-blocker {
-  animation: blocker-flash 0.55s ease-in-out 2;
+/* ── 덩어리 하나가 머리에서 꼬리로 ─────────────────────────────────────────
+   경로는 꼬리→머리 순으로 그려지므로 dashoffset 이 커질수록 덩어리는 꼬리 쪽으로 간다.
+   시작값(--lump-from)은 머리 바깥, 끝값(--lump-to)은 꼬리 바깥이라
+   앞뒤로 경로를 벗어난 동안은 아무것도 그려지지 않는다 —
+   즉 '쉬는 시간'을 따로 숨기지 않아도 저절로 생긴다. */
+@keyframes jelly-ripple {
+  from { stroke-dashoffset: var(--lump-from); }
+  to   { stroke-dashoffset: var(--lump-to); }
 }
-@keyframes blocker-flash {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.35; }
+
+/* 지나가는 동안 덩어리가 꿀렁인다.
+   부피가 일정한 젤리처럼 — 선 방향으로 길어질 땐 얇아지고, 뭉칠 땐 두꺼워진다.
+   길이는 stroke-dasharray, 두께는 stroke-width 로 서로 반대 위상으로 움직인다.
+   이동(jelly-ripple)과 변형(jelly-pulse)은 다른 속성이라 두 애니메이션으로 겹쳐도
+   서로 타이밍을 간섭하지 않는다 — 이동은 피스 길이에, 변형은 제 주기에 따른다.
+   두 겹은 dash 길이가 달라 키프레임을 따로 둔다(값 개수가 다르면 보간되지 않는다). */
+@keyframes jelly-pulse-a {
+  0%   { stroke-width: calc(var(--lump-w) * 1.18); stroke-dasharray: 7px 9999px; }
+  30%  { stroke-width: calc(var(--lump-w) * 0.88); stroke-dasharray: 32px 9999px; }
+  64%  { stroke-width: calc(var(--lump-w) * 1.12); stroke-dasharray: 11px 9999px; }
+  100% { stroke-width: calc(var(--lump-w) * 1.18); stroke-dasharray: 7px 9999px; }
+}
+@keyframes jelly-pulse-b {
+  0%   { stroke-width: calc(var(--lump-w) * 1.16); stroke-dasharray: 3px 9999px; }
+  30%  { stroke-width: calc(var(--lump-w) * 0.86); stroke-dasharray: 20px 9999px; }
+  64%  { stroke-width: calc(var(--lump-w) * 1.1);  stroke-dasharray: 6px 9999px; }
+  100% { stroke-width: calc(var(--lump-w) * 1.16); stroke-dasharray: 3px 9999px; }
+}
+
+.ap-flow {
+  stroke-width: var(--lump-w);
+  stroke-dasharray: 14px 9999px;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+.ap-flow-a { animation-name: jelly-ripple, jelly-pulse-a; }
+.ap-flow-b { animation-name: jelly-ripple, jelly-pulse-b; }
+
+/* 장식이므로 모션을 줄이도록 설정한 사용자에게는 나타나지 않는다 */
+@media (prefers-reduced-motion: reduce) {
+  .ap-flow { animation: none; opacity: 0; }
 }
