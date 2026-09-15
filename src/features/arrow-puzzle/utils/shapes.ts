@@ -5,9 +5,14 @@
  * 판정 함수는 정규화 좌표를 받는다 — 가운데가 (0,0), 가장자리가 ±1, y 는 아래가 양수.
  * 반환값이 true 인 칸만 판에 포함된다.
  *
+ * 자동차/고래처럼 수식으로 표현하기 어려운 복잡한 실루엣은 이모지를 헤드리스 브라우저로
+ * 래스터라이즈해 만든 기준 해상도 마스크(emoji-masks.json)를 shapeFromGrid 로 감싸 쓴다.
+ * (scripts/render-emoji-mask.mjs 로 생성)
+ *
  * 추가한 뒤에는 반드시 미리보기로 실루엣을 확인할 것:
  *   npx tsx scripts/preview-arrow-shapes.ts
  */
+import emojiMasks from '../data/emoji-masks.json';
 
 export type Mask = [number, number][];
 
@@ -61,7 +66,33 @@ export const SHAPES: MaskShape[] = [
     },
     minSide: 12,
   },
+  shapeFromGrid('car', 14),
+  shapeFromGrid('whale', 18),
+  shapeFromGrid('cat', 16),
+  shapeFromGrid('tree', 14),
+  shapeFromGrid('rocket', 14),
+  shapeFromGrid('fish', 14),
 ];
+
+/**
+ * emoji-masks.json 에 미리 래스터라이즈해 둔 기준 해상도 마스크를,
+ * 임의의 격자 크기에서도 판정할 수 있는 inside(x,y) 함수로 감싼다.
+ * 세밀한 실루엣이라 작은 격자에서는 뭉개지므로 minSide 를 넉넉히 둔다.
+ */
+function shapeFromGrid(key: keyof typeof emojiMasks, minSide: number): MaskShape {
+  const { name, refCols, refRows, cells } = emojiMasks[key];
+  const set = new Set(cells.map(([c, r]) => `${c},${r}`));
+  return {
+    name,
+    minSide,
+    inside: (x, y) => {
+      const c = Math.round(x * (refCols / 2) + (refCols - 1) / 2);
+      const r = Math.round(y * (refRows / 2) + (refRows - 1) / 2);
+      if (c < 0 || c >= refCols || r < 0 || r >= refRows) return false;
+      return set.has(`${c},${r}`);
+    },
+  };
+}
 
 /** 정규화 좌표 판정을 격자 칸 목록으로 바꾼다. */
 export function buildMask(shape: MaskShape, cols: number, rows: number): Mask {

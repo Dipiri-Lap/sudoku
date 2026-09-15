@@ -1,4 +1,5 @@
 import stagesJson from './stages.json';
+import shapeStagesJson from './shape-stages.json';
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -83,3 +84,16 @@ export interface StageData extends LevelData {
 }
 
 export const stages = stagesJson as StageData[];
+
+/**
+ * 쉐이프 스테이지 전용 목록(scripts/generate-arrow-shape-stages.ts 로 생성).
+ * 메인 캠페인과 달리 SHAPES 카탈로그의 모든 모양이 추첨 없이 다 들어있다.
+ */
+export interface ShapeStageData extends LevelData {
+  level: number;
+  shape: string;
+  minMoves: number;
+  searchCost: number;
+}
+
+export const shapeStages = shapeStagesJson as ShapeStageData[];

@@ -46,7 +46,8 @@
 .ap-board-wrap {
   flex: 1;
   display: flex;
-  align-items: center;
+  /* 판은 상단 기준으로 붙인다 — 판 크기가 레벨마다 달라도 시작 위치가 안 흔들린다 */
+  align-items: flex-start;
   justify-content: center;
   position: relative;
   width: 100%;
@@ -352,6 +353,8 @@
   max-width: 460px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  /* 행 수가 적을 때(쉐이프 스테이지 등) 남는 세로 공간을 행 사이에 늘리지 않고 위로 모은다 */
+  align-content: start;
   gap: 0.6rem;
 }
 
@@ -391,6 +394,12 @@
   font-size: 1.05rem;
   font-weight: 800;
   line-height: 1;
+}
+
+.ap-stage-no-shape {
+  font-size: 0.82rem;
+  text-align: center;
+  line-height: 1.15;
 }
 
 /* 피스 수 — 판이 얼마나 큰지 미리 가늠하게 해준다 */

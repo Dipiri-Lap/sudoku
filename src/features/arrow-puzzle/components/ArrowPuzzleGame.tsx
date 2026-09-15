@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, RotateCcw, RefreshCw } from 'lucide-react';
-import { levels, stages, type PieceData, type LevelData, type Direction } from '../data/levels';
+import { levels, stages, shapeStages, type PieceData, type LevelData, type Direction } from '../data/levels';
 import { type Difficulty, DIFFICULTY_CONFIGS, generateLevelForDifficulty } from '../utils/levelGenerator';
 import '../styles/ArrowPuzzle.css';
 
 const CELL_SIZE = 64;
 const PADDING = 32;
+const BOARD_INSET = 10;      // 판 배경이 격자보다 조금 더 넓게 깔리는 여유
 const STROKE_W = 21;          // 칸(64)의 약 1/3 — 젤리는 가늘면 젤리로 안 보인다
 const GLOSS_RATIO = 0.26;    // 윗면 광택 (본체 두께 대비)
 const SHADE_RATIO = 0.44;    // 아랫면 그늘
@@ -294,6 +295,7 @@ function onBoard(c: number, r: number, cols: number, rows: number) {
 }
 
 const PROGRESS_KEY = 'arrowPuzzleProgress';
+const SHAPE_CLEARED_KEY = 'arrowPuzzleShapeCleared';
 
 /** 클리어한 최고 스테이지 번호. 다음 한 판까지 열어준다. */
 function loadProgress(): number {
@@ -310,6 +312,24 @@ function saveProgress(level: number) {
   } catch { /* 저장 실패는 무시 — 진행도는 편의 기능이다 */ }
 }
 
+/** 쉐이프 스테이지는 메인 캠페인과 독립적으로 클리어 여부만 기록한다 — 순서 제한 없이 자유롭게 플레이. */
+function loadShapeCleared(): Set<number> {
+  try {
+    const raw = localStorage.getItem(SHAPE_CLEARED_KEY);
+    return new Set(raw ? (JSON.parse(raw) as number[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveShapeCleared(level: number) {
+  try {
+    const cleared = loadShapeCleared();
+    cleared.add(level);
+    localStorage.setItem(SHAPE_CLEARED_KEY, JSON.stringify([...cleared]));
+  } catch { /* 저장 실패는 무시 — 진행도는 편의 기능이다 */ }
+}
+
 const ArrowPuzzleGame: React.FC = () => {
   const navigate = useNavigate();
 
@@ -322,11 +342,13 @@ const ArrowPuzzleGame: React.FC = () => {
     return null;
   });
 
-  type Screen = 'select' | 'stages' | 'generating' | 'playing';
+  type Screen = 'select' | 'stages' | 'shapes' | 'generating' | 'playing';
   const [screen, setScreen] = useState<Screen>(testLevel ? 'playing' : 'select');
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [stageNo, setStageNo] = useState<number | null>(null);
+  const [isShapeMode, setIsShapeMode] = useState(false);
   const [progress, setProgress] = useState(loadProgress);
+  const [shapeCleared, setShapeCleared] = useState(loadShapeCleared);
   const [levelData, setLevelData] = useState<LevelData>(testLevel ?? levels[0]);
 
   const { gridCols, gridRows } = levelData;
@@ -431,13 +453,18 @@ const ArrowPuzzleGame: React.FC = () => {
       const t = setTimeout(() => {
         setIsCleared(true);
         if (stageNo !== null) {
-          saveProgress(stageNo);
-          setProgress(p => Math.max(p, stageNo));
+          if (isShapeMode) {
+            saveShapeCleared(stageNo);
+            setShapeCleared(prev => new Set(prev).add(stageNo));
+          } else {
+            saveProgress(stageNo);
+            setProgress(p => Math.max(p, stageNo));
+          }
         }
       }, 200);
       return () => clearTimeout(t);
     }
-  }, [activePieces.length, escapingPieces.length, stageNo]);
+  }, [activePieces.length, escapingPieces.length, stageNo, isShapeMode]);
 
   useEffect(() => {
     return () => {
@@ -493,6 +520,17 @@ const ArrowPuzzleGame: React.FC = () => {
     if (!stage) return;
     setDifficulty(null);
     setStageNo(level);
+    setIsShapeMode(false);
+    loadLevel(stage);
+    setScreen('playing');
+  }, [loadLevel]);
+
+  const handleSelectShapeStage = useCallback((level: number) => {
+    const stage = shapeStages[level - 1];
+    if (!stage) return;
+    setDifficulty(null);
+    setStageNo(level);
+    setIsShapeMode(true);
     loadLevel(stage);
     setScreen('playing');
   }, [loadLevel]);
@@ -632,6 +670,14 @@ const ArrowPuzzleGame: React.FC = () => {
             <span className="ap-campaign-progress">{Math.min(progress, stages.length)}/{stages.length}</span>
           </button>
 
+          <button className="ap-campaign-card" onClick={() => setScreen('shapes')}>
+            <div className="ap-campaign-main">
+              <span className="ap-campaign-title">쉐이프 스테이지</span>
+              <span className="ap-campaign-sub">모양대로 채워진 퍼즐만 모아서 자유롭게 플레이</span>
+            </div>
+            <span className="ap-campaign-progress">{shapeCleared.size}/{shapeStages.length}</span>
+          </button>
+
           <div className="ap-select-title">
             <h1>랜덤 퍼즐</h1>
             <p>퍼즐이 매번 다르게 자동 생성됩니다</p>
@@ -697,6 +743,41 @@ const ArrowPuzzleGame: React.FC = () => {
     );
   }
 
+  // ── Shape stage list screen (쉐이프 스테이지 — 순서 제한 없이 자유 플레이) ──────────────
+
+  if (screen === 'shapes') {
+    return (
+      <div className="ap-page">
+        <header className="ap-header">
+          <button className="ap-icon-btn" onClick={() => setScreen('select')}>
+            <ChevronLeft size={20} />
+          </button>
+          <span className="ap-level-badge">쉐이프 스테이지</span>
+          <div style={{ width: 42 }} />
+        </header>
+
+        <div className="ap-stage-screen">
+          <div className="ap-stage-grid">
+            {shapeStages.map(st => {
+              const cleared = shapeCleared.has(st.level);
+              return (
+                <button
+                  key={st.level}
+                  className={`ap-stage-btn${cleared ? ' cleared' : ''}`}
+                  onClick={() => handleSelectShapeStage(st.level)}
+                  title={`${st.shape} · ${st.gridCols}×${st.gridRows} · ${st.pieces.length}피스`}
+                >
+                  <span className="ap-stage-no ap-stage-no-shape">{st.shape}</span>
+                  <span className="ap-stage-meta">{st.pieces.length}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Generating screen ────────────────────────────────────────────────────────
 
   if (screen === 'generating') {
@@ -718,11 +799,11 @@ const ArrowPuzzleGame: React.FC = () => {
   return (
     <div className="ap-page">
       <header className="ap-header">
-        <button className="ap-icon-btn" onClick={() => setScreen(stageNo !== null ? 'stages' : 'select')}>
+        <button className="ap-icon-btn" onClick={() => setScreen(stageNo !== null ? (isShapeMode ? 'shapes' : 'stages') : 'select')}>
           <ChevronLeft size={20} />
         </button>
         <span className="ap-level-badge" style={diffMeta ? { color: diffMeta.color } as React.CSSProperties : undefined}>
-          {diffMeta ? diffMeta.label : stageNo !== null ? `Level ${stageNo}` : 'Level 1'}
+          {diffMeta ? diffMeta.label : stageNo !== null ? (isShapeMode ? shapeStages[stageNo - 1]?.shape ?? `Level ${stageNo}` : `Level ${stageNo}`) : 'Level 1'}
         </span>
         <div className="ap-header-btns">
           {difficulty && (
@@ -747,6 +828,17 @@ const ArrowPuzzleGame: React.FC = () => {
               </feMerge>
             </filter>
           </defs>
+          {/* 판 영역 — 배경보다 살짝 밝게 깔아 "어디까지가 판인지" 눈에 들어오게 한다.
+              화살촉이 목 길이만큼 튀어나와도 칸 절반 안쪽이라 판 밖으로 새지 않는다. */}
+          <rect
+            x={PADDING - BOARD_INSET} y={PADDING - BOARD_INSET}
+            width={gridCols * CELL_SIZE + BOARD_INSET * 2}
+            height={gridRows * CELL_SIZE + BOARD_INSET * 2}
+            rx={14}
+            fill="rgba(255,255,255,0.045)"
+            stroke="rgba(255,255,255,0.09)" strokeWidth={1}
+            pointerEvents="none"
+          />
           {dotCells.map(([c, r]) => {
             const [x, y] = cellCenter(c, r);
             return <circle key={`d${c},${r}`} cx={x} cy={y} r={2.5} fill="rgba(255,255,255,0.12)" />;
@@ -762,7 +854,21 @@ const ArrowPuzzleGame: React.FC = () => {
               <h2>클리어!</h2>
               <p>젤리 {moveCount}개를 모두 빼냈습니다</p>
               <div className="ap-clear-btns">
-                {stageNo !== null && stageNo < stages.length ? (
+                {stageNo !== null && isShapeMode ? (
+                  (() => {
+                    const idx = shapeStages.findIndex(s => s.level === stageNo);
+                    const next = idx >= 0 ? shapeStages[idx + 1] : undefined;
+                    return next ? (
+                      <button className="ap-btn-primary" onClick={() => handleSelectShapeStage(next.level)}>
+                        다음 레벨
+                      </button>
+                    ) : (
+                      <button className="ap-btn-primary" onClick={handleReset}>
+                        다시 시도
+                      </button>
+                    );
+                  })()
+                ) : stageNo !== null && stageNo < stages.length ? (
                   <button className="ap-btn-primary" onClick={() => handleSelectStage(stageNo + 1)}>
                     다음 레벨
                   </button>
@@ -788,8 +894,8 @@ const ArrowPuzzleGame: React.FC = () => {
                 </button>
               )}
               {stageNo !== null && (
-                <button className="ap-btn-text" onClick={() => setScreen('stages')}>
-                  스테이지 목록
+                <button className="ap-btn-text" onClick={() => setScreen(isShapeMode ? 'shapes' : 'stages')}>
+                  {isShapeMode ? '쉐이프 스테이지 목록' : '스테이지 목록'}
                 </button>
               )}
             </div>
