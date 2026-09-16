@@ -33,6 +33,68 @@
   background: rgba(255, 255, 255, 0.14);
 }
 
+.ap-header--title {
+  gap: 1rem;
+  justify-content: flex-start;
+}
+.ap-header--title .back-btn {
+  color: #fff;
+}
+.ap-header--title .back-btn:hover {
+  color: #7fb3ff;
+}
+.ap-header--title h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ── Select screen: same light panel-over-tiled-bg look as other games' mode-select ── */
+.ap-page--select {
+  background: transparent;
+  color: var(--text-main, #34495e);
+}
+.ap-page--select .ap-header--title {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 0;
+  box-sizing: border-box;
+}
+.ap-page--select .ap-header--title .back-btn {
+  color: var(--text-muted, #7f8c8d);
+}
+.ap-page--select .ap-header--title .back-btn:hover {
+  color: var(--brand-primary, #3b6b91);
+}
+.ap-page--select .ap-header--title h1 {
+  color: var(--text-main, #34495e);
+}
+.ap-page--select .ap-select-screen {
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+  margin: 0.25rem auto;
+  background: rgba(210, 210, 210, 0.75);
+  border-radius: 20px;
+}
+.ap-page--select .ap-diff-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.ap-page--select .ap-diff-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+.ap-page--select .ap-diff-grid-size {
+  color: var(--text-muted, #7f8c8d);
+}
+.ap-page--select .ap-diff-desc {
+  color: rgba(52, 73, 94, 0.5);
+}
+.ap-page--select .ap-select-title p {
+  color: var(--text-muted, #7f8c8d);
+}
+
 .ap-level-badge {
   font-size: 0.95rem;
   font-weight: 700;
@@ -65,7 +127,9 @@
 }
 
 
-/* ── 클리어 오버레이 ── */
+/* ── 클리어 오버레이 ──
+   다른 게임(스냅스팟·크로썸·크라운퀘스트)과 같은 형식: 스크림은 페이드,
+   카드는 스프링 이징으로 통통 튀며 들어온다. */
 .ap-clear-overlay {
   position: absolute;
   inset: 0;
@@ -75,12 +139,12 @@
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(8px);
   border-radius: 16px;
-  animation: apFadeIn 0.3s ease;
+  animation: apScrimFadeIn 0.28s ease;
 }
 
-@keyframes apFadeIn {
-  from { opacity: 0; transform: scale(0.93); }
-  to   { opacity: 1; transform: scale(1); }
+@keyframes apScrimFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .ap-clear-card {
@@ -93,10 +157,16 @@
   flex-direction: column;
   align-items: center;
   gap: 0.6rem;
+  animation: apCardPopIn 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes apCardPopIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .ap-clear-emoji {
-  font-size: 3.2rem;
+  font-size: 3.4rem;
   margin-bottom: 0.2rem;
 }
 
@@ -112,6 +182,34 @@
   font-size: 0.92rem;
 }
 
+/* 다른 게임(크라운 퀘스트 등)과 같은 코인/퍼즐력 보상 뱃지 */
+.ap-reward-row {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin: 0.4rem 0 0.2rem;
+}
+.ap-reward-coin,
+.ap-reward-power {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 20px;
+  padding: 0.4rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.ap-reward-coin {
+  background: #fef9e7;
+  border: 1px solid #f4c430;
+  color: #b8860b;
+}
+.ap-reward-power {
+  background: #eef2ff;
+  border: 1px solid #6366f1;
+  color: #4338ca;
+}
+
 .ap-btn-primary {
   margin-top: 0.8rem;
   background: linear-gradient(135deg, #7c3aed, #a78bfa);
@@ -123,6 +221,9 @@
   padding: 0.8rem 2.2rem;
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 .ap-btn-primary:hover {
   transform: translateY(-2px);
@@ -409,21 +510,6 @@
   line-height: 1;
 }
 
-/* ── 막힘 반응 ──────────────────────────────────────────────────────────── */
-
-/* 앞을 막고 있는 젤리도 부딪힌 것처럼 함께 출렁인다.
-   흐려지게 하면 색이 탁해져서, 색은 살리고 부피만 흔든다. */
-.ap-piece.ap-blocker {
-  animation: blocker-jiggle 0.28s ease-in-out 2;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-@keyframes blocker-jiggle {
-  0%, 100% { transform: scale(1, 1); }
-  30%      { transform: scale(1.06, 0.94); }
-  65%      { transform: scale(0.96, 1.05); }
-}
-
 /* ── 덩어리 하나가 머리에서 꼬리로 ─────────────────────────────────────────
    경로는 꼬리→머리 순으로 그려지므로 dashoffset 이 커질수록 덩어리는 꼬리 쪽으로 간다.
    시작값(--lump-from)은 머리 바깥, 끝값(--lump-to)은 꼬리 바깥이라
@@ -465,4 +551,69 @@
 /* 장식이므로 모션을 줄이도록 설정한 사용자에게는 나타나지 않는다 */
 @media (prefers-reduced-motion: reduce) {
   .ap-flow { animation: none; opacity: 0; }
+}
+
+/* ── Mono 컨셉: 같은 화면·같은 로직에서 배경과 HUD만 바뀐다 ── */
+.ap-mono {
+  background: #111 !important;
+}
+
+.ap-mono-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 0.3rem 0.9rem;
+}
+.ap-mono-counter-num {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+.ap-mono-counter-label {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.04em;
+}
+
+.ap-mono-hearts {
+  display: flex;
+  gap: 0.3rem;
+  margin-left: 0.5rem;
+}
+.ap-mono-heart {
+  font-size: 1.3rem;
+  color: #e11d48;
+  transition: color 0.15s, transform 0.15s;
+}
+.ap-mono-heart.dead {
+  color: rgba(255, 255, 255, 0.15);
+  transform: scale(0.85);
+}
+
+/* ── 탈출 타격감: 판을 완전히 빠져나가는 순간 터지는 링 + 파편 ── */
+.ap-burst-ring {
+  stroke-width: 5;
+  opacity: 0.95;
+  animation: ap-burst-ring 0.42s ease-out forwards;
+}
+@keyframes ap-burst-ring {
+  from { r: 5; opacity: 0.95; stroke-width: 6; }
+  to   { r: 42; opacity: 0; stroke-width: 0.5; }
+}
+
+.ap-burst-dot {
+  opacity: 1;
+  animation: ap-burst-dot 0.46s ease-out forwards;
+}
+@keyframes ap-burst-dot {
+  from { transform: translate(0, 0); opacity: 0.95; }
+  to   { transform: translate(calc(var(--tx) * 1px), calc(var(--ty) * 1px)); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* animation: none 으로 끄면 onAnimationEnd 가 안 불려서 burst 가 state 에 계속 쌓인다.
+     지속시간만 0에 가깝게 줄여서 이벤트는 여전히 발생하게 한다. */
+  .ap-burst-ring, .ap-burst-dot { animation-duration: 0.01s; opacity: 0; }
 }

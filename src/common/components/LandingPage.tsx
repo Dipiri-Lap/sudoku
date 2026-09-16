@@ -704,19 +704,11 @@ const LandingPage: React.FC = () => {
                 )}
 
                 {window.location.hostname === 'localhost' && (
-                    <a href="/arrow-puzzle" className="game-card animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', color: 'inherit' } as any}>
-                        <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
-                            🍬
-                        </div>
-                        <div className="game-card-content">
-                            <h3>젤리 퍼즐</h3>
-                            <p>길이 뚫린 젤리부터 탭해서 모두 빼내세요</p>
-                            <div className="game-card-footer">
-                                <span className="play-now">
-                                    <Play size={16} fill="currentColor" /> 플레이하기
-                                </span>
-                            </div>
-                        </div>
+                    <a href="/arrow-puzzle" className="animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                    >
+                        <img src="/images/arrow-puzzle/title.webp" alt="Arrow Puzzle" style={{ width: '100%', display: 'block' }} />
                     </a>
                 )}
 

@@ -72,6 +72,10 @@ export const SHAPES: MaskShape[] = [
   shapeFromGrid('tree', 14),
   shapeFromGrid('rocket', 14),
   shapeFromGrid('fish', 14),
+  // public/images/nonogram/card/umbrella.png 의 알파 채널을 140x140으로 리샘플링해 만든 마스크.
+  // 이모지가 아니라 임의 PNG를 쓴 첫 사례 — render-emoji-mask.mjs 의 이모지 캔버스 대신
+  // PIL로 직접 리사이즈 + 알파 스레숄드(0.35) 했을 뿐, emoji-masks.json 포맷은 동일하다.
+  shapeFromGrid('umbrella', 16),
 ];
 
 /**
