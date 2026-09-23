@@ -1,6 +1,6 @@
 .ap-page {
   min-height: 100dvh;
-  background: #0d1526;
+  background: #322e3d;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,12 +8,17 @@
 }
 
 .ap-header {
-  width: 100%;
+  width: calc(100% - 2rem);
   max-width: 480px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
+  padding: 0.6rem 0.75rem;
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
 
 .ap-icon-btn {
@@ -36,6 +41,10 @@
 .ap-header--title {
   gap: 1rem;
   justify-content: flex-start;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 1rem 1.25rem;
 }
 .ap-header--title .back-btn {
   color: #fff;
@@ -121,6 +130,12 @@
   height: auto;
 }
 
+.ap-board-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 /* ── 피스 공통 ── */
 .ap-piece {
   transition: opacity 0.08s;
@@ -180,6 +195,12 @@
   color: rgba(255, 255, 255, 0.55);
   margin: 0;
   font-size: 0.92rem;
+}
+
+.ap-clear-card .ap-clear-time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #fff;
 }
 
 /* 다른 게임(크라운 퀘스트 등)과 같은 코인/퍼즐력 보상 뱃지 */
@@ -510,6 +531,30 @@
   line-height: 1;
 }
 
+/* 별점 — 클리어 시간에 따라 1~3개, earned 만큼 채워진다 */
+.ap-stage-stars {
+  display: flex;
+  gap: 0.15rem;
+}
+.ap-stage-star {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.35);
+}
+.ap-stage-star.earned {
+  fill: #facc15;
+  stroke: #facc15;
+}
+.ap-stage-btn.cleared .ap-stage-star {
+  stroke: rgba(255, 255, 255, 0.6);
+}
+.ap-stage-btn.cleared .ap-stage-star.earned {
+  fill: #facc15;
+  stroke: #facc15;
+}
+.ap-stage-btn.locked .ap-stage-star {
+  stroke: rgba(255, 255, 255, 0.18);
+}
+
 /* ── 덩어리 하나가 머리에서 꼬리로 ─────────────────────────────────────────
    경로는 꼬리→머리 순으로 그려지므로 dashoffset 이 커질수록 덩어리는 꼬리 쪽으로 간다.
    시작값(--lump-from)은 머리 바깥, 끝값(--lump-to)은 꼬리 바깥이라
@@ -555,41 +600,38 @@
 
 /* ── Mono 컨셉: 같은 화면·같은 로직에서 배경과 HUD만 바뀐다 ── */
 .ap-mono {
-  background: #111 !important;
+  background: #322e3d !important;
 }
 
-.ap-mono-counter {
+.ap-mono-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 1.1;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  padding: 0.3rem 0.9rem;
+  line-height: 1.25;
 }
-.ap-mono-counter-num {
-  font-size: 0.95rem;
+.ap-mono-info-level {
+  font-size: 0.85rem;
   font-weight: 800;
 }
-.ap-mono-counter-label {
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.04em;
+.ap-mono-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.ap-mono-info-time {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
 }
 
-.ap-mono-hearts {
+.ap-mono-hearts-bar {
+  margin-top: 0.6rem;
   display: flex;
-  gap: 0.3rem;
-  margin-left: 0.5rem;
-}
-.ap-mono-heart {
-  font-size: 1.3rem;
+  align-items: center;
+  gap: 0.35rem;
   color: #e11d48;
-  transition: color 0.15s, transform 0.15s;
-}
-.ap-mono-heart.dead {
-  color: rgba(255, 255, 255, 0.15);
-  transform: scale(0.85);
+  font-weight: 800;
+  font-size: 0.95rem;
 }
 
 /* ── 탈출 타격감: 판을 완전히 빠져나가는 순간 터지는 링 + 파편 ── */

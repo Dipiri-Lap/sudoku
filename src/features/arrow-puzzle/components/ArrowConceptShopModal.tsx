@@ -20,6 +20,22 @@ const ConceptPreview: React.FC<{ id: ArrowConcept }> = ({ id }) => {
       </div>
     );
   }
+  if (id === 'way-tile') {
+    return (
+      <div style={{
+        width: 58, height: 58, borderRadius: 10, flexShrink: 0,
+        background: 'linear-gradient(135deg, #22375c, #1a2b4a)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <img
+          src="/images/arrow-puzzle/icon.png"
+          alt="ArrowWay Tile"
+          style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }}
+        />
+      </div>
+    );
+  }
   return (
     <img
       src="/images/arrow-puzzle/icon.png"

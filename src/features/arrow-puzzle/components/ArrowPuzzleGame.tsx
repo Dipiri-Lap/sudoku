@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, RotateCcw, RefreshCw, Store, ArrowRight } from 'lucide-react';
+import { ChevronLeft, RotateCcw, RefreshCw, Store, ArrowRight, Heart, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { levels, stages, shapeStages, type PieceData, type LevelData, type Direction } from '../data/levels';
 import { type Difficulty, DIFFICULTY_CONFIGS, generateLevelForDifficulty } from '../utils/levelGenerator';
@@ -15,10 +15,17 @@ const CLEAR_COIN_REWARD = 10; // 다른 게임과 동일한 클리어 보상 액
 const MAX_HEARTS = 3; // Mono 컨셉 전용: 막힌 조각을 누르면 하트가 줄어든다
 
 const CELL_SIZE = 64;
-const PADDING = 32;
-const BOARD_INSET = 32;      // 판 배경이 격자보다 조금 더 넓게 깔리는 여유 — 화살촉이 빠져나가는 목(NECK) 길이까지 덮도록
+const PADDING = 36;
+const BOARD_INSET = 36;      // 판 배경이 격자보다 조금 더 넓게 깔리는 여유 — 화살촉이 빠져나가는 목(NECK) 길이까지 덮도록
 const STROKE_W = 21;          // 칸(64)의 약 1/3 — 젤리는 가늘면 젤리로 안 보인다
 const BULGE_MAX = CELL_SIZE * 0.24;  // 부딪힌 접점이 국소적으로 볼록해지는 최대 거리
+const BOARD_RADIUS = 20; // 판 모서리 둥글기
+// 판 외곽을 살짝 파인 듯 보이게 하는 겹겹의 테 — 바깥은 조금 진하고 안쪽으로 갈수록 옅어진다
+const BOARD_BEVEL_RINGS: { inset: number; sw: number; color: string }[] = [
+  { inset: 0, sw: 2, color: 'rgba(0,0,0,0.2)' },
+  { inset: 2, sw: 2, color: 'rgba(0,0,0,0.05)' },
+];
+const BOARD_BEVEL_DEPTH = 3; // 벽 테가 차지하는 폭 — 바닥 하이라이트가 이 지점부터 시작된다
 // ── 타일 판 ──
 // 칸마다 높이가 있는 타일을 깔고, 화살표는 타일 윗면에만 그려진다(clipPath).
 // 그래서 타일 사이 틈에서는 화살표가 끊겨 "타일에 그려진 그림"처럼 보인다.
@@ -48,8 +55,12 @@ function idNoise(id: string, salt: number): number {
   return ((h >>> 0) % 10007) / 10007;
 }
 // 화살촉 끝(= NECK + 촉 길이 0.3칸)이 타일 윗면 안에 들어와야 clip 에 잘리지 않는다.
-// 타일 반폭이 (64-5)/2 ≈ 29.5 이므로 목은 짧게 잡는다.
-const NECK = CELL_SIZE * 0.13;
+// 타일 반폭이 (64-5)/2 ≈ 29.5 이므로 타일 컨셉에서는 목을 짧게 잡는다.
+const NECK_TILE = CELL_SIZE * 0.13;
+// 타일 없는 컨셉은 그런 제약이 없다 — 목을 넉넉히 잡아야 머리에서 바로 꺾이는 조각도
+// 화살촉 앞에 눈에 보이는 직선 구간이 남아서 이쁘게 보인다(목이 파이프 두께보다 짧으면
+// 곡선이 화살촉 코앞까지 이어져 확 꺾인 것처럼 보인다).
+const NECK_OPEN = CELL_SIZE * 0.22;
 const CORNER_R = CELL_SIZE * 0.42;
 
 interface EscapingPiece extends PieceData {
@@ -65,6 +76,9 @@ interface EscapingPiece extends PieceData {
    */
   exitPoint: [number, number];
 }
+
+// 지금 스타일과 안 어울린다는 피드백으로 일단 보류 — 코드는 남겨두고 트리거만 끈다.
+const BURST_FX = false;
 
 /** 피스가 판을 완전히 빠져나가는 순간 터지는 타격감 연출 — 위치 하나만 있으면 되고 CSS 애니메이션이 끝나면 스스로 사라진다. */
 interface BurstInfo {
@@ -100,6 +114,26 @@ const modeHoverOff = (e: React.MouseEvent<HTMLImageElement>) => {
 function piecesLabel(min: number, max: number) {
   return min === max ? `${min} 피스` : `${min}–${max} 피스`;
 }
+
+function formatPlayTime(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+/** 스테이지 버튼 아래 별점 — earned 개수만큼 채워서 보여준다. */
+const StageStars: React.FC<{ earned?: number; size?: number }> = ({ earned = 0, size = 11 }) => (
+  <span className="ap-stage-stars">
+    {Array.from({ length: 3 }, (_, i) => (
+      <Star
+        key={i}
+        size={size}
+        className={`ap-stage-star${i < earned ? ' earned' : ''}`}
+        fill={i < earned ? '#facc15' : 'none'}
+      />
+    ))}
+  </span>
+);
 
 /**
  * 감쇠 진동. t=0 에서 +1(가장 두꺼움)로 시작해 흔들리며 0으로 잦아든다.
@@ -178,10 +212,10 @@ function toPathFromPts(pts: [number, number][]): string {
   return d;
 }
 
-function toPath(cells: [number, number][], dir: Direction): string {
+function toPath(cells: [number, number][], dir: Direction, neck: number): string {
   const pts: [number, number][] = cells.map(([c, r]) => cellCenter(c, r));
   const [hx, hy] = pts[pts.length - 1];
-  const [dx, dy] = dirOffset(dir, NECK);
+  const [dx, dy] = dirOffset(dir, neck);
   pts.push([hx + dx, hy + dy]);
   return toPathFromPts(pts);
 }
@@ -211,11 +245,11 @@ function trimFromStart(pts: [number, number][], amount: number): [number, number
  * 머리는 진행 방향으로 뻗고 꼬리는 같은 길이만큼 뒤에서 줄어든다 — 몸통이 머리를 따라간다.
  * 탈출할 때만 쓴다 — 몸 전체가 슬라이드해서 빠져나가야 자연스럽다.
  */
-function toPathAnimated(cells: [number, number][], dir: Direction, frac: number): string {
+function toPathAnimated(cells: [number, number][], dir: Direction, frac: number, neck: number): string {
   if (cells.length === 0) return '';
   const pts: [number, number][] = cells.map(([c, r]) => cellCenter(c, r));
   const [hx, hy] = pts[pts.length - 1];
-  const [dx, dy] = dirOffset(dir, frac * CELL_SIZE + NECK);
+  const [dx, dy] = dirOffset(dir, frac * CELL_SIZE + neck);
   pts.push([hx + dx, hy + dy]);
   return toPathFromPts(trimFromStart(pts, frac * CELL_SIZE));
 }
@@ -225,11 +259,11 @@ function toPathAnimated(cells: [number, number][], dir: Direction, frac: number)
  * 국소적으로 늘어났다 줄어든다. toPathAnimated 와 달리 trimFromStart 를 하지
  * 않아서 몸통 전체가 밀리는 게 아니라 머리 부위만 볼록 나왔다 들어간 것처럼 보인다.
  */
-function toPathBump(cells: [number, number][], dir: Direction, frac: number): string {
+function toPathBump(cells: [number, number][], dir: Direction, frac: number, neck: number): string {
   if (cells.length === 0) return '';
   const pts: [number, number][] = cells.map(([c, r]) => cellCenter(c, r));
   const [hx, hy] = pts[pts.length - 1];
-  const [dx, dy] = dirOffset(dir, frac * CELL_SIZE + NECK);
+  const [dx, dy] = dirOffset(dir, frac * CELL_SIZE + neck);
   pts.push([hx + dx, hy + dy]);
   return toPathFromPts(pts);
 }
@@ -243,7 +277,8 @@ function toPathWithBulge(
   cells: [number, number][],
   dir: Direction,
   bulgeIdx: number,
-  offset: [number, number]
+  offset: [number, number],
+  neck: number
 ): string {
   if (cells.length === 0) return '';
   const pts: [number, number][] = cells.map(([c, r]) => cellCenter(c, r));
@@ -251,20 +286,20 @@ function toPathWithBulge(
     pts[bulgeIdx] = [pts[bulgeIdx][0] + offset[0], pts[bulgeIdx][1] + offset[1]];
   }
   const [hx, hy] = cellCenter(cells[cells.length - 1][0], cells[cells.length - 1][1]);
-  const [dx, dy] = dirOffset(dir, NECK);
+  const [dx, dy] = dirOffset(dir, neck);
   pts.push([hx + dx, hy + dy]);
   return toPathFromPts(pts);
 }
 
-function neckTipStatic(head: [number, number], dir: Direction): [number, number] {
+function neckTipStatic(head: [number, number], dir: Direction, neck: number): [number, number] {
   const [x, y] = cellCenter(head[0], head[1]);
-  const [dx, dy] = dirOffset(dir, NECK);
+  const [dx, dy] = dirOffset(dir, neck);
   return [x + dx, y + dy];
 }
 
-function neckTipAnimated(cells: [number, number][], dir: Direction, frac: number): [number, number] {
+function neckTipAnimated(cells: [number, number][], dir: Direction, frac: number, neck: number): [number, number] {
   const [hx, hy] = cellCenter(cells[cells.length - 1][0], cells[cells.length - 1][1]);
-  const [dx, dy] = dirOffset(dir, frac * CELL_SIZE + NECK);
+  const [dx, dy] = dirOffset(dir, frac * CELL_SIZE + neck);
   return [hx + dx, hy + dy];
 }
 
@@ -312,7 +347,7 @@ const JellyFlow: React.FC<{
   // 덩어리가 지나갈 거리 = 머리 바깥에서 들어와 꼬리 바깥으로 빠질 때까지.
   // dash 가 경로 밖에 있으면 아무것도 그려지지 않으므로, 쉬는 구간은 따로 숨길 필요 없이
   // "경로 밖을 지나가는 시간"으로 저절로 만들어진다.
-  const travel = (cellCount - 1) * CELL_SIZE + NECK + LUMP_LEN * 2;
+  const travel = (cellCount - 1) * CELL_SIZE + NECK_OPEN + LUMP_LEN * 2;
   // 쉬는 시간과 맥동 주기를 피스마다 흩어 놓아야 다 같은 박자로 꿀렁이지 않는다
   const rest = REST_MIN + idNoise(id, 1) * (REST_MAX - REST_MIN);
   const rippleDur = (travel + rest) / LUMP_SPEED;
@@ -445,6 +480,44 @@ function saveShapeCleared(level: number) {
   } catch { /* 저장 실패는 무시 — 진행도는 편의 기능이다 */ }
 }
 
+const STAGE_STARS_KEY = 'arrowPuzzleStageStars';
+
+/** 화살 개수에 비례해 3개/2개 별 목표 시간을 정한다 — 많을수록 넉넉하게 준다. */
+function starTargets(pieceCount: number): { three: number; two: number } {
+  const three = Math.max(6, Math.round(pieceCount * 2.5));
+  const two = Math.max(12, Math.round(pieceCount * 4.5));
+  return { three, two };
+}
+
+/** 클리어만 하면 별 1개, 목표 시간 안에 들어오면 2개·3개. */
+function computeStars(pieceCount: number, seconds: number): number {
+  const { three, two } = starTargets(pieceCount);
+  if (seconds <= three) return 3;
+  if (seconds <= two) return 2;
+  return 1;
+}
+
+function loadStageStars(): Record<number, number> {
+  try {
+    const raw = localStorage.getItem(STAGE_STARS_KEY);
+    return raw ? (JSON.parse(raw) as Record<number, number>) : {};
+  } catch {
+    return {};
+  }
+}
+
+/** 이전 기록보다 별이 많을 때만 갱신한다 — 나중에 못한 판이 기록을 깎지 않는다. */
+function saveStageStars(level: number, stars: number): Record<number, number> {
+  const all = loadStageStars();
+  if (!all[level] || stars > all[level]) {
+    all[level] = stars;
+    try {
+      localStorage.setItem(STAGE_STARS_KEY, JSON.stringify(all));
+    } catch { /* 저장 실패는 무시 — 진행도는 편의 기능이다 */ }
+  }
+  return all;
+}
+
 const ArrowPuzzleGame: React.FC = () => {
   const navigate = useNavigate();
   const { addCoins } = useCoins();
@@ -466,6 +539,9 @@ const ArrowPuzzleGame: React.FC = () => {
   const [isShapeMode, setIsShapeMode] = useState(false);
   const [progress, setProgress] = useState(loadProgress);
   const [shapeCleared, setShapeCleared] = useState(loadShapeCleared);
+  const [stageStars, setStageStars] = useState(loadStageStars);
+  // 이번 판에서 받은 별 — 클리어 카드에 보여준다
+  const [lastStars, setLastStars] = useState(0);
   const [levelData, setLevelData] = useState<LevelData>(testLevel ?? levels[0]);
 
   const { gridCols, gridRows } = levelData;
@@ -482,11 +558,14 @@ const ArrowPuzzleGame: React.FC = () => {
   const [moveCount, setMoveCount] = useState(0);
   const [hearts, setHearts] = useState(MAX_HEARTS);
   const [isFailed, setIsFailed] = useState(false);
+  // 레벨 시작부터 흐른 시간(초) — 클리어/실패하면 멈춘다
+  const [playSeconds, setPlaySeconds] = useState(0);
   // 피스가 판을 완전히 빠져나가는 순간의 타격감 연출
   const [bursts, setBursts] = useState<BurstInfo[]>([]);
   const hitstopUntilRef = useRef(0);
   const { concept, setConcept } = useArrowConcept();
   const isMono = concept === 'mono';
+  const hasTiles = concept === 'way-tile';
   const [showShop, setShowShop] = useState(false);
 
   const started = useRef(false);
@@ -565,7 +644,7 @@ const ArrowPuzzleGame: React.FC = () => {
     }
     escapingRef.current = updated;
     setEscapingPieces([...updated]);
-    if (newBursts.length > 0) setBursts(prev => [...prev, ...newBursts]);
+    if (BURST_FX && newBursts.length > 0) setBursts(prev => [...prev, ...newBursts]);
 
     // 막힌 피스: 앞으로 밀고 나가다 부딪히면 되돌아온다.
     // 돌아올 때를 조금 느리게 해서 "튕겨 나왔다"가 아니라 "밀렸다 물러난다"로 읽히게.
@@ -618,6 +697,9 @@ const ArrowPuzzleGame: React.FC = () => {
           } else {
             saveProgress(stageNo);
             setProgress(p => Math.max(p, stageNo));
+            const stars = computeStars(levelData.pieces.length, playSeconds);
+            setLastStars(stars);
+            setStageStars(saveStageStars(stageNo, stars));
           }
           // 코인·퍼즐력 보상 — 메인 스테이지 클리어에만 준다.
           // "랜덤 퍼즐"은 새 퍼즐을 무한히 다시 뽑을 수 있어서 포함하면
@@ -633,16 +715,17 @@ const ArrowPuzzleGame: React.FC = () => {
             }
           }
         }
-        // 다른 게임(크라운 퀘스트 등)과 같은 방식의 폭죽 연출
-        const end = Date.now() + 1800;
-        const fire = (opts: confetti.Options) => confetti({ startVelocity: 30, spread: 70, ticks: 60, zIndex: 300, ...opts });
-        const frame = () => {
-          fire({ particleCount: 4, angle: 60, origin: { x: 0, y: 0.65 } });
-          fire({ particleCount: 4, angle: 120, origin: { x: 1, y: 0.65 } });
-          fire({ particleCount: 3, angle: 90, origin: { x: 0.5, y: 0.7 } });
-          if (Date.now() < end) requestAnimationFrame(frame);
-        };
-        frame();
+        // 화면 위쪽에서 한 번 터졌다가 중력에 떨어지는 단발성 연출
+        confetti({
+          particleCount: 90,
+          spread: 100,
+          startVelocity: 40,
+          angle: 270,
+          origin: { x: 0.5, y: 0 },
+          gravity: 1,
+          ticks: 130,
+          zIndex: 300,
+        });
       }, 200);
       return () => clearTimeout(t);
     }
@@ -661,6 +744,13 @@ const ArrowPuzzleGame: React.FC = () => {
     return () => { document.body.classList.remove('landing-bg'); };
   }, [screen]);
 
+  // 플레이 시간 — 플레이 화면에서 클리어/실패 전까지 1초마다 증가한다
+  useEffect(() => {
+    if (screen !== 'playing' || isCleared || isFailed) return;
+    const id = setInterval(() => setPlaySeconds(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [screen, isCleared, isFailed]);
+
   const loadLevel = useCallback((newLevel: LevelData) => {
     started.current = false;
     if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
@@ -677,6 +767,8 @@ const ArrowPuzzleGame: React.FC = () => {
     setMoveCount(0);
     setHearts(MAX_HEARTS);
     setIsFailed(false);
+    setPlaySeconds(0);
+    setLastStars(0);
     hasAwardedRef.current = false;
   }, []);
 
@@ -813,6 +905,9 @@ const ArrowPuzzleGame: React.FC = () => {
     // Mono 컨셉은 젤리보다 가는 흰 선 하나로만 그린다 — 두께 비율만 줄인다.
     const dsw = isMono ? sw * (13 / STROKE_W) : sw;
 
+    // 타일 컨셉은 화살촉이 타일 clip 안에 들어와야 하므로 목을 짧게, 그 외는 넉넉하게 잡는다.
+    const neck = hasTiles ? NECK_TILE : NECK_OPEN;
+
     const isBlocker = blockerInfo?.id === piece.id;
     // 부딪힌 접점만 poke 방향으로 국소적으로 볼록해졌다 들어간다 — 몸 전체는 그대로 둔다.
     let bulgePathD: string | null = null;
@@ -821,18 +916,18 @@ const ArrowPuzzleGame: React.FC = () => {
       if (bulgeIdx >= 0) {
         const progress = Math.min(1, bump.frac / bump.dist);
         const [ox, oy] = dirOffset(blockerInfo.pokeDir, BULGE_MAX * progress);
-        bulgePathD = toPathWithBulge(piece.cells, piece.exitDir, bulgeIdx, [ox, oy]);
+        bulgePathD = toPathWithBulge(piece.cells, piece.exitDir, bulgeIdx, [ox, oy], neck);
       }
     }
 
     const pathD = isEscaping
-      ? toPathAnimated(piece.cells, piece.exitDir, frac)
+      ? toPathAnimated(piece.cells, piece.exitDir, frac, neck)
       : isBumping
-        ? toPathBump(piece.cells, piece.exitDir, frac)
-        : bulgePathD ?? toPath(piece.cells, piece.exitDir);
+        ? toPathBump(piece.cells, piece.exitDir, frac, neck)
+        : bulgePathD ?? toPath(piece.cells, piece.exitDir, neck);
     const arrowTip = moving
-      ? neckTipAnimated(piece.cells, piece.exitDir, frac)
-      : neckTipStatic(head, piece.exitDir);
+      ? neckTipAnimated(piece.cells, piece.exitDir, frac, neck)
+      : neckTipStatic(head, piece.exitDir, neck);
     const showArrow = isEscaping || onBoard(head[0], head[1], gridCols, gridRows);
     const arrowPts = arrowPointsFromTip(arrowTip, piece.exitDir, 1 + squish * 0.7);
     return (
@@ -840,14 +935,14 @@ const ArrowPuzzleGame: React.FC = () => {
         onClick={clickable ? () => handlePieceClick(piece as PieceData) : undefined}
         style={{ cursor: clickable ? 'pointer' : 'default' }}>
         {isMono ? (
-          <>
+          <g filter="url(#ap-piece-shadow)">
             {/* 미니멀 라인아트: 색 채우기·광택 없이 흰 선 하나로만 그린다 */}
             <path d={pathD} stroke="#fff" strokeWidth={dsw} fill="none"
               strokeLinecap="round" strokeLinejoin="round" />
             {showArrow && (
               <polygon points={arrowPts} fill="#fff" stroke="#fff" strokeWidth={dsw * 0.24} strokeLinejoin="round" />
             )}
-          </>
+          </g>
         ) : (
           <>
             {/* 바닥에 깔리는 번짐 — 젤리가 판 위에 떠 있는 느낌 */}
@@ -976,7 +1071,7 @@ const ArrowPuzzleGame: React.FC = () => {
                   title={`${st.gridCols}×${st.gridRows} · ${st.pieces.length}피스`}
                 >
                   <span className="ap-stage-no">{st.level}</span>
-                  <span className="ap-stage-meta">{st.pieces.length}</span>
+                  <StageStars earned={stageStars[st.level] ?? 0} />
                 </button>
               );
             })}
@@ -1038,6 +1133,11 @@ const ArrowPuzzleGame: React.FC = () => {
   // ── Playing screen ───────────────────────────────────────────────────────────
 
   const diffMeta = difficulty ? DIFFICULTY_CONFIGS[difficulty] : null;
+  const levelLabel = diffMeta
+    ? diffMeta.label
+    : stageNo !== null
+      ? (isShapeMode ? shapeStages[stageNo - 1]?.shape ?? `STAGE ${stageNo}` : `STAGE ${stageNo}`)
+      : 'STAGE 1';
 
   return (
     <div className={`ap-page${isMono ? ' ap-mono' : ''}`}>
@@ -1045,21 +1145,18 @@ const ArrowPuzzleGame: React.FC = () => {
         <button className="ap-icon-btn" onClick={() => setScreen(stageNo !== null ? (isShapeMode ? 'shapes' : 'stages') : 'select')}>
           <ChevronLeft size={20} />
         </button>
-        {isMono ? (
-          <div className="ap-mono-counter">
-            <span className="ap-mono-counter-num">{moveCount}/{levelData.pieces.length}</span>
-            <span className="ap-mono-counter-label">Arrows</span>
-          </div>
-        ) : (
+        {!isMono && (
           <span className="ap-level-badge" style={diffMeta ? { color: diffMeta.color } as React.CSSProperties : undefined}>
-            {diffMeta ? diffMeta.label : stageNo !== null ? (isShapeMode ? shapeStages[stageNo - 1]?.shape ?? `Level ${stageNo}` : `Level ${stageNo}`) : 'Level 1'}
+            {levelLabel}
           </span>
         )}
         {isMono && (
-          <div className="ap-mono-hearts">
-            {Array.from({ length: MAX_HEARTS }, (_, i) => (
-              <span key={i} className={`ap-mono-heart${i < hearts ? ' alive' : ' dead'}`}>♥</span>
-            ))}
+          <div className="ap-mono-info">
+            <span className="ap-mono-info-level">{levelLabel}</span>
+            <div className="ap-mono-info-row">
+              <span className="ap-mono-info-time">{formatPlayTime(playSeconds)}</span>
+              <StageStars earned={computeStars(levelData.pieces.length, playSeconds)} size={10} />
+            </div>
           </div>
         )}
         <div className="ap-header-btns">
@@ -1082,6 +1179,7 @@ const ArrowPuzzleGame: React.FC = () => {
       )}
 
       <div className="ap-board-wrap">
+        <div className="ap-board-col">
         <svg className="ap-svg" viewBox={`0 0 ${svgW} ${svgH}`}>
           <defs>
             <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
@@ -1091,14 +1189,37 @@ const ArrowPuzzleGame: React.FC = () => {
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            {/* 화살표는 타일 윗면 안쪽에만 그려진다 — 틈을 지나는 구간은 잘려서 안 보인다 */}
-            <clipPath id="ap-tile-clip">
-              <path d={tilesPathD} />
-            </clipPath>
-            <linearGradient id="ap-tile-face" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={isMono ? '#2b2b2b' : '#22375c'} />
-              <stop offset="100%" stopColor={isMono ? '#1c1c1c' : '#1a2b4a'} />
-            </linearGradient>
+            {/* 화살표가 판 위에 살짝 떠 있는 느낌을 주는 그림자 */}
+            <filter id="ap-piece-shadow" x="-40%" y="-40%" width="180%" height="180%">
+              <feDropShadow dx="0" dy="6" stdDeviation="3" floodColor="#000" floodOpacity="0.7" />
+            </filter>
+            {/* 판 영역을 파인 홈처럼 — 안쪽에 그림자를 깔아 음각 느낌을 낸다 */}
+            <filter id="ap-board-inset" x="-30%" y="-30%" width="160%" height="160%">
+              <feComponentTransfer in="SourceAlpha">
+                <feFuncA type="table" tableValues="1 0" />
+              </feComponentTransfer>
+              <feGaussianBlur stdDeviation="5" />
+              <feOffset dx="0" dy="0" result="ap-board-inset-blur" />
+              <feFlood floodColor="#000" floodOpacity="0.28" />
+              <feComposite in2="ap-board-inset-blur" operator="in" />
+              <feComposite in2="SourceAlpha" operator="in" />
+              <feMerge>
+                <feMergeNode in="SourceGraphic" />
+                <feMergeNode />
+              </feMerge>
+            </filter>
+            {hasTiles && (
+              <>
+                {/* 화살표는 타일 윗면 안쪽에만 그려진다 — 틈을 지나는 구간은 잘려서 안 보인다 */}
+                <clipPath id="ap-tile-clip">
+                  <path d={tilesPathD} />
+                </clipPath>
+                <linearGradient id="ap-tile-face" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#22375c" />
+                  <stop offset="100%" stopColor="#1a2b4a" />
+                </linearGradient>
+              </>
+            )}
           </defs>
           {/* 판 영역 — 배경보다 살짝 밝게 깔아 "어디까지가 판인지" 눈에 들어오게 한다.
               화살촉이 목 길이만큼 튀어나와도 칸 절반 안쪽이라 판 밖으로 새지 않는다. */}
@@ -1106,30 +1227,64 @@ const ArrowPuzzleGame: React.FC = () => {
             x={PADDING - BOARD_INSET} y={PADDING - BOARD_INSET}
             width={gridCols * CELL_SIZE + BOARD_INSET * 2}
             height={gridRows * CELL_SIZE + BOARD_INSET * 2}
-            rx={14}
-            fill="rgba(255,255,255,0.045)"
-            stroke="rgba(255,255,255,0.09)" strokeWidth={1}
+            rx={BOARD_RADIUS}
+            fill="rgba(0,0,0,0.1)"
+            filter="url(#ap-board-inset)"
             pointerEvents="none"
           />
-          {/* 타일 옆면(두께) — 윗면을 살짝 아래로 복사해 깔면 높이가 있는 것처럼 보인다 */}
-          <path
-            d={tilesPathD}
-            transform={`translate(0 ${TILE_DEPTH})`}
-            fill={isMono ? '#070707' : '#0a1526'}
+          {/* 외곽 테두리를 안쪽으로 갈수록 옅어지는 여러 겹의 어두운 테로 감싸 깊게 파인 벽처럼 보이게 한다 */}
+          {BOARD_BEVEL_RINGS.map((ring, i) => (
+            <rect
+              key={i}
+              x={PADDING - BOARD_INSET + ring.inset} y={PADDING - BOARD_INSET + ring.inset}
+              width={gridCols * CELL_SIZE + BOARD_INSET * 2 - ring.inset * 2}
+              height={gridRows * CELL_SIZE + BOARD_INSET * 2 - ring.inset * 2}
+              rx={Math.max(2, BOARD_RADIUS - ring.inset)}
+              fill="none"
+              stroke={ring.color} strokeWidth={ring.sw}
+              pointerEvents="none"
+            />
+          ))}
+          {/* 벽이 끝나고 바닥이 시작되는 안쪽 경계에 얇은 하이라이트를 둘러 턱을 강조한다 */}
+          <rect
+            x={PADDING - BOARD_INSET + BOARD_BEVEL_DEPTH} y={PADDING - BOARD_INSET + BOARD_BEVEL_DEPTH}
+            width={gridCols * CELL_SIZE + BOARD_INSET * 2 - BOARD_BEVEL_DEPTH * 2}
+            height={gridRows * CELL_SIZE + BOARD_INSET * 2 - BOARD_BEVEL_DEPTH * 2}
+            rx={Math.max(2, BOARD_RADIUS - BOARD_BEVEL_DEPTH)}
+            fill="none"
+            stroke="rgba(255,255,255,0.04)" strokeWidth={1}
             pointerEvents="none"
           />
-          {/* 타일 윗면 */}
-          <path
-            d={tilesPathD}
-            fill="url(#ap-tile-face)"
-            stroke={isMono ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.08)'}
-            strokeWidth={1}
-            pointerEvents="none"
-          />
-          <g clipPath="url(#ap-tile-clip)">
-            {activePieces.map(p => renderPiece(p, true))}
-            {escapingPieces.map(p => renderPiece(p, false))}
-          </g>
+          {hasTiles ? (
+            <>
+              {/* 타일 옆면(두께) — 윗면을 살짝 아래로 복사해 깔면 높이가 있는 것처럼 보인다 */}
+              <path
+                d={tilesPathD}
+                transform={`translate(0 ${TILE_DEPTH})`}
+                fill="#0a1526"
+                pointerEvents="none"
+              />
+              {/* 타일 윗면 */}
+              <path
+                d={tilesPathD}
+                fill="url(#ap-tile-face)"
+                stroke="rgba(255,255,255,0.08)"
+                strokeWidth={1}
+                pointerEvents="none"
+              />
+            </>
+          ) : null}
+          {hasTiles ? (
+            <g clipPath="url(#ap-tile-clip)">
+              {activePieces.map(p => renderPiece(p, true))}
+              {escapingPieces.map(p => renderPiece(p, false))}
+            </g>
+          ) : (
+            <>
+              {activePieces.map(p => renderPiece(p, true))}
+              {escapingPieces.map(p => renderPiece(p, false))}
+            </>
+          )}
           {bursts.map(b => (
             <g key={b.id} transform={`translate(${b.x} ${b.y})`} pointerEvents="none">
               <circle
@@ -1152,6 +1307,14 @@ const ArrowPuzzleGame: React.FC = () => {
           ))}
         </svg>
 
+        {isMono && (
+          <div className="ap-mono-hearts-bar">
+            <Heart size={20} fill="#e11d48" stroke="#e11d48" strokeWidth={2} />
+            <span>× {hearts}</span>
+          </div>
+        )}
+        </div>
+
         {isCleared && (
           <div className="ap-clear-overlay">
             <div className="ap-clear-card">
@@ -1159,10 +1322,14 @@ const ArrowPuzzleGame: React.FC = () => {
               <h2>클리어!</h2>
               <p>{isMono ? '화살표' : '젤리'} {moveCount}개를 모두 빼냈습니다</p>
               {stageNo !== null && !isShapeMode && (
-                <div className="ap-reward-row">
-                  <div className="ap-reward-coin">🪙 +{CLEAR_COIN_REWARD}</div>
-                  <div className="ap-reward-power">⚡ 퍼즐력 +1</div>
-                </div>
+                <>
+                  <StageStars earned={lastStars} size={26} />
+                  <p className="ap-clear-time">{formatPlayTime(playSeconds)}</p>
+                  <div className="ap-reward-row">
+                    <div className="ap-reward-coin">🪙 +{CLEAR_COIN_REWARD}</div>
+                    <div className="ap-reward-power">⚡ 퍼즐력 +1</div>
+                  </div>
+                </>
               )}
               <div className="ap-clear-btns">
                 {stageNo !== null && isShapeMode ? (
