@@ -34,7 +34,19 @@ const TILE_RADIUS = 11;
 const TILE_DEPTH = 7;         // 타일 아래로 깔리는 두께 — 높이감을 만든다
 const GLOSS_RATIO = 0.26;    // 윗면 광택 (본체 두께 대비)
 const SHADE_RATIO = 0.44;    // 아랫면 그늘
-const ESCAPE_SPEED = 9;
+const ESCAPE_SPEED = 17;
+// 탈출 시작 직전 — 활시위를 당기듯 천천히 뒤로 모았다가, 그 자리에서 바로 튕겨 나가는 예비 동작.
+// 원위치로 먼저 돌아온 뒤에 출발하는 게 아니라, 당겨진 채로 있다가 발사 순간 그대로 전진이 붙는다
+// — 당겨진 만큼(ANTICIPATION_PULL)을 빠른 ESCAPE_SPEED 가 순식간에 통과하면서 "쑝" 하고 튀어나간다.
+const ANTICIPATION_TIME = 0.3;   // 초 — 뒤로 당기는 데 걸리는 시간
+const ANTICIPATION_PULL = 0.16;  // 칸 단위 — 얼마나 뒤로 당겨지는지
+const ANTICIPATION_SQUASH = 0.35; // 뒤로 당겨질수록 눌려서 옆으로 퍼지는 정도 — 높이는 줄고 너비는 는다
+
+/** 뒤로 당기는 예비 동작의 frac — 처음엔 빠르게 당겨지다가 끝으로 갈수록 천천히 늦춰진다(ease-out). */
+function anticipationFrac(t: number): number {
+  const p = Math.min(1, t / ANTICIPATION_TIME);
+  return -ANTICIPATION_PULL * (1 - (1 - p) ** 2);
+}
 const BUMP_OUT = 0.11;       // 막힐 때까지 밀고 나가는 시간(초)
 const BUMP_BACK = 0.17;      // 물러나는 시간 — 나갈 때보다 느려야 "막혔다"로 읽힌다
 const WOBBLE_TIME = 0.42;    // 부딪힌 뒤 출렁임이 잦아드는 시간(초)
@@ -618,7 +630,14 @@ const ArrowPuzzleGame: React.FC = () => {
     for (const ep of escapingRef.current) {
       let { cells, frac } = ep;
       const t = ep.t + delta;
-      frac += ESCAPE_SPEED * delta;
+      if (t < ANTICIPATION_TIME) {
+        // 힘을 모으는 구간 — 활시위를 당기듯 천천히 뒤로 모은다
+        frac = anticipationFrac(t);
+      } else {
+        // 당겨진 자리(음수) 그대로 발사 — 원위치로 돌아오는 구간 없이 빠른 속도가
+        // 그 간격을 순식간에 통과하면서 "쑝" 하고 튀어나가는 느낌을 만든다
+        frac += ESCAPE_SPEED * delta;
+      }
       while (frac >= 1) {
         const newHead = advance(cells[cells.length - 1], ep.exitDir);
         cells = [...cells.slice(1), newHead];
@@ -890,12 +909,14 @@ const ArrowPuzzleGame: React.FC = () => {
     const head = piece.cells[piece.cells.length - 1];
 
     // 물컹거림: 두께를 흔든다. 부피가 일정한 젤리라 두꺼워지면 짧아 보이고
-    // 얇아지면 늘어난 것처럼 보인다 — 스쿼시&스트레치.
+    // 얇아지면 늘어난 것처럼 보인다 — 스쿼시&스트레치. 몸통에는 적용하지 않는다.
     let squish = 0;
     if (isEscaping) {
-      // 튀어나가는 순간 한 번 뭉쳤다가 얇게 늘어난 채로 빠져나간다
-      const et = (piece as EscapingPiece).t;
-      squish = 0.34 * wobble(et, 0.13, 7.5) - 0.1;
+      const ep = piece as EscapingPiece;
+      if (ep.frac >= 0) {
+        // 튀어나가는 순간 한 번 뭉쳤다가 얇게 늘어난 채로 빠져나간다
+        squish = 0.34 * wobble(ep.t, 0.13, 7.5) - 0.1;
+      }
     } else if (isBumping) {
       squish = bump!.phase === 'out'
         ? -0.12                              // 밀고 나갈 땐 얇게 늘어남
@@ -904,6 +925,11 @@ const ArrowPuzzleGame: React.FC = () => {
     const sw = STROKE_W * (1 + squish);
     // Mono 컨셉은 젤리보다 가는 흰 선 하나로만 그린다 — 두께 비율만 줄인다.
     const dsw = isMono ? sw * (13 / STROKE_W) : sw;
+
+    // 힘을 모으는 구간 — 화살촉만 뒤로 당겨진 만큼 눌려서 옆으로 퍼진다(높이↓ 너비↑). 몸통 굵기는 그대로 둔다.
+    const anticipationSquash = isEscaping && (piece as EscapingPiece).frac < 0
+      ? (-(piece as EscapingPiece).frac / ANTICIPATION_PULL) * ANTICIPATION_SQUASH
+      : 0;
 
     // 타일 컨셉은 화살촉이 타일 clip 안에 들어와야 하므로 목을 짧게, 그 외는 넉넉하게 잡는다.
     const neck = hasTiles ? NECK_TILE : NECK_OPEN;
@@ -929,7 +955,7 @@ const ArrowPuzzleGame: React.FC = () => {
       ? neckTipAnimated(piece.cells, piece.exitDir, frac, neck)
       : neckTipStatic(head, piece.exitDir, neck);
     const showArrow = isEscaping || onBoard(head[0], head[1], gridCols, gridRows);
-    const arrowPts = arrowPointsFromTip(arrowTip, piece.exitDir, 1 + squish * 0.7);
+    const arrowPts = arrowPointsFromTip(arrowTip, piece.exitDir, 1 + squish + anticipationSquash);
     return (
       <g key={piece.id} className="ap-piece"
         onClick={clickable ? () => handlePieceClick(piece as PieceData) : undefined}
