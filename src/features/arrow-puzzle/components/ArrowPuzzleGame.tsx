@@ -38,7 +38,7 @@ const ESCAPE_SPEED = 17;
 // 탈출 시작 직전 — 활시위를 당기듯 천천히 뒤로 모았다가, 그 자리에서 바로 튕겨 나가는 예비 동작.
 // 원위치로 먼저 돌아온 뒤에 출발하는 게 아니라, 당겨진 채로 있다가 발사 순간 그대로 전진이 붙는다
 // — 당겨진 만큼(ANTICIPATION_PULL)을 빠른 ESCAPE_SPEED 가 순식간에 통과하면서 "쑝" 하고 튀어나간다.
-const ANTICIPATION_TIME = 0.3;   // 초 — 뒤로 당기는 데 걸리는 시간
+const ANTICIPATION_TIME = 0.18;  // 초 — 뒤로 당기는 데 걸리는 시간
 const ANTICIPATION_PULL = 0.16;  // 칸 단위 — 얼마나 뒤로 당겨지는지
 const ANTICIPATION_SQUASH = 0.35; // 뒤로 당겨질수록 눌려서 옆으로 퍼지는 정도 — 높이는 줄고 너비는 는다
 
@@ -47,6 +47,10 @@ function anticipationFrac(t: number): number {
   const p = Math.min(1, t / ANTICIPATION_TIME);
   return -ANTICIPATION_PULL * (1 - (1 - p) ** 2);
 }
+
+// 레벨 시작 연출 — CSS 쪽 apPieceDraw 애니메이션 길이와 맞춰 둔다.
+const PIECE_DRAW_MS = 380;       // 선이 꼬리에서 머리까지 그어지는 데 걸리는 시간
+const ARROW_POP_OVERLAP_MS = 80; // 선이 다 그어지기 살짝 전에 화살촉이 붙기 시작 — 더 경쾌하게
 const BUMP_OUT = 0.11;       // 막힐 때까지 밀고 나가는 시간(초)
 const BUMP_BACK = 0.17;      // 물러나는 시간 — 나갈 때보다 느려야 "막혔다"로 읽힌다
 const WOBBLE_TIME = 0.42;    // 부딪힌 뒤 출렁임이 잦아드는 시간(초)
@@ -99,6 +103,15 @@ interface BurstInfo {
   y: number;
   color: string;
   particles: { tx: number; ty: number }[];
+}
+
+/** 활시위 당김이 끝나고 실제로 튕겨 나가는 순간(frac 이 음수에서 0을 넘는 순간) 뒤로 남는 스피드라인 잔상. */
+interface TrailInfo {
+  id: string;
+  x: number;
+  y: number;
+  angleDeg: number;
+  color: string;
 }
 
 const DIFFICULTIES: Difficulty[] = ['lv1', 'lv2', 'lv3', 'lv4', 'lv5', 'lv6', 'lv7', 'lv8'];
@@ -574,11 +587,16 @@ const ArrowPuzzleGame: React.FC = () => {
   const [playSeconds, setPlaySeconds] = useState(0);
   // 피스가 판을 완전히 빠져나가는 순간의 타격감 연출
   const [bursts, setBursts] = useState<BurstInfo[]>([]);
+  // 튕겨 나가는 순간 뒤로 남는 스피드라인 잔상
+  const [trails, setTrails] = useState<TrailInfo[]>([]);
   const hitstopUntilRef = useRef(0);
   const { concept, setConcept } = useArrowConcept();
   const isMono = concept === 'mono';
   const hasTiles = concept === 'way-tile';
   const [showShop, setShowShop] = useState(false);
+  // 레벨을 새로 불러올 때마다 올라가는 값 — 피스 <g> 의 key 에 섞어서 같은 id라도
+  // 등장 연출(ap-piece-enter)이 다시 재생되도록 강제 리마운트시킨다
+  const [resetToken, setResetToken] = useState(0);
 
   const started = useRef(false);
   const escapingRef = useRef<EscapingPiece[]>([]);
@@ -627,7 +645,9 @@ const ArrowPuzzleGame: React.FC = () => {
 
     const updated: EscapingPiece[] = [];
     const newBursts: BurstInfo[] = [];
+    const newTrails: TrailInfo[] = [];
     for (const ep of escapingRef.current) {
+      const prevFrac = ep.frac;
       let { cells, frac } = ep;
       const t = ep.t + delta;
       if (t < ANTICIPATION_TIME) {
@@ -637,6 +657,16 @@ const ArrowPuzzleGame: React.FC = () => {
         // 당겨진 자리(음수) 그대로 발사 — 원위치로 돌아오는 구간 없이 빠른 속도가
         // 그 간격을 순식간에 통과하면서 "쑝" 하고 튀어나가는 느낌을 만든다
         frac += ESCAPE_SPEED * delta;
+      }
+      // 당겨진 자리(음수)에서 0을 넘어서는 바로 그 프레임 — 실제로 튕겨 나가는 순간이다.
+      // 여기서 진행 방향 반대쪽으로 짧게 남았다 사라지는 스피드라인을 남겨서 속도감을 강조한다.
+      if (prevFrac < 0 && frac >= 0) {
+        const head = cells[cells.length - 1];
+        const [hx, hy] = cellCenter(head[0], head[1]);
+        const [ox, oy] = dirOffset(ep.exitDir, CELL_SIZE / 2);
+        const [ddx, ddy] = dirOffset(ep.exitDir, 1);
+        const angleDeg = (Math.atan2(ddy, ddx) * 180) / Math.PI;
+        newTrails.push({ id: `${ep.id}-trail-${time}`, x: hx + ox, y: hy + oy, angleDeg, color: ep.color });
       }
       while (frac >= 1) {
         const newHead = advance(cells[cells.length - 1], ep.exitDir);
@@ -664,6 +694,7 @@ const ArrowPuzzleGame: React.FC = () => {
     escapingRef.current = updated;
     setEscapingPieces([...updated]);
     if (BURST_FX && newBursts.length > 0) setBursts(prev => [...prev, ...newBursts]);
+    if (newTrails.length > 0) setTrails(prev => [...prev, ...newTrails]);
 
     // 막힌 피스: 앞으로 밀고 나가다 부딪히면 되돌아온다.
     // 돌아올 때를 조금 느리게 해서 "튕겨 나왔다"가 아니라 "밀렸다 물러난다"로 읽히게.
@@ -775,6 +806,7 @@ const ArrowPuzzleGame: React.FC = () => {
     if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     escapingRef.current = [];
     bumpRef.current = null;
+    setResetToken(t => t + 1);
     setLevelData(newLevel);
     setActivePieces(newLevel.pieces.map(p => ({ ...p, cells: [...p.cells] })));
     setEscapingPieces([]);
@@ -898,7 +930,14 @@ const ArrowPuzzleGame: React.FC = () => {
     }
   }, [activePieces, gridCols, gridRows, startEscape, isFailed, isMono]);
 
-  const renderPiece = (piece: PieceData | EscapingPiece, clickable: boolean) => {
+  // 피스가 많아도 전체 등장 시간이 너무 늘어지지 않도록, 총 스태거 시간에 상한(320ms)을 두고
+  // 그 안에서 균등하게 나눈다.
+  const pieceEnterDelay = (index: number, total: number): number => {
+    const step = total > 0 ? Math.min(40, 320 / total) : 0;
+    return Math.round(index * step);
+  };
+
+  const renderPiece = (piece: PieceData | EscapingPiece, clickable: boolean, enterDelay?: number) => {
     const isEscaping = 'frac' in piece;
     // 탈출 중이거나, 막혀서 밀고 나갔다 돌아오는 중이면 같은 방식으로 전진 경로를 그린다
     const frac = isEscaping
@@ -956,45 +995,57 @@ const ArrowPuzzleGame: React.FC = () => {
       : neckTipStatic(head, piece.exitDir, neck);
     const showArrow = isEscaping || onBoard(head[0], head[1], gridCols, gridRows);
     const arrowPts = arrowPointsFromTip(arrowTip, piece.exitDir, 1 + squish + anticipationSquash);
+
+    // 레벨 시작 연출 — 꼬리에서 머리로 선이 그어지듯 등장한 뒤, 화살촉이 톡 붙는다.
+    // pathLength={100} 으로 정규화해서 실제 피스 길이와 무관하게 같은 dash 값을 쓸 수 있다.
+    const isEntering = enterDelay !== undefined;
+    const drawProps = isEntering
+      ? { className: 'ap-piece-draw-path', pathLength: 100, style: { animationDelay: `${enterDelay}ms` } }
+      : {};
+    const arrowDrawProps = isEntering
+      ? { className: 'ap-piece-draw-arrow', style: { animationDelay: `${enterDelay! + PIECE_DRAW_MS - ARROW_POP_OVERLAP_MS}ms` } }
+      : {};
+
     return (
-      <g key={piece.id} className="ap-piece"
+      <g key={isEntering ? `${piece.id}-${resetToken}` : piece.id}
+        className="ap-piece"
         onClick={clickable ? () => handlePieceClick(piece as PieceData) : undefined}
         style={{ cursor: clickable ? 'pointer' : 'default' }}>
         {isMono ? (
           <g filter="url(#ap-piece-shadow)">
             {/* 미니멀 라인아트: 색 채우기·광택 없이 흰 선 하나로만 그린다 */}
             <path d={pathD} stroke="#fff" strokeWidth={dsw} fill="none"
-              strokeLinecap="round" strokeLinejoin="round" />
+              strokeLinecap="round" strokeLinejoin="round" {...drawProps} />
             {showArrow && (
-              <polygon points={arrowPts} fill="#fff" stroke="#fff" strokeWidth={dsw * 0.24} strokeLinejoin="round" />
+              <polygon points={arrowPts} fill="#fff" stroke="#fff" strokeWidth={dsw * 0.24} strokeLinejoin="round" {...arrowDrawProps} />
             )}
           </g>
         ) : (
           <>
             {/* 바닥에 깔리는 번짐 — 젤리가 판 위에 떠 있는 느낌 */}
             <path d={pathD} stroke={piece.color} strokeWidth={sw + 7} fill="none"
-              strokeLinecap="round" strokeLinejoin="round" opacity={0.16} />
+              strokeLinecap="round" strokeLinejoin="round" opacity={0.16} {...drawProps} />
 
             {/* 젤리 본체 */}
             <path d={pathD} stroke={piece.color} strokeWidth={sw} fill="none"
-              strokeLinecap="round" strokeLinejoin="round" />
+              strokeLinecap="round" strokeLinejoin="round" {...drawProps} />
 
             {JELLY_FLOW && !isEscaping && (
               <JellyFlow d={pathD} color={piece.color} sw={sw} id={piece.id} cellCount={piece.cells.length} />
             )}
             {showArrow && (
               <polygon points={arrowPts} fill={piece.color}
-                stroke={piece.color} strokeWidth={sw * 0.24} strokeLinejoin="round" />
+                stroke={piece.color} strokeWidth={sw * 0.24} strokeLinejoin="round" {...arrowDrawProps} />
             )}
 
             {/* 아랫면 그늘과 윗면 광택. 본체보다 좁고 덜 밀어내서 밖으로 새지 않는다 */}
             <g opacity={0.5}>
               <path d={pathD} stroke="#000" strokeWidth={sw * SHADE_RATIO} fill="none"
                 strokeLinecap="round" strokeLinejoin="round"
-                opacity={0.22} transform={`translate(1.2 ${sw * 0.19})`} />
+                opacity={0.22} transform={`translate(1.2 ${sw * 0.19})`} {...drawProps} />
               <path d={pathD} stroke="#fff" strokeWidth={sw * GLOSS_RATIO} fill="none"
                 strokeLinecap="round" strokeLinejoin="round"
-                opacity={0.55} transform={`translate(-1.4 -${sw * 0.24})`} />
+                opacity={0.55} transform={`translate(-1.4 -${sw * 0.24})`} {...drawProps} />
             </g>
           </>
         )}
@@ -1302,12 +1353,12 @@ const ArrowPuzzleGame: React.FC = () => {
           ) : null}
           {hasTiles ? (
             <g clipPath="url(#ap-tile-clip)">
-              {activePieces.map(p => renderPiece(p, true))}
+              {activePieces.map((p, i) => renderPiece(p, true, pieceEnterDelay(i, activePieces.length)))}
               {escapingPieces.map(p => renderPiece(p, false))}
             </g>
           ) : (
             <>
-              {activePieces.map(p => renderPiece(p, true))}
+              {activePieces.map((p, i) => renderPiece(p, true, pieceEnterDelay(i, activePieces.length)))}
               {escapingPieces.map(p => renderPiece(p, false))}
             </>
           )}
@@ -1327,6 +1378,31 @@ const ArrowPuzzleGame: React.FC = () => {
                   r={4}
                   fill={isMono ? '#fff' : b.color}
                   style={{ '--tx': p.tx, '--ty': p.ty } as React.CSSProperties}
+                />
+              ))}
+            </g>
+          ))}
+          {trails.map(tr => (
+            <g key={tr.id} transform={`translate(${tr.x} ${tr.y}) rotate(${tr.angleDeg})`} pointerEvents="none">
+              {/* 피스 색과 겹치면(특히 흰색 Mono) 잘 안 보여서, 피스 색과 무관하게
+                  밝은 하늘색 "에너지" 톤으로 고정해 시원한 느낌을 강조한다. */}
+              {[
+                { len: 46, y: -8, w: 4, o: 0.9 },
+                { len: 34, y: 0, w: 5, o: 0.7 },
+                { len: 24, y: 8, w: 3.5, o: 0.5 },
+              ].map((s, i) => (
+                <rect
+                  key={i}
+                  className="ap-speedline"
+                  x={-s.len}
+                  y={-s.w / 2 + s.y}
+                  width={s.len}
+                  height={s.w}
+                  rx={s.w / 2}
+                  fill="#bff0ff"
+                  opacity={s.o}
+                  style={{ animationDelay: `${i * 14}ms` }}
+                  onAnimationEnd={i === 0 ? () => setTrails(prev => prev.filter(x => x.id !== tr.id)) : undefined}
                 />
               ))}
             </g>
