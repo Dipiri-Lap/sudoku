@@ -2442,3 +2442,53 @@ html.theme-gameboy .theme-toggle-btn {
 @media (prefers-reduced-motion: reduce) {
   .frame-electric, .frame-lava, .frame-galaxy { animation: none; }
 }
+
+/* 에픽 상위 테두리 — 회전(오로라 회전·사파이어·독기)과 빛줄기(루비) */
+@property --frame-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes frameSpin {
+  to { --frame-angle: 360deg; }
+}
+@keyframes frameSweep {
+  0%   { background-position: 0% 0, 0 0, 0% 50%; }
+  55%  { background-position: 100% 0, 0 0, 0% 50%; }
+  100% { background-position: 100% 0, 0 0, 0% 50%; }
+}
+@keyframes frameToxic {
+  0%, 100% { box-shadow: 0 0 6px rgba(74, 222, 128, 0.9), 0 0 12px rgba(74, 222, 128, 0.5); }
+  50%      { box-shadow: 0 0 6px rgba(168, 85, 247, 0.9), 0 0 12px rgba(168, 85, 247, 0.5); }
+}
+.frame-aurorax {
+  animation: frameSpin 4s linear infinite;
+}
+.frame-ruby {
+  animation: frameSweep 4s ease-in-out infinite;
+}
+.frame-toxic {
+  animation: frameSpin 3s linear infinite, frameToxic 1.8s ease-in-out infinite;
+}
+/* 사파이어: 바깥 테두리는 시계 방향, 안쪽 얇은 링(::before)은 반대 방향으로 돈다.
+   링은 아바타 그림 가장자리 위에 겹친다. */
+.frame-sapphire {
+  position: relative;
+  animation: frameSpin 6s linear infinite;
+}
+.frame-sapphire::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from calc(360deg - var(--frame-angle, 0deg)), #e0f2fe, #38bdf8, #0ea5e9, #e0f2fe);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .frame-aurorax, .frame-ruby, .frame-sapphire, .frame-toxic { animation: none; }
+}

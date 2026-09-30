@@ -20,13 +20,23 @@ export interface AvatarFrame {
      * 움직이는 테두리. 그라데이션이 흐르고(index.css 의 frameShimmer) 종류별로 빛이 깜빡이거나 숨 쉰다.
      * 쓰는 곳에서 frameClass 를 함께 붙여야 움직인다.
      */
-    anim?: 'shimmer' | 'electric' | 'lava' | 'galaxy';
+    anim?: FrameAnim;
+    /** 테두리 위를 지나가는 빛줄기 레이어(gradient 문자열). anim 이 'ruby' 일 때 쓴다 */
+    sweep?: string;
     price?: number;
 }
+
+export type FrameAnim =
+    | 'shimmer' | 'electric' | 'lava' | 'galaxy'      // 그라데이션이 좌우로 흐르는 종류
+    | 'aurorax' | 'ruby' | 'sapphire' | 'toxic';       // 회전·빛줄기·이중 링 종류
+
+/** 그라데이션을 키워서 흘려 보내지 않는 종류 (conic 회전이나 제자리 빛줄기) */
+const STATIC_SIZE_ANIMS: FrameAnim[] = ['aurorax', 'ruby', 'sapphire', 'toxic'];
 
 export const FRAME_PRICE_COMMON = 100;
 export const FRAME_PRICE_RARE = 200;
 export const FRAME_PRICE_EPIC = 300;
+export const FRAME_PRICE_EPIC_PLUS = 400;
 
 export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'yellow', name: '노랑', color: '#fde047' },
@@ -80,6 +90,21 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'goldtwin', name: '이중 금테', color: '#e6b422', price: FRAME_PRICE_EPIC,
         gradient: 'linear-gradient(135deg, #fff3b0 0%, #e6b422 45%, #a8740a 100%)',
         glow: '0 0 0 2px #fff3b0, 0 0 0 4px #b8860b, 0 0 10px rgba(230, 180, 34, 0.6)' },
+    // 유료(에픽 상위) — 테두리가 돌거나, 빛줄기가 지나가거나, 두 겹이 엇갈려 돈다
+    // conic 의 각도는 CSS 변수 --frame-angle (index.css 의 @property). 미지원 브라우저는 0deg 고정으로 보인다.
+    { id: 'aurorax', name: '오로라 회전', color: '#5eead4', price: FRAME_PRICE_EPIC_PLUS,
+        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #5eead4, #38bdf8, #818cf8, #e879f9, #5eead4)',
+        glow: '0 0 6px rgba(94, 234, 212, 0.7), 0 0 12px rgba(232, 121, 249, 0.4)', anim: 'aurorax' },
+    { id: 'ruby', name: '루비', color: '#dc2626', price: FRAME_PRICE_EPIC_PLUS,
+        gradient: 'linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%)',
+        sweep: 'linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.95) 50%, transparent 62%)',
+        glow: '0 0 6px rgba(220, 38, 38, 0.8), 0 0 12px rgba(127, 29, 29, 0.5)', anim: 'ruby' },
+    { id: 'sapphire', name: '사파이어', color: '#3b82f6', price: FRAME_PRICE_EPIC_PLUS,
+        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #1e3a8a, #3b82f6, #93c5fd, #3b82f6, #1e3a8a)',
+        glow: '0 0 6px rgba(59, 130, 246, 0.8), 0 0 12px rgba(125, 211, 252, 0.45)', anim: 'sapphire' },
+    { id: 'toxic', name: '독기', color: '#4ade80', price: FRAME_PRICE_EPIC_PLUS,
+        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #4ade80, #166534, #a855f7, #581c87, #4ade80)',
+        glow: '0 0 6px rgba(74, 222, 128, 0.85), 0 0 12px rgba(168, 85, 247, 0.5)', anim: 'toxic' },
 ];
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';
@@ -107,11 +132,13 @@ export const frameStyle = (
     if (!f.gradient) {
         return { border: `${width}px solid ${f.color}`, backgroundColor: innerBg, boxShadow };
     }
-    // 움직이는 테두리는 그라데이션을 3배로 키워 background-position 으로 흘려 보낸다
-    const size = f.anim ? '300% 300%' : '100% 100%';
+    // 흐르는 테두리는 그라데이션을 3배로 키워 background-position 으로 흘려 보낸다
+    const size = f.anim && !STATIC_SIZE_ANIMS.includes(f.anim) ? '300% 300%' : '100% 100%';
+    // 빛줄기는 맨 위 레이어(250% 폭)로 깔고 위치만 애니메이션한다 — 아바타 그림이 안쪽을 덮으므로 테두리에만 보인다
+    const sweepLayer = f.sweep ? `${f.sweep} 0% 0 / 250% 100% no-repeat border-box, ` : '';
     return {
         border: `${width}px solid transparent`,
-        background: `linear-gradient(${innerBg}, ${innerBg}) 0 0 / 100% 100% no-repeat padding-box, ${f.gradient} 0% 50% / ${size} no-repeat border-box`,
+        background: `${sweepLayer}linear-gradient(${innerBg}, ${innerBg}) 0 0 / 100% 100% no-repeat padding-box, ${f.gradient} 0% 50% / ${size} no-repeat border-box`,
         boxShadow,
     };
 };
