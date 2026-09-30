@@ -408,7 +408,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             width: '70px',
                             height: '70px',
                             borderRadius: '16px',
-                            ...frameStyle(avatarFrame, 3, '#cbd5e1', '0 4px 10px rgba(0,0,0,0.2)'),
+                            ...frameStyle(avatarFrame, 3, '#cbd5e1', '0 4px 10px rgba(0,0,0,0.2)', 16),
                             overflow: 'hidden',
                             flexShrink: 0,
                         }}>
@@ -682,7 +682,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                     aspectRatio: '1',
                                                     borderRadius: '12px',
                                                     overflow: 'hidden',
-                                                    ...frameStyle(f.id, 4, '#334155', isSelected ? '0 0 0 3px #4ade80' : undefined),
+                                                    ...frameStyle(f.id, 4, '#334155', isSelected ? '0 0 0 3px #4ade80' : undefined, 12),
                                                     filter: unlocked ? 'none' : 'brightness(0.65)',
                                                     transition: 'transform 0.1s',
                                                     transform: isSelected ? 'scale(1.05)' : 'scale(1)',
@@ -1181,7 +1181,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             <div className={frameClass(f.id)} style={{
                                 width: '72px', height: '72px', borderRadius: '14px',
                                 overflow: 'hidden', margin: '0 auto 0.75rem',
-                                ...frameStyle(f.id, 4, '#334155', '0 4px 12px rgba(0,0,0,0.3)')
+                                ...frameStyle(f.id, 4, '#334155', '0 4px 12px rgba(0,0,0,0.3)', 14)
                             }} />
                             <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>{f.name} 테두리 해제</div>
                             <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)', marginBottom: '0.75rem', lineHeight: 1.8 }}>

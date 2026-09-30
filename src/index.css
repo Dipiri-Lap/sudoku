@@ -2480,7 +2480,8 @@ html.theme-gameboy .theme-toggle-btn {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: inherit;
+  /* 호스트의 안쪽(패딩 박스) 모서리 반지름 = 바깥 반지름 - 테두리 두께. frameStyle 이 --frame-ir 로 넘겨 준다 */
+  border-radius: var(--frame-ir, 12px);
   padding: 2px;
   background: conic-gradient(from calc(360deg - var(--frame-angle, 0deg)), #e0f2fe, #38bdf8, #0ea5e9, #e0f2fe);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);

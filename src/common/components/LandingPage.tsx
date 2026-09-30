@@ -345,7 +345,7 @@ const LandingPage: React.FC = () => {
                                     width: '60px',
                                     height: '60px',
                                     borderRadius: '16px',
-                                    ...frameStyle(avatarFrame, 3, '#cbd5e1', '0 2px 8px rgba(0,0,0,0.2)'),
+                                    ...frameStyle(avatarFrame, 3, '#cbd5e1', '0 2px 8px rgba(0,0,0,0.2)', 16),
                                     overflow: 'hidden',
                                     display: 'flex',
                                     alignItems: 'center',

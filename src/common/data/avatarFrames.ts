@@ -100,7 +100,7 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
         sweep: 'linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.95) 50%, transparent 62%)',
         glow: '0 0 6px rgba(220, 38, 38, 0.8), 0 0 12px rgba(127, 29, 29, 0.5)', anim: 'ruby' },
     { id: 'sapphire', name: '사파이어', color: '#3b82f6', price: FRAME_PRICE_EPIC_PLUS,
-        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #1e3a8a, #3b82f6, #93c5fd, #3b82f6, #1e3a8a)',
+        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #2563eb, #60a5fa, #dbeafe, #60a5fa, #2563eb)',
         glow: '0 0 6px rgba(59, 130, 246, 0.8), 0 0 12px rgba(125, 211, 252, 0.45)', anim: 'sapphire' },
     { id: 'toxic', name: '독기', color: '#4ade80', price: FRAME_PRICE_EPIC_PLUS,
         gradient: 'conic-gradient(from var(--frame-angle, 0deg), #4ade80, #166534, #a855f7, #581c87, #4ade80)',
@@ -126,6 +126,8 @@ export const frameStyle = (
     width: number,
     innerBg = '#cbd5e1',
     baseShadow?: string,
+    /** 상자의 바깥 모서리 반지름(px). 사파이어의 안쪽 링이 이미지 모서리와 맞도록 쓴다 */
+    radius?: number,
 ): CSSProperties => {
     const f = findFrame(id);
     const boxShadow = [baseShadow, f.glow].filter(Boolean).join(', ') || undefined;
@@ -136,11 +138,13 @@ export const frameStyle = (
     const size = f.anim && !STATIC_SIZE_ANIMS.includes(f.anim) ? '300% 300%' : '100% 100%';
     // 빛줄기는 맨 위 레이어(250% 폭)로 깔고 위치만 애니메이션한다 — 아바타 그림이 안쪽을 덮으므로 테두리에만 보인다
     const sweepLayer = f.sweep ? `${f.sweep} 0% 0 / 250% 100% no-repeat border-box, ` : '';
+    const innerRadius = radius === undefined ? {} : { '--frame-ir': `${Math.max(radius - width, 0)}px` };
     return {
+        ...innerRadius,
         border: `${width}px solid transparent`,
         background: `${sweepLayer}linear-gradient(${innerBg}, ${innerBg}) 0 0 / 100% 100% no-repeat padding-box, ${f.gradient} 0% 50% / ${size} no-repeat border-box`,
         boxShadow,
-    };
+    } as CSSProperties;
 };
 
 /** 움직이는 테두리에 붙일 클래스. 랭킹처럼 수십 개가 한꺼번에 보이는 곳에는 붙이지 않는다. */
