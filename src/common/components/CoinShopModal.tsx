@@ -238,6 +238,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
 
                     {/* 보유 코인 */}
                     <div style={{
+                        flexShrink: 0,
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         padding: '0.7rem 1rem',
                         backgroundColor: '#1e293b',
@@ -257,6 +258,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                             onClick={() => handlePurchase(STARTER_PACK)}
                             disabled={purchasing}
                             style={{
+                                flexShrink: 0,
                                 position: 'relative', display: 'block', width: '100%',
                                 aspectRatio: '1020 / 510',
                                 // 글자를 뷰포트가 아니라 배너 폭에 맞춘다.
@@ -309,6 +311,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
 
                     {/* 코인 구매 */}
                     <div style={{
+                        flexShrink: 0,
                         padding: '1rem',
                         backgroundColor: '#1e293b',
                         borderRadius: '12px',
@@ -386,6 +389,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
 
                     {/* 광고 보기 */}
                     <div style={{
+                        flexShrink: 0,
                         padding: '1rem',
                         backgroundColor: '#1e293b',
                         borderRadius: '12px',
