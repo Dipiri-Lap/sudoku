@@ -13,7 +13,7 @@ export const DifficultyLevels: Record<Difficulty, number> = {
     Master: 22,
 };
 
-export function generatePuzzles(difficulty: Difficulty): { puzzle: Grid; solution: Grid } {
+export function generatePuzzles(difficulty: Difficulty, givens?: number): { puzzle: Grid; solution: Grid } {
     // 1. Create empty grid
     const grid: Grid = Array(9).fill(null).map(() => Array(9).fill(null));
 
@@ -28,7 +28,7 @@ export function generatePuzzles(difficulty: Difficulty): { puzzle: Grid; solutio
 
     // 4. Remove cells to create the puzzle
     const puzzle = solution.map(row => [...row]);
-    const cellsToRemove = 81 - DifficultyLevels[difficulty];
+    const cellsToRemove = 81 - (givens ?? DifficultyLevels[difficulty]);
     removeCells(puzzle, cellsToRemove);
 
     return { puzzle, solution };

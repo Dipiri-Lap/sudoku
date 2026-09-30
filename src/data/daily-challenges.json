@@ -1,0 +1,19 @@
+[
+  {
+    "id": "daily_2026-10",
+    "type": "STAGE",
+    "game": "daily",
+    "title": "🧟 스도쿠 좀비",
+    "condition": "2026년 10월 오늘의 퍼즐 전부 클리어",
+    "progressConfig": {
+      "source": "daily_month",
+      "target": 31,
+      "month": "2026-10"
+    },
+    "reward": {
+      "puzzle_power": 0,
+      "coin": 500,
+    "avatar": "41"
+    }
+  }
+]

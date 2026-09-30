@@ -14,6 +14,7 @@ export interface DailyPuzzle {
  */
 const MONTH_LOADERS: Record<string, () => Promise<{ default: unknown }>> = {
     '2026-09': () => import('../../../data/daily/2026-09.json'),
+    '2026-10': () => import('../../../data/daily/2026-10.json'),
 };
 
 /** 문제가 준비된 달 (캘린더의 이전/다음 달 이동 범위) */

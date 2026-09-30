@@ -24,7 +24,7 @@ const SudokuGame: React.FC = () => {
     const location = useLocation();
     const { addCoins, coins } = useCoins();
     const { stageProgress, saveBeginnerProgress, bigProgress } = useSudokuProgress();
-    const { clearDaily } = useDailyPuzzle();
+    const { clearDaily, clearedDates, unlockedDates, monthReward, clearMonthReward } = useDailyPuzzle();
     const hasAwardedCoins = useRef(false);
     const { selectedTheme } = useSudokuTheme();
     const [showThemeModal, setShowThemeModal] = useState(false);
@@ -91,6 +91,7 @@ const SudokuGame: React.FC = () => {
             // 오늘의 퍼즐은 보상 체계가 따로다(코인 100 + 퍼즐력 30).
             // 일반 클리어 보상과 겹쳐 주지 않는다.
             if (state.gameMode === 'Daily') {
+                clearMonthReward();
                 if (state.currentDate) clearDaily(state.currentDate);
             } else if (state.gameMode !== 'TimeAttack') {
                 addCoins(10);
@@ -110,7 +111,7 @@ const SudokuGame: React.FC = () => {
                 }
             }
         }
-    }, [state.isWinner, addCoins, state.gameMode, state.currentDate, clearDaily]);
+    }, [state.isWinner, addCoins, state.gameMode, state.currentDate, clearDaily, clearMonthReward]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -214,6 +215,13 @@ const SudokuGame: React.FC = () => {
         const date = new URLSearchParams(location.search).get('date') || todayKey();
         if (state.gameMode === 'Daily' && state.currentDate === date) return;
 
+        // 오늘 문제, 이미 푼 문제, 코인으로 해제한 문제만 연다. (개발 중에는 앞으로 올 날짜도 허용)
+        const allowed = (import.meta.env.DEV && date >= todayKey()) || date === todayKey() || clearedDates.has(date) || unlockedDates.has(date);
+        if (!allowed) {
+            navigate('/daily', { replace: true });
+            return;
+        }
+
         let cancelled = false;
         getDailyPuzzle(date).then(puzzle => {
             if (cancelled) return;
@@ -230,7 +238,7 @@ const SudokuGame: React.FC = () => {
             });
         });
         return () => { cancelled = true; };
-    }, [location.pathname, location.search, state.gameMode, state.currentDate, dispatch, navigate]);
+    }, [location.pathname, location.search, state.gameMode, state.currentDate, clearedDates, unlockedDates, dispatch, navigate]);
 
     useEffect(() => {
         if (location.pathname.startsWith('/daily')) return;
@@ -483,6 +491,14 @@ const SudokuGame: React.FC = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
                                         ⚡ 퍼즐력 +{DAILY_REWARD_PUZZLE_POWER}
                                     </div>
+                                </div>
+                            )}
+                            {state.gameMode === 'Daily' && monthReward && (
+                                <div style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '1px solid #f59e0b', borderRadius: 14, padding: '0.6rem 0.9rem', textAlign: 'center', color: '#92400e', fontWeight: 800, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                                    한 달 완성! {monthReward.title} 칭호<br />
+                                    <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>
+                                        🪙 +{monthReward.reward.coin}{monthReward.reward.avatar ? ' · 🖼 아바타 획득' : ''}
+                                    </span>
                                 </div>
                             )}
                             {state.gameMode !== 'TimeAttack' && state.gameMode !== 'Daily' && (

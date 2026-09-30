@@ -2,9 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ChevronLeft, ChevronRight, Check, Lock } from 'lucide-react';
-import { useDailyPuzzle, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
+import { useDailyPuzzle, isUnlockableDate, DAILY_UNLOCK_COST, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
 import { loadMonth, hasMonth, todayKey, toDateKey, type DailyPuzzle } from '../data/loader';
 import CoinDisplay from '../../../common/components/CoinDisplay';
+import { useCoins } from '../../../context/CoinContext';
+import { useChallenges } from '../../../context/ChallengeContext';
+import { DAILY_CHALLENGES } from '../../../data/challenges';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const IS_DEV = import.meta.env.DEV;
@@ -13,13 +16,18 @@ const IS_DEV = import.meta.env.DEV;
 type DayState =
     | 'cleared'   // 클리어함 - 도장
     | 'today'     // 오늘, 아직 안 풂 - 강조
-    | 'missed'    // 지나갔는데 안 풂 - 다시 못 품
+    | 'missed'    // 지나갔는데 안 풂 - 해제 대상이면 코인으로 열 수 있음
     | 'upcoming'  // 아직 오지 않은 날
     | 'empty';    // 문제가 없는 날 (기능 시작 이전)
 
 const DailyPuzzleCalendar: React.FC = () => {
     const navigate = useNavigate();
-    const { clearedDates } = useDailyPuzzle();
+    const { clearedDates, unlockedDates, unlockDaily } = useDailyPuzzle();
+    const { coins } = useCoins();
+    const { isChallengeCompleted } = useChallenges();
+    const [unlockTarget, setUnlockTarget] = useState<string | null>(null);
+    const [unlockError, setUnlockError] = useState<string | null>(null);
+    const [unlocking, setUnlocking] = useState(false);
 
     // 다른 게임 화면과 같은 셸을 쓴다 - 퍼즐 타일 배경 위에 밝은 패널.
     useEffect(() => {
@@ -56,13 +64,37 @@ const DailyPuzzleCalendar: React.FC = () => {
         return date < today ? 'missed' : 'upcoming';
     };
 
-    // 지나간 날은 다시 풀 수 없다 - 그래야 "오늘 들어올 이유"가 생긴다.
-    // 개발 중에는 아무 날짜나 열어 볼 수 있게 둔다.
+    // 이미 지나간 날(10월부터)은 풀지 않았다면 코인으로 열어야 풀 수 있다.
+    // 개발 중에는 앞으로 올 날짜를 열어 볼 수 있게 두되, 지난 날짜는 개발 중에도 해제 흐름을 그대로 태운다.
+    // 달이 지나면 지난달의 남은 문제는 해제할 수 없어 잠긴 채로 남는다.
+    const isUnlockTarget = (date: string): boolean =>
+        puzzleDates.has(date) && isUnlockableDate(date, today)
+        && !clearedDates.has(date) && !unlockedDates.has(date);
+
     const isPlayable = (date: string): boolean => {
         if (!puzzleDates.has(date)) return false;
-        if (IS_DEV) return true;
-        return date === today || clearedDates.has(date);
+        if (isUnlockTarget(date)) return false;
+        if (IS_DEV && date >= today) return true;
+        return date === today || clearedDates.has(date) || unlockedDates.has(date);
     };
+
+    const confirmUnlock = async () => {
+        if (!unlockTarget || unlocking) return;
+        setUnlocking(true);
+        const ok = await unlockDaily(unlockTarget, today);
+        setUnlocking(false);
+        if (ok) {
+            const date = unlockTarget;
+            setUnlockTarget(null);
+            navigate(`/daily/play?date=${date}`);
+        } else {
+            setUnlockError('코인이 부족해요');
+        }
+    };
+
+    // 이 달을 전부 클리어하면 받는 보상 (월간 도전과제)
+    const monthChallenge = DAILY_CHALLENGES.find(c => c.progressConfig.month === monthKey);
+    const monthRewardDone = monthChallenge ? isChallengeCompleted(monthChallenge.id) : false;
 
     const clearedThisMonth = [...clearedDates].filter(d => d.startsWith(monthKey)).length;
     const totalThisMonth = puzzles.length;
@@ -194,6 +226,7 @@ const DailyPuzzleCalendar: React.FC = () => {
                         const st = dayState(date);
                         const day = Number(date.slice(8));
                         const playable = isPlayable(date);
+                        const unlockable = isUnlockTarget(date);
 
                         const bg =
                             st === 'cleared' ? 'linear-gradient(135deg, #22c55e, #16a34a)'
@@ -210,9 +243,12 @@ const DailyPuzzleCalendar: React.FC = () => {
                         return (
                             <button
                                 key={date}
-                                onClick={() => { if (playable) navigate(`/daily/play?date=${date}`); }}
-                                disabled={!playable}
-                                title={st === 'missed' ? '지나간 날은 다시 풀 수 없어요' : undefined}
+                                onClick={() => {
+                                    if (playable) navigate(`/daily/play?date=${date}`);
+                                    else if (unlockable) { setUnlockError(null); setUnlockTarget(date); }
+                                }}
+                                disabled={!playable && !unlockable}
+                                title={unlockable ? `🪙 ${DAILY_UNLOCK_COST}으로 해제` : st === 'missed' ? '지나간 날은 다시 풀 수 없어요' : undefined}
                                 style={{
                                     aspectRatio: '1 / 1',
                                     display: 'flex', flexDirection: 'column',
@@ -224,19 +260,47 @@ const DailyPuzzleCalendar: React.FC = () => {
                                     color,
                                     fontSize: '0.8rem',
                                     fontWeight: st === 'cleared' || st === 'today' ? 800 : 600,
-                                    cursor: playable ? 'pointer' : 'default',
+                                    cursor: playable || unlockable ? 'pointer' : 'default',
                                     padding: 0,
                                     boxShadow: st === 'today' ? '0 0 0 2px rgba(139,92,246,0.35)' : 'none',
                                 }}
                             >
                                 <span>{day}</span>
                                 {st === 'cleared' && <Check size={11} strokeWidth={3} />}
-                                {st === 'missed' && <Lock size={9} />}
+                                {st === 'missed' && !unlockedDates.has(date) && <Lock size={9} />}
                             </button>
                         );
                     })}
                 </div>
             </div>
+
+            {/* 한 달 전체 클리어 보상 */}
+            {monthChallenge && (
+                <div className="animate-fade-in" style={{
+                    '--delay': '0.15s',
+                    marginTop: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.8rem',
+                    background: monthRewardDone ? 'linear-gradient(135deg, #ecfdf5, #d1fae5)' : 'linear-gradient(135deg, #fffbeb, #fef3c7)',
+                    border: `1px solid ${monthRewardDone ? '#6ee7b7' : '#fcd34d'}`,
+                    borderRadius: 16, padding: '0.7rem 0.9rem',
+                } as React.CSSProperties}>
+                    {monthChallenge.reward.avatar && (
+                        <img
+                            src={`/assets/profiles/${monthChallenge.reward.avatar}.png`}
+                            alt="월간 보상 아바타"
+                            style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', flexShrink: 0, filter: monthRewardDone ? 'none' : 'saturate(0.9)' }}
+                        />
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: monthRewardDone ? '#047857' : '#b45309' }}>
+                            {month}월 전체 클리어 보상{monthRewardDone ? ' · 획득 완료' : ''}
+                        </div>
+                        <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1e293b', margin: '1px 0' }}>{monthChallenge.title}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>
+                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? ' + 전용 아바타' : ''} + 칭호
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* 범례 */}
             <div style={{
@@ -250,8 +314,56 @@ const DailyPuzzleCalendar: React.FC = () => {
 
             <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#64748b', marginTop: '0.9rem', lineHeight: 1.6 }}>
                 매일 자정에 새 문제가 열립니다.<br />
-                지나간 날의 문제는 다시 풀 수 없어요.
+                10월부터는 이번 달에 지나간 문제를 🪙 {DAILY_UNLOCK_COST}으로 해제해 풀 수 있어요.<br />
+                달이 바뀌면 지난달의 남은 문제는 열 수 없어요.
             </p>
+
+            {unlockTarget && (
+                <div
+                    onClick={() => { if (!unlocking) setUnlockTarget(null); }}
+                    style={{
+                        position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.55)', zIndex: 1000,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+                    }}
+                >
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            background: 'white', borderRadius: 18, padding: '1.4rem 1.3rem',
+                            width: '100%', maxWidth: 320, textAlign: 'center',
+                            boxShadow: '0 12px 32px rgba(0,0,0,0.25)',
+                        }}
+                    >
+                        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1e293b', marginBottom: '0.4rem' }}>
+                            {Number(unlockTarget.slice(5, 7))}월 {Number(unlockTarget.slice(8))}일 문제 해제
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, marginBottom: '0.3rem' }}>
+                            🪙 {DAILY_UNLOCK_COST}을 사용해 이 날의 퍼즐을 풀 수 있어요.<br />
+                            클리어하면 보상도 그대로 받아요.
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '0.6rem' }}>보유 🪙 {coins}</div>
+                        {unlockError && (
+                            <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: 700, marginBottom: '0.6rem' }}>{unlockError}</div>
+                        )}
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => setUnlockTarget(null)}
+                                disabled={unlocking}
+                                style={{ flex: 1, padding: '0.7rem', borderRadius: 12, border: '1px solid #e1e8ed', background: 'white', color: '#475569', fontWeight: 700, cursor: 'pointer' }}
+                            >취소</button>
+                            <button
+                                onClick={confirmUnlock}
+                                disabled={unlocking || coins < DAILY_UNLOCK_COST}
+                                style={{
+                                    flex: 1, padding: '0.7rem', borderRadius: 12, border: 'none', fontWeight: 800, color: 'white',
+                                    background: coins < DAILY_UNLOCK_COST ? '#cbd5e1' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                    cursor: coins < DAILY_UNLOCK_COST ? 'not-allowed' : 'pointer',
+                                }}
+                            >🪙 {DAILY_UNLOCK_COST} 해제</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

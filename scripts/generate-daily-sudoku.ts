@@ -26,6 +26,9 @@ interface DailyPuzzle {
     solution: number[][];
 }
 
+/** Medium(45)과 Hard(35) 사이. 10월용으로 주어진 숫자 40개 고정. */
+const DAILY_GIVENS = 40;
+
 /** v1은 중간 난이도 고정. 요일별 변주를 넣게 되면 여기만 고치면 된다. */
 function getDailyDifficulty(_date: string): Difficulty {
     return 'Medium';
@@ -91,7 +94,7 @@ function main() {
         let data: { puzzle: (number | null)[][]; solution: number[][] };
         let key: string;
         do {
-            const generated = generatePuzzles(difficulty);
+            const generated = generatePuzzles(difficulty, DAILY_GIVENS);
             data = { puzzle: generated.puzzle, solution: generated.solution as number[][] };
             key = data.puzzle.flat().map(v => v === null ? '0' : v).join('');
         } while (seen.has(key));

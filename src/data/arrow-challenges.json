@@ -1,0 +1,137 @@
+[
+  {
+    "id": "arrow_stage_5",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "🏹 첫 발사",
+    "condition": "스테이지 5 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 5
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
+  },
+  {
+    "id": "arrow_stage_10",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "➡️ 길을 열다",
+    "condition": "스테이지 10 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 10
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 25
+    }
+  },
+  {
+    "id": "arrow_stage_25",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "🧩 얽힌 줄 풀기",
+    "condition": "스테이지 25 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 25
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 50
+    }
+  },
+  {
+    "id": "arrow_stage_50",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "🌀 미로 탈출가",
+    "condition": "스테이지 50 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 50
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 75
+    }
+  },
+  {
+    "id": "arrow_stage_100",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "🎯 화살 장인",
+    "condition": "스테이지 100 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 100
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 100
+    }
+  },
+  {
+    "id": "arrow_stage_300",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "🧠 길 찾기의 달인",
+    "condition": "스테이지 300 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 300
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 300
+    }
+  },
+  {
+    "id": "arrow_stage_500",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "🌌 끝없는 미로",
+    "condition": "스테이지 500 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 500
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 400
+    }
+  },
+  {
+    "id": "arrow_stage_700",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "🏃 탈출 마스터",
+    "condition": "스테이지 700 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 700
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 500
+    }
+  },
+  {
+    "id": "arrow_stage_1000",
+    "type": "STAGE",
+    "game": "arrow",
+    "title": "🏆 애로우웨이 마스터",
+    "condition": "스테이지 1000 클리어",
+    "progressConfig": {
+      "source": "arrow_stage",
+      "target": 1000
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 500
+    }
+  }
+]

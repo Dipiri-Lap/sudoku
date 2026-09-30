@@ -3,22 +3,28 @@ import wordSortChallenges from './word-sort-challenges.json';
 import queensChallenges from './queens-challenges.json';
 import snapspotChallenges from './snapspot-challenges.json';
 import crossumChallenges from './crossum-challenges.json';
+import arrowChallenges from './arrow-challenges.json';
+import dailyChallenges from './daily-challenges.json';
 
 export type ChallengeType = 'STAGE' | 'TIME_ATTACK';
 
-export type GameKey = 'sudoku' | 'word-sort' | 'queens' | 'snapspot' | 'crossum';
+export type GameKey = 'sudoku' | 'word-sort' | 'queens' | 'snapspot' | 'crossum' | 'arrow' | 'daily';
 
-export type ProgressSource = 'regular_stage' | 'beginner_stage' | 'time_attack' | 'word_sort_stage' | 'word_sort_hard_stage' | 'queens_stage' | 'snapspot_stage' | 'crossum_stage';
+export type ProgressSource = 'regular_stage' | 'beginner_stage' | 'time_attack' | 'word_sort_stage' | 'word_sort_hard_stage' | 'queens_stage' | 'snapspot_stage' | 'crossum_stage' | 'arrow_stage' | 'daily_month';
 
 export interface ChallengeProgressConfig {
     source: ProgressSource;
     /** Number of stages (or 1 for binary) required to complete this challenge */
     target: number;
+    /** daily_month 전용: 클리어 수를 셀 달 (YYYY-MM) */
+    month?: string;
 }
 
 export interface ChallengeReward {
     puzzle_power: number;
     coin: number;
+    /** 보상으로 함께 지급하는 아바타 id (public/assets/profiles/{id}.png) */
+    avatar?: string;
 }
 
 export interface Challenge {
@@ -36,6 +42,8 @@ export const WORD_SORT_CHALLENGES: Challenge[] = wordSortChallenges as Challenge
 export const QUEENS_CHALLENGES: Challenge[] = queensChallenges as Challenge[];
 export const SNAPSPOT_CHALLENGES: Challenge[] = snapspotChallenges as Challenge[];
 export const CROSSUM_CHALLENGES: Challenge[] = crossumChallenges as Challenge[];
+export const ARROW_CHALLENGES: Challenge[] = arrowChallenges as Challenge[];
+export const DAILY_CHALLENGES: Challenge[] = dailyChallenges as Challenge[];
 
 /** 게임별 도전과제 목록 — 게임 추가 시 여기에 등록 */
 export const ALL_CHALLENGES: Record<GameKey, Challenge[]> = {
@@ -44,6 +52,8 @@ export const ALL_CHALLENGES: Record<GameKey, Challenge[]> = {
     queens: QUEENS_CHALLENGES,
     snapspot: SNAPSPOT_CHALLENGES,
     crossum: CROSSUM_CHALLENGES,
+    arrow: ARROW_CHALLENGES,
+    daily: DAILY_CHALLENGES,
 };
 
 /** id → Challenge 빠른 조회 */

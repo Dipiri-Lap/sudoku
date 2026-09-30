@@ -13,6 +13,8 @@ import { useWordSortHardProgress } from '../../context/WordSortHardProgressConte
 import { useQueensProgress } from '../../context/QueensProgressContext';
 import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
 import { useCrossumProgress } from '../../features/cross-math/stage/progress';
+import { useArrowProgress } from '../../features/arrow-puzzle/hooks/useArrowProgress';
+import { useDailyPuzzle } from '../../context/DailyPuzzleContext';
 
 interface ProfileModalProps {
     uid: string;
@@ -23,13 +25,16 @@ interface ProfileModalProps {
     onActiveTitleChange?: (titleId: string | null) => void;
 }
 
-// 1-40 local avatar IDs
+// 1-40 local avatar IDs (코인으로 해제 가능)
 const AVATAR_SEEDS = Array.from({ length: 40 }, (_, i) => String(i + 1));
+// 41~ 도전과제 보상 전용 아바타. 획득하기 전에는 목록에 나타나지 않는다.
+const REWARD_AVATAR_SEEDS = ['41'];
+const MAX_AVATAR_ID = 41;
 
 export const getAvatarUrl = (seed: string) => {
     if (seed.startsWith('http') || seed.startsWith('/')) return seed;
     const num = parseInt(seed, 10);
-    const validSeed = (!isNaN(num) && num >= 1 && num <= 40) ? seed : '1';
+    const validSeed = (!isNaN(num) && num >= 1 && num <= MAX_AVATAR_ID) ? seed : '1';
     return `/assets/profiles/${validSeed}.png`;
 };
 
@@ -43,6 +48,8 @@ const GAME_LABELS: Record<GameKey, string> = {
     queens: '크라운 퀘스트',
     snapspot: '스냅스팟',
     crossum: '크로썸',
+    arrow: '애로우웨이',
+    daily: '오늘의 퍼즐',
 };
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -69,6 +76,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const { queensProgress } = useQueensProgress();
     const { snapSpotProgress } = useSnapSpotProgress();
     const { stageProgress: crossumProgress } = useCrossumProgress();
+    const { progress: arrowProgress } = useArrowProgress();
+    const { clearedDates: dailyClearedDates } = useDailyPuzzle();
 
     /** Returns { current, target } for the challenge's progress bar */
     const getProgress = (challenge: Challenge): { current: number; target: number } => {
@@ -89,6 +98,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             case 'crossum_stage':
                 // crossumProgress 는 '도전 중인 스테이지' 라 클리어 수는 -1
                 return { current: Math.min(crossumProgress - 1, target), target };
+            case 'arrow_stage':
+                return { current: Math.min(arrowProgress, target), target };
+            case 'daily_month': {
+                const month = challenge.progressConfig.month ?? '';
+                const count = [...dailyClearedDates].filter(d => d.startsWith(month)).length;
+                return { current: Math.min(count, target), target };
+            }
             case 'time_attack': {
                 const cleared = challenges.isChallengeCleared(challenge.id) || challenges.isChallengeCompleted(challenge.id);
                 return { current: cleared ? 1 : 0, target: 1 };
@@ -106,6 +122,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     };
 
     const hasUnclaimed = Object.values(ALL_CHALLENGES).flat().some(c => isReadyToClaim(c));
+
+    // 월간 칭호(오늘의 퍼즐)는 달성하기 전에는 목록에 드러나지 않는다. 달이 계속 추가되므로
+    // 진행도 없이 달성한 것(수령 대기 포함)만 보여 준다.
+    const visibleChallenges = Object.entries(ALL_CHALLENGES).map(([game, list]) => [
+        game,
+        game === 'daily' ? list.filter(c => challenges.isChallengeCompleted(c.id) || isReadyToClaim(c)) : list,
+    ] as [string, Challenge[]]);
 
     // Tab & Ranking state
     const [activeTab, setActiveTab] = useState<'avatar' | 'ranking' | 'challenge'>('avatar');
@@ -190,10 +213,28 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         }
     }, [activeTab]);
 
+    // 보상 아바타는 해당 도전과제 조건을 채우면(보상 수령 전이라도) 바로 나타나고 쓸 수 있다.
+    const isRewardAvatarEarned = (avatarId: string): boolean => {
+        const source = Object.values(ALL_CHALLENGES).flat().find(c => c.reward.avatar === avatarId);
+        return !!source && (challenges.isChallengeCompleted(source.id) || isReadyToClaim(source));
+    };
+    const isAvatarUnlocked = (avatarId: string): boolean =>
+        unlockedAvatars.includes(avatarId) || (REWARD_AVATAR_SEEDS.includes(avatarId) && isRewardAvatarEarned(avatarId));
+
     const handleAvatarClick = async (avatarId: string) => {
         const url = getAvatarUrl(avatarId);
 
-        if (unlockedAvatars.includes(avatarId)) {
+        if (REWARD_AVATAR_SEEDS.includes(avatarId) && isRewardAvatarEarned(avatarId) && !unlockedAvatars.includes(avatarId)) {
+            try {
+                await unlockAvatar(uid, avatarId);
+                setUnlockedAvatars(prev => [...prev, avatarId]);
+            } catch (e) {
+                console.error('Failed to grant reward avatar:', e);
+                return;
+            }
+        }
+
+        if (isAvatarUnlocked(avatarId)) {
             setSelectedPhoto(url);
             await updateProfileInfo(uid, { nickname: nickname.trim(), photoURL: url || undefined });
             onSaveSuccess(nickname.trim(), url);
@@ -495,10 +536,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                         gridTemplateColumns: 'repeat(4, 1fr)',
                                         gap: '0.8rem',
                                     }}>
-                                        {AVATAR_SEEDS.map((seed) => {
+                                        {[...AVATAR_SEEDS, ...REWARD_AVATAR_SEEDS.filter(isAvatarUnlocked)].map((seed) => {
                                             const url = getAvatarUrl(seed);
                                             const isSelected = selectedPhoto === url;
-                                            const isUnlocked = unlockedAvatars.includes(seed);
+                                            const isUnlocked = isAvatarUnlocked(seed);
 
                                             return (
                                                 <div
@@ -596,7 +637,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                     flex: 1,
                                 }}
                             >
-                                {Object.entries(ALL_CHALLENGES).map(([game, list]) =>
+                                {visibleChallenges.map(([game, list]) =>
                                     list.length === 0 ? null : (
                                         <div key={game}>
                                             {/* Game section header (toggle) */}
@@ -617,9 +658,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: expandedGames.has(game) ? 'rotate(0deg)' : 'rotate(-90deg)', flexShrink: 0 }} />
                                                 <span style={{ fontSize: '0.72rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                                                     {GAME_LABELS[game as GameKey] ?? game}
-                                                    <span style={{ marginLeft: '5px', fontSize: '0.65rem', color: '#64748b' }}>
-                                                        ({list.filter(c => challenges.isChallengeCompleted(c.id)).length}/{list.length})
-                                                    </span>
+                                                    {game !== 'daily' && (
+                                                        <span style={{ marginLeft: '5px', fontSize: '0.65rem', color: '#64748b' }}>
+                                                            ({list.filter(c => challenges.isChallengeCompleted(c.id)).length}/{list.length})
+                                                        </span>
+                                                    )}
                                                 </span>
                                             </button>
                                             {expandedGames.has(game) && (
@@ -688,7 +731,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                     {challenge.condition}
                                                                 </div>
                                                                 {/* Progress bar */}
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '5px' }}>
+                                                                {challenge.progressConfig.source !== 'daily_month' && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '5px' }}>
                                                                     <div style={{
                                                                         flex: 1,
                                                                         height: '4px',
@@ -706,7 +749,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                     <span style={{ fontSize: '0.62rem', color: '#64748b', flexShrink: 0 }}>
                                                                         {current}/{target}
                                                                     </span>
-                                                                </div>
+                                                                </div>}
                                                             </div>
 
                                                             {/* Reward box / action */}
@@ -744,7 +787,17 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                 <button
                                                                     onClick={async () => {
                                                                         const c = await challenges.claimReward(challenge.id);
-                                                                        if (c) setDisplayPP(p => p + c.reward.puzzle_power);
+                                                                        if (!c) return;
+                                                                        setDisplayPP(p => p + c.reward.puzzle_power);
+                                                                        const avatarId = c.reward.avatar;
+                                                                        if (avatarId) {
+                                                                            try {
+                                                                                await unlockAvatar(uid, avatarId);
+                                                                                setUnlockedAvatars(prev => prev.includes(avatarId) ? prev : [...prev, avatarId]);
+                                                                            } catch (e) {
+                                                                                console.error('Failed to grant reward avatar:', e);
+                                                                            }
+                                                                        }
                                                                     }}
                                                                     style={{
                                                                         flexShrink: 0,
@@ -761,12 +814,17 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                         boxShadow: '0 0 8px rgba(251,191,36,0.15)',
                                                                     }}
                                                                 >
-                                                                    <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                        <Star size={10} fill="#fde047" color="#fde047" />퍼즐력 +{challenge.reward.puzzle_power}
-                                                                    </span>
+                                                                    {challenge.reward.puzzle_power > 0 && (
+                                                                        <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                            <Star size={10} fill="#fde047" color="#fde047" />퍼즐력 +{challenge.reward.puzzle_power}
+                                                                        </span>
+                                                                    )}
                                                                     <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
                                                                         <CoinImg size={10} />코인 +{challenge.reward.coin}
                                                                     </span>
+                                                                    {challenge.reward.avatar && (
+                                                                        <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold' }}>🖼 아바타</span>
+                                                                    )}
                                                                     <span style={{ fontSize: '0.58rem', color: '#fbbf24', marginTop: '1px', alignSelf: 'center' }}>보상받기</span>
                                                                 </button>
                                                             ) : (
