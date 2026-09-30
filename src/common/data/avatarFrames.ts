@@ -37,6 +37,14 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
         gradient: 'linear-gradient(135deg, #f6cfa6 0%, #cd7f32 45%, #8b4a1f 100%)' },
     { id: 'sakura', name: '벚꽃', color: '#f9a8d4', price: FRAME_PRICE_COMMON,
         gradient: 'linear-gradient(135deg, #fff1f7 0%, #f9a8d4 50%, #f472b6 100%)' },
+    { id: 'sunset', name: '노을', color: '#f97316', price: FRAME_PRICE_COMMON,
+        gradient: 'linear-gradient(135deg, #fde047 0%, #fb923c 35%, #ec4899 70%, #7c3aed 100%)' },
+    { id: 'aurora', name: '오로라', color: '#2dd4bf', price: FRAME_PRICE_COMMON,
+        gradient: 'linear-gradient(135deg, #5eead4 0%, #38bdf8 35%, #818cf8 70%, #c084fc 100%)' },
+    { id: 'ocean', name: '바다', color: '#0ea5e9', price: FRAME_PRICE_COMMON,
+        gradient: 'linear-gradient(135deg, #bae6fd 0%, #38bdf8 40%, #0369a1 100%)' },
+    { id: 'forest', name: '숲', color: '#22c55e', price: FRAME_PRICE_COMMON,
+        gradient: 'linear-gradient(135deg, #d9f99d 0%, #4ade80 40%, #0f766e 100%)' },
 ];
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';
