@@ -478,18 +478,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 onClick={() => setActiveTab(key)}
                                 style={{
                                     flex: 1,
-                                    padding: '0.55rem 0.2rem',
+                                    padding: '0.55rem 0.1rem',
                                     border: 'none',
                                     borderRadius: '8px',
                                     background: activeTab === key ? '#475569' : 'transparent',
                                     color: activeTab === key ? 'white' : '#94a3b8',
                                     cursor: 'pointer',
-                                    fontSize: '0.78rem',
+                                    fontSize: '0.7rem',
                                     fontWeight: 'bold',
+                                    whiteSpace: 'nowrap',
+                                    minWidth: 0,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: '4px',
+                                    gap: '3px',
                                     transition: 'all 0.2s'
                                 }}
                             >
@@ -667,7 +669,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                         </div>
                                                     )}
                                                 </div>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: isSelected ? '#4ade80' : '#cbd5e1' }}>{f.name}</span>
                                             </div>
                                         );
                                     })}
