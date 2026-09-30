@@ -12,11 +12,13 @@ import { routes, BASE_URL } from './seo-routes.mjs';
 const today = new Date().toISOString().slice(0, 10);
 
 const urls = [
-  { loc: `${BASE_URL}/`, changefreq: 'daily', priority: '1.0' },
+  { loc: `${BASE_URL}/`, changefreq: 'daily', priority: '1.0', lastmod: today },
   ...routes.map(r => ({
     loc: r.canonical,
     changefreq: r.changefreq ?? 'monthly',
     priority: r.priority ?? '0.8',
+    // 내용을 실제로 고친 날짜. 매일 바뀌는 오늘의 퍼즐만 빌드 날짜를 쓴다.
+    lastmod: r.lastmod ?? today,
   })),
 ];
 
@@ -24,7 +26,7 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `  <url>
     <loc>${u.loc}</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${u.lastmod}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
   </url>`).join('\n')}

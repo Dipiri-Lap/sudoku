@@ -7,7 +7,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { routes } from './seo-routes.mjs';
+import { routes, relatedLinks } from './seo-routes.mjs';
 
 const distDir = 'dist';
 
@@ -52,6 +52,14 @@ for (const route of routes) {
     `<meta property="og:description" content="${route.description}" />`
   );
 
+  // 공유 이미지 + 트위터 카드 (카카오톡·SNS 미리보기)
+  html = html.replace(/<meta property="og:image" content=".*?"\s*\/>/, `<meta property="og:image" content="${route.ogImage}" />\n  <meta property="og:image:width" content="1200" />\n  <meta property="og:image:height" content="630" />`);
+  html = html.replace(/<meta name="twitter:image" content=".*?"\s*\/>/, `<meta name="twitter:image" content="${route.ogImage}" />`);
+  html = html.replace(/<meta name="twitter:url" content=".*?"\s*\/>/, `<meta name="twitter:url" content="${route.canonical}" />`);
+  html = html.replace(/<meta name="twitter:title" content=".*?"\s*\/>/, `<meta name="twitter:title" content="${route.title}" />`);
+  html = html.replace(/<meta name="twitter:description" content=".*?"\s*\/>/, `<meta name="twitter:description" content="${route.description}" />`);
+  html = html.replace(/<meta name="title" content=".*?"\s*\/>/, `<meta name="title" content="${route.title}" />`);
+
   // BreadcrumbList Schema 삽입
   if (route.breadcrumbSchema) {
     html = html.replace(
@@ -80,7 +88,7 @@ for (const route of routes) {
   if (route.seoContent) {
     html = html.replace(
       '<div id="root"></div>',
-      `<div id="root"></div><noscript>${route.seoContent}</noscript>`
+      `<div id="root"></div><noscript>${route.seoContent}${relatedLinks(route.path)}</noscript>`
     );
   }
 

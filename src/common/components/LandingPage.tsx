@@ -291,8 +291,8 @@ const LandingPage: React.FC = () => {
     return (
         <>
         <Helmet>
-            <title>퍼즐 가든 - 무료 스도쿠, 워드스택, 틀린그림찾기 게임</title>
-            <meta name="description" content="퍼즐 가든에서 무료로 즐기는 두뇌 퍼즐 게임! 스도쿠, 워드스택 카드 게임, 틀린그림찾기(스냅스팟)를 온라인에서 바로 플레이하세요." />
+            <title>퍼즐 가든 - 무료 스도쿠, 틀린그림찾기, 화살표 퍼즐 게임 모음</title>
+            <meta name="description" content="퍼즐 가든에서 무료로 즐기는 두뇌 퍼즐 게임 모음! 스도쿠, 틀린그림찾기(스냅스팟), 단어 맞추기(워드스택), 퀸즈 퍼즐(크라운 퀘스트), 숫자 수식 퍼즐(크로썸), 화살표 퍼즐(애로우웨이), 매일 새로 열리는 오늘의 퍼즐까지 설치 없이 바로 플레이하세요." />
             <link rel="canonical" href="https://puzzles.tmhub.co.kr/" />
         </Helmet>
         <div className="landing-page">
