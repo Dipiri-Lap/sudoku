@@ -57,6 +57,12 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'diamond', name: '다이아', color: '#7dd3fc', price: FRAME_PRICE_RARE,
         gradient: 'linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 20%, #ffffff 40%, #7dd3fc 60%, #e0f2fe 80%, #bae6fd 100%)',
         glow: '0 0 6px rgba(186, 230, 253, 0.8)', shimmer: true },
+    { id: 'flame', name: '불꽃', color: '#f97316', price: FRAME_PRICE_RARE,
+        gradient: 'linear-gradient(135deg, #fde047 0%, #fb923c 40%, #ef4444 100%)',
+        glow: '0 0 6px rgba(249, 115, 22, 0.9), 0 0 12px rgba(239, 68, 68, 0.55)' },
+    { id: 'moonlight', name: '달빛', color: '#c4b5fd', price: FRAME_PRICE_RARE,
+        gradient: 'linear-gradient(135deg, #ffffff 0%, #ddd6fe 40%, #a5b4fc 100%)',
+        glow: '0 0 6px rgba(221, 214, 254, 0.95), 0 0 12px rgba(165, 180, 252, 0.55)' },
 ];
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';
