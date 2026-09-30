@@ -28,15 +28,17 @@ export interface AvatarFrame {
 
 export type FrameAnim =
     | 'shimmer' | 'electric' | 'lava' | 'galaxy'      // 그라데이션이 좌우로 흐르는 종류
-    | 'aurorax' | 'ruby' | 'sapphire' | 'toxic';       // 회전·빛줄기·이중 링 종류
+    | 'aurorax' | 'ruby' | 'sapphire' | 'toxic'        // 회전·빛줄기·이중 링 종류
+    | 'rainbow' | 'phoenix' | 'crown';                  // 전설: 무지개 회전·불사조 회전·왕관 장식
 
 /** 그라데이션을 키워서 흘려 보내지 않는 종류 (conic 회전이나 제자리 빛줄기) */
-const STATIC_SIZE_ANIMS: FrameAnim[] = ['aurorax', 'ruby', 'sapphire', 'toxic'];
+const STATIC_SIZE_ANIMS: FrameAnim[] = ['aurorax', 'ruby', 'sapphire', 'toxic', 'rainbow', 'phoenix'];
 
 export const FRAME_PRICE_COMMON = 100;
 export const FRAME_PRICE_RARE = 200;
 export const FRAME_PRICE_EPIC = 300;
 export const FRAME_PRICE_EPIC_PLUS = 400;
+export const FRAME_PRICE_LEGEND = 500;
 
 export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'yellow', name: '노랑', color: '#fde047' },
@@ -105,6 +107,16 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'toxic', name: '독기', color: '#4ade80', price: FRAME_PRICE_EPIC_PLUS,
         gradient: 'conic-gradient(from var(--frame-angle, 0deg), #4ade80, #166534, #a855f7, #581c87, #4ade80)',
         glow: '0 0 6px rgba(74, 222, 128, 0.85), 0 0 12px rgba(168, 85, 247, 0.5)', anim: 'toxic' },
+    // 유료(전설) — 가장 화려한 움직임. 왕관은 위쪽에 장식이 붙는다(index.css 의 .frame-crown::after).
+    { id: 'rainbow', name: '무지개', color: '#f59e0b', price: FRAME_PRICE_LEGEND,
+        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #ef4444, #f59e0b, #eab308, #22c55e, #06b6d4, #3b82f6, #a855f7, #ef4444)',
+        glow: '0 0 7px rgba(239, 68, 68, 0.9), 0 0 14px rgba(239, 68, 68, 0.5)', anim: 'rainbow' },
+    { id: 'phoenix', name: '불사조', color: '#f97316', price: FRAME_PRICE_LEGEND,
+        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #fde047, #f97316, #dc2626, #f97316, #fde047)',
+        glow: '0 0 7px rgba(249, 115, 22, 0.95), 0 0 16px rgba(239, 68, 68, 0.6)', anim: 'phoenix' },
+    { id: 'crown', name: '왕관', color: '#facc15', price: FRAME_PRICE_LEGEND,
+        gradient: 'linear-gradient(135deg, #fff3b0 0%, #e6b422 25%, #a8740a 50%, #e6b422 75%, #fff3b0 100%)',
+        glow: '0 0 0 2px #fff3b0, 0 0 0 4px #b8860b, 0 0 14px rgba(250, 204, 21, 0.75)', anim: 'crown' },
 ];
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';
