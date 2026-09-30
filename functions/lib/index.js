@@ -17,20 +17,22 @@ function assertAdmin(request) {
 // 결제 금액(원) -> 지급 코인. 클라이언트가 보낸 금액이 아니라
 // PortOne에서 실제로 조회한 결제 금액을 기준으로 지급 코인을 결정한다.
 const AMOUNT_TO_COINS = {
-    1100: 500, // 스타터 팩 - 계정당 1회만
+    1100: 500, // 예전 스타터 팩(₩1,100) - 이미 열려 있는 옛 화면의 결제가 실패하지 않게 남겨 둔다. 계정당 1회만
+    2000: 1200, // 스타터 팩 - 계정당 1회만
     2200: 500,
     4400: 1200,
     11000: 3500,
     25000: 10000,
 };
 /**
- * 첫 구매 전용 특가. 같은 500코인을 절반 값에 주므로 반복 구매를 허용하면
+ * 첫 구매 전용 특가. ₩4,400짜리(1,200코인)를 ₩2,000에 주므로 반복 구매를 허용하면
  * 아무도 다른 패키지를 사지 않는다. 그래서 계정당 1회로 막는다.
+ * 스타터 금액은 일반 패키지 금액(2,200·4,400…)과 겹치지 않아야 서버가 금액만으로 구분할 수 있다.
  *
  * 검사는 반드시 지급 트랜잭션 안에서 해야 한다. 밖에서 확인하면 동시에 두 번
  * 결제했을 때 둘 다 통과한다.
  */
-const STARTER_PACK_AMOUNT = 1100;
+const STARTER_PACK_AMOUNTS = [1100, 2000];
 exports.verifyPortOnePayment = (0, https_1.onCall)({ secrets: [PORTONE_API_SECRET] }, async (request) => {
     const uid = request.auth?.uid;
     if (!uid) {
@@ -61,7 +63,7 @@ exports.verifyPortOnePayment = (0, https_1.onCall)({ secrets: [PORTONE_API_SECRE
     }
     const paymentRef = db.collection("processedPayments").doc(paymentId);
     const userRef = db.collection("users").doc(uid);
-    const isStarterPack = paidAmount === STARTER_PACK_AMOUNT;
+    const isStarterPack = paidAmount !== undefined && STARTER_PACK_AMOUNTS.includes(paidAmount);
     const result = await db.runTransaction(async (tx) => {
         const existing = await tx.get(paymentRef);
         if (existing.exists) {

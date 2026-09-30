@@ -19,11 +19,12 @@ const COIN_PACKAGES = [
 ] as const;
 
 /**
- * 첫 구매 전용 특가. ₩2,200짜리와 같은 500코인을 절반 값에 준다.
+ * 첫 구매 전용 특가. ₩4,400짜리와 같은 1,200코인을 ₩2,000에 준다(55% 할인).
+ * 금액이 일반 패키지와 겹치면 서버가 구분하지 못하므로 일반 금액과 다르게 잡아야 한다.
  * 이득이 한눈에 보여야 첫 결제를 넘기므로 일부러 최고 할인보다도 싸게 잡았고,
  * 그래서 계정당 1회로 막는다(실제 차단은 서버에서 한다).
  */
-const STARTER_PACK = { coins: 500, price: '₩1,100', amount: 1100 } as const;
+const STARTER_PACK = { coins: 1200, price: '₩2,000', amount: 2000 } as const;
 
 const AD_COOLDOWN_MS = 30 * 60 * 1000; // 30분
 const AD_STORAGE_KEY = 'lastAdWatchTime';
@@ -202,6 +203,8 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                     borderRadius: '16px',
                     width: '100%',
                     maxWidth: '400px',
+                    // 화면보다 커지면 위아래가 잘리므로 높이를 화면에 맞추고 내용만 스크롤한다
+                    maxHeight: '100%',
                     position: 'relative',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
                     display: 'flex',
@@ -231,7 +234,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                 </div>
 
                 {/* Content */}
-                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minHeight: 0, overflowY: 'auto' }}>
 
                     {/* 보유 코인 */}
                     <div style={{
@@ -291,7 +294,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                                     <span style={{
                                         color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: '3.6cqw',
                                         textDecoration: 'line-through',
-                                    }}>₩2,200</span>
+                                    }}>₩4,400</span>
                                 </div>
                                 <div style={{
                                     display: 'inline-block', marginTop: '0.4em',
@@ -299,7 +302,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                                     background: 'linear-gradient(to bottom, #ef4444, #b91c1c)',
                                     color: 'white', fontWeight: 800, fontSize: '3.4cqw',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.4)',
-                                }}>50% 할인</div>
+                                }}>55% 할인</div>
                             </div>
                         </button>
                     )}
