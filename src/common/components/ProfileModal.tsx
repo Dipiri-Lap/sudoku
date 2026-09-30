@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Edit2, Check, Lock, Star, ChevronDown } from 'lucide-react'; // Lock은 아바타 탭에서 사용
+import { X, Edit2, Check, Lock, Star, ChevronDown, Palette } from 'lucide-react'; // Lock은 아바타 탭에서 사용
 const CoinImg = ({ size = 14 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle, updateAvatarFrame } from '../../services/rankingService';
 import type { UserProfile as UserProfileType } from '../../services/rankingService';
@@ -135,7 +135,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     ] as [string, Challenge[]]);
 
     // Tab & Ranking state
-    const [activeTab, setActiveTab] = useState<'avatar' | 'ranking' | 'challenge'>('avatar');
+    const [activeTab, setActiveTab] = useState<'avatar' | 'frame' | 'ranking' | 'challenge'>('avatar');
     const [expandedGames, setExpandedGames] = useState<Set<string>>(new Set());
     const toggleGame = (game: string) => setExpandedGames(prev => {
         const next = new Set(prev);
@@ -469,6 +469,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     }}>
                         {([
                             { key: 'avatar',    icon: <Edit2 size={14} />,  label: '아바타' },
+                            { key: 'frame',     icon: <Palette size={14} />, label: '테두리' },
                             { key: 'ranking',   icon: <Trophy size={14} />, label: '랭킹' },
                             { key: 'challenge', icon: <Star size={14} />,   label: '도전과제' },
                         ] as const).map(({ key, icon, label }) => (
@@ -523,34 +524,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     <CoinImg size={16} />
                                     <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
-                                </div>
-                            </div>
-
-                            {/* 테두리 색 선택 */}
-                            <div style={{ flexShrink: 0 }}>
-                                <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>테두리 색</div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                    {AVATAR_FRAMES.map(f => {
-                                        const selected = getFrameColor(avatarFrame) === f.color;
-                                        return (
-                                            <button
-                                                key={f.id}
-                                                type="button"
-                                                title={f.name}
-                                                aria-label={`테두리 ${f.name}`}
-                                                aria-pressed={selected}
-                                                onClick={() => handleSetFrame(f.id)}
-                                                style={{
-                                                    width: '30px', height: '30px', borderRadius: '50%',
-                                                    background: f.color, cursor: 'pointer', padding: 0,
-                                                    border: selected ? '3px solid #fff' : '2px solid rgba(255,255,255,0.25)',
-                                                    boxShadow: selected ? `0 0 0 2px ${f.color}` : 'none',
-                                                    transform: selected ? 'scale(1.1)' : 'scale(1)',
-                                                    transition: 'transform 0.1s',
-                                                }}
-                                            />
-                                        );
-                                    })}
                                 </div>
                             </div>
 
@@ -642,6 +615,66 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 </div>
                             </div>
                         </>
+                    ) : activeTab === 'frame' ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1, minHeight: 0 }}>
+                            <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold', flexShrink: 0 }}>테두리 선택</div>
+                            <div style={{
+                                backgroundColor: '#475569',
+                                borderRadius: '16px',
+                                padding: '1rem',
+                                overflowY: 'auto',
+                                flex: 1,
+                            }}>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(4, 1fr)',
+                                    gap: '0.8rem',
+                                }}>
+                                    {AVATAR_FRAMES.map(f => {
+                                        const isSelected = getFrameColor(avatarFrame) === f.color;
+                                        return (
+                                            <div
+                                                key={f.id}
+                                                onClick={() => handleSetFrame(f.id)}
+                                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                                            >
+                                                <div style={{
+                                                    position: 'relative',
+                                                    width: '100%',
+                                                    aspectRatio: '1',
+                                                    borderRadius: '12px',
+                                                    overflow: 'hidden',
+                                                    backgroundColor: '#cbd5e1',
+                                                    border: `4px solid ${f.color}`,
+                                                    boxShadow: isSelected ? '0 0 0 3px #4ade80' : 'none',
+                                                    transition: 'transform 0.1s',
+                                                    transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+                                                }}>
+                                                    <img draggable={false} src={selectedPhoto || '/assets/profiles/1.png'} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    {isSelected && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            bottom: '2px',
+                                                            right: '2px',
+                                                            background: '#4ade80',
+                                                            borderRadius: '50%',
+                                                            padding: '2px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            border: '2px solid #475569'
+                                                        }}>
+                                                            <Check size={12} color="white" strokeWidth={4} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: isSelected ? '#4ade80' : '#cbd5e1' }}>{f.name}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
                     ) : activeTab === 'challenge' ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1, minHeight: 0 }}>
                             {/* Puzzle Power summary */}
