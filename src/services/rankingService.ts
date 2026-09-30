@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc, query, orderBy, limit, getDocs, collectionGroup, increment, collection, where, getCountFromServer } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, query, orderBy, limit, getDocs, collectionGroup, increment, arrayUnion, collection, where, getCountFromServer } from 'firebase/firestore';
 
 export interface UserProfile {
     uid: string;
@@ -12,6 +12,7 @@ export interface UserProfile {
     };
     activeTitle?: string | null;
     avatarFrame?: string | null;
+    unlockedFrames?: string[];
 }
 
 export const getUserProfile = async (uid: string): Promise<UserProfile> => {
@@ -25,6 +26,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
     let bestTimes: { [key: string]: number } = {};
     let activeTitle: string | null = null;
     let avatarFrame: string | null = null;
+    let unlockedFrames: string[] = [];
 
     if (userSnap.exists()) {
         const userData = userSnap.data();
@@ -35,6 +37,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
         bestTimes = userData.bestTimes || {};
         activeTitle = userData.activeTitle ?? null;
         avatarFrame = userData.avatarFrame ?? null;
+        unlockedFrames = userData.unlockedFrames || [];
     } else {
         // Create new profile if not exists
         await setDoc(userRef, { uid, nickname, photoURL: '1', coins: 0, puzzlePower: 0, createdAt: new Date().toISOString() });
@@ -51,7 +54,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
         }
     }
 
-    return { uid, nickname, photoURL, puzzlePower, unlockedAvatars, bestTimes, activeTitle, avatarFrame };
+    return { uid, nickname, photoURL, puzzlePower, unlockedAvatars, bestTimes, activeTitle, avatarFrame, unlockedFrames };
 };
 
 export const updateProfileInfo = async (uid: string, data: { nickname: string; photoURL?: string }): Promise<void> => {
@@ -68,6 +71,11 @@ export const updateProfileInfo = async (uid: string, data: { nickname: string; p
 export const incrementPuzzlePower = async (uid: string): Promise<void> => {
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, { puzzlePower: increment(1) });
+};
+
+export const unlockFrame = async (uid: string, frameId: string): Promise<void> => {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { unlockedFrames: arrayUnion(frameId) });
 };
 
 export const updateAvatarFrame = async (uid: string, frameId: string): Promise<void> => {

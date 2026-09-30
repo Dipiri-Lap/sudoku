@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Edit2, Check, Lock, Star, ChevronDown, Palette } from 'lucide-react'; // Lock은 아바타 탭에서 사용
 const CoinImg = ({ size = 14 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
-import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle, updateAvatarFrame } from '../../services/rankingService';
+import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle, updateAvatarFrame, unlockFrame } from '../../services/rankingService';
 import type { UserProfile as UserProfileType } from '../../services/rankingService';
-import { AVATAR_FRAMES, getFrameColor } from '../data/avatarFrames';
+import { AVATAR_FRAMES, findFrame, frameStyle, isFrameFree } from '../data/avatarFrames';
 import { Trophy, Users } from 'lucide-react';
 import { useCoins } from '../../context/CoinContext';
 import { useChallenges } from '../../context/ChallengeContext';
@@ -71,6 +71,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const [pendingUnlockAvatar, setPendingUnlockAvatar] = useState<string | null>(null);
     const [activeTitle, setActiveTitle] = useState<string | null>(null);
     const [avatarFrame, setAvatarFrame] = useState<string | null>(null);
+    const [unlockedFrames, setUnlockedFrames] = useState<string[]>([]);
+    const [pendingUnlockFrame, setPendingUnlockFrame] = useState<string | null>(null);
     const [displayPP, setDisplayPP] = useState<number>(0);
 
     const challenges = useChallenges();
@@ -189,6 +191,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 setUnlockedAvatars(profile.unlockedAvatars);
             }
             setAvatarFrame(profile.avatarFrame ?? null);
+            setUnlockedFrames(profile.unlockedFrames ?? []);
             if (profile.activeTitle !== undefined) {
                 setActiveTitle(profile.activeTitle ?? null);
             }
@@ -207,6 +210,40 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             await updateAvatarFrame(uid, id);
         } catch (e) {
             console.error('Failed to save avatar frame:', e);
+        }
+    };
+
+    const isFrameUnlocked = (id: string): boolean => {
+        const f = findFrame(id);
+        return isFrameFree(f) || unlockedFrames.includes(id);
+    };
+
+    const handleFrameClick = (id: string) => {
+        if (isFrameUnlocked(id)) {
+            handleSetFrame(id);
+        } else {
+            setPendingUnlockFrame(id);
+        }
+    };
+
+    const handleConfirmUnlockFrame = async () => {
+        if (!pendingUnlockFrame) return;
+        const id = pendingUnlockFrame;
+        const cost = findFrame(id).price ?? 0;
+        const success = await spendCoins(cost);
+        if (!success) {
+            alert('코인이 부족합니다!');
+            setPendingUnlockFrame(null);
+            return;
+        }
+        try {
+            await unlockFrame(uid, id);
+            setUnlockedFrames(prev => [...prev, id]);
+            setPendingUnlockFrame(null);
+            await handleSetFrame(id);
+        } catch (e) {
+            console.error('Failed to unlock frame:', e);
+            alert('잠금 해제 중 오류가 발생했습니다.');
         }
     };
 
@@ -371,8 +408,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             width: '70px',
                             height: '70px',
                             borderRadius: '16px',
-                            border: `3px solid ${getFrameColor(avatarFrame)}`,
-                            backgroundColor: '#cbd5e1',
+                            ...frameStyle(avatarFrame, 3),
                             overflow: 'hidden',
                             flexShrink: 0,
                             boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
@@ -633,11 +669,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                     gap: '0.8rem',
                                 }}>
                                     {AVATAR_FRAMES.map(f => {
-                                        const isSelected = getFrameColor(avatarFrame) === f.color;
+                                        const isSelected = findFrame(avatarFrame).id === f.id;
+                                        const unlocked = isFrameUnlocked(f.id);
                                         return (
                                             <div
                                                 key={f.id}
-                                                onClick={() => handleSetFrame(f.id)}
+                                                onClick={() => handleFrameClick(f.id)}
                                                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
                                             >
                                                 <div style={{
@@ -646,12 +683,23 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                     aspectRatio: '1',
                                                     borderRadius: '12px',
                                                     overflow: 'hidden',
-                                                    backgroundColor: '#334155',
-                                                    border: `4px solid ${f.color}`,
+                                                    ...frameStyle(f.id, 4, '#334155'),
+                                                    filter: unlocked ? 'none' : 'brightness(0.65)',
                                                     boxShadow: isSelected ? '0 0 0 3px #4ade80' : 'none',
                                                     transition: 'transform 0.1s',
                                                     transform: isSelected ? 'scale(1.05)' : 'scale(1)',
                                                 }}>
+                                                    {!unlocked && (
+                                                        <div style={{
+                                                            position: 'absolute', inset: 0,
+                                                            display: 'flex', flexDirection: 'column',
+                                                            alignItems: 'center', justifyContent: 'center',
+                                                            gap: '2px'
+                                                        }}>
+                                                            <Lock size={16} color="white" />
+                                                            <span style={{ color: 'white', fontSize: '0.6rem', fontWeight: 'bold' }}>{f.price}</span>
+                                                        </div>
+                                                    )}
                                                     {isSelected && (
                                                         <div style={{
                                                             position: 'absolute',
@@ -954,7 +1002,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                         height: '32px',
                                         borderRadius: '8px',
                                         overflow: 'hidden',
-                                        border: `2px solid ${getFrameColor(avatarFrame)}`
+                                        ...frameStyle(avatarFrame, 2)
                                     }}>
                                         <img src={selectedPhoto || '/assets/profiles/1.png'} alt="Me" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
@@ -1074,9 +1122,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                             height: '36px',
                                                             borderRadius: '8px',
                                                             overflow: 'hidden',
-                                                            backgroundColor: '#cbd5e1',
                                                             flexShrink: 0,
-                                                            border: `2px solid ${getFrameColor(isMe ? avatarFrame : user.avatarFrame)}`
+                                                            ...frameStyle(isMe ? avatarFrame : user.avatarFrame, 2)
                                                         }}>
                                                             <img draggable={false} src={avatar} alt={user.nickname} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                         </div>
@@ -1118,6 +1165,53 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 </div>
 
             </div>
+
+            {/* 테두리 해제 확인창 */}
+            {pendingUnlockFrame && (() => {
+                const f = findFrame(pendingUnlockFrame);
+                const cost = f.price ?? 0;
+                return (
+                    <div style={{
+                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000
+                    }}>
+                        <div style={{
+                            background: '#3a3c5a', borderRadius: '16px', padding: '1.5rem',
+                            textAlign: 'center', width: '240px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                            color: 'white'
+                        }}>
+                            <div style={{
+                                width: '72px', height: '72px', borderRadius: '14px',
+                                overflow: 'hidden', margin: '0 auto 0.75rem',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                ...frameStyle(f.id, 4, '#334155')
+                            }} />
+                            <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>{f.name} 테두리 해제</div>
+                            <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)', marginBottom: '0.75rem', lineHeight: 1.8 }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: '700', color: '#fde047' }}>
+                                    <CoinImg size={15} />{cost}
+                                </span> 코인을 사용하여 해제 하시겠습니까?
+                            </div>
+                            {coins < cost && (
+                                <div style={{ fontSize: '0.78rem', color: '#ff6b6b', marginBottom: '0.6rem' }}>
+                                    코인 부족 (현재 {coins}개)
+                                </div>
+                            )}
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                <button
+                                    onClick={() => setPendingUnlockFrame(null)}
+                                    style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
+                                >취소</button>
+                                <button
+                                    onClick={handleConfirmUnlockFrame}
+                                    disabled={coins < cost}
+                                    style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= cost ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= cost ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
+                                >확인</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* Custom Unlock Confirmation Modal */}
             {pendingUnlockAvatar && (

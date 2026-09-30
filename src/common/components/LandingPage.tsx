@@ -23,7 +23,7 @@ import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
 import { useWordSortHardProgress } from '../../context/WordSortHardProgressContext';
 import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
-import { getFrameColor } from '../data/avatarFrames';
+import { frameStyle } from '../data/avatarFrames';
 
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
@@ -345,8 +345,7 @@ const LandingPage: React.FC = () => {
                                     width: '60px',
                                     height: '60px',
                                     borderRadius: '16px',
-                                    border: `3px solid ${getFrameColor(avatarFrame)}`,
-                                    backgroundColor: '#cbd5e1',
+                                    ...frameStyle(avatarFrame, 3),
                                     overflow: 'hidden',
                                     display: 'flex',
                                     alignItems: 'center',
