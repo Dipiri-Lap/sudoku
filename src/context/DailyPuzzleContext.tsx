@@ -13,7 +13,7 @@ const FIRESTORE_DOC = (uid: string) => doc(db, 'users', uid, 'dailyPuzzle', 'dat
 
 /** 오늘의 퍼즐 클리어 보상 */
 export const DAILY_REWARD_COIN = 100;
-export const DAILY_REWARD_PUZZLE_POWER = 30;
+export const DAILY_REWARD_PUZZLE_POWER = 10;
 
 /** 지난 날짜 문제 해제 비용. 이 달(포함) 이후의 문제만 해제할 수 있다. */
 export const DAILY_UNLOCK_COST = 300;

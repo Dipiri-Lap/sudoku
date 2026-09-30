@@ -88,7 +88,7 @@ const SudokuGame: React.FC = () => {
     useEffect(() => {
         if (state.isWinner && !hasAwardedCoins.current) {
             hasAwardedCoins.current = true;
-            // 오늘의 퍼즐은 보상 체계가 따로다(코인 100 + 퍼즐력 30).
+            // 오늘의 퍼즐은 보상 체계가 따로다(코인 100 + 퍼즐력 10).
             // 일반 클리어 보상과 겹쳐 주지 않는다.
             if (state.gameMode === 'Daily') {
                 clearMonthReward();
