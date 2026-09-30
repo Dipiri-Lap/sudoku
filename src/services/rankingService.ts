@@ -11,6 +11,7 @@ export interface UserProfile {
         [key: string]: number; // difficulty -> seconds
     };
     activeTitle?: string | null;
+    avatarFrame?: string | null;
 }
 
 export const getUserProfile = async (uid: string): Promise<UserProfile> => {
@@ -23,6 +24,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
     let unlockedAvatars: string[] = ['1', '2', '3', '4', '5', '6', '7', '8'];
     let bestTimes: { [key: string]: number } = {};
     let activeTitle: string | null = null;
+    let avatarFrame: string | null = null;
 
     if (userSnap.exists()) {
         const userData = userSnap.data();
@@ -32,6 +34,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
         unlockedAvatars = userData.unlockedAvatars || unlockedAvatars;
         bestTimes = userData.bestTimes || {};
         activeTitle = userData.activeTitle ?? null;
+        avatarFrame = userData.avatarFrame ?? null;
     } else {
         // Create new profile if not exists
         await setDoc(userRef, { uid, nickname, photoURL: '1', coins: 0, puzzlePower: 0, createdAt: new Date().toISOString() });
@@ -48,7 +51,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile> => {
         }
     }
 
-    return { uid, nickname, photoURL, puzzlePower, unlockedAvatars, bestTimes, activeTitle };
+    return { uid, nickname, photoURL, puzzlePower, unlockedAvatars, bestTimes, activeTitle, avatarFrame };
 };
 
 export const updateProfileInfo = async (uid: string, data: { nickname: string; photoURL?: string }): Promise<void> => {
@@ -65,6 +68,11 @@ export const updateProfileInfo = async (uid: string, data: { nickname: string; p
 export const incrementPuzzlePower = async (uid: string): Promise<void> => {
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, { puzzlePower: increment(1) });
+};
+
+export const updateAvatarFrame = async (uid: string, frameId: string): Promise<void> => {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { avatarFrame: frameId });
 };
 
 export const updateActiveTitle = async (uid: string, titleId: string | null): Promise<void> => {
@@ -154,7 +162,8 @@ export const getTopRankings = async (limitCount: number = 100): Promise<UserProf
                 puzzlePower: data.puzzlePower || 0,
                 unlockedAvatars: data.unlockedAvatars || [],
                 bestTimes: data.bestTimes || {},
-                activeTitle: data.activeTitle ?? null
+                activeTitle: data.activeTitle ?? null,
+                avatarFrame: data.avatarFrame ?? null
             };
         });
     } catch (e) {

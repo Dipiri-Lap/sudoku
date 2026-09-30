@@ -23,6 +23,7 @@ import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
 import { useWordSortHardProgress } from '../../context/WordSortHardProgressContext';
 import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
+import { getFrameColor } from '../data/avatarFrames';
 
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
@@ -113,6 +114,7 @@ const LandingPage: React.FC = () => {
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
     const [showCoinShop, setShowCoinShop] = useState(false);
     const [activeTitle, setActiveTitle] = useState<string | null>(null);
+    const [avatarFrame, setAvatarFrame] = useState<string | null>(null);
     const [termsModal, setTermsModal] = useState<TermsType | null>(null);
 
     useEffect(() => {
@@ -127,6 +129,7 @@ const LandingPage: React.FC = () => {
                     setUserPhoto(c.photoURL || null);
                     setPuzzlePower(c.puzzlePower || 0);
                     setActiveTitle(c.activeTitle ?? null);
+                    setAvatarFrame(c.avatarFrame ?? null);
                 }
 
                 const { getUserProfile, getUserRank } = await import('../../services/rankingService');
@@ -136,11 +139,13 @@ const LandingPage: React.FC = () => {
                     setUserPhoto(profile.photoURL || null);
                     setPuzzlePower(profile.puzzlePower || 0);
                     setActiveTitle(profile.activeTitle ?? null);
+                    setAvatarFrame(profile.avatarFrame ?? null);
                     localStorage.setItem(PROFILE_CACHE_KEY(user.uid), JSON.stringify({
                         nickname: profile.nickname,
                         photoURL: profile.photoURL || null,
                         puzzlePower: profile.puzzlePower || 0,
                         activeTitle: profile.activeTitle ?? null,
+                        avatarFrame: profile.avatarFrame ?? null,
                     }));
 
                     const rank = await getUserRank(profile.puzzlePower || 0);
@@ -340,7 +345,7 @@ const LandingPage: React.FC = () => {
                                     width: '60px',
                                     height: '60px',
                                     borderRadius: '16px',
-                                    border: '3px solid #fde047',
+                                    border: `3px solid ${getFrameColor(avatarFrame)}`,
                                     backgroundColor: '#cbd5e1',
                                     overflow: 'hidden',
                                     display: 'flex',
@@ -808,6 +813,7 @@ const LandingPage: React.FC = () => {
                             photoURL: newPhotoURL,
                             puzzlePower,
                             activeTitle,
+                            avatarFrame,
                         }));
                         showToast('프로필이 업데이트되었습니다.');
                     }}
@@ -818,6 +824,17 @@ const LandingPage: React.FC = () => {
                             photoURL: userPhoto,
                             puzzlePower,
                             activeTitle: titleId,
+                            avatarFrame,
+                        }));
+                    }}
+                    onAvatarFrameChange={(frameId) => {
+                        setAvatarFrame(frameId);
+                        localStorage.setItem(PROFILE_CACHE_KEY(currentUser.uid), JSON.stringify({
+                            nickname,
+                            photoURL: userPhoto,
+                            puzzlePower,
+                            activeTitle,
+                            avatarFrame: frameId,
                         }));
                     }}
                 />

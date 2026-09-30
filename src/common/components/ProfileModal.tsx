@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Edit2, Check, Lock, Star, ChevronDown } from 'lucide-react'; // Lock은 아바타 탭에서 사용
 const CoinImg = ({ size = 14 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
-import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle } from '../../services/rankingService';
+import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle, updateAvatarFrame } from '../../services/rankingService';
 import type { UserProfile as UserProfileType } from '../../services/rankingService';
+import { AVATAR_FRAMES, getFrameColor } from '../data/avatarFrames';
 import { Trophy, Users } from 'lucide-react';
 import { useCoins } from '../../context/CoinContext';
 import { useChallenges } from '../../context/ChallengeContext';
@@ -23,6 +24,7 @@ interface ProfileModalProps {
     onClose: () => void;
     onSaveSuccess: (newNickname: string, newPhotoURL: string | null) => void;
     onActiveTitleChange?: (titleId: string | null) => void;
+    onAvatarFrameChange?: (frameId: string) => void;
 }
 
 // 1-40 local avatar IDs (코인으로 해제 가능)
@@ -59,6 +61,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     onClose,
     onSaveSuccess,
     onActiveTitleChange,
+    onAvatarFrameChange,
 }) => {
     const { coins, spendCoins } = useCoins();
     const [nickname, setNickname] = useState(currentNickname);
@@ -67,6 +70,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const [unlockedAvatars, setUnlockedAvatars] = useState<string[]>(['1', '2', '3', '4', '5', '6', '7', '8']);
     const [pendingUnlockAvatar, setPendingUnlockAvatar] = useState<string | null>(null);
     const [activeTitle, setActiveTitle] = useState<string | null>(null);
+    const [avatarFrame, setAvatarFrame] = useState<string | null>(null);
     const [displayPP, setDisplayPP] = useState<number>(0);
 
     const challenges = useChallenges();
@@ -184,6 +188,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             if (profile.unlockedAvatars) {
                 setUnlockedAvatars(profile.unlockedAvatars);
             }
+            setAvatarFrame(profile.avatarFrame ?? null);
             if (profile.activeTitle !== undefined) {
                 setActiveTitle(profile.activeTitle ?? null);
             }
@@ -194,6 +199,16 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         };
         fetchProfile();
     }, [uid]);
+
+    const handleSetFrame = async (id: string) => {
+        setAvatarFrame(id);
+        onAvatarFrameChange?.(id);
+        try {
+            await updateAvatarFrame(uid, id);
+        } catch (e) {
+            console.error('Failed to save avatar frame:', e);
+        }
+    };
 
     const handleSetTitle = async (id: string | null) => {
         setActiveTitle(id);
@@ -356,7 +371,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             width: '70px',
                             height: '70px',
                             borderRadius: '16px',
-                            border: '3px solid #fde047',
+                            border: `3px solid ${getFrameColor(avatarFrame)}`,
                             backgroundColor: '#cbd5e1',
                             overflow: 'hidden',
                             flexShrink: 0,
@@ -508,6 +523,34 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     <CoinImg size={16} />
                                     <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            {/* 테두리 색 선택 */}
+                            <div style={{ flexShrink: 0 }}>
+                                <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>테두리 색</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                    {AVATAR_FRAMES.map(f => {
+                                        const selected = getFrameColor(avatarFrame) === f.color;
+                                        return (
+                                            <button
+                                                key={f.id}
+                                                type="button"
+                                                title={f.name}
+                                                aria-label={`테두리 ${f.name}`}
+                                                aria-pressed={selected}
+                                                onClick={() => handleSetFrame(f.id)}
+                                                style={{
+                                                    width: '30px', height: '30px', borderRadius: '50%',
+                                                    background: f.color, cursor: 'pointer', padding: 0,
+                                                    border: selected ? '3px solid #fff' : '2px solid rgba(255,255,255,0.25)',
+                                                    boxShadow: selected ? `0 0 0 2px ${f.color}` : 'none',
+                                                    transform: selected ? 'scale(1.1)' : 'scale(1)',
+                                                    transition: 'transform 0.1s',
+                                                }}
+                                            />
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -878,7 +921,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                         height: '32px',
                                         borderRadius: '8px',
                                         overflow: 'hidden',
-                                        border: '2px solid #fde047'
+                                        border: `2px solid ${getFrameColor(avatarFrame)}`
                                     }}>
                                         <img src={selectedPhoto || '/assets/profiles/1.png'} alt="Me" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
@@ -999,7 +1042,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                             borderRadius: '8px',
                                                             overflow: 'hidden',
                                                             backgroundColor: '#cbd5e1',
-                                                            flexShrink: 0
+                                                            flexShrink: 0,
+                                                            border: `2px solid ${getFrameColor(isMe ? avatarFrame : user.avatarFrame)}`
                                                         }}>
                                                             <img draggable={false} src={avatar} alt={user.nickname} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                         </div>
