@@ -128,6 +128,34 @@ const DailyPuzzleCalendar: React.FC = () => {
                 </div>
             </header>
 
+            {/* 한 달 전체 클리어 보상 */}
+            {monthChallenge && (
+                <div className="animate-fade-in" style={{
+                    '--delay': '0.02s',
+                    marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.8rem',
+                    background: monthRewardDone ? 'linear-gradient(135deg, #ecfdf5, #d1fae5)' : 'linear-gradient(135deg, #fffbeb, #fef3c7)',
+                    border: `1px solid ${monthRewardDone ? '#6ee7b7' : '#fcd34d'}`,
+                    borderRadius: 16, padding: '0.7rem 0.9rem',
+                } as React.CSSProperties}>
+                    {monthChallenge.reward.avatar && (
+                        <img
+                            src={`/assets/profiles/${monthChallenge.reward.avatar}.png`}
+                            alt="월간 보상 아바타"
+                            style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', flexShrink: 0, filter: monthRewardDone ? 'none' : 'saturate(0.9)' }}
+                        />
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: monthRewardDone ? '#047857' : '#b45309' }}>
+                            {month}월 전체 클리어 보상{monthRewardDone ? ' · 획득 완료' : ''}
+                        </div>
+                        <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1e293b', margin: '1px 0' }}>{monthChallenge.title}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>
+                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? ' + 전용 아바타' : ''} + 칭호
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* 오늘 카드 */}
             <button
                 onClick={() => navigate(`/daily/play?date=${today}`)}
@@ -273,34 +301,6 @@ const DailyPuzzleCalendar: React.FC = () => {
                     })}
                 </div>
             </div>
-
-            {/* 한 달 전체 클리어 보상 */}
-            {monthChallenge && (
-                <div className="animate-fade-in" style={{
-                    '--delay': '0.15s',
-                    marginTop: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.8rem',
-                    background: monthRewardDone ? 'linear-gradient(135deg, #ecfdf5, #d1fae5)' : 'linear-gradient(135deg, #fffbeb, #fef3c7)',
-                    border: `1px solid ${monthRewardDone ? '#6ee7b7' : '#fcd34d'}`,
-                    borderRadius: 16, padding: '0.7rem 0.9rem',
-                } as React.CSSProperties}>
-                    {monthChallenge.reward.avatar && (
-                        <img
-                            src={`/assets/profiles/${monthChallenge.reward.avatar}.png`}
-                            alt="월간 보상 아바타"
-                            style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', flexShrink: 0, filter: monthRewardDone ? 'none' : 'saturate(0.9)' }}
-                        />
-                    )}
-                    <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: monthRewardDone ? '#047857' : '#b45309' }}>
-                            {month}월 전체 클리어 보상{monthRewardDone ? ' · 획득 완료' : ''}
-                        </div>
-                        <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1e293b', margin: '1px 0' }}>{monthChallenge.title}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>
-                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? ' + 전용 아바타' : ''} + 칭호
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* 범례 */}
             <div style={{
