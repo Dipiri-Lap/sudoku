@@ -1,11 +1,15 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, RotateCcw, RefreshCw, Store, ArrowRight, Heart, Star } from 'lucide-react';
+import { ChevronLeft, RotateCcw, RefreshCw, Store, ArrowRight, Heart, Star, House, Settings } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { levels, stages, shapeStages, type PieceData, type LevelData, type Direction } from '../data/levels';
 import { type Difficulty, DIFFICULTY_CONFIGS, generateLevelForDifficulty } from '../utils/levelGenerator';
 import { useArrowConcept } from '../hooks/useArrowConcept';
+import { useArrowProgress } from '../hooks/useArrowProgress';
+import { playEscapeSfx, playBlockedSfx, playClearSfx, preloadEscapeSfx } from '../utils/sound';
 import ArrowConceptShopModal from './ArrowConceptShopModal';
+import ArrowAbout from './ArrowAbout';
+import ArrowSettingsModal from './ArrowSettingsModal';
 import { useCoins } from '../../../context/CoinContext';
 import { auth } from '../../../firebase';
 import '../styles/ArrowPuzzle.css';
@@ -34,11 +38,20 @@ const TILE_RADIUS = 11;
 const TILE_DEPTH = 7;         // 타일 아래로 깔리는 두께 — 높이감을 만든다
 const GLOSS_RATIO = 0.26;    // 윗면 광택 (본체 두께 대비)
 const SHADE_RATIO = 0.44;    // 아랫면 그늘
-const ESCAPE_SPEED = 17;
+// 발사 후 속도 — 누르자마자 바로 빠르게 튀어나가고, ESCAPE_SPEED 까지 짧게 더 가속한다.
+const RAINBOW_DEG_PER_SEC = 1400; // 빠져나가는 동안 색상환이 도는 속도 — 한 바퀴에 약 0.26초
+const ESCAPE_SPEED = 32;         // 칸/초 — 최종 속도
+const ESCAPE_SPEED_START = 20;   // 칸/초 — 발사 직후 속도
+const ESCAPE_ACCEL_TIME = 0.12;  // 초 — 최종 속도에 도달하기까지 걸리는 시간
+
+function escapeSpeed(sinceLaunch: number): number {
+  const p = Math.min(1, Math.max(0, sinceLaunch / ESCAPE_ACCEL_TIME));
+  return ESCAPE_SPEED_START + (ESCAPE_SPEED - ESCAPE_SPEED_START) * p * p;
+}
 // 탈출 시작 직전 — 활시위를 당기듯 천천히 뒤로 모았다가, 그 자리에서 바로 튕겨 나가는 예비 동작.
 // 원위치로 먼저 돌아온 뒤에 출발하는 게 아니라, 당겨진 채로 있다가 발사 순간 그대로 전진이 붙는다
-// — 당겨진 만큼(ANTICIPATION_PULL)을 빠른 ESCAPE_SPEED 가 순식간에 통과하면서 "쑝" 하고 튀어나간다.
-const ANTICIPATION_TIME = 0.18;  // 초 — 뒤로 당기는 데 걸리는 시간
+// — 당겨진 만큼(ANTICIPATION_PULL)을 가속되는 escapeSpeed 가 순식간에 통과하면서 "쑝" 하고 튀어나간다.
+const ANTICIPATION_TIME = 0;     // 초 — 뒤로 당기는 데 걸리는 시간. 0 이면 누르자마자 바로 발사(예비 동작 없음)
 const ANTICIPATION_PULL = 0.16;  // 칸 단위 — 얼마나 뒤로 당겨지는지
 const ANTICIPATION_SQUASH = 0.35; // 뒤로 당겨질수록 눌려서 옆으로 퍼지는 정도 — 높이는 줄고 너비는 는다
 
@@ -105,14 +118,35 @@ interface BurstInfo {
   particles: { tx: number; ty: number }[];
 }
 
-/** 활시위 당김이 끝나고 실제로 튕겨 나가는 순간(frac 이 음수에서 0을 넘는 순간) 뒤로 남는 스피드라인 잔상. */
-interface TrailInfo {
+/** 막힌 화살이 상대에 부딪히는 접점에서 터지는 오답 이펙트(붉은 링 + X 표시) — CSS 애니메이션이 끝나면 스스로 사라진다. */
+interface ImpactInfo {
   id: string;
   x: number;
   y: number;
-  angleDeg: number;
-  color: string;
 }
+
+const SHAKE_PX = 4;   // 오답 시 보드 흔들림 세기(px)
+const SHAKE_MS = 300;
+
+// 오답 — 막힌 방향으로 툭 밀렸다가 수직 방향으로 짧게 떨며 가라앉는다.
+// 웹 애니메이션이라 리렌더 없이 매번 다시 시작된다.
+function shakeBoard(el: SVGSVGElement | null, dir: Direction) {
+  if (!el || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  const [dx, dy] = dirOffset(dir, SHAKE_PX);
+  const [ax, ay] = dx !== 0 ? [0, SHAKE_PX] : [SHAKE_PX, 0]; // 진행 방향의 수직축
+  const steps: [number, number, number][] = [
+    [0, 0, 0], [0.15, dx, dy],
+    [0.35, ax * 0.8, ay * 0.8], [0.55, -ax * 0.6, -ay * 0.6], [0.75, ax * 0.3, ay * 0.3],
+    [1, 0, 0],
+  ];
+  el.animate(
+    steps.map(([offset, x, y]) => ({ offset, transform: `translate(${x}px, ${y}px)` })),
+    { duration: SHAKE_MS, easing: 'ease-out' },
+  );
+}
+
+// 컨셉 상점 — 정식 공개 전이라 개발 빌드(로컬)에서만 진입 버튼을 보여 준다. 공개할 때 true 로 바꾼다.
+const SHOP_ENABLED = import.meta.env.DEV;
 
 const DIFFICULTIES: Difficulty[] = ['lv1', 'lv2', 'lv3', 'lv4', 'lv5', 'lv6', 'lv7', 'lv8'];
 
@@ -469,23 +503,7 @@ function onBoard(c: number, r: number, cols: number, rows: number) {
   return c >= 0 && c < cols && r >= 0 && r < rows;
 }
 
-const PROGRESS_KEY = 'arrowPuzzleProgress';
 const SHAPE_CLEARED_KEY = 'arrowPuzzleShapeCleared';
-
-/** 클리어한 최고 스테이지 번호. 다음 한 판까지 열어준다. */
-function loadProgress(): number {
-  try {
-    return Number(localStorage.getItem(PROGRESS_KEY) ?? 0) || 0;
-  } catch {
-    return 0;
-  }
-}
-
-function saveProgress(level: number) {
-  try {
-    if (level > loadProgress()) localStorage.setItem(PROGRESS_KEY, String(level));
-  } catch { /* 저장 실패는 무시 — 진행도는 편의 기능이다 */ }
-}
 
 /** 쉐이프 스테이지는 메인 캠페인과 독립적으로 클리어 여부만 기록한다 — 순서 제한 없이 자유롭게 플레이. */
 function loadShapeCleared(): Set<number> {
@@ -559,10 +577,13 @@ const ArrowPuzzleGame: React.FC = () => {
 
   type Screen = 'select' | 'stages' | 'shapes' | 'generating' | 'playing';
   const [screen, setScreen] = useState<Screen>(testLevel ? 'playing' : 'select');
+  const [showSettings, setShowSettings] = useState(false);
+  const [devStage, setDevStage] = useState(''); // 개발용 스테이지 바로가기 입력값
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [stageNo, setStageNo] = useState<number | null>(null);
   const [isShapeMode, setIsShapeMode] = useState(false);
-  const [progress, setProgress] = useState(loadProgress);
+  // 클리어한 최고 스테이지 번호(다음 한 판까지 열린다). 로그인하면 서버와 병합되어 도전과제에도 쓰인다.
+  const { progress, clearStage } = useArrowProgress();
   const [shapeCleared, setShapeCleared] = useState(loadShapeCleared);
   const [stageStars, setStageStars] = useState(loadStageStars);
   // 이번 판에서 받은 별 — 클리어 카드에 보여준다
@@ -583,12 +604,13 @@ const ArrowPuzzleGame: React.FC = () => {
   const [moveCount, setMoveCount] = useState(0);
   const [hearts, setHearts] = useState(MAX_HEARTS);
   const [isFailed, setIsFailed] = useState(false);
+  const [impacts, setImpacts] = useState<ImpactInfo[]>([]);
+  const svgRef = useRef<SVGSVGElement>(null);
   // 레벨 시작부터 흐른 시간(초) — 클리어/실패하면 멈춘다
   const [playSeconds, setPlaySeconds] = useState(0);
   // 피스가 판을 완전히 빠져나가는 순간의 타격감 연출
   const [bursts, setBursts] = useState<BurstInfo[]>([]);
   // 튕겨 나가는 순간 뒤로 남는 스피드라인 잔상
-  const [trails, setTrails] = useState<TrailInfo[]>([]);
   const hitstopUntilRef = useRef(0);
   const { concept, setConcept } = useArrowConcept();
   const isMono = concept === 'mono';
@@ -600,7 +622,7 @@ const ArrowPuzzleGame: React.FC = () => {
 
   const started = useRef(false);
   const escapingRef = useRef<EscapingPiece[]>([]);
-  const bumpRef = useRef<{ piece: PieceData; frac: number; dist: number; phase: 'out' | 'back' | 'wobble'; t: number } | null>(null);
+  const bumpRef = useRef<{ piece: PieceData; frac: number; dist: number; phase: 'out' | 'back' | 'wobble'; t: number; hit: [number, number] } | null>(null);
   const blockerTimerRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -637,7 +659,8 @@ const ArrowPuzzleGame: React.FC = () => {
   };
 
   rafCallbackRef.current = (time: number) => {
-    let delta = Math.min((time - lastTimeRef.current) / 1000, 0.1);
+    // rAF 타임스탬프가 startEscape 의 performance.now() 보다 살짝 앞서 음수가 될 수 있어 0 으로 막는다.
+    let delta = Math.min(Math.max((time - lastTimeRef.current) / 1000, 0), 0.1);
     lastTimeRef.current = time;
     // 히트스톱: 막 빠져나간 순간 아주 짧게 전체를 멈춰서 타격을 "느끼게" 한다.
     // 너무 길면 끊긴 것처럼 보이므로 한 프레임 예산(70ms) 정도로 짧게 잡는다.
@@ -645,28 +668,16 @@ const ArrowPuzzleGame: React.FC = () => {
 
     const updated: EscapingPiece[] = [];
     const newBursts: BurstInfo[] = [];
-    const newTrails: TrailInfo[] = [];
     for (const ep of escapingRef.current) {
-      const prevFrac = ep.frac;
       let { cells, frac } = ep;
       const t = ep.t + delta;
-      if (t < ANTICIPATION_TIME) {
+      if (ANTICIPATION_TIME > 0 && t < ANTICIPATION_TIME) {
         // 힘을 모으는 구간 — 활시위를 당기듯 천천히 뒤로 모은다
         frac = anticipationFrac(t);
       } else {
         // 당겨진 자리(음수) 그대로 발사 — 원위치로 돌아오는 구간 없이 빠른 속도가
         // 그 간격을 순식간에 통과하면서 "쑝" 하고 튀어나가는 느낌을 만든다
-        frac += ESCAPE_SPEED * delta;
-      }
-      // 당겨진 자리(음수)에서 0을 넘어서는 바로 그 프레임 — 실제로 튕겨 나가는 순간이다.
-      // 여기서 진행 방향 반대쪽으로 짧게 남았다 사라지는 스피드라인을 남겨서 속도감을 강조한다.
-      if (prevFrac < 0 && frac >= 0) {
-        const head = cells[cells.length - 1];
-        const [hx, hy] = cellCenter(head[0], head[1]);
-        const [ox, oy] = dirOffset(ep.exitDir, CELL_SIZE / 2);
-        const [ddx, ddy] = dirOffset(ep.exitDir, 1);
-        const angleDeg = (Math.atan2(ddy, ddx) * 180) / Math.PI;
-        newTrails.push({ id: `${ep.id}-trail-${time}`, x: hx + ox, y: hy + oy, angleDeg, color: ep.color });
+        frac += escapeSpeed(t - ANTICIPATION_TIME) * delta;
       }
       while (frac >= 1) {
         const newHead = advance(cells[cells.length - 1], ep.exitDir);
@@ -694,7 +705,6 @@ const ArrowPuzzleGame: React.FC = () => {
     escapingRef.current = updated;
     setEscapingPieces([...updated]);
     if (BURST_FX && newBursts.length > 0) setBursts(prev => [...prev, ...newBursts]);
-    if (newTrails.length > 0) setTrails(prev => [...prev, ...newTrails]);
 
     // 막힌 피스: 앞으로 밀고 나가다 부딪히면 되돌아온다.
     // 돌아올 때를 조금 느리게 해서 "튕겨 나왔다"가 아니라 "밀렸다 물러난다"로 읽히게.
@@ -708,6 +718,7 @@ const ArrowPuzzleGame: React.FC = () => {
           bp.frac = bp.dist;
           bp.phase = 'back';
           bp.t = 0;                                    // 여기서부터 출렁임 시작
+          setImpacts(prev => [...prev, { id: `${bp.piece.id}-${time}`, x: bp.hit[0], y: bp.hit[1] }]);
           setBlockerInfo(findBlockerInfo(bp.piece));   // 부딪힌 순간 상대 쪽 접점이 볼록해지기 시작
         }
       } else {
@@ -740,13 +751,13 @@ const ArrowPuzzleGame: React.FC = () => {
     if (activePieces.length === 0 && escapingPieces.length === 0) {
       const t = setTimeout(() => {
         setIsCleared(true);
+        playClearSfx();
         if (stageNo !== null) {
           if (isShapeMode) {
             saveShapeCleared(stageNo);
             setShapeCleared(prev => new Set(prev).add(stageNo));
           } else {
-            saveProgress(stageNo);
-            setProgress(p => Math.max(p, stageNo));
+            clearStage(stageNo);
             const stars = computeStars(levelData.pieces.length, playSeconds);
             setLastStars(stars);
             setStageStars(saveStageStars(stageNo, stars));
@@ -779,7 +790,7 @@ const ArrowPuzzleGame: React.FC = () => {
       }, 200);
       return () => clearTimeout(t);
     }
-  }, [activePieces.length, escapingPieces.length, stageNo, isShapeMode, addCoins]);
+  }, [activePieces.length, escapingPieces.length, stageNo, isShapeMode, addCoins, clearStage]);
 
   useEffect(() => {
     return () => {
@@ -787,6 +798,9 @@ const ArrowPuzzleGame: React.FC = () => {
       if (blockerTimerRef.current !== null) clearTimeout(blockerTimerRef.current);
     };
   }, []);
+
+  // 첫 발사에서 소리가 늦지 않도록 효과음을 미리 불러 둔다
+  useEffect(() => { preloadEscapeSfx(); }, []);
 
   useEffect(() => {
     if (screen !== 'select') return;
@@ -813,6 +827,7 @@ const ArrowPuzzleGame: React.FC = () => {
     setBump(null);
     setBlockerInfo(null);
     setBursts([]);
+    setImpacts([]);
     hitstopUntilRef.current = 0;
     setIsCleared(false);
     setMoveCount(0);
@@ -861,6 +876,11 @@ const ArrowPuzzleGame: React.FC = () => {
     setScreen('playing');
   }, [loadLevel]);
 
+  const handleDevStageGo = () => {
+    const n = parseInt(devStage, 10);
+    if (n >= 1 && n <= stages.length) handleSelectStage(n);
+  };
+
   const handleSelectShapeStage = useCallback((level: number) => {
     const stage = shapeStages[level - 1];
     if (!stage) return;
@@ -873,6 +893,7 @@ const ArrowPuzzleGame: React.FC = () => {
 
   const startEscape = useCallback((piece: PieceData) => {
     started.current = true;
+    playEscapeSfx();
     setMoveCount(n => n + 1);
     const exitPoint = exitEdgePoint(piece.cells[piece.cells.length - 1], piece.exitDir, gridCols, gridRows);
     const ep: EscapingPiece = { ...piece, cells: [...piece.cells], frac: 0, t: 0, exitPoint };
@@ -897,6 +918,7 @@ const ArrowPuzzleGame: React.FC = () => {
     // 어디서 멈추는지가 곧 "무엇이 막고 있는지"를 말해준다.
     const blocker = findBlocker(piece, others, gridCols, gridRows);
     if (!blocker) return;
+    playBlockedSfx();
 
     // Mono 컨셉에서는 막힌 조각을 누른 게 "잘못 짚은 수" — 하트를 하나 깎는다.
     if (isMono) {
@@ -922,7 +944,12 @@ const ArrowPuzzleGame: React.FC = () => {
     // 젤리니까 조금 파고드는 게 오히려 자연스럽다.
     const dist = gap >= 1 ? gap : 0.34;
 
-    bumpRef.current = { piece, frac: 0, dist, phase: 'out', t: -1 };
+    // 접점 = 마지막으로 비어 있던 칸과 막은 칸의 경계
+    const [bcx, bcy] = cellCenter(blocker.cell[0], blocker.cell[1]);
+    const [hox, hoy] = dirOffset(piece.exitDir, CELL_SIZE / 2);
+    shakeBoard(svgRef.current, piece.exitDir);
+
+    bumpRef.current = { piece, frac: 0, dist, phase: 'out', t: -1, hit: [bcx - hox, bcy - hoy] };
     setBump({ id: piece.id, frac: 0, dist, t: -1, phase: 'out' });
     if (rafRef.current === null) {
       lastTimeRef.current = performance.now();
@@ -946,6 +973,12 @@ const ArrowPuzzleGame: React.FC = () => {
     const isBumping = !isEscaping && bump?.id === piece.id;
     const moving = isEscaping || frac > 0;
     const head = piece.cells[piece.cells.length - 1];
+
+    // 빠져나가는 동안 색이 무지개로 빠르게 순환한다. 나가는 중이 아니면 원래 색.
+    const color = isEscaping
+      ? `hsl(${Math.round((piece as EscapingPiece).t * RAINBOW_DEG_PER_SEC) % 360} 95% 60%)`
+      : piece.color;
+    const monoColor = isEscaping ? color : '#fff';
 
     // 물컹거림: 두께를 흔든다. 부피가 일정한 젤리라 두꺼워지면 짧아 보이고
     // 얇아지면 늘어난 것처럼 보인다 — 스쿼시&스트레치. 몸통에는 적용하지 않는다.
@@ -1014,28 +1047,28 @@ const ArrowPuzzleGame: React.FC = () => {
         {isMono ? (
           <g filter="url(#ap-piece-shadow)">
             {/* 미니멀 라인아트: 색 채우기·광택 없이 흰 선 하나로만 그린다 */}
-            <path d={pathD} stroke="#fff" strokeWidth={dsw} fill="none"
+            <path d={pathD} stroke={monoColor} strokeWidth={dsw} fill="none"
               strokeLinecap="round" strokeLinejoin="round" {...drawProps} />
             {showArrow && (
-              <polygon points={arrowPts} fill="#fff" stroke="#fff" strokeWidth={dsw * 0.24} strokeLinejoin="round" {...arrowDrawProps} />
+              <polygon points={arrowPts} fill={monoColor} stroke={monoColor} strokeWidth={dsw * 0.24} strokeLinejoin="round" {...arrowDrawProps} />
             )}
           </g>
         ) : (
           <>
             {/* 바닥에 깔리는 번짐 — 젤리가 판 위에 떠 있는 느낌 */}
-            <path d={pathD} stroke={piece.color} strokeWidth={sw + 7} fill="none"
+            <path d={pathD} stroke={color} strokeWidth={sw + 7} fill="none"
               strokeLinecap="round" strokeLinejoin="round" opacity={0.16} {...drawProps} />
 
             {/* 젤리 본체 */}
-            <path d={pathD} stroke={piece.color} strokeWidth={sw} fill="none"
+            <path d={pathD} stroke={color} strokeWidth={sw} fill="none"
               strokeLinecap="round" strokeLinejoin="round" {...drawProps} />
 
             {JELLY_FLOW && !isEscaping && (
-              <JellyFlow d={pathD} color={piece.color} sw={sw} id={piece.id} cellCount={piece.cells.length} />
+              <JellyFlow d={pathD} color={color} sw={sw} id={piece.id} cellCount={piece.cells.length} />
             )}
             {showArrow && (
-              <polygon points={arrowPts} fill={piece.color}
-                stroke={piece.color} strokeWidth={sw * 0.24} strokeLinejoin="round" {...arrowDrawProps} />
+              <polygon points={arrowPts} fill={color}
+                stroke={color} strokeWidth={sw * 0.24} strokeLinejoin="round" {...arrowDrawProps} />
             )}
 
             {/* 아랫면 그늘과 윗면 광택. 본체보다 좁고 덜 밀어내서 밖으로 새지 않는다 */}
@@ -1057,16 +1090,17 @@ const ArrowPuzzleGame: React.FC = () => {
 
   if (screen === 'select') {
     return (
-      <div className="ap-page ap-page--select">
-        <header className="ap-header ap-header--title">
+      <div className="mode-select-page">
+        <header className="mode-header">
           <button className="back-btn" onClick={() => navigate('/')}>
             <ChevronLeft size={24} />
           </button>
           <h1>ArrowWay</h1>
         </header>
 
-        <div className="ap-select-screen">
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '100%', maxWidth: 420 }}>
+        {/* 다른 게임(스냅스팟·크로썸 등)과 같은 공통 모드 선택 껍데기 */}
+        <div className="mode-grid">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
             <img
               src="/images/arrow-puzzle/stageBtn.webp"
               alt="스테이지 모드"
@@ -1076,11 +1110,34 @@ const ArrowPuzzleGame: React.FC = () => {
               onMouseEnter={modeHoverOn}
               onMouseLeave={modeHoverOff}
             />
-            <span style={{ fontSize: '0.88rem', color: '#7c3aed', fontWeight: 700 }}>
-              {Math.min(progress, stages.length)}/{stages.length} 클리어 · {progress > 0 ? '이어하기' : '시작하기'}
+            <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
+              {progress > 0
+                ? `Stage ${Math.min(progress + 1, stages.length)}/${stages.length} 이어하기`
+                : `Stage 1/${stages.length} 시작하기`}
             </span>
           </div>
+        </div>
 
+        <ArrowAbout />
+
+        {/* DEV: 스테이지 번호를 직접 입력해 진행도와 상관없이 바로 플레이 */}
+        {import.meta.env.DEV && (
+          <div className="ap-devbox">
+            <input
+              type="number"
+              min={1}
+              max={stages.length}
+              placeholder={`스테이지 번호 (1~${stages.length})`}
+              value={devStage}
+              onChange={e => setDevStage(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleDevStageGo(); }}
+            />
+            <button onClick={handleDevStageGo}>GO</button>
+          </div>
+        )}
+
+        <div className="ap-page--select">
+        <div className="ap-select-screen">
           {window.location.hostname === 'localhost' && (
             <>
               <button className="ap-campaign-card" onClick={() => setScreen('shapes')}>
@@ -1114,6 +1171,7 @@ const ArrowPuzzleGame: React.FC = () => {
               </div>
             </>
           )}
+        </div>
         </div>
       </div>
     );
@@ -1237,9 +1295,14 @@ const ArrowPuzzleGame: React.FC = () => {
           </div>
         )}
         <div className="ap-header-btns">
-          <button className="ap-icon-btn" title="컨셉 상점" onClick={() => setShowShop(true)}>
-            <Store size={16} />
+          <button className="ap-icon-btn" title="설정" onClick={() => setShowSettings(true)}>
+            <Settings size={16} />
           </button>
+          {SHOP_ENABLED && (
+            <button className="ap-icon-btn" title="컨셉 상점" onClick={() => setShowShop(true)}>
+              <Store size={16} />
+            </button>
+          )}
           {difficulty && (
             <button className="ap-icon-btn" title="새 퍼즐 생성" onClick={handleNewPuzzle}>
               <RefreshCw size={16} />
@@ -1251,13 +1314,14 @@ const ArrowPuzzleGame: React.FC = () => {
         </div>
       </header>
 
-      {showShop && (
+      {SHOP_ENABLED && showShop && (
         <ArrowConceptShopModal concept={concept} onSelect={setConcept} onClose={() => setShowShop(false)} />
       )}
+      {showSettings && <ArrowSettingsModal onClose={() => setShowSettings(false)} />}
 
       <div className="ap-board-wrap">
         <div className="ap-board-col">
-        <svg className="ap-svg" viewBox={`0 0 ${svgW} ${svgH}`}>
+        <svg ref={svgRef} className="ap-svg" viewBox={`0 0 ${svgW} ${svgH}`} style={{ '--ap-aspect': svgW / svgH } as React.CSSProperties}>
           <defs>
             <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
               <feGaussianBlur stdDeviation="3.5" result="blur" />
@@ -1382,37 +1446,24 @@ const ArrowPuzzleGame: React.FC = () => {
               ))}
             </g>
           ))}
-          {trails.map(tr => (
-            <g key={tr.id} transform={`translate(${tr.x} ${tr.y}) rotate(${tr.angleDeg})`} pointerEvents="none">
-              {/* 피스 색과 겹치면(특히 흰색 Mono) 잘 안 보여서, 피스 색과 무관하게
-                  밝은 하늘색 "에너지" 톤으로 고정해 시원한 느낌을 강조한다. */}
-              {[
-                { len: 46, y: -8, w: 4, o: 0.9 },
-                { len: 34, y: 0, w: 5, o: 0.7 },
-                { len: 24, y: 8, w: 3.5, o: 0.5 },
-              ].map((s, i) => (
-                <rect
-                  key={i}
-                  className="ap-speedline"
-                  x={-s.len}
-                  y={-s.w / 2 + s.y}
-                  width={s.len}
-                  height={s.w}
-                  rx={s.w / 2}
-                  fill="#bff0ff"
-                  opacity={s.o}
-                  style={{ animationDelay: `${i * 14}ms` }}
-                  onAnimationEnd={i === 0 ? () => setTrails(prev => prev.filter(x => x.id !== tr.id)) : undefined}
-                />
-              ))}
+          {impacts.map(im => (
+            <g key={im.id} transform={`translate(${im.x} ${im.y})`} pointerEvents="none">
+              <circle className="ap-impact-ring" r={10} fill="none" stroke="#ef4444" strokeWidth={4}
+                onAnimationEnd={() => setImpacts(prev => prev.filter(x => x.id !== im.id))} />
+              <g className="ap-impact-x" stroke="#ef4444" strokeWidth={5} strokeLinecap="round">
+                <line x1={-7} y1={-7} x2={7} y2={7} />
+                <line x1={7} y1={-7} x2={-7} y2={7} />
+              </g>
             </g>
           ))}
         </svg>
 
         {isMono && (
-          <div className="ap-mono-hearts-bar">
-            <Heart size={20} fill="#e11d48" stroke="#e11d48" strokeWidth={2} />
+          // 하트를 잃을 때마다 key 가 바뀌어 애니메이션이 다시 재생된다. 리셋(가득 참)일 땐 재생하지 않는다.
+          <div key={hearts} className={`ap-mono-hearts-bar${hearts < MAX_HEARTS ? ' ap-hearts-hit' : ''}`}>
+            <Heart className="ap-heart-icon" size={20} fill="#e11d48" stroke="#e11d48" strokeWidth={2} />
             <span>× {hearts}</span>
+            {hearts < MAX_HEARTS && <span className="ap-heart-float" aria-hidden="true">💔</span>}
           </div>
         )}
         </div>
@@ -1420,7 +1471,7 @@ const ArrowPuzzleGame: React.FC = () => {
         {isCleared && (
           <div className="ap-clear-overlay">
             <div className="ap-clear-card">
-              <div className="ap-clear-emoji">{isMono ? '➜' : '🍬'}</div>
+              <div className="ap-clear-emoji">🎉</div>
               <h2>클리어!</h2>
               <p>{isMono ? '화살표' : '젤리'} {moveCount}개를 모두 빼냈습니다</p>
               {stageNo !== null && !isShapeMode && (
@@ -1434,6 +1485,11 @@ const ArrowPuzzleGame: React.FC = () => {
                 </>
               )}
               <div className="ap-clear-btns">
+                {stageNo !== null && (
+                  <button className="ap-btn-home" onClick={() => setScreen(isShapeMode ? 'shapes' : 'stages')} aria-label="스테이지 목록">
+                    <House size={22} />
+                  </button>
+                )}
                 {stageNo !== null && isShapeMode ? (
                   (() => {
                     const idx = shapeStages.findIndex(s => s.level === stageNo);
@@ -1462,20 +1518,15 @@ const ArrowPuzzleGame: React.FC = () => {
                     새 퍼즐
                   </button>
                 )}
-                {stageNo !== null && (
-                  <button className="ap-btn-secondary" onClick={handleReset}>
-                    다시 시도
-                  </button>
-                )}
               </div>
+              {stageNo !== null && (
+                <button className="ap-btn-text" onClick={handleReset}>
+                  다시 시도
+                </button>
+              )}
               {difficulty && (
                 <button className="ap-btn-text" onClick={() => setScreen('select')}>
                   난이도 변경
-                </button>
-              )}
-              {stageNo !== null && (
-                <button className="ap-btn-text" onClick={() => setScreen(isShapeMode ? 'shapes' : 'stages')}>
-                  {isShapeMode ? '쉐이프 스테이지 목록' : '스테이지 목록'}
                 </button>
               )}
             </div>

@@ -12,7 +12,7 @@
  *
  *   npx tsx scripts/generate-arrow-levels.ts
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { generateLevel, generateShapedLevel } from '../src/features/arrow-puzzle/utils/levelGenerator';
 import type { LevelData, Direction, PieceData } from '../src/features/arrow-puzzle/data/levels';
 // 모양 정의는 공용 모듈에 있다 — 새 모양은 거기에 한 줄 추가하면 여기까지 따라온다.
@@ -79,9 +79,9 @@ function measure(lv: LevelData, runs: number): number | null {
 
 // ── 곡선 ─────────────────────────────────────────────────────────────────────
 
-// 1000판 설계를 그대로 쓰되, 우선 100판만 먼저 뽑아 흐름을 확인한다.
+// 1000판 설계 그대로. (한때 100판만 먼저 뽑아 흐름을 확인했었다.)
 // 캡(피스 밀도/줌) 논의는 아직 반영 전 — 상한 없이 원래 곡선 그대로.
-const COUNT = 100;
+const COUNT = 1000;
 const MAX_SIDE = 20;    // 폰 화면 기준 격자 상한
 
 // COUNT판을 세 구간으로 나눈다.
@@ -91,23 +91,53 @@ const MAX_SIDE = 20;    // 폰 화면 기준 격자 상한
 //   대신 CYCLE판 주기로 올랐다 내렸다를 반복해 상급자용으로 오래 즐길 수 있게 한다 —
 //   계속 단조 증가만 시키면 board/pieces 조합의 가짓수가 금방 바닥나 후보를 못 찾는다.
 // 1000판 설계(램프 290 : 정체기 700 ≈ 3:7, 주기 40 = 상승30+완화10)와 같은 비율로 100판에 맞췄다.
-const RAMP_END = 40;
-const CYCLE = 20;        // 정체기 한 주기(판 수)
-const CYCLE_RISE = 15;   // 그중 상승에 쓰는 판 수 — 나머지는 완화
+const RAMP_END = 300;
+const CYCLE = 40;        // 정체기 한 주기(판 수)
+const CYCLE_RISE = 30;   // 그중 상승에 쓰는 판 수 — 나머지는 완화
 
 // 모양 스테이지를 사이사이에 배치한다.
 // 비용만 보고 고르면 배치가 통제되지 않아 한쪽에 뭉친다(이전 결과: L17~21 연속, L1~11 전무).
 // 자리를 먼저 정하고 그 자리엔 모양 후보만 고른다.
-const SHAPE_FROM = 15;         // 이 레벨부터
-const SHAPE_EVERY_RAMP = 5;    // 램프 구간 간격
-const SHAPE_EVERY_PLATEAU = 4; // 정체기는 더 자주 섞어 1000판 동안 지루하지 않게 한다
+// 10판마다 한 번 — 10, 20, 30... 중 10번은 도입부(고정 크기)라 모양이 못 들어가서 20번부터.
+const SHAPE_FROM = 20;         // 이 레벨부터
+const SHAPE_EVERY_RAMP = 10;   // 램프 구간 간격
+const SHAPE_EVERY_PLATEAU = 10; // 정체기 간격
+
+// 이 번호까지는 기존 stages.json 을 그대로 두고, 그 뒤만 새로 만든다.
+// 모양 스테이지는 사용자가 이미지로 따로 만들어 대체할 예정이라 메인 생성에서는 넣지 않는다(SHAPES_IN_MAIN).
+const KEEP_UNTIL = 100;
+const SHAPES_IN_MAIN = false;
+const existing: Stage[] = KEEP_UNTIL > 0 ? JSON.parse(readFileSync('src/features/arrow-puzzle/data/stages.json', 'utf-8')) : [];
+
+// 하이라이트 판 — 곡선을 따라 오르다가 5번째마다(5, 15, 25...) 한 번씩 눈에 띄게 어려운 판을 끼운다.
+// 쉐이프(10의 배수)와 겹치지 않는 자리이고, 도입부(1~10)는 크기가 고정이라 15번부터 적용된다.
+// 곡선은 그대로 우상향이되 사이사이 "이번 건 좀 어렵네" 하는 굴곡을 만든다.
+const HIGHLIGHT_MULT = 1.6;
+const isHighlight = (level: number) => level > INTRO_COUNT && level % 10 === 5;
 
 interface Cfg { side: number; per: number; shape: number | null }
 
+// 일반(사각) 스테이지의 가로:세로 비율 후보. 후보마다 무작위로 뽑는다 — 정사각형만 나오지 않고
+// 가로로 긴 판, 세로로 긴 판이 섞이게 하려는 것. 면적은 side*side 에 맞춰 난이도 곡선이 크게 달라지지 않게 한다.
+// (cols / rows) 값이고, 정사각 근처를 조금 더 자주 뽑도록 1.0 을 여러 번 넣었다.
+const ASPECTS = [0.6, 0.7, 0.8, 0.9, 1.0, 1.0, 1.1, 1.25, 1.45];
+const MAX_COLS = 20;   // 폰 가로폭 기준 — 이보다 넓으면 칸이 너무 작아진다
+const MAX_ROWS = 26;   // 세로는 스크롤로 여유가 있어 조금 더 허용
+
+function rectFor(side: number): { cols: number; rows: number } {
+  const a = ASPECTS[Math.floor(Math.random() * ASPECTS.length)];
+  let cols = Math.max(3, Math.round(side * Math.sqrt(a)));
+  let rows = Math.max(3, Math.round(side / Math.sqrt(a)));
+  cols = Math.min(cols, MAX_COLS);
+  rows = Math.min(rows, MAX_ROWS);
+  return { cols, rows };
+}
+
 function makeCandidate(cfg: Cfg): LevelData | null {
   if (cfg.shape === null) {
-    const n = Math.max(2, Math.round((cfg.side * cfg.side) / cfg.per));
-    return generateLevel(cfg.side, cfg.side, n, 0.35);
+    const { cols, rows } = rectFor(cfg.side);
+    const n = Math.max(2, Math.round((cols * rows) / cfg.per));
+    return generateLevel(cols, rows, n, 0.35);
   }
   const raw = buildMask(SHAPES[cfg.shape], cfg.side, cfg.side);
   if (raw.length < 8) return null;
@@ -154,7 +184,7 @@ for (let side = 4; side <= MAX_SIDE; side++) {
   }
 }
 // 모양 후보. 복잡한 실루엣은 칸이 적으면 뭉개지므로 shapes.ts 의 minSide 로 걸러진다.
-for (const side of [8, 9, 10, 12, 14, 16, 18, 20]) {
+for (const side of SHAPES_IN_MAIN ? [8, 9, 10, 12, 14, 16, 18, 20] : []) {
   for (let si = 0; si < SHAPES.length; si++) {
     if (side < (SHAPES[si].minSide ?? 0)) continue;
     for (const per of [4, 5, 6, 8]) {
@@ -171,6 +201,7 @@ console.log(`후보 ${pool.length}개, 난이도 ${pool[0].cost.toFixed(1)} ~ ${
 //    피스가 2~5개뿐인 판은 만들 수 있는 탐색비용 값이 몇 개 없어(양자화) 전부 1.0 근처로 뭉친다.
 //    이 구간의 체감 진행은 난이도 수치가 아니라 "판이 커지고 피스가 늘어나는 것"이므로
 //    피스 수를 정해놓고 올린다.
+const INTRO_COUNT = 10; // 아래 INTRO 표의 길이와 같아야 한다
 const INTRO: { side: number; pieces: number }[] = [
   { side: 4, pieces: 2 }, { side: 4, pieces: 3 }, { side: 5, pieces: 4 }, { side: 5, pieces: 5 },
   { side: 6, pieces: 6 }, { side: 6, pieces: 7 }, { side: 7, pieces: 9 }, { side: 7, pieces: 11 },
@@ -178,7 +209,7 @@ const INTRO: { side: number; pieces: number }[] = [
 ];
 
 const intro: typeof pool = [];
-for (const { side, pieces } of INTRO) {
+for (const { side, pieces } of KEEP_UNTIL >= INTRO_COUNT ? [] : INTRO) {
   const cands: typeof pool = [];
   for (let k = 0; k < 10; k++) {
     const lv = generateLevel(side, side, pieces, 0.3);
@@ -203,7 +234,9 @@ for (const { side, pieces } of INTRO) {
 const RAMP_COUNT = RAMP_END - INTRO.length;          // 11~300, 290판
 const PLATEAU_COUNT = COUNT - RAMP_END;              // 301~1000, 700판
 // 이음매는 여유를 두고 넘긴다. 재측정 때 값이 흔들려도 도입부보다 낮아지지 않도록.
-const lo = Math.max(intro[intro.length - 1].cost * 1.4, 1.5);
+// 도입부를 보존하는 경우엔 기존 9번(마지막 도입 스테이지 — 10번은 모양으로 교체됐다)의 비용을 기준으로 한다.
+const introLastCost = intro.length ? intro[intro.length - 1].cost : existing[INTRO_COUNT - 2].searchCost;
+const lo = Math.max(introLastCost * 1.4, 1.5);
 // 램프의 정점 — 풀 최댓값(hiMax)보다 낮게 잡아 정체기가 더 올라갈 여지를 남긴다.
 const hiRamp = pool[Math.floor(pool.length * 0.85)].cost;
 // 정체기가 오르내리는 실질 상한. 이상치 하나에 끌려가지 않게 상위 2% 지점을 쓴다.
@@ -253,12 +286,13 @@ function pickFromPool(target: number, wantShape: boolean, minCost: number): (typ
 // 풀이 바닥나면(정체기 후반, 상급 대역에서 특히 자주 벌어진다) 그 자리에서 새로 만든다.
 // 풀에만 의존하면 700판을 감당할 만큼 서로 다른 고난도 후보를 미리 다 채워둘 수 없다.
 function generateFresh(target: number, wantShape: boolean, minCost: number): (typeof pool)[number] | null {
-  const sides = wantShape ? [10, 12, 14, 16, 18, 20] : [12, 14, 16, 18, 20];
+  // 목표 비용이 낮은 초·중반에도 쓰이므로 작은 판도 후보에 넣는다(판이 클수록 비용이 커진다).
+  const sides = wantShape ? [8, 10, 12, 14, 16, 18, 20] : [6, 8, 10, 12, 14, 16, 18, 20];
   let best: (typeof pool)[number] | null = null;
   let bestScore = Infinity;
-  for (let attempt = 0; attempt < 20; attempt++) {
+  for (let attempt = 0; attempt < 40; attempt++) {
     const side = sides[Math.floor(Math.random() * sides.length)];
-    const per = [3, 4, 5, 6][Math.floor(Math.random() * 4)];
+    const per = [3, 4, 5, 6, 8, 10][Math.floor(Math.random() * 6)];
     const shape = wantShape ? Math.floor(Math.random() * SHAPES.length) : null;
     if (wantShape && shape !== null && side < (SHAPES[shape].minSide ?? 0)) continue;
     const cfg: Cfg = { side, per, shape };
@@ -268,13 +302,20 @@ function generateFresh(target: number, wantShape: boolean, minCost: number): (ty
     if (acc === null || acc <= minCost) continue;
     const score = Math.abs(Math.log(acc / target));
     if (score < bestScore) { bestScore = score; best = { lv, cost: acc, cfg }; }
-    if (score < 0.05) break; // 충분히 가까우면 더 찾지 않는다
+    if (score < 0.12) break; // 충분히 가까우면 더 찾지 않는다
   }
   return best;
 }
 
 function pick(target: number, wantShape: boolean, minCost: number, level: number): (typeof pool)[number] {
-  const best = pickFromPool(target, wantShape, minCost) ?? generateFresh(target, wantShape, minCost);
+  // 풀에서 고른 후보가 목표에서 크게 벗어나면(가까운 후보가 이미 다 쓰인 경우) 새로 만들어 더 가까운 쪽을 쓴다.
+  // 풀에만 의존하면 중반부터 목표와 동떨어진 후보를 집어 곡선이 무너진다.
+  const dist = (c: (typeof pool)[number]) => Math.abs(Math.log(c.cost / target));
+  let best = pickFromPool(target, wantShape, minCost);
+  if (!best || dist(best) > 0.45) {
+    const fresh = generateFresh(target, wantShape, minCost);
+    if (fresh && (!best || dist(fresh) < dist(best))) best = fresh;
+  }
   if (!best) {
     console.error(`L${level} 후보 없음 (모양=${wantShape}, 목표 ${target.toFixed(1)}, 하한 ${minCost.toFixed(1)})`);
     process.exit(1);
@@ -285,9 +326,13 @@ function pick(target: number, wantShape: boolean, minCost: number, level: number
 // 램프(11~300): 등비 곡선으로 단조 증가. "직전보다 비싼 것만" 을 하한으로 강제한다.
 for (let i = 0; i < RAMP_COUNT; i++) {
   const level = INTRO.length + i + 1;
-  const target = lo * Math.pow(hiRamp / lo, i / (RAMP_COUNT - 1));
-  const wantShape = level >= nextShapeLevel;
-  const best = pick(target, wantShape, lastCost, level);
+  const trend = lo * Math.pow(hiRamp / lo, i / (RAMP_COUNT - 1));
+  const target = isHighlight(level) ? trend * HIGHLIGHT_MULT : trend;
+  if (level <= KEEP_UNTIL) { lastCost = existing[level - 1].searchCost; continue; }
+  const wantShape = SHAPES_IN_MAIN && level >= nextShapeLevel;
+  // 하한은 직전 비용이되, 목표의 90%를 넘지 않게 자른다. 측정 편차 때문에 이상치 하나(예: 목표의 수십 배)가
+  // 뽑히면 그 값이 곧 하한이 되어 뒤 레벨이 전부 후보를 못 찾는다.
+  const best = pick(target, wantShape, Math.min(lastCost, target * 0.9), level);
   picks.push(best);
   lastCost = best.cost;
   if (wantShape) nextShapeLevel += SHAPE_EVERY_RAMP;
@@ -302,8 +347,11 @@ for (let i = 0; i < PLATEAU_COUNT; i++) {
   const riseFrac = phase < CYCLE_RISE
     ? phase / (CYCLE_RISE - 1)
     : 1 - (phase - CYCLE_RISE) / (CYCLE - CYCLE_RISE - 1);
-  const target = bandLow + (hiMax - bandLow) * Math.max(0, Math.min(1, riseFrac));
-  const wantShape = level >= nextShapeLevel;
+  const trend = bandLow + (hiMax - bandLow) * Math.max(0, Math.min(1, riseFrac));
+  // 정체기는 이미 상한 근처라 후보가 얇으므로 하이라이트도 상한의 1.4배를 넘지 않게 한다.
+  const target = isHighlight(level) ? Math.min(trend * HIGHLIGHT_MULT, hiMax * 1.4) : trend;
+  if (level <= KEEP_UNTIL) { lastCost = existing[level - 1].searchCost; continue; }
+  const wantShape = SHAPES_IN_MAIN && level >= nextShapeLevel;
   // 정체기는 굴곡이 있어 직전보다 낮아질 수 있다 — 최소선은 도입부보다 항상 위인 bandLow*0.9.
   const minCost = bandLow * 0.9;
   const best = pick(target, wantShape, minCost, level);
@@ -314,15 +362,19 @@ for (let i = 0; i < PLATEAU_COUNT; i++) {
 
 const ordered = picks;
 
-const out: Stage[] = [...intro, ...ordered].map((p, i) => ({
-  level: i + 1,
+const generated: Stage[] = ordered.map((p, i) => ({
+  level: KEEP_UNTIL + i + 1,
   ...p.lv,
   shape: p.cfg.shape === null ? null : SHAPES[p.cfg.shape].name,
   minMoves: p.lv.pieces.length,
   searchCost: Math.round(p.cost * 10) / 10,
 }));
+// 도입부까지 새로 만드는 경우(KEEP_UNTIL < INTRO_COUNT)엔 intro 가 앞에 붙는다.
+const out: Stage[] = KEEP_UNTIL >= INTRO_COUNT
+  ? [...existing.slice(0, KEEP_UNTIL), ...generated]
+  : [...intro.map((p, i) => ({ level: i + 1, ...p.lv, shape: null, minMoves: p.lv.pieces.length, searchCost: Math.round(p.cost * 10) / 10 })), ...generated];
 
-for (const s of out) {
+for (const s of out.slice(KEEP_UNTIL)) {
   console.log(
     `L${String(s.level).padStart(2)}  ${(s.shape ?? '사각').padEnd(5)} ${s.gridCols}x${s.gridRows}  ` +
     `${String(s.pieces.length).padStart(3)}피스  비용 ${s.searchCost.toFixed(1).padStart(6)}`

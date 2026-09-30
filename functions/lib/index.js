@@ -17,11 +17,20 @@ function assertAdmin(request) {
 // 결제 금액(원) -> 지급 코인. 클라이언트가 보낸 금액이 아니라
 // PortOne에서 실제로 조회한 결제 금액을 기준으로 지급 코인을 결정한다.
 const AMOUNT_TO_COINS = {
+    1100: 500, // 스타터 팩 - 계정당 1회만
     2200: 500,
     4400: 1200,
     11000: 3500,
     25000: 10000,
 };
+/**
+ * 첫 구매 전용 특가. 같은 500코인을 절반 값에 주므로 반복 구매를 허용하면
+ * 아무도 다른 패키지를 사지 않는다. 그래서 계정당 1회로 막는다.
+ *
+ * 검사는 반드시 지급 트랜잭션 안에서 해야 한다. 밖에서 확인하면 동시에 두 번
+ * 결제했을 때 둘 다 통과한다.
+ */
+const STARTER_PACK_AMOUNT = 1100;
 exports.verifyPortOnePayment = (0, https_1.onCall)({ secrets: [PORTONE_API_SECRET] }, async (request) => {
     const uid = request.auth?.uid;
     if (!uid) {
@@ -52,10 +61,18 @@ exports.verifyPortOnePayment = (0, https_1.onCall)({ secrets: [PORTONE_API_SECRE
     }
     const paymentRef = db.collection("processedPayments").doc(paymentId);
     const userRef = db.collection("users").doc(uid);
+    const isStarterPack = paidAmount === STARTER_PACK_AMOUNT;
     const result = await db.runTransaction(async (tx) => {
         const existing = await tx.get(paymentRef);
         if (existing.exists) {
             return { alreadyProcessed: true, coins: existing.data()?.coins ?? 0 };
+        }
+        // 트랜잭션 안에서 읽고 같은 트랜잭션에서 표시해야 두 번 사지 못한다.
+        if (isStarterPack) {
+            const userSnap = await tx.get(userRef);
+            if (userSnap.data()?.starterPackUsed === true) {
+                throw new https_1.HttpsError("failed-precondition", "스타터 팩은 계정당 한 번만 구매할 수 있습니다.");
+            }
         }
         tx.set(paymentRef, {
             uid,
@@ -64,7 +81,9 @@ exports.verifyPortOnePayment = (0, https_1.onCall)({ secrets: [PORTONE_API_SECRE
             coins: coinsToGrant,
             processedAt: firestore_1.FieldValue.serverTimestamp(),
         });
-        tx.set(userRef, { paidCoins: firestore_1.FieldValue.increment(coinsToGrant) }, { merge: true });
+        tx.set(userRef, isStarterPack
+            ? { paidCoins: firestore_1.FieldValue.increment(coinsToGrant), starterPackUsed: true }
+            : { paidCoins: firestore_1.FieldValue.increment(coinsToGrant) }, { merge: true });
         return { alreadyProcessed: false, coins: coinsToGrant };
     });
     return result;
@@ -237,6 +256,10 @@ const VALID_CHALLENGE_IDS = new Set([
     "cq_50", "cq_100", "cq_200", "cq_300", "cq_400", "cq_500",
     "cq_1000", "ss_1", "ss_10", "ss_30", "ss_50", "ss_100",
     "ss_200", "ss_300", "ss_500",
+    "crossum_stage_5", "crossum_stage_10", "crossum_stage_25", "crossum_stage_50", "crossum_stage_100",
+    "crossum_stage_300", "crossum_stage_500", "crossum_stage_700", "crossum_stage_1000",
+    "arrow_stage_5", "arrow_stage_10", "arrow_stage_25", "arrow_stage_50", "arrow_stage_100",
+    "arrow_stage_300", "arrow_stage_500", "arrow_stage_700", "arrow_stage_1000",
 ]);
 exports.adminRecalcPuzzlePower = (0, https_1.onCall)({ timeoutSeconds: 540, memory: "512MiB" }, async (request) => {
     assertAdmin(request);
@@ -377,6 +400,8 @@ const STAGE_PROGRESS_SOURCES = [
         collection: "crossumProgress",
         cleared: (d) => Math.max(0, (Number(d.stageProgress) || 1) - 1),
     },
+    // 애로우웨이는 클리어한 최고 스테이지 번호(=개수)를 그대로 저장한다.
+    { collection: "arrowProgress", cleared: (d) => Math.max(0, Number(d.clearedStage) || 0) },
 ];
 /**
  * 스도쿠 일반 스테이지 진행도는 저장 위치가 세 군데다.

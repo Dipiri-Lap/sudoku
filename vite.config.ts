@@ -5,6 +5,16 @@ import nonogramSave from './scripts/vite-nonogram-save'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        // 애로우웨이 스테이지 데이터(약 1.2MB)를 메인 번들에서 떼어 내 PWA 프리캐시 한도(5MB) 안에 둔다
+        manualChunks(id) {
+          if (id.includes('arrow-puzzle/data/stages.json')) return 'arrow-stages'
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api/anthropic': {

@@ -4,6 +4,7 @@ import queensChallenges from './queens-challenges.json';
 import snapspotChallenges from './snapspot-challenges.json';
 import crossumChallenges from './crossum-challenges.json';
 import arrowChallenges from './arrow-challenges.json';
+import { ARROW_MAX_STAGE } from '../features/arrow-puzzle/data/limits';
 import dailyChallenges from './daily-challenges.json';
 
 export type ChallengeType = 'STAGE' | 'TIME_ATTACK';
@@ -42,7 +43,10 @@ export const WORD_SORT_CHALLENGES: Challenge[] = wordSortChallenges as Challenge
 export const QUEENS_CHALLENGES: Challenge[] = queensChallenges as Challenge[];
 export const SNAPSPOT_CHALLENGES: Challenge[] = snapspotChallenges as Challenge[];
 export const CROSSUM_CHALLENGES: Challenge[] = crossumChallenges as Challenge[];
-export const ARROW_CHALLENGES: Challenge[] = arrowChallenges as Challenge[];
+// 공개 스테이지 수(ARROW_MAX_STAGE)를 넘는 목표는 달성할 수 없으므로 숨긴다
+export const ARROW_CHALLENGES: Challenge[] = (arrowChallenges as Challenge[]).filter(
+    (c) => (c.progressConfig?.target ?? 0) <= ARROW_MAX_STAGE
+);
 export const DAILY_CHALLENGES: Challenge[] = dailyChallenges as Challenge[];
 
 /** 게임별 도전과제 목록 — 게임 추가 시 여기에 등록 */

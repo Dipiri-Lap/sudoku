@@ -608,7 +608,7 @@ const LandingPage: React.FC = () => {
                     <img src="/images/snapspot/title.webp" alt="스냅스팟" style={{ width: '100%', display: 'block' }} />
                 </a>
 
-                <a href="/cross-math" className="animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
+                <a href="/arrow-puzzle" className="animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
                 >
@@ -620,7 +620,7 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
                         zIndex: 1,
                     }}>NEW</div>
-                    <img src="/images/crossum/title.webp" alt="크로썸" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/arrow-puzzle/title.webp" alt="애로우웨이" style={{ width: '100%', display: 'block' }} />
                 </a>
 
                 <a href="/word-sort" className="animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
@@ -711,14 +711,12 @@ const LandingPage: React.FC = () => {
                     </a>
                 )}
 
-                {window.location.hostname === 'localhost' && (
-                    <a href="/arrow-puzzle" className="animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
-                    >
-                        <img src="/images/arrow-puzzle/title.webp" alt="Arrow Puzzle" style={{ width: '100%', display: 'block' }} />
-                    </a>
-                )}
+                <a href="/cross-math" className="animate-fade-in" style={{ '--delay': '0.6s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                >
+                    <img src="/images/crossum/title.webp" alt="크로썸" style={{ width: '100%', display: 'block' }} />
+                </a>
 
             </div>
 

@@ -343,6 +343,10 @@ const VALID_CHALLENGE_IDS = new Set([
   "cq_50", "cq_100", "cq_200", "cq_300", "cq_400", "cq_500",
   "cq_1000", "ss_1", "ss_10", "ss_30", "ss_50", "ss_100",
   "ss_200", "ss_300", "ss_500",
+  "crossum_stage_5", "crossum_stage_10", "crossum_stage_25", "crossum_stage_50", "crossum_stage_100",
+  "crossum_stage_300", "crossum_stage_500", "crossum_stage_700", "crossum_stage_1000",
+  "arrow_stage_5", "arrow_stage_10", "arrow_stage_25", "arrow_stage_50", "arrow_stage_100",
+  "arrow_stage_300", "arrow_stage_500", "arrow_stage_700", "arrow_stage_1000",
 ]);
 
 export const adminRecalcPuzzlePower = onCall(
@@ -513,6 +517,8 @@ const STAGE_PROGRESS_SOURCES: Array<{
     collection: "crossumProgress",
     cleared: (d) => Math.max(0, (Number(d.stageProgress) || 1) - 1),
   },
+  // 애로우웨이는 클리어한 최고 스테이지 번호(=개수)를 그대로 저장한다.
+  {collection: "arrowProgress", cleared: (d) => Math.max(0, Number(d.clearedStage) || 0)},
 ];
 
 /**

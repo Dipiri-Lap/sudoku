@@ -107,42 +107,58 @@ function weightedPickDir(cells: [number, number][], dirs: Direction[], cols: num
 // 남은 피스들의 길은 열리기만 하므로 — 지금 나갈 수 있는 피스를 아무거나
 // 골라도 뒤에 손해가 없다. 막히는 경우는 분할 자체가 나쁜 경우뿐이라
 // 그때는 다른 분할로 다시 시도한다.
-function assignExitDirsConstructive(
+export function assignExitDirsConstructive(
   layout: [number, number][][],
   cols: number,
   rows: number,
-  attempts = 8
+  attempts = 8,
+  allowReverse = true
 ): Direction[] | null {
   const N = layout.length;
+  // 머리는 뱀의 어느 쪽 끝이어도 된다. 한쪽 끝으로 고정하면 크고 복잡한 모양에서 나갈 수 있는 피스가 금방 바닥나
+  // 교착되므로, 뒤집은 방향도 후보로 준다. 뒤집기로 정해지면 성공 시 layout 의 해당 피스를 제자리에서 뒤집는다.
+  const reversed = layout.map(cells => [...cells].reverse() as [number, number][]);
 
   for (let attempt = 0; attempt < attempts; attempt++) {
     const dirs: Direction[] = new Array(N);
+    const flip = new Array<boolean>(N).fill(false);
     const escaped = new Array<boolean>(N).fill(false);
     // 아직 판 위에 남아있는 모든 칸
     const remaining = new Set<string>(layout.flat().map(([c, r]) => `${c},${r}`));
 
     let ok = true;
     for (let k = 0; k < N; k++) {
-      const candidates: { idx: number; validDirs: Direction[] }[] = [];
+      const candidates: { idx: number; options: { rev: boolean; validDirs: Direction[] }[] }[] = [];
 
       for (let i = 0; i < N; i++) {
         if (escaped[i]) continue;
         // 자기 자신은 장애물이 아니다
         for (const [c, r] of layout[i]) remaining.delete(`${c},${r}`);
-        const validDirs = ALL_DIRS.filter(d => canEscapeWithRemaining(layout[i], d, remaining, cols, rows));
+        const options: { rev: boolean; validDirs: Direction[] }[] = [];
+        for (const rev of allowReverse ? [false, true] : [false]) {
+          const cells = rev ? reversed[i] : layout[i];
+          const validDirs = ALL_DIRS.filter(d => canEscapeWithRemaining(cells, d, remaining, cols, rows));
+          if (validDirs.length > 0) options.push({ rev, validDirs });
+        }
         for (const [c, r] of layout[i]) remaining.add(`${c},${r}`);
-        if (validDirs.length > 0) candidates.push({ idx: i, validDirs });
+        if (options.length > 0) candidates.push({ idx: i, options });
       }
 
       if (candidates.length === 0) { ok = false; break; }
 
       const pick = candidates[Math.floor(Math.random() * candidates.length)];
-      dirs[pick.idx] = weightedPickDir(layout[pick.idx], pick.validDirs, cols, rows);
+      const opt = pick.options[Math.floor(Math.random() * pick.options.length)];
+      const cells = opt.rev ? reversed[pick.idx] : layout[pick.idx];
+      dirs[pick.idx] = weightedPickDir(cells, opt.validDirs, cols, rows);
+      flip[pick.idx] = opt.rev;
       escaped[pick.idx] = true;
       for (const [c, r] of layout[pick.idx]) remaining.delete(`${c},${r}`);
     }
 
-    if (ok) return dirs;
+    if (ok) {
+      for (let i = 0; i < N; i++) if (flip[i]) layout[i].reverse();
+      return dirs;
+    }
   }
   return null;
 }
@@ -244,7 +260,7 @@ function neighborsOf(c: number, r: number): [number, number][] {
   return [[c + 1, r], [c - 1, r], [c, r + 1], [c, r - 1]];
 }
 
-function partitionMaskIntoSnakes(
+export function partitionMaskIntoSnakes(
   mask: [number, number][],
   targetLen: number,
   variance: number,
@@ -335,6 +351,52 @@ export function generateShapedLevel(
       color: palette[i % palette.length],
     }));
     return { gridCols: cols, gridRows: rows, pieces, mask };
+  }
+  return null;
+}
+
+/**
+ * 여러 영역으로 나뉜 마스크에서 레벨을 만든다. 영역마다 따로 뱀 모양 피스로 자르기 때문에
+ * 피스가 영역 경계를 넘지 않고, 그래서 경계가 화살들의 끊어진 선으로 또렷하게 보인다
+ * (피자의 빵 테두리와 토핑 부분처럼). 영역별로 색 팔레트를 따로 줄 수 있다.
+ *
+ * 풀 수 있는 순서는 영역을 합친 전체 배치에서 한 번에 구성하므로(assignExitDirsConstructive)
+ * 영역끼리 서로의 길을 막아 교착되는 일은 없다.
+ */
+export function generateRegionedLevel(
+  regions: { mask: [number, number][]; numPieces: number; palette: string[] }[],
+  cols: number,
+  rows: number,
+  variance = 0.3
+): LevelData | null {
+  const all = regions.flatMap(r => r.mask);
+  if (all.length < 2) return null;
+
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const maxOrphans = Math.floor(attempt / 10);
+    const layout: [number, number][][] = [];
+    const regionOf: number[] = [];
+    let ok = true;
+    for (let ri = 0; ri < regions.length; ri++) {
+      const r = regions[ri];
+      if (r.mask.length === 0) continue;
+      const targetLen = Math.max(2, r.mask.length / Math.max(1, r.numPieces));
+      const part = partitionMaskIntoSnakes(r.mask, targetLen, variance, maxOrphans);
+      if (!part) { ok = false; break; }
+      for (const cells of part) { layout.push(cells); regionOf.push(ri); }
+    }
+    if (!ok) continue;
+
+    const dirs = assignExitDirsConstructive(layout, cols, rows);
+    if (!dirs) continue;
+
+    const seen = new Array(regions.length).fill(0);
+    const pieces: PieceData[] = layout.map((cells, i) => {
+      const ri = regionOf[i];
+      const pal = regions[ri].palette;
+      return { id: String(i + 1), cells, exitDir: dirs[i], color: pal[seen[ri]++ % pal.length] };
+    });
+    return { gridCols: cols, gridRows: rows, pieces, mask: all };
   }
   return null;
 }

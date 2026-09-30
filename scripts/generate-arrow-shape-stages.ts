@@ -6,9 +6,10 @@
  * SHAPES 의 모든 모양을 하나씩 만들어 별도 목록(shape-stages.json)에 저장한다 —
  * "쉐이프 스테이지" 화면은 이 목록만 보여준다.
  *
- *   npx tsx scripts/generate-arrow-shape-stages.ts
+ *   npx tsx scripts/generate-arrow-shape-stages.ts            # 전부 새로 만든다(기존 스테이지 배치가 모두 바뀜)
+ *   npx tsx scripts/generate-arrow-shape-stages.ts --append   # 목록에 아직 없는 모양만 뒤에 덧붙인다(기존 스테이지 유지)
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { generateShapedLevel } from '../src/features/arrow-puzzle/utils/levelGenerator';
 import type { LevelData, Direction, PieceData } from '../src/features/arrow-puzzle/data/levels';
 import { SHAPES, buildMask, fitMask } from '../src/features/arrow-puzzle/utils/shapes';
@@ -83,10 +84,14 @@ interface ShapeStage extends LevelData {
 const PER = 6;           // 칸당 평균 피스 크기 — 판이 커진 만큼 같이 올려서 피스 수가 폭증하지 않게 한다
 const MIN_DETAIL_SIDE = 22; // 이보다 작으면 실루엣이 뭉개지므로 항상 이 이상에서 만든다
 
-const out: ShapeStage[] = [];
+const OUT_PATH = 'src/features/arrow-puzzle/data/shape-stages.json';
+const append = process.argv.includes('--append');
+const out: ShapeStage[] = append ? JSON.parse(readFileSync(OUT_PATH, 'utf-8')) : [];
+const existing = new Set(out.map(s => s.shape));
 
 for (let i = 0; i < SHAPES.length; i++) {
   const shape = SHAPES[i];
+  if (existing.has(shape.name)) continue;
   const side = Math.max(shape.minSide ?? 0, MIN_DETAIL_SIDE);
 
   let best: { lv: LevelData; cost: number } | null = null;
@@ -108,14 +113,14 @@ for (let i = 0; i < SHAPES.length; i++) {
   }
 
   out.push({
-    level: i + 1,
+    level: out.length + 1,
     ...best.lv,
     shape: shape.name,
     minMoves: best.lv.pieces.length,
     searchCost: Math.round(best.cost * 10) / 10,
   });
   console.log(
-    `${String(i + 1).padStart(2)}  ${shape.name.padEnd(5)} ${best.lv.gridCols}x${best.lv.gridRows}  ` +
+    `${String(out.length).padStart(2)}  ${shape.name.padEnd(5)} ${best.lv.gridCols}x${best.lv.gridRows}  ` +
     `${String(best.lv.pieces.length).padStart(3)}피스  비용 ${best.cost.toFixed(1)}`
   );
 }
