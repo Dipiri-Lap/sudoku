@@ -876,6 +876,12 @@ const ArrowPuzzleGame: React.FC = () => {
     setScreen('playing');
   }, [loadLevel]);
 
+  /** 스테이지를 깬 뒤 다음으로 넘어갈 때 — 전면 광고를 한 번 띄운다(다른 게임과 같은 방식) */
+  const handleNextStage = useCallback((next: number) => {
+    if (import.meta.env.DEV || !window.adBreak) { handleSelectStage(next); return; }
+    window.adBreak({ type: 'next', name: 'arrow-stage-complete', adBreakDone: () => handleSelectStage(next) });
+  }, [handleSelectStage]);
+
   const handleDevStageGo = () => {
     const n = parseInt(devStage, 10);
     if (n >= 1 && n <= stages.length) handleSelectStage(n);
@@ -1505,7 +1511,7 @@ const ArrowPuzzleGame: React.FC = () => {
                     );
                   })()
                 ) : stageNo !== null && stageNo < stages.length ? (
-                  <button className="ap-btn-primary" onClick={() => handleSelectStage(stageNo + 1)}>
+                  <button className="ap-btn-primary" onClick={() => handleNextStage(stageNo + 1)}>
                     다음 레벨 <ArrowRight size={18} />
                   </button>
                 ) : (
