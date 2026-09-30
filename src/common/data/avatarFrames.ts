@@ -15,12 +15,8 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'pink', name: '분홍', color: '#f472b6' },
     { id: 'purple', name: '보라', color: '#a78bfa' },
     { id: 'blue', name: '파랑', color: '#60a5fa' },
-    { id: 'sky', name: '하늘', color: '#38bdf8' },
-    { id: 'mint', name: '민트', color: '#2dd4bf' },
     { id: 'green', name: '초록', color: '#4ade80' },
     { id: 'white', name: '하양', color: '#f8fafc' },
-    { id: 'gray', name: '회색', color: '#94a3b8' },
-    { id: 'black', name: '검정', color: '#1e293b' },
 ];
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';

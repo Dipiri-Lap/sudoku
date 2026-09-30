@@ -191,7 +191,7 @@ export const routes = [
     seoContent: `
       <section style="${S.section}">
         <h2 style="${S.h2}">애로우웨이 — 화살표 퍼즐 게임</h2>
-        <p style="${S.lead}"><strong>애로우웨이</strong>는 서로 얽혀 있는 <strong>화살</strong>를 하나씩 눌러 판 밖으로 빼내는 <strong>화살표 퍼즐</strong>입니다. 규칙은 단순하지만 어떤 화살이 어떤 화살의 길을 막고 있는지 찾아내는 추리의 재미가 있습니다.</p>
+        <p style="${S.lead}"><strong>애로우웨이</strong>는 서로 얽혀 있는 <strong>화살</strong>을 하나씩 눌러 판 밖으로 빼내는 <strong>화살표 퍼즐</strong>입니다. 규칙은 단순하지만 어떤 화살이 어떤 화살의 길을 막고 있는지 찾아내는 추리의 재미가 있습니다.</p>
         <h3 style="${S.h3}">게임 방법</h3>
         <p style="${S.p}">화살이 가리키는 방향 앞이 비어 있는 화살을 눌러 빼냅니다. 하나를 빼내면 그 뒤에 막혀 있던 화살이 풀려납니다. <strong>막힌 화살을 누르면 나가지 못하니</strong> 빼내는 순서를 먼저 생각해 보세요. 모든 화살을 빼내면 스테이지 클리어입니다.</p>
         <h3 style="${S.h3}">모양이 되는 스테이지</h3>

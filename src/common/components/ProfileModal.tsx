@@ -644,13 +644,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                     aspectRatio: '1',
                                                     borderRadius: '12px',
                                                     overflow: 'hidden',
-                                                    backgroundColor: '#cbd5e1',
+                                                    backgroundColor: '#334155',
                                                     border: `4px solid ${f.color}`,
                                                     boxShadow: isSelected ? '0 0 0 3px #4ade80' : 'none',
                                                     transition: 'transform 0.1s',
                                                     transform: isSelected ? 'scale(1.05)' : 'scale(1)',
                                                 }}>
-                                                    <img draggable={false} src={selectedPhoto || '/assets/profiles/1.png'} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     {isSelected && (
                                                         <div style={{
                                                             position: 'absolute',

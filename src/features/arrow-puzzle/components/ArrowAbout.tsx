@@ -116,7 +116,7 @@ const ArrowAbout: React.FC = () => (
     </summary>
     <div className="ap-about-body">
       <p className="ap-about-lead">
-        애로우웨이는 서로 얽혀 있는 <strong>화살</strong>를 하나씩 눌러 판 밖으로 빼내는 퍼즐이에요.
+        애로우웨이는 서로 얽혀 있는 <strong>화살</strong>을 하나씩 눌러 판 밖으로 빼내는 퍼즐이에요.
         규칙은 단순하지만, <strong>어떤 화살이 어떤 화살의 길을 막고 있는지</strong> 찾아내는 재미가 있습니다.
         {' '}{ARROW_MAX_STAGE}개의 스테이지로 관찰력과 순서 찾기 실력을 마음껏 키워보세요!
       </p>
