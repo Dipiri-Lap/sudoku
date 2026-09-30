@@ -23,7 +23,7 @@ import { useSudokuProgress } from '../../context/SudokuProgressContext';
 import { useWordSortProgress } from '../../context/WordSortProgressContext';
 import { useWordSortHardProgress } from '../../context/WordSortHardProgressContext';
 import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
-import { frameStyle } from '../data/avatarFrames';
+import { frameStyle, frameClass } from '../data/avatarFrames';
 
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
@@ -341,16 +341,15 @@ const LandingPage: React.FC = () => {
                                 onClick={() => setShowProfileModal(true)}
                                 style={{ position: 'relative', flexShrink: 0, cursor: 'pointer' }}
                             >
-                            <div style={{
+                            <div className={frameClass(avatarFrame)} style={{
                                     width: '60px',
                                     height: '60px',
                                     borderRadius: '16px',
-                                    ...frameStyle(avatarFrame, 3),
+                                    ...frameStyle(avatarFrame, 3, '#cbd5e1', '0 2px 8px rgba(0,0,0,0.2)'),
                                     overflow: 'hidden',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                                     transition: 'transform 0.1s',
                                 }}>
                                 <img

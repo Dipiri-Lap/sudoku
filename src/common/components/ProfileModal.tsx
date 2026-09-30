@@ -3,7 +3,7 @@ import { X, Edit2, Check, Lock, Star, ChevronDown, Palette } from 'lucide-react'
 const CoinImg = ({ size = 14 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle, updateAvatarFrame, unlockFrame } from '../../services/rankingService';
 import type { UserProfile as UserProfileType } from '../../services/rankingService';
-import { AVATAR_FRAMES, findFrame, frameStyle, isFrameFree } from '../data/avatarFrames';
+import { AVATAR_FRAMES, findFrame, frameStyle, frameClass, isFrameFree } from '../data/avatarFrames';
 import { Trophy, Users } from 'lucide-react';
 import { useCoins } from '../../context/CoinContext';
 import { useChallenges } from '../../context/ChallengeContext';
@@ -404,14 +404,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
                     {/* Top Row: Current Avatar & Nickname Edit */}
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexShrink: 0 }}>
-                        <div style={{
+                        <div className={frameClass(avatarFrame)} style={{
                             width: '70px',
                             height: '70px',
                             borderRadius: '16px',
-                            ...frameStyle(avatarFrame, 3),
+                            ...frameStyle(avatarFrame, 3, '#cbd5e1', '0 4px 10px rgba(0,0,0,0.2)'),
                             overflow: 'hidden',
                             flexShrink: 0,
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
                         }}>
                             <img
                                 src={selectedPhoto || '/assets/profiles/1.png'}
@@ -677,15 +676,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                 onClick={() => handleFrameClick(f.id)}
                                                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
                                             >
-                                                <div style={{
+                                                <div className={frameClass(f.id)} style={{
                                                     position: 'relative',
                                                     width: '100%',
                                                     aspectRatio: '1',
                                                     borderRadius: '12px',
                                                     overflow: 'hidden',
-                                                    ...frameStyle(f.id, 4, '#334155'),
+                                                    ...frameStyle(f.id, 4, '#334155', isSelected ? '0 0 0 3px #4ade80' : undefined),
                                                     filter: unlocked ? 'none' : 'brightness(0.65)',
-                                                    boxShadow: isSelected ? '0 0 0 3px #4ade80' : 'none',
                                                     transition: 'transform 0.1s',
                                                     transform: isSelected ? 'scale(1.05)' : 'scale(1)',
                                                 }}>
@@ -1180,11 +1178,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             textAlign: 'center', width: '240px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
                             color: 'white'
                         }}>
-                            <div style={{
+                            <div className={frameClass(f.id)} style={{
                                 width: '72px', height: '72px', borderRadius: '14px',
                                 overflow: 'hidden', margin: '0 auto 0.75rem',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                                ...frameStyle(f.id, 4, '#334155')
+                                ...frameStyle(f.id, 4, '#334155', '0 4px 12px rgba(0,0,0,0.3)')
                             }} />
                             <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>{f.name} 테두리 해제</div>
                             <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)', marginBottom: '0.75rem', lineHeight: 1.8 }}>
