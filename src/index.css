@@ -2452,9 +2452,10 @@ html.theme-gameboy .theme-toggle-btn {
 @keyframes frameSpin {
   to { --frame-angle: 360deg; }
 }
+/* 빛줄기는 상자 오른쪽 밖(0%)에서 시작해 왼쪽 밖(100%)으로 나간다. 시작·끝 위치에서는 빛이 상자 안에 걸리지 않는다. */
 @keyframes frameSweep {
   0%   { background-position: 0% 0, 0 0, 0% 50%; }
-  55%  { background-position: 100% 0, 0 0, 0% 50%; }
+  35%  { background-position: 100% 0, 0 0, 0% 50%; }
   100% { background-position: 100% 0, 0 0, 0% 50%; }
 }
 @keyframes frameToxic {
@@ -2465,7 +2466,7 @@ html.theme-gameboy .theme-toggle-btn {
   animation: frameSpin 4s linear infinite;
 }
 .frame-ruby {
-  animation: frameSweep 4s ease-in-out infinite;
+  animation: frameSweep 3s ease-in-out infinite;
 }
 .frame-toxic {
   animation: frameSpin 3s linear infinite, frameToxic 1.8s ease-in-out infinite;

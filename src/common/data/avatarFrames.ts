@@ -99,7 +99,7 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
         glow: '0 0 6px rgba(94, 234, 212, 0.7), 0 0 12px rgba(232, 121, 249, 0.4)', anim: 'aurorax' },
     { id: 'ruby', name: '루비', color: '#dc2626', price: FRAME_PRICE_EPIC_PLUS,
         gradient: 'linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%)',
-        sweep: 'linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.95) 50%, transparent 62%)',
+        sweep: 'linear-gradient(115deg, transparent 43%, rgba(255, 255, 255, 0.95) 50%, transparent 57%)',
         glow: '0 0 6px rgba(220, 38, 38, 0.8), 0 0 12px rgba(127, 29, 29, 0.5)', anim: 'ruby' },
     { id: 'sapphire', name: '사파이어', color: '#3b82f6', price: FRAME_PRICE_EPIC_PLUS,
         gradient: 'conic-gradient(from var(--frame-angle, 0deg), #2563eb, #60a5fa, #dbeafe, #60a5fa, #2563eb)',
@@ -152,8 +152,8 @@ export const frameStyle = (
     }
     // 흐르는 테두리는 그라데이션을 3배로 키워 background-position 으로 흘려 보낸다
     const size = f.anim && !STATIC_SIZE_ANIMS.includes(f.anim) ? '300% 300%' : '100% 100%';
-    // 빛줄기는 맨 위 레이어(250% 폭)로 깔고 위치만 애니메이션한다 — 아바타 그림이 안쪽을 덮으므로 테두리에만 보인다
-    const sweepLayer = f.sweep ? `${f.sweep} 0% 0 / 250% 100% no-repeat border-box, ` : '';
+    // 빛줄기는 맨 위 레이어(300% 폭)로 깔고 위치만 애니메이션한다 — 아바타 그림이 안쪽을 덮으므로 테두리에만 보인다
+    const sweepLayer = f.sweep ? `${f.sweep} 0% 0 / 300% 100% no-repeat border-box, ` : '';
     const innerRadius = radius === undefined ? {} : { '--frame-ir': `${Math.max(radius - width, 0)}px` };
     return {
         ...innerRadius,
