@@ -15,7 +15,8 @@ import { generateShapedLevel, generateRegionedLevel } from '../src/features/arro
 import type { LevelData, Direction, PieceData } from '../src/features/arrow-puzzle/data/levels';
 import { SHAPES, buildMask, fitMask, shapeFromGrid } from '../src/features/arrow-puzzle/utils/shapes';
 
-const STAGES_PATH = 'src/features/arrow-puzzle/data/stages.json';
+// 301번 이후는 stages.full.json 에만 있다 — STAGES_PATH=src/features/arrow-puzzle/data/stages.full.json 으로 돌린다.
+const STAGES_PATH = process.env.STAGES_PATH ?? 'src/features/arrow-puzzle/data/stages.json';
 
 // 쉐이프는 이웃보다 살짝 어렵게.
 const SHAPE_MULT = 1.25;
@@ -106,6 +107,99 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
         { key: 'camera_glass', palette: ['#6d28d9', '#4f46e5', '#818cf8'] },
       ],
       restPalette: ['#94a3b8', '#64748b', '#cbd5e1', '#334155'],
+    },
+  },
+  // 달리는 코기 — 이미지 색에 맞춰 빨간 목도리, 흰 털(얼굴·배·발·꼬리 끝), 주황 털(기본)을 영역으로 나눈다.
+  {
+    level: 310, shape: '달리는 코기', sides: [30, 32], counts: [56, 66, 76, 88],
+    multi: {
+      parts: [
+        { key: 'corgi_run_scarf', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'corgi_run_white', palette: ['#f8fafc', '#e2e8f0', '#f1f5f9'] },
+      ],
+      restPalette: ['#f59e0b', '#fb923c', '#f97316', '#d97706'],
+    },
+  },
+  // 하이라이트 자리에 렌치와 드라이버 — 이미지 색에 맞춰 빨간 손잡이와 은색 금속(기본)을 영역으로 나눈다.
+  {
+    level: 315, shape: '공구', sides: [32, 34], counts: [100, 115, 130, 150], mult: 1.6,
+    multi: {
+      parts: [{ key: 'tools_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] }],
+      restPalette: ['#94a3b8', '#64748b', '#cbd5e1', '#475569'],
+    },
+  },
+  // 전동 드릴 — 이미지 색에 맞춰 노란 몸체와 검은·회색 부품(기본)을 영역으로 나눈다.
+  {
+    level: 320, shape: '전동 드릴', sides: [32, 34], counts: [100, 115, 130, 150],
+    multi: {
+      parts: [{ key: 'drill_yellow', palette: ['#facc15', '#fbbf24', '#f59e0b'] }],
+      restPalette: ['#334155', '#475569', '#1e293b', '#64748b'],
+    },
+  },
+  // 하이라이트 자리에 비행기 — 이미지 색에 맞춰 파란 날개 끝·꼬리·조종석과 흰 동체(기본)를 영역으로 나눈다.
+  {
+    level: 325, shape: '비행기', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    multi: {
+      parts: [{ key: 'plane_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8'] }],
+      restPalette: ['#f8fafc', '#e2e8f0', '#fb923c', '#cbd5e1'],
+    },
+  },
+  // 스쿨버스 — 이미지 색에 맞춰 파란 유리, 노란 차체, 검은 범퍼·바퀴(기본)를 영역으로 나눈다.
+  {
+    level: 330, shape: '스쿨버스', sides: [32, 34], counts: [100, 115, 130, 150],
+    multi: {
+      parts: [
+        { key: 'bus_blue', palette: ['#2563eb', '#3b82f6', '#60a5fa'] },
+        { key: 'bus_yellow', palette: ['#facc15', '#fbbf24', '#f59e0b'] },
+      ],
+      restPalette: ['#334155', '#475569', '#1e293b', '#64748b'],
+    },
+  },
+  // 하이라이트 자리에 헬리콥터 — 이미지 색에 맞춰 파란 조종석·꼬리, 빨간 꼬리 날개·줄무늬, 흰 동체와 회색 로터(기본)를 영역으로 나눈다.
+  {
+    level: 335, shape: '헬리콥터', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    multi: {
+      parts: [
+        { key: 'heli_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'heli_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#cbd5e1', '#94a3b8'],
+    },
+  },
+  // 열기구 — 이미지 색에 맞춰 빨강·파랑·초록·노랑 띠와 주황·흰 띠, 갈색 바구니(기본)를 영역으로 나눈다.
+  {
+    level: 340, shape: '열기구', sides: [30, 32, 34], counts: [50, 60, 70, 80, 95, 110],
+    multi: {
+      parts: [
+        { key: 'balloon_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'balloon_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8'] },
+        { key: 'balloon_green', palette: ['#22c55e', '#16a34a', '#4ade80'] },
+        { key: 'balloon_yellow', palette: ['#facc15', '#fbbf24', '#fde047'] },
+      ],
+      restPalette: ['#f97316', '#fb923c', '#b45309', '#fed7aa'],
+    },
+  },
+  // 하이라이트 자리에 돛단배 — 이미지 색에 맞춰 파란 물결·돛 띠, 주황 돛대·선체 테두리, 흰 돛과 선체(기본)를 영역으로 나눈다.
+  {
+    level: 345, shape: '돛단배', sides: [34, 36, 38], counts: [120, 140, 160, 185, 210], mult: 1.6,
+    multi: {
+      parts: [
+        { key: 'boat_wood', palette: ['#f59e0b', '#d97706', '#b45309'] },
+        { key: 'boat_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8', '#60a5fa'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#cbd5e1', '#94a3b8'],
+    },
+  },
+  // 여행 가방 — 이미지 색에 맞춰 파란 리본·스티커, 밀짚모자, 노란 몸통, 검은 손잡이·바퀴(기본)를 영역으로 나눈다.
+  {
+    level: 350, shape: '여행 가방', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
+    multi: {
+      parts: [
+        { key: 'suitcase_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8'] },
+        { key: 'suitcase_hat', palette: ['#d6a55a', '#e7c07a', '#c08a3e'] },
+        { key: 'suitcase_yellow', palette: ['#facc15', '#fbbf24', '#f59e0b'] },
+      ],
+      restPalette: ['#334155', '#475569', '#1e293b', '#64748b'],
     },
   },
   // UFO — 이미지 색에 맞춰 파란 돔, 주황 창, 하늘색 빛줄기, 회색 접시(기본)를 영역으로 나눈다. 주위에 떠 있는 별과 구슬은 제외했다.

@@ -83,7 +83,13 @@ export interface StageData extends LevelData {
   searchCost: number;
 }
 
-export const stages = stagesJson as StageData[];
+// 로컬(dev)에서는 생성해 둔 1000개 전체를, 배포 빌드에서는 공개된 stages.json 만 쓴다.
+// 배포 빌드에서는 DEV 가 false 로 치환되어 stages.full.json 이 번들에서 빠진다.
+const stagesSource: unknown = import.meta.env.DEV
+  ? (await import('./stages.full.json')).default
+  : stagesJson;
+
+export const stages = stagesSource as StageData[];
 
 /**
  * 쉐이프 스테이지 전용 목록(scripts/generate-arrow-shape-stages.ts 로 생성).
