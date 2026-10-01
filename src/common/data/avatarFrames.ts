@@ -29,10 +29,12 @@ export interface AvatarFrame {
 export type FrameAnim =
     | 'shimmer' | 'electric' | 'lava' | 'galaxy'      // 그라데이션이 좌우로 흐르는 종류
     | 'aurorax' | 'ruby' | 'sapphire' | 'toxic'        // 회전·빛줄기·이중 링 종류
-    | 'rainbow' | 'phoenix' | 'crown' | 'blackhole';                  // 전설: 무지개 회전·불사조 회전·흐르는 이중 금테
+    | 'rainbow' | 'phoenix' | 'crown' | 'blackhole'
+    | 'ripple' | 'comet' | 'neonsign' | 'glitch' | 'stardust' | 'snow';  // 파동·혜성·네온 간판·글리치·별가루·눈송이                  // 전설: 무지개 회전·불사조 회전·흐르는 이중 금테
 
 /** 그라데이션을 키워서 흘려 보내지 않는 종류 (conic 회전이나 제자리 빛줄기) */
-const STATIC_SIZE_ANIMS: FrameAnim[] = ['aurorax', 'ruby', 'sapphire', 'toxic', 'rainbow', 'phoenix', 'blackhole'];
+const STATIC_SIZE_ANIMS: FrameAnim[] = ['aurorax', 'ruby', 'sapphire', 'toxic', 'rainbow', 'phoenix', 'blackhole',
+    'ripple', 'comet', 'neonsign', 'glitch', 'stardust', 'snow'];
 
 export const FRAME_PRICE_COMMON = 100;
 export const FRAME_PRICE_RARE = 200;
@@ -122,6 +124,25 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'blackhole', name: '블랙홀', color: '#7c3aed', price: FRAME_PRICE_LEGEND,
         gradient: 'conic-gradient(from var(--frame-angle, 0deg), #1e1b4b 0deg, #2e1065 70deg, #7c3aed 120deg, #ec4899 150deg, #7c3aed 180deg, #2e1065 230deg, #1e1b4b 290deg, #4c1d95 330deg, #1e1b4b 360deg)',
         glow: '0 0 7px rgba(124, 58, 237, 0.9), 0 0 16px rgba(236, 72, 153, 0.5)', anim: 'blackhole' },
+    // 움직임이 다른 종류들. 눈송이·별가루는 ::before/::after 장식이 붙는다(index.css).
+    { id: 'ripple', name: '파동', color: '#22d3ee', price: FRAME_PRICE_RARE,
+        gradient: 'linear-gradient(135deg, #a5f3fc 0%, #22d3ee 50%, #0891b2 100%)',
+        glow: '0 0 6px rgba(34, 211, 238, 0.7)', anim: 'ripple' },
+    { id: 'comet', name: '혜성', color: '#7dd3fc', price: FRAME_PRICE_EPIC,
+        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #475569 0deg, #475569 240deg, #7dd3fc 320deg, #ffffff 358deg, #475569 360deg)',
+        glow: '0 0 6px rgba(125, 211, 252, 0.6)', anim: 'comet' },
+    { id: 'neonsign', name: '네온 간판', color: '#f472b6', price: FRAME_PRICE_EPIC,
+        gradient: 'repeating-conic-gradient(from var(--frame-angle, 0deg), #f472b6 0deg 22.5deg, #581c87 22.5deg 45deg)',
+        glow: '0 0 6px rgba(244, 114, 182, 0.8), 0 0 12px rgba(192, 38, 211, 0.5)', anim: 'neonsign' },
+    { id: 'glitch', name: '글리치', color: '#e879f9', price: FRAME_PRICE_EPIC_PLUS,
+        gradient: 'linear-gradient(135deg, #22d3ee 0%, #e879f9 100%)',
+        glow: '0 0 6px rgba(34, 211, 238, 0.6)', anim: 'glitch' },
+    { id: 'stardust', name: '별가루', color: '#fde68a', price: FRAME_PRICE_EPIC_PLUS,
+        gradient: 'linear-gradient(135deg, #fef9c3 0%, #fde68a 40%, #f59e0b 100%)',
+        glow: '0 0 7px rgba(253, 230, 138, 0.85)', anim: 'stardust' },
+    { id: 'snow', name: '눈송이', color: '#60a5fa', price: FRAME_PRICE_LEGEND,
+        gradient: 'linear-gradient(135deg, #bfdbfe 0%, #60a5fa 50%, #3b82f6 100%)',
+        glow: '0 0 7px rgba(186, 230, 253, 0.9), 0 0 14px rgba(125, 211, 252, 0.5)', anim: 'snow' },
 ];
 
 /** 테두리 탭에 보여 줄 순서 — 무료 → 비싼 순. 같은 가격은 위 목록 순서를 따른다 */
