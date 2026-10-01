@@ -2630,12 +2630,15 @@ html.theme-gameboy .theme-toggle-btn {
 }
 
 /* 그림 테두리(좀비) — 투명 PNG 를 아바타 위에 겹친다.
-   그림의 링 바깥 가장자리가 PNG 폭의 약 86% 라서, 겹치는 그림은 상자(테두리 포함)보다 약 16% 크게 둔다.
-   그림을 바꾸면 이 비율(8.05%·1.161)을 다시 재야 한다.
-   연필·거미줄처럼 링 밖으로 나온 장식이 보이도록 overflow 를 푸는 대신 아바타 그림 모서리를 직접 둥글린다. */
+   그림 속 링의 바깥 가장자리가 PNG(1254px) 안에서 x 91~1171, y 102~1130 이다(가로 1080 · 세로 1028).
+   이 링 바깥 가장자리가 상자(테두리 포함, S)에 정확히 맞도록 가로·세로 배율을 따로 둔다.
+   연필·거미줄처럼 링 밖으로 나온 장식이 보이도록 overflow 를 풀고, 아바타 그림 모서리는 직접 둥글린다.
+   그림을 바꾸면 아래 숫자(1254/1080, 91/1080, 1254/1028, 102/1028)를 다시 재야 한다. */
 .frame-image {
   position: relative;
   overflow: visible !important;
+  /* 상자(테두리 포함) 한 변의 길이. 가상 요소의 기준은 패딩 박스라서 테두리 두께 두 번을 더한다 */
+  --frame-s: calc(100% + 2 * var(--frame-bw, 3px));
 }
 .frame-image img {
   border-radius: var(--frame-ir, 12px);
@@ -2643,7 +2646,10 @@ html.theme-gameboy .theme-toggle-btn {
 .frame-image::after {
   content: '';
   position: absolute;
-  inset: calc(-1 * (8.05% + var(--frame-bw, 3px) * 1.161));
+  left: calc(-1 * var(--frame-bw, 3px) - 0.08426 * var(--frame-s));
+  top: calc(-1 * var(--frame-bw, 3px) - 0.09922 * var(--frame-s));
+  width: calc(1.16111 * var(--frame-s));
+  height: calc(1.21984 * var(--frame-s));
   background: var(--frame-img) center / 100% 100% no-repeat;
   pointer-events: none;
 }
