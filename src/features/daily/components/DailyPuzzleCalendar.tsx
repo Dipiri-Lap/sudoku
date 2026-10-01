@@ -150,7 +150,7 @@ const DailyPuzzleCalendar: React.FC = () => {
                         </div>
                         <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1e293b', margin: '1px 0' }}>{monthChallenge.title}</div>
                         <div style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>
-                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? ' + 전용 아바타' : ''} + 칭호
+                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? ' + 전용 아바타' : ''}{monthChallenge.reward.frame ? ' + 전용 테두리' : ''} + 칭호
                         </div>
                     </div>
                 </div>

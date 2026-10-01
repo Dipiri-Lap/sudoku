@@ -5,7 +5,7 @@ import { auth, db, logEvent } from '../firebase';
 import { useCoins } from './CoinContext';
 import { useChallenges } from './ChallengeContext';
 import { DAILY_CHALLENGES, type Challenge } from '../data/challenges';
-import { unlockAvatar } from '../services/rankingService';
+import { unlockAvatar, unlockFrame } from '../services/rankingService';
 
 const LS_CLEARED_KEY = 'daily_cleared_dates';
 const LS_UNLOCKED_KEY = 'daily_unlocked_dates';
@@ -175,6 +175,13 @@ export const DailyPuzzleProvider: React.FC<{ children: React.ReactNode }> = ({ c
                             await unlockAvatar(auth.currentUser.uid, granted.reward.avatar);
                         } catch (e) {
                             console.error('DailyPuzzleContext avatar grant error:', e);
+                        }
+                    }
+                    if (granted.reward.frame && auth.currentUser) {
+                        try {
+                            await unlockFrame(auth.currentUser.uid, granted.reward.frame);
+                        } catch (e) {
+                            console.error('DailyPuzzleContext frame grant error:', e);
                         }
                     }
                 }

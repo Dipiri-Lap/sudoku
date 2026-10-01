@@ -26,6 +26,8 @@ export interface ChallengeReward {
     coin: number;
     /** 보상으로 함께 지급하는 아바타 id (public/assets/profiles/{id}.png) */
     avatar?: string;
+    /** 보상으로 함께 지급하는 테두리 id (src/common/data/avatarFrames.ts) */
+    frame?: string;
 }
 
 export interface Challenge {

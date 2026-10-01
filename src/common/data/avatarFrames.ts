@@ -28,8 +28,11 @@ export interface AvatarFrame {
      * 링 바깥으로 튀어나온 장식까지 보이도록 상자의 overflow 를 풀고, 링 바깥 가장자리가 상자 크기에 맞게 둔다.
      */
     image?: string;
-    /** true 면 로컬(개발) 환경에서만 목록에 나타난다 */
-    localOnly?: boolean;
+    /**
+     * true 면 도전과제 보상으로만 얻는다. 조건을 채우기 전에는 목록에 나타나지 않고,
+     * 로컬(개발) 환경에서는 확인용으로 항상 보인다. 이 테두리를 주는 도전과제는 reward.frame 으로 가리킨다.
+     */
+    rewardOnly?: boolean;
     price?: number;
 }
 
@@ -154,15 +157,13 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'snow', name: '눈송이', color: '#60a5fa', price: FRAME_PRICE_LEGEND,
         gradient: 'linear-gradient(135deg, #bfdbfe 0%, #60a5fa 50%, #3b82f6 100%)',
         glow: '0 0 7px rgba(186, 230, 253, 0.9), 0 0 14px rgba(125, 211, 252, 0.5)', anim: 'snow' },
-    // 그림 테두리 — 아직 로컬에서만 고를 수 있다
-    { id: 'zombie', name: '좀비', color: '#a3b556', image: '/images/frames/zombie.webp', localOnly: true },
+    // 그림 테두리 — 오늘의 퍼즐 10월 한 달 완료 보상
+    { id: 'zombie', name: '좀비', color: '#a3b556', image: '/images/frames/zombie.webp', rewardOnly: true },
 ];
 
 /** 테두리 탭에 보여 줄 순서 — 무료 → 비싼 순. 같은 가격은 위 목록 순서를 따른다 */
 export const SORTED_AVATAR_FRAMES: AvatarFrame[] =
-    AVATAR_FRAMES
-        .filter(f => !f.localOnly || IS_LOCAL_ENV)
-        .sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+    [...AVATAR_FRAMES].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';
 
@@ -171,7 +172,7 @@ export const findFrame = (id?: string | null): AvatarFrame =>
 
 export const getFrameColor = (id?: string | null): string => findFrame(id).color;
 
-export const isFrameFree = (f: AvatarFrame): boolean => !f.price;
+export const isFrameFree = (f: AvatarFrame): boolean => !f.price && !f.rewardOnly;
 
 /**
  * 아바타 상자에 펼칠 테두리 스타일. 그라데이션은 border-box 배경으로 그리므로

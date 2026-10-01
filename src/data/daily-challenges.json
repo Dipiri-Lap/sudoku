@@ -13,7 +13,8 @@
     "reward": {
       "puzzle_power": 0,
       "coin": 1000,
-    "avatar": "41"
+    "avatar": "41",
+    "frame": "zombie"
     }
   }
 ]

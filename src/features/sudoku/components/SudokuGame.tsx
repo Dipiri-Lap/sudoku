@@ -497,7 +497,7 @@ const SudokuGame: React.FC = () => {
                                 <div style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '1px solid #f59e0b', borderRadius: 14, padding: '0.6rem 0.9rem', textAlign: 'center', color: '#92400e', fontWeight: 800, fontSize: '0.9rem', lineHeight: 1.5 }}>
                                     한 달 완성! {monthReward.title} 칭호<br />
                                     <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>
-                                        🪙 +{monthReward.reward.coin}{monthReward.reward.avatar ? ' · 🖼 아바타 획득' : ''}
+                                        🪙 +{monthReward.reward.coin}{monthReward.reward.avatar ? ' · 🖼 아바타 획득' : ''}{monthReward.reward.frame ? ' · 🔲 테두리 획득' : ''}
                                     </span>
                                 </div>
                             )}

@@ -213,12 +213,31 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         }
     };
 
-    const isFrameUnlocked = (id: string): boolean => {
-        const f = findFrame(id);
-        return isFrameFree(f) || unlockedFrames.includes(id);
+    // 보상 테두리는 아바타처럼 도전과제 조건을 채우면(보상 수령 전이라도) 나타나고 쓸 수 있다.
+    const isRewardFrameEarned = (frameId: string): boolean => {
+        const source = Object.values(ALL_CHALLENGES).flat().find(c => c.reward.frame === frameId);
+        return !!source && (challenges.isChallengeCompleted(source.id) || isReadyToClaim(source));
     };
 
-    const handleFrameClick = (id: string) => {
+    const isFrameUnlocked = (id: string): boolean => {
+        const f = findFrame(id);
+        return isFrameFree(f) || unlockedFrames.includes(id)
+            // 보상 테두리는 로컬에서는 조건 없이 고를 수 있다(확인용)
+            || (!!f.rewardOnly && (IS_LOCAL_ENV || isRewardFrameEarned(id)));
+    };
+
+    const handleFrameClick = async (id: string) => {
+        const f = findFrame(id);
+        if (f.rewardOnly && isFrameUnlocked(id) && !unlockedFrames.includes(id) && isRewardFrameEarned(id)) {
+            // 조건을 채웠지만 아직 계정에 기록되지 않았다면 지금 기록한다
+            try {
+                await unlockFrame(uid, id);
+                setUnlockedFrames(prev => [...prev, id]);
+            } catch (e) {
+                console.error('Failed to grant reward frame:', e);
+                return;
+            }
+        }
         if (isFrameUnlocked(id)) {
             handleSetFrame(id);
         } else {
@@ -669,7 +688,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                     gridTemplateColumns: 'repeat(4, 1fr)',
                                     gap: '0.8rem',
                                 }}>
-                                    {SORTED_AVATAR_FRAMES.map(f => {
+                                    {SORTED_AVATAR_FRAMES.filter(f => !f.rewardOnly || isFrameUnlocked(f.id)).map(f => {
                                         const isSelected = findFrame(avatarFrame).id === f.id;
                                         const unlocked = isFrameUnlocked(f.id);
                                         return (
@@ -922,6 +941,15 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                                 console.error('Failed to grant reward avatar:', e);
                                                                             }
                                                                         }
+                                                                        const frameId = c.reward.frame;
+                                                                        if (frameId) {
+                                                                            try {
+                                                                                await unlockFrame(uid, frameId);
+                                                                                setUnlockedFrames(prev => prev.includes(frameId) ? prev : [...prev, frameId]);
+                                                                            } catch (e) {
+                                                                                console.error('Failed to grant reward frame:', e);
+                                                                            }
+                                                                        }
                                                                     }}
                                                                     style={{
                                                                         flexShrink: 0,
@@ -948,6 +976,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                     </span>
                                                                     {challenge.reward.avatar && (
                                                                         <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold' }}>🖼 아바타</span>
+                                                                    )}
+                                                                    {challenge.reward.frame && (
+                                                                        <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold' }}>🔲 테두리</span>
                                                                     )}
                                                                     <span style={{ fontSize: '0.58rem', color: '#fbbf24', marginTop: '1px', alignSelf: 'center' }}>보상받기</span>
                                                                 </button>
