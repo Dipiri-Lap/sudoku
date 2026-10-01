@@ -995,12 +995,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 flexShrink: 0
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <div style={{
+                                    <div className={frameClass(avatarFrame)} style={{
                                         width: '32px',
                                         height: '32px',
                                         borderRadius: '8px',
                                         overflow: 'hidden',
-                                        ...frameStyle(avatarFrame, 2)
+                                        ...frameStyle(avatarFrame, 2, '#cbd5e1', undefined, 8)
                                     }}>
                                         <img src={selectedPhoto || '/assets/profiles/1.png'} alt="Me" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
@@ -1115,13 +1115,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                         }}>
                                                             {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
                                                         </div>
-                                                        <div style={{
+                                                        <div className={frameClass(isMe ? avatarFrame : user.avatarFrame)} style={{
                                                             width: '36px',
                                                             height: '36px',
                                                             borderRadius: '8px',
                                                             overflow: 'hidden',
                                                             flexShrink: 0,
-                                                            ...frameStyle(isMe ? avatarFrame : user.avatarFrame, 2)
+                                                            ...frameStyle(isMe ? avatarFrame : user.avatarFrame, 2, '#cbd5e1', undefined, 8)
                                                         }}>
                                                             <img draggable={false} src={avatar} alt={user.nickname} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                         </div>

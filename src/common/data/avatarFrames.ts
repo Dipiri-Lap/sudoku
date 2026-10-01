@@ -163,6 +163,6 @@ export const frameStyle = (
     } as CSSProperties;
 };
 
-/** 움직이는 테두리에 붙일 클래스. 랭킹처럼 수십 개가 한꺼번에 보이는 곳에는 붙이지 않는다. */
+/** 움직이는 테두리에 붙일 클래스. 랭킹(최대 100줄)에도 붙이고 있어 사용자가 늘면 부하가 커질 수 있다 - 그때는 상위 순위만 붙이도록 줄일 것. */
 export const frameClass = (id?: string | null): string | undefined =>
     findFrame(id).anim ? `frame-${findFrame(id).anim}` : undefined;
