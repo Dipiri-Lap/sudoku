@@ -6,6 +6,7 @@ import { useDailyPuzzle, isUnlockableDate, DAILY_UNLOCK_COST, DAILY_REWARD_COIN,
 import { loadMonth, hasMonth, todayKey, toDateKey, type DailyPuzzle } from '../data/loader';
 import CoinDisplay from '../../../common/components/CoinDisplay';
 import { useCoins } from '../../../context/CoinContext';
+import { frameStyle, frameClass } from '../../../common/data/avatarFrames';
 import { useChallenges } from '../../../context/ChallengeContext';
 import { DAILY_CHALLENGES } from '../../../data/challenges';
 
@@ -138,11 +139,22 @@ const DailyPuzzleCalendar: React.FC = () => {
                     borderRadius: 16, padding: '0.7rem 0.9rem',
                 } as React.CSSProperties}>
                     {monthChallenge.reward.avatar && (
-                        <img
-                            src={`/assets/profiles/${monthChallenge.reward.avatar}.png`}
-                            alt="월간 보상 아바타"
-                            style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', flexShrink: 0, filter: monthRewardDone ? 'none' : 'saturate(0.9)' }}
-                        />
+                        // 보상 아바타에 보상 테두리를 입혀서 보여 준다(테두리가 없으면 아바타만)
+                        <div
+                            className={frameClass(monthChallenge.reward.frame)}
+                            style={{
+                                width: 56, height: 56, boxSizing: 'border-box', borderRadius: 12,
+                                overflow: 'hidden', flexShrink: 0,
+                                ...(monthChallenge.reward.frame ? frameStyle(monthChallenge.reward.frame, 3, '#cbd5e1', undefined, 12) : {}),
+                                filter: monthRewardDone ? 'none' : 'saturate(0.9)',
+                            }}
+                        >
+                            <img
+                                src={`/assets/profiles/${monthChallenge.reward.avatar}.png`}
+                                alt="월간 보상 아바타"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            />
+                        </div>
                     )}
                     <div style={{ minWidth: 0 }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: monthRewardDone ? '#047857' : '#b45309' }}>
