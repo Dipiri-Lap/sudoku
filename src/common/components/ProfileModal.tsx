@@ -3,7 +3,7 @@ import { X, Edit2, Check, Lock, Star, ChevronDown, Palette } from 'lucide-react'
 const CoinImg = ({ size = 14 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle, updateAvatarFrame, unlockFrame } from '../../services/rankingService';
 import type { UserProfile as UserProfileType } from '../../services/rankingService';
-import { SORTED_AVATAR_FRAMES, findFrame, frameStyle, frameClass, isFrameFree } from '../data/avatarFrames';
+import { SORTED_AVATAR_FRAMES, IS_LOCAL_ENV, findFrame, frameStyle, frameClass, isFrameFree } from '../data/avatarFrames';
 import { Trophy, Users } from 'lucide-react';
 import { useCoins } from '../../context/CoinContext';
 import { useChallenges } from '../../context/ChallengeContext';
@@ -271,7 +271,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         return !!source && (challenges.isChallengeCompleted(source.id) || isReadyToClaim(source));
     };
     const isAvatarUnlocked = (avatarId: string): boolean =>
-        unlockedAvatars.includes(avatarId) || (REWARD_AVATAR_SEEDS.includes(avatarId) && isRewardAvatarEarned(avatarId));
+        unlockedAvatars.includes(avatarId)
+        // 보상 아바타는 로컬에서는 조건 없이 고를 수 있다(확인용)
+        || (REWARD_AVATAR_SEEDS.includes(avatarId) && (IS_LOCAL_ENV || isRewardAvatarEarned(avatarId)));
 
     const handleAvatarClick = async (avatarId: string) => {
         const url = getAvatarUrl(avatarId);

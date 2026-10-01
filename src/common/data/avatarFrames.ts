@@ -23,8 +23,19 @@ export interface AvatarFrame {
     anim?: FrameAnim;
     /** 테두리 위를 지나가는 빛줄기 레이어(gradient 문자열). anim 이 'ruby' 일 때 쓴다 */
     sweep?: string;
+    /**
+     * 그림 테두리 — 투명 PNG 를 아바타 위에 겹쳐 그린다(index.css 의 .frame-image).
+     * 링 바깥으로 튀어나온 장식까지 보이도록 상자의 overflow 를 풀고, 링 바깥 가장자리가 상자 크기에 맞게 둔다.
+     */
+    image?: string;
+    /** true 면 로컬(개발) 환경에서만 목록에 나타난다 */
+    localOnly?: boolean;
     price?: number;
 }
+
+/** 로컬 개발 환경인지 — 아직 공개하지 않은 항목을 열어 두는 데 쓴다 */
+export const IS_LOCAL_ENV =
+    typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
 export type FrameAnim =
     | 'shimmer' | 'electric' | 'lava' | 'galaxy'      // 그라데이션이 좌우로 흐르는 종류
@@ -143,11 +154,15 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'snow', name: '눈송이', color: '#60a5fa', price: FRAME_PRICE_LEGEND,
         gradient: 'linear-gradient(135deg, #bfdbfe 0%, #60a5fa 50%, #3b82f6 100%)',
         glow: '0 0 7px rgba(186, 230, 253, 0.9), 0 0 14px rgba(125, 211, 252, 0.5)', anim: 'snow' },
+    // 그림 테두리 — 아직 로컬에서만 고를 수 있다
+    { id: 'zombie', name: '좀비', color: '#a3b556', image: '/images/frames/zombie.webp', localOnly: true },
 ];
 
 /** 테두리 탭에 보여 줄 순서 — 무료 → 비싼 순. 같은 가격은 위 목록 순서를 따른다 */
 export const SORTED_AVATAR_FRAMES: AvatarFrame[] =
-    [...AVATAR_FRAMES].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+    AVATAR_FRAMES
+        .filter(f => !f.localOnly || IS_LOCAL_ENV)
+        .sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';
 
@@ -173,6 +188,16 @@ export const frameStyle = (
 ): CSSProperties => {
     const f = findFrame(id);
     const boxShadow = [baseShadow, f.glow].filter(Boolean).join(', ') || undefined;
+    if (f.image) {
+        // 링은 겹쳐 그리는 그림이 맡으므로 상자 테두리는 투명하게 두고 두께만 변수로 넘긴다
+        return {
+            border: `${width}px solid transparent`,
+            backgroundColor: innerBg,
+            boxShadow,
+            '--frame-img': `url(${f.image})`,
+            '--frame-bw': `${width}px`,
+        } as CSSProperties;
+    }
     if (!f.gradient) {
         return { border: `${width}px solid ${f.color}`, backgroundColor: innerBg, boxShadow };
     }
@@ -191,4 +216,4 @@ export const frameStyle = (
 
 /** 움직이는 테두리에 붙일 클래스. 랭킹(최대 100줄)에도 붙이고 있어 사용자가 늘면 부하가 커질 수 있다 - 그때는 상위 순위만 붙이도록 줄일 것. */
 export const frameClass = (id?: string | null): string | undefined =>
-    findFrame(id).anim ? `frame-${findFrame(id).anim}` : undefined;
+    findFrame(id).image ? 'frame-image' : findFrame(id).anim ? `frame-${findFrame(id).anim}` : undefined;
