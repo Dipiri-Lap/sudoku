@@ -29,10 +29,10 @@ export interface AvatarFrame {
 export type FrameAnim =
     | 'shimmer' | 'electric' | 'lava' | 'galaxy'      // 그라데이션이 좌우로 흐르는 종류
     | 'aurorax' | 'ruby' | 'sapphire' | 'toxic'        // 회전·빛줄기·이중 링 종류
-    | 'rainbow' | 'phoenix' | 'crown';                  // 전설: 무지개 회전·불사조 회전·흐르는 이중 금테
+    | 'rainbow' | 'phoenix' | 'crown' | 'blackhole';                  // 전설: 무지개 회전·불사조 회전·흐르는 이중 금테
 
 /** 그라데이션을 키워서 흘려 보내지 않는 종류 (conic 회전이나 제자리 빛줄기) */
-const STATIC_SIZE_ANIMS: FrameAnim[] = ['aurorax', 'ruby', 'sapphire', 'toxic', 'rainbow', 'phoenix'];
+const STATIC_SIZE_ANIMS: FrameAnim[] = ['aurorax', 'ruby', 'sapphire', 'toxic', 'rainbow', 'phoenix', 'blackhole'];
 
 export const FRAME_PRICE_COMMON = 100;
 export const FRAME_PRICE_RARE = 200;
@@ -117,6 +117,10 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'crown', name: '왕관', color: '#facc15', price: FRAME_PRICE_LEGEND,
         gradient: 'linear-gradient(135deg, #fff3b0 0%, #e6b422 25%, #a8740a 50%, #e6b422 75%, #fff3b0 100%)',
         glow: '0 0 0 2px #fff3b0, 0 0 0 4px #b8860b, 0 0 14px rgba(250, 204, 21, 0.75)', anim: 'crown' },
+    // 어둠이 대부분을 차지하고 보라·분홍 빛이 소용돌이친다. 완전한 검정은 어두운 배경에 묻혀 빈 띠처럼 보이므로 짙은 남보라로 둔다.
+    { id: 'blackhole', name: '블랙홀', color: '#7c3aed', price: FRAME_PRICE_LEGEND,
+        gradient: 'conic-gradient(from var(--frame-angle, 0deg), #1e1b4b 0deg, #2e1065 70deg, #7c3aed 120deg, #ec4899 150deg, #7c3aed 180deg, #2e1065 230deg, #1e1b4b 290deg, #4c1d95 330deg, #1e1b4b 360deg)',
+        glow: '0 0 7px rgba(124, 58, 237, 0.9), 0 0 16px rgba(236, 72, 153, 0.5)', anim: 'blackhole' },
 ];
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';

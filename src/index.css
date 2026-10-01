@@ -2523,3 +2523,15 @@ html.theme-gameboy .theme-toggle-btn {
 @media (prefers-reduced-motion: reduce) {
   .frame-rainbow, .frame-phoenix, .frame-crown { animation: none; }
 }
+
+/* 블랙홀 — 어두운 소용돌이가 돌고, 보랏빛이 안쪽으로 모였다 퍼진다 */
+@keyframes frameBlackhole {
+  0%, 100% { box-shadow: 0 0 7px rgba(124, 58, 237, 0.9), 0 0 16px rgba(236, 72, 153, 0.5); }
+  50%      { box-shadow: 0 0 3px rgba(124, 58, 237, 0.7), 0 0 8px rgba(236, 72, 153, 0.3); }
+}
+.frame-blackhole {
+  animation: frameSpin 5s linear infinite, frameBlackhole 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .frame-blackhole { animation: none; }
+}
