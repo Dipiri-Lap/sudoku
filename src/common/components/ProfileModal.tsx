@@ -3,7 +3,7 @@ import { X, Edit2, Check, Lock, Star, ChevronDown, Palette } from 'lucide-react'
 const CoinImg = ({ size = 14 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle, updateAvatarFrame, unlockFrame } from '../../services/rankingService';
 import type { UserProfile as UserProfileType } from '../../services/rankingService';
-import { AVATAR_FRAMES, findFrame, frameStyle, frameClass, isFrameFree } from '../data/avatarFrames';
+import { SORTED_AVATAR_FRAMES, findFrame, frameStyle, frameClass, isFrameFree } from '../data/avatarFrames';
 import { Trophy, Users } from 'lucide-react';
 import { useCoins } from '../../context/CoinContext';
 import { useChallenges } from '../../context/ChallengeContext';
@@ -667,7 +667,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                     gridTemplateColumns: 'repeat(4, 1fr)',
                                     gap: '0.8rem',
                                 }}>
-                                    {AVATAR_FRAMES.map(f => {
+                                    {SORTED_AVATAR_FRAMES.map(f => {
                                         const isSelected = findFrame(avatarFrame).id === f.id;
                                         const unlocked = isFrameUnlocked(f.id);
                                         return (

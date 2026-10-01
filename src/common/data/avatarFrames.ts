@@ -36,10 +36,11 @@ const STATIC_SIZE_ANIMS: FrameAnim[] = ['aurorax', 'ruby', 'sapphire', 'toxic', 
 
 export const FRAME_PRICE_COMMON = 100;
 export const FRAME_PRICE_RARE = 200;
-export const FRAME_PRICE_EPIC = 300;
-export const FRAME_PRICE_EPIC_PLUS = 400;
-export const FRAME_PRICE_LEGEND = 500;
+export const FRAME_PRICE_EPIC = 400;
+export const FRAME_PRICE_EPIC_PLUS = 600;
+export const FRAME_PRICE_LEGEND = 800;
 
+/** 표시 순서는 쓰는 곳에서 가격순으로 정렬하므로 등급 순서대로 적지 않아도 된다 */
 export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'yellow', name: '노랑', color: '#fde047' },
     { id: 'orange', name: '주황', color: '#fb923c' },
@@ -66,7 +67,7 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
         gradient: 'linear-gradient(135deg, #bae6fd 0%, #38bdf8 40%, #0369a1 100%)' },
     { id: 'forest', name: '숲', color: '#22c55e', price: FRAME_PRICE_COMMON,
         gradient: 'linear-gradient(135deg, #d9f99d 0%, #4ade80 40%, #0f766e 100%)' },
-    // 유료(희귀) — 빛 번짐이나 움직임이 더해진다
+    // 유료(희귀) — 빛 번짐이나 겹침이 더해진다(이중 금테는 정지 상태라 이 등급)
     { id: 'neon', name: '네온', color: '#22d3ee', price: FRAME_PRICE_RARE,
         gradient: 'linear-gradient(135deg, #22d3ee 0%, #818cf8 50%, #e879f9 100%)',
         glow: '0 0 6px rgba(34, 211, 238, 0.9), 0 0 12px rgba(232, 121, 249, 0.6)' },
@@ -79,7 +80,7 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'moonlight', name: '달빛', color: '#c4b5fd', price: FRAME_PRICE_RARE,
         gradient: 'linear-gradient(135deg, #ffffff 0%, #ddd6fe 40%, #a5b4fc 100%)',
         glow: '0 0 6px rgba(221, 214, 254, 0.95), 0 0 12px rgba(165, 180, 252, 0.55)' },
-    // 유료(에픽) — 움직임과 빛을 함께 쓰거나 테두리를 두 겹으로 둘렀다
+    // 유료(에픽) — 움직임과 빛을 함께 쓴다
     { id: 'electric', name: '전기', color: '#22d3ee', price: FRAME_PRICE_EPIC,
         gradient: 'linear-gradient(135deg, #0891b2 0%, #22d3ee 25%, #ffffff 50%, #22d3ee 75%, #0891b2 100%)',
         glow: '0 0 6px rgba(34, 211, 238, 0.9), 0 0 14px rgba(255, 255, 255, 0.5)', anim: 'electric' },
@@ -89,12 +90,12 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'galaxy', name: '은하', color: '#a855f7', price: FRAME_PRICE_EPIC,
         gradient: 'linear-gradient(135deg, #1e1b4b 0%, #6d28d9 25%, #ec4899 50%, #6d28d9 75%, #1e1b4b 100%)',
         glow: '0 0 6px rgba(192, 132, 252, 0.8), 0 0 12px rgba(236, 72, 153, 0.45)', anim: 'galaxy' },
-    { id: 'goldtwin', name: '이중 금테', color: '#e6b422', price: FRAME_PRICE_EPIC,
+    { id: 'goldtwin', name: '이중 금테', color: '#e6b422', price: FRAME_PRICE_RARE,
         gradient: 'linear-gradient(135deg, #fff3b0 0%, #e6b422 45%, #a8740a 100%)',
         glow: '0 0 0 2px #fff3b0, 0 0 0 4px #b8860b, 0 0 10px rgba(230, 180, 34, 0.6)' },
     // 유료(에픽 상위) — 테두리가 돌거나, 빛줄기가 지나가거나, 두 겹이 엇갈려 돈다
     // conic 의 각도는 CSS 변수 --frame-angle (index.css 의 @property). 미지원 브라우저는 0deg 고정으로 보인다.
-    { id: 'aurorax', name: '오로라 회전', color: '#5eead4', price: FRAME_PRICE_EPIC_PLUS,
+    { id: 'aurorax', name: '오로라 회전', color: '#5eead4', price: FRAME_PRICE_EPIC,
         gradient: 'conic-gradient(from var(--frame-angle, 0deg), #5eead4, #38bdf8, #818cf8, #e879f9, #5eead4)',
         glow: '0 0 6px rgba(94, 234, 212, 0.7), 0 0 12px rgba(232, 121, 249, 0.4)', anim: 'aurorax' },
     { id: 'ruby', name: '루비', color: '#dc2626', price: FRAME_PRICE_EPIC_PLUS,
@@ -114,7 +115,7 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'phoenix', name: '불사조', color: '#f97316', price: FRAME_PRICE_LEGEND,
         gradient: 'conic-gradient(from var(--frame-angle, 0deg), #fde047, #f97316, #dc2626, #f97316, #fde047)',
         glow: '0 0 7px rgba(249, 115, 22, 0.95), 0 0 16px rgba(239, 68, 68, 0.6)', anim: 'phoenix' },
-    { id: 'crown', name: '왕관', color: '#facc15', price: FRAME_PRICE_LEGEND,
+    { id: 'crown', name: '왕관', color: '#facc15', price: FRAME_PRICE_EPIC_PLUS,
         gradient: 'linear-gradient(135deg, #fff3b0 0%, #e6b422 25%, #a8740a 50%, #e6b422 75%, #fff3b0 100%)',
         glow: '0 0 0 2px #fff3b0, 0 0 0 4px #b8860b, 0 0 14px rgba(250, 204, 21, 0.75)', anim: 'crown' },
     // 어둠이 대부분을 차지하고 보라·분홍 빛이 소용돌이친다. 완전한 검정은 어두운 배경에 묻혀 빈 띠처럼 보이므로 짙은 남보라로 둔다.
@@ -122,6 +123,10 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
         gradient: 'conic-gradient(from var(--frame-angle, 0deg), #1e1b4b 0deg, #2e1065 70deg, #7c3aed 120deg, #ec4899 150deg, #7c3aed 180deg, #2e1065 230deg, #1e1b4b 290deg, #4c1d95 330deg, #1e1b4b 360deg)',
         glow: '0 0 7px rgba(124, 58, 237, 0.9), 0 0 16px rgba(236, 72, 153, 0.5)', anim: 'blackhole' },
 ];
+
+/** 테두리 탭에 보여 줄 순서 — 무료 → 비싼 순. 같은 가격은 위 목록 순서를 따른다 */
+export const SORTED_AVATAR_FRAMES: AvatarFrame[] =
+    [...AVATAR_FRAMES].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
 
 export const DEFAULT_AVATAR_FRAME = 'yellow';
 
