@@ -202,6 +202,121 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
       restPalette: ['#334155', '#475569', '#1e293b', '#64748b'],
     },
   },
+  // 하이라이트 자리에 골프백 — 이미지 색에 맞춰 남색 가방, 초록 잔디, 금색 지퍼, 흰 가방 면·공(기본)을 영역으로 나눈다.
+  {
+    level: 355, shape: '골프백', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    multi: {
+      parts: [
+        { key: 'golf_grass', palette: ['#22c55e', '#16a34a', '#4ade80'] },
+        { key: 'golf_gold', palette: ['#facc15', '#f59e0b', '#fbbf24'] },
+        { key: 'golf_navy', palette: ['#1e3a8a', '#1d4ed8', '#312e81'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#cbd5e1', '#94a3b8'],
+    },
+  },
+  // 몬스테라 화분 — 이미지 색에 맞춰 초록 잎과 흰 화분(기본)을 영역으로 나눈다.
+  {
+    level: 360, shape: '몬스테라 화분', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
+    multi: {
+      parts: [{ key: 'plant_leaf', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] }],
+      restPalette: ['#f8fafc', '#e2e8f0', '#cbd5e1', '#94a3b8'],
+    },
+  },
+  // 하이라이트 자리에 지구본 — 이미지 색에 맞춰 초록 육지, 금색 받침, 흰 구름, 파란 바다(기본)를 영역으로 나눈다.
+  {
+    level: 365, shape: '지구본', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    multi: {
+      parts: [
+        { key: 'globe_cloud', palette: ['#f8fafc', '#e2e8f0', '#ffffff'] },
+        { key: 'globe_land', palette: ['#22c55e', '#16a34a', '#4ade80'] },
+        { key: 'globe_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
+      ],
+      restPalette: ['#2563eb', '#3b82f6', '#1d4ed8', '#60a5fa'],
+    },
+  },
+  // 잠자는 달 — 이미지 색에 맞춰 검은 윤곽선·눈, 흰 하이라이트, 주황 그림자, 노란 몸통(기본)을 영역으로 나눈다.
+  {
+    level: 370, shape: '잠자는 달', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
+    multi: {
+      parts: [
+        { key: 'moon_dark', palette: ['#334155', '#1e293b', '#475569'] },
+        { key: 'moon_light', palette: ['#fefce8', '#fef9c3', '#ffffff'] },
+        { key: 'moon_orange', palette: ['#f59e0b', '#ea580c', '#fb923c'] },
+      ],
+      restPalette: ['#facc15', '#fbbf24', '#fde047', '#eab308'],
+    },
+  },
+  // 하이라이트 자리에 팔레트와 붓 — 이미지 색에 맞춰 빨강·노랑·초록·파랑 물감과 나무색 팔레트(기본)를 영역으로 나눈다.
+  {
+    level: 375, shape: '팔레트와 붓', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    multi: {
+      parts: [
+        { key: 'palette_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'palette_yellow', palette: ['#facc15', '#fbbf24', '#fde047'] },
+        { key: 'palette_green', palette: ['#22c55e', '#16a34a', '#4ade80'] },
+        { key: 'palette_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8'] },
+      ],
+      restPalette: ['#d97706', '#b45309', '#f59e0b', '#92400e'],
+    },
+  },
+  // 망원경 — 이미지 색에 맞춰 파란 렌즈, 금색 테, 갈색 다리, 은색 몸통(기본)을 영역으로 나눈다.
+  {
+    level: 380, shape: '망원경', sides: [34, 36, 38], counts: [120, 140, 160, 185, 210],
+    multi: {
+      parts: [
+        { key: 'scope_lens', palette: ['#2563eb', '#1d4ed8', '#3b82f6'] },
+        { key: 'scope_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
+        { key: 'scope_wood', palette: ['#92400e', '#78350f', '#a16207'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#cbd5e1', '#94a3b8'],
+    },
+  },
+  // 하이라이트 자리에 요리사 모자 — 이미지 색에 맞춰 빨간 스카프, 회색 포크·뒤집개, 나무 손잡이, 흰 모자(기본)를 영역으로 나눈다.
+  {
+    level: 385, shape: '요리사 모자', sides: [30, 32, 34], counts: [70, 85, 100, 115, 130], mult: 1.6,
+    multi: {
+      parts: [
+        { key: 'chef_scarf', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'chef_steel', palette: ['#64748b', '#475569', '#94a3b8'] },
+        { key: 'chef_wood', palette: ['#92400e', '#78350f', '#b45309'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#ffffff', '#cbd5e1'],
+    },
+  },
+  // 로봇 — 이미지 색에 맞춰 검은 화면·관절, 하늘색 눈·귀·안테나, 흰 몸통(기본)을 영역으로 나눈다.
+  {
+    level: 390, shape: '로봇', sides: [30, 32, 34], counts: [80, 95, 110, 125, 140],
+    multi: {
+      parts: [
+        { key: 'robot_dark', palette: ['#1e293b', '#334155', '#0f172a'] },
+        { key: 'robot_cyan', palette: ['#22d3ee', '#06b6d4', '#67e8f9'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#ffffff', '#cbd5e1'],
+    },
+  },
+  // 하이라이트 자리에 물약 병 — 이미지 색에 맞춰 파란 물약, 코르크·끈·태그의 황토색, 유리(기본)를 영역으로 나눈다.
+  {
+    level: 395, shape: '물약 병', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6,
+    multi: {
+      parts: [
+        { key: 'potion_tan', palette: ['#d6a55a', '#b45309', '#e7c07a', '#c08a3e'] },
+        { key: 'potion_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8', '#60a5fa'] },
+      ],
+      restPalette: ['#e0f2fe', '#bae6fd', '#f0f9ff', '#cbd5e1'],
+    },
+  },
+  // 축음기 — 이미지 색에 맞춰 금색 나팔, 검은 레코드판, 빨간 라벨, 갈색 나무 상자(기본)를 영역으로 나눈다.
+  {
+    level: 400, shape: '축음기', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
+    multi: {
+      parts: [
+        { key: 'gramo_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'gramo_dark', palette: ['#1e293b', '#334155', '#0f172a'] },
+        { key: 'gramo_gold', palette: ['#f59e0b', '#fbbf24', '#d97706', '#fcd34d'] },
+      ],
+      restPalette: ['#92400e', '#78350f', '#a16207', '#b45309'],
+    },
+  },
   // UFO — 이미지 색에 맞춰 파란 돔, 주황 창, 하늘색 빛줄기, 회색 접시(기본)를 영역으로 나눈다. 주위에 떠 있는 별과 구슬은 제외했다.
   {
     level: 270, shape: 'UFO', sides: [30, 32], counts: [56, 66, 76, 88],

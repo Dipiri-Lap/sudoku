@@ -1,9 +1,9 @@
 /**
  * 지금 플레이할 수 있는 애로우웨이 스테이지 수.
  *
- * 생성한 스테이지는 1000개지만 351번부터는 아직 공개하지 않는다. 앱 번들에는 stages.json(1~350번만)만 들어가고,
+ * 생성한 스테이지는 1000개지만 401번부터는 아직 공개하지 않는다. 앱 번들에는 stages.json(1~400번만)만 들어가고,
  * 전체 1000개는 stages.full.json 에 보관한다(앱이 불러오지 않으므로 번들에 들어가지 않는다).
  * 공개 범위를 늘릴 때는 이 값을 올리고 stages.full.json 의 앞 N개로 stages.json 을 다시 만든다.
  * 도전과제도 이 값을 넘는 목표(500·700·1000 스테이지)는 숨긴다.
  */
-export const ARROW_MAX_STAGE = import.meta.env.DEV ? 1000 : 350; // 로컬(dev)에서는 1000개 전부 플레이 가능
+export const ARROW_MAX_STAGE = import.meta.env.DEV ? 1000 : 400; // 로컬(dev)에서는 1000개 전부 플레이 가능
