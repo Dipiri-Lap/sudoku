@@ -393,6 +393,17 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
       restPalette: ['#d97706', '#b45309', '#f59e0b', '#92400e'],
     },
   },
+  // 구름 위에서 자는 고양이 — 세 영역(주황 털, 흰 털(기본), 구름)으로 나눈다. 영역마다 화살을 따로 만들어 경계를 넘지 않는다.
+  {
+    level: 430, shape: '구름 위 고양이', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'catcloud_orange', palette: ['#f97316', '#fb923c', '#ea580c', '#fdba74'] },
+        { key: 'catcloud_cloud', palette: ['#dbeafe', '#bfdbfe', '#e0f2fe', '#93c5fd'] },
+      ],
+      restPalette: ['#fff7ed', '#ffe4d6', '#fef3c7', '#fecdd3'],
+    },
+  },
   // UFO — 이미지 색에 맞춰 파란 돔, 주황 창, 하늘색 빛줄기, 회색 접시(기본)를 영역으로 나눈다. 주위에 떠 있는 별과 구슬은 제외했다.
   {
     level: 270, shape: 'UFO', sides: [30, 32], counts: [56, 66, 76, 88],
