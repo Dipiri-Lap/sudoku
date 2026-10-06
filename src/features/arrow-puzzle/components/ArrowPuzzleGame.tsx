@@ -16,7 +16,7 @@ import '../styles/ArrowPuzzle.css';
 
 const CLEAR_COIN_REWARD = 10; // 다른 게임과 동일한 클리어 보상 액수
 
-const MAX_HEARTS = 3; // Mono 컨셉 전용: 막힌 조각을 누르면 하트가 줄어든다
+const MAX_HEARTS = 3; // 막힌 조각을 누르면 하트가 줄고, 다 잃으면 실패한다(모든 컨셉 공통)
 
 const CELL_SIZE = 64;
 const PADDING = 36;
@@ -206,6 +206,30 @@ function wobble(t: number, tau: number, freq: number): number {
 function cellCenter(col: number, row: number): [number, number] {
   return [PADDING + col * CELL_SIZE + CELL_SIZE / 2, PADDING + row * CELL_SIZE + CELL_SIZE / 2];
 }
+
+/** 점 (px, py) 에서 선분 (ax, ay)-(bx, by) 까지의 거리 */
+function distToSegment(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
+  const dx = bx - ax, dy = by - ay;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / len2));
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+}
+
+/** 점에서 조각(칸 중심을 잇는 선 + 머리 앞 화살촉)까지의 거리 */
+function distToPiece(px: number, py: number, piece: PieceData): number {
+  const pts = piece.cells.map(([c, r]) => cellCenter(c, r));
+  const [hx, hy] = pts[pts.length - 1];
+  const [ox, oy] = dirOffset(piece.exitDir, CELL_SIZE / 2);
+  pts.push([hx + ox, hy + oy]);
+  let best = Infinity;
+  for (let i = 0; i < pts.length - 1; i++) {
+    best = Math.min(best, distToSegment(px, py, pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]));
+  }
+  return best;
+}
+
+/** 화살을 직접 못 맞혀도 이 거리(판 좌표) 안이면 가장 가까운 조각을 누른 것으로 친다 */
+const TAP_REACH = CELL_SIZE * 0.9;
 
 /** 둥근 사각형 한 조각. 여러 칸을 이어 붙여 path 하나로 판 전체를 그린다(노드 수 절약). */
 function roundedRectSubpath(x: number, y: number, size: number, r: number): string {
@@ -926,14 +950,12 @@ const ArrowPuzzleGame: React.FC = () => {
     if (!blocker) return;
     playBlockedSfx();
 
-    // Mono 컨셉에서는 막힌 조각을 누른 게 "잘못 짚은 수" — 하트를 하나 깎는다.
-    if (isMono) {
-      setHearts(h => {
-        const next = h - 1;
-        if (next <= 0) setIsFailed(true);
-        return Math.max(0, next);
-      });
-    }
+    // 막힌 조각을 누른 게 "잘못 짚은 수" — 하트를 하나 깎는다.
+    setHearts(h => {
+      const next = h - 1;
+      if (next <= 0) setIsFailed(true);
+      return Math.max(0, next);
+    });
 
     // 연출 중에 다른 피스를 눌러도 반응이 씹히면 안 된다.
     // 진행 중이던 것은 즉시 제자리로 돌리고 새로 누른 쪽을 보여준다.
@@ -961,7 +983,25 @@ const ArrowPuzzleGame: React.FC = () => {
       lastTimeRef.current = performance.now();
       rafRef.current = requestAnimationFrame(t => rafCallbackRef.current!(t));
     }
-  }, [activePieces, gridCols, gridRows, startEscape, isFailed, isMono]);
+  }, [activePieces, gridCols, gridRows, startEscape, isFailed]);
+
+  // 판 어디를 눌러도 가장 가까운 조각을 누른 것으로 처리한다 — 손가락으로 가는 선을 정확히 맞히지 않아도 된다.
+  const handleBoardClick = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
+    const svg = svgRef.current;
+    const ctm = svg?.getScreenCTM();
+    if (!svg || !ctm) return;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const { x, y } = pt.matrixTransform(ctm.inverse());
+    let nearest: PieceData | null = null;
+    let nearestDist = TAP_REACH;
+    for (const piece of activePieces) {
+      const d = distToPiece(x, y, piece);
+      if (d < nearestDist) { nearest = piece; nearestDist = d; }
+    }
+    if (nearest) handlePieceClick(nearest);
+  }, [activePieces, handlePieceClick]);
 
   // 피스가 많아도 전체 등장 시간이 너무 늘어지지 않도록, 총 스태거 시간에 상한(320ms)을 두고
   // 그 안에서 균등하게 나눈다.
@@ -1048,7 +1088,6 @@ const ArrowPuzzleGame: React.FC = () => {
     return (
       <g key={isEntering ? `${piece.id}-${resetToken}` : piece.id}
         className="ap-piece"
-        onClick={clickable ? () => handlePieceClick(piece as PieceData) : undefined}
         style={{ cursor: clickable ? 'pointer' : 'default' }}>
         {isMono ? (
           <g filter="url(#ap-piece-shadow)">
@@ -1287,9 +1326,15 @@ const ArrowPuzzleGame: React.FC = () => {
           <ChevronLeft size={20} />
         </button>
         {!isMono && (
-          <span className="ap-level-badge" style={diffMeta ? { color: diffMeta.color } as React.CSSProperties : undefined}>
-            {levelLabel}
-          </span>
+          <div className="ap-way-info">
+            <span className="ap-level-badge" style={diffMeta ? { color: diffMeta.color } as React.CSSProperties : undefined}>
+              {levelLabel}
+            </span>
+            <div className="ap-mono-info-row">
+              <span className="ap-mono-info-time">{formatPlayTime(playSeconds)}</span>
+              <StageStars earned={computeStars(levelData.pieces.length, playSeconds)} size={10} />
+            </div>
+          </div>
         )}
         {isMono && (
           <div className="ap-mono-info">
@@ -1327,7 +1372,7 @@ const ArrowPuzzleGame: React.FC = () => {
 
       <div className="ap-board-wrap">
         <div className="ap-board-col">
-        <svg ref={svgRef} className="ap-svg" viewBox={`0 0 ${svgW} ${svgH}`} style={{ '--ap-aspect': svgW / svgH } as React.CSSProperties}>
+        <svg ref={svgRef} className="ap-svg" onClick={handleBoardClick} viewBox={`0 0 ${svgW} ${svgH}`} style={{ '--ap-aspect': svgW / svgH } as React.CSSProperties}>
           <defs>
             <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
               <feGaussianBlur stdDeviation="3.5" result="blur" />
@@ -1464,14 +1509,12 @@ const ArrowPuzzleGame: React.FC = () => {
           ))}
         </svg>
 
-        {isMono && (
-          // 하트를 잃을 때마다 key 가 바뀌어 애니메이션이 다시 재생된다. 리셋(가득 참)일 땐 재생하지 않는다.
-          <div key={hearts} className={`ap-mono-hearts-bar${hearts < MAX_HEARTS ? ' ap-hearts-hit' : ''}`}>
-            <Heart className="ap-heart-icon" size={20} fill="#e11d48" stroke="#e11d48" strokeWidth={2} />
-            <span>× {hearts}</span>
-            {hearts < MAX_HEARTS && <span className="ap-heart-float" aria-hidden="true">💔</span>}
-          </div>
-        )}
+        {/* 하트를 잃을 때마다 key 가 바뀌어 애니메이션이 다시 재생된다. 리셋(가득 참)일 땐 재생하지 않는다. */}
+        <div key={hearts} className={`ap-mono-hearts-bar${hearts < MAX_HEARTS ? ' ap-hearts-hit' : ''}`}>
+          <Heart className="ap-heart-icon" size={20} fill="#e11d48" stroke="#e11d48" strokeWidth={2} />
+          <span>× {hearts}</span>
+          {hearts < MAX_HEARTS && <span className="ap-heart-float" aria-hidden="true">💔</span>}
+        </div>
         </div>
 
         {isCleared && (

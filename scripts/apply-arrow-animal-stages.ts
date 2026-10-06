@@ -317,6 +317,82 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
       restPalette: ['#92400e', '#78350f', '#a16207', '#b45309'],
     },
   },
+  // 하이라이트 자리에 라멘 — 이미지 색에 맞춰 빨간 그릇, 검은 김, 초록 파, 주황 노른자, 크림색 면(기본)을 영역으로 나눈다.
+  {
+    level: 405, shape: '라멘', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6,
+    multi: {
+      parts: [
+        { key: 'ramen_nori', palette: ['#1e293b', '#14532d', '#334155'] },
+        { key: 'ramen_green', palette: ['#22c55e', '#16a34a', '#4ade80'] },
+        { key: 'ramen_yolk', palette: ['#f59e0b', '#fb923c', '#fbbf24'] },
+        { key: 'ramen_bowl', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+      ],
+      restPalette: ['#fef3c7', '#fde68a', '#fcd9b6', '#f5e6d3'],
+    },
+  },
+  // 포도 — 알 17개를 각각 별도 영역으로 두어(화살이 알 경계를 넘지 않는다) 한 알 한 알이 또렷하게 보이게 한다. 잎 2장·줄기도 따로.
+  {
+    level: 410, shape: '포도', sides: [36, 38, 40], counts: [160, 190, 220, 250, 280], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'grape_1', palette: ['#7c3aed', '#8b5cf6'] },
+        { key: 'grape_2', palette: ['#a855f7', '#b36bf8'] },
+        { key: 'grape_3', palette: ['#5b21b6', '#6d28d9'] },
+        { key: 'grape_4', palette: ['#a855f7', '#b36bf8'] },
+        { key: 'grape_5', palette: ['#7c3aed', '#8b5cf6'] },
+        { key: 'grape_6', palette: ['#5b21b6', '#6d28d9'] },
+        { key: 'grape_7', palette: ['#7c3aed', '#8b5cf6'] },
+        { key: 'grape_8', palette: ['#a855f7', '#b36bf8'] },
+        { key: 'grape_9', palette: ['#7c3aed', '#8b5cf6'] },
+        { key: 'grape_10', palette: ['#5b21b6', '#6d28d9'] },
+        { key: 'grape_11', palette: ['#a855f7', '#b36bf8'] },
+        { key: 'grape_12', palette: ['#d8b4fe', '#c4a1fb'] },
+        { key: 'grape_13', palette: ['#5b21b6', '#6d28d9'] },
+        { key: 'grape_14', palette: ['#a855f7', '#b36bf8'] },
+        { key: 'grape_15', palette: ['#7c3aed', '#8b5cf6'] },
+        { key: 'grape_16', palette: ['#a855f7', '#b36bf8'] },
+        { key: 'grape_17', palette: ['#5b21b6', '#6d28d9'] },
+        { key: 'grape_leaf_l', palette: ['#22c55e', '#16a34a', '#4ade80'] },
+        { key: 'grape_leaf_r', palette: ['#16a34a', '#15803d', '#22c55e'] },
+        { key: 'grape_stem', palette: ['#92400e', '#78350f', '#b45309'] },
+      ],
+      restPalette: ['#4c1d95', '#3b0764', '#581c87'],
+    },
+  },
+  // 하이라이트 자리에 사과 — 세 영역(1 꼭지·이파리, 2 사과 몸통, 3 오른쪽 아래 사과 조각)으로 나눈다. 영역마다 화살을 따로 만들어
+  // 화살이 영역 경계를 넘지 않으므로 세 덩어리의 구분이 또렷하다.
+  {
+    level: 415, shape: '사과', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'apple_top', palette: ['#16a34a', '#22c55e', '#15803d', '#92400e'] },
+        { key: 'apple_slice', palette: ['#fef3c7', '#fde68a', '#fffbeb', '#fcd9b6'] },
+      ],
+      restPalette: ['#dc2626', '#ef4444', '#b91c1c', '#f87171'],
+    },
+  },
+  // 딸기 — 세 영역(1 꼭지 잎, 2 뒤쪽 온전한 딸기, 3 앞쪽 반으로 자른 단면)으로 나눈다. 영역마다 화살을 따로 만들어 경계를 넘지 않는다.
+  {
+    level: 420, shape: '딸기 단면', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'berry_leaf', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] },
+        { key: 'berry_half', palette: ['#fecdd3', '#fda4af', '#fff1f2', '#fb7185'] },
+      ],
+      restPalette: ['#dc2626', '#ef4444', '#b91c1c', '#f87171'],
+    },
+  },
+  // 하이라이트 자리에 파인애플 — 세 영역(1 초록 잎, 2 파인애플 몸통, 3 잘라 놓은 노란 조각)으로 나눈다. 영역마다 화살을 따로 만들어 경계를 넘지 않는다.
+  {
+    level: 425, shape: '파인애플 단면', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'pine_crown', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] },
+        { key: 'pine_slice', palette: ['#fde047', '#facc15', '#fef08a', '#fbbf24'] },
+      ],
+      restPalette: ['#d97706', '#b45309', '#f59e0b', '#92400e'],
+    },
+  },
   // UFO — 이미지 색에 맞춰 파란 돔, 주황 창, 하늘색 빛줄기, 회색 접시(기본)를 영역으로 나눈다. 주위에 떠 있는 별과 구슬은 제외했다.
   {
     level: 270, shape: 'UFO', sides: [30, 32], counts: [56, 66, 76, 88],

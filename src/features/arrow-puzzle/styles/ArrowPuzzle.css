@@ -743,6 +743,16 @@
   font-variant-numeric: tabular-nums;
 }
 
+.ap-way-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.ap-way-info .ap-mono-info-time {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .ap-mono-hearts-bar {
   position: relative;
   margin-top: 0.6rem;
