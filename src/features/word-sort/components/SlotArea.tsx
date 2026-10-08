@@ -145,6 +145,7 @@ export const SlotArea: React.FC = () => {
                                                 opacity: 0.9
                                             }}>
                                                 {slot.collected.length}/{slot.target}
+                                                {state.categories.find((c: any) => c.id === slot.catId)?.ordered && slot.collected.length < slot.target ? ` · 다음 ${slot.collected.length + 1}` : ''}
                                             </span>
                                             <span style={{
                                                 fontSize: `${(parseFloat(cardNameSize) * 0.85).toFixed(2)}rem`,

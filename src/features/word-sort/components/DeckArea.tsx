@@ -164,7 +164,17 @@ export const DeckArea: React.FC = () => {
                                             <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2, lineHeight: 1 }}>
                                                 <Crown size={Math.max(10, Math.round(finalCardWidth * 0.16))} fill="#ff9f43" fillOpacity={0.2} />
                                             </div>
+                                            {category?.ordered && (
+                                                <div style={{ position: 'absolute', bottom: '3px', left: '6px', color: '#e17055', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
+                                                    1→{category.words.length}
+                                                </div>
+                                            )}
                                         </>
+                                    )}
+                                    {isTop && card.type === 'word' && card.idx !== undefined && (
+                                        <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#e17055', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
+                                            {card.idx}
+                                        </div>
                                     )}
                                     <div style={{
                                         height: '100%',

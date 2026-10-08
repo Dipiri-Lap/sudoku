@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import type { WordSolitaireState } from '../context/WordSortContext';
+import { orderedPrefixLen } from '../context/WordSortContext';
+import type { WordSolitaireState, ActiveSlot, Card } from '../context/WordSortContext';
 
 interface UseWordSortDragParams {
     state: WordSolitaireState;
@@ -76,6 +77,12 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         return overlapX * overlapY;
     };
 
+    // 슬롯에 들어갈 수 있는 장수 (순서 카테고리는 다음 번호부터 이어지는 앞부분만)
+    const slotWordFit = (slot: ActiveSlot | null, cards: Card[]): number => {
+        if (!slot || cards.some(c => c.cat !== slot.catId)) return 0;
+        return cards[0].ordered ? orderedPrefixLen(cards, slot.collected.length) : cards.length;
+    };
+
     // ─── Shared: Compute drag start info from coordinates ───────────────────────
     const _computeDragStart = (
         clientX: number,
@@ -140,6 +147,9 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                     break;
                 }
             }
+
+            // 순서 카드는 눌린 카드부터 위쪽만 집는다 (아래 같은 카테고리 카드까지 끌려오지 않게)
+            if (clickedCard.type === 'word' && clickedCard.ordered) baseIndex = cardIndex;
 
             if (cardIndex > baseIndex) {
                 grabOffsetY += (cardIndex - baseIndex) * visibleHeight;
@@ -218,7 +228,7 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                 if (movingCards[0].type === 'category') {
                     isCompatible = movingCards.length === 1 && slot === null;
                 } else if (movingCards[0].type === 'word') {
-                    isCompatible = slot !== null && movingCards.every(c => c.cat === slot.catId);
+                    isCompatible = slotWordFit(slot, movingCards) > 0;
                 }
             } else {
                 const targetStack = state.stacks[bestTarget.index];
@@ -339,7 +349,7 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                 if (movingCards[0].type === 'category') {
                     isCompatible = movingCards.length === 1 && slot === null;
                 } else if (movingCards[0].type === 'word') {
-                    isCompatible = slot !== null && movingCards.every(c => c.cat === slot.catId);
+                    isCompatible = slotWordFit(slot, movingCards) > 0;
                 }
             } else {
                 const targetStack = state.stacks[dropTarget.index];
@@ -353,6 +363,10 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
         }
 
         if (isCompatible) {
+            // 순서 카테고리를 슬롯에 부분 배치할 때는 실제로 들어가는 앞부분만 날아간다
+            const flyingCards = dropTarget.type === 'slot' && movingCards[0].type === 'word'
+                ? movingCards.slice(0, slotWordFit(state.activeSlots[dropTarget.index], movingCards))
+                : movingCards;
             const sfx = new Audio('/assets/word-sort/sounds/cardsfx1.wav');
             sfx.volume = sfxVolume;
             sfx.play().catch(() => {});
@@ -382,7 +396,7 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                 setLandingGroup({
                     targetIds: [],
                     isProxy: true,
-                    movingCards,
+                    movingCards: flyingCards,
                     targetX: targetCenterX,
                     targetY: targetCenterY,
                     offsetX: diffX,
@@ -397,7 +411,7 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
                     setLandingGroup(prev => prev ? { ...prev, animating: true } : null);
                 }, 10);
 
-                const staggeredDelay = movingCards.length * 40;
+                const staggeredDelay = flyingCards.length * 40;
                 const totalAnimationTime = 380 + staggeredDelay;
 
                 setTimeout(() => {

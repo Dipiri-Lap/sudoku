@@ -11,6 +11,32 @@ export interface Card {
     value: string;
     cat: string;
     isRevealed?: boolean;
+    ordered?: boolean; // 순서(인덱싱) 카테고리의 카드 — 슬롯에 idx 오름차순으로만 들어감
+    idx?: number;      // ordered 단어 카드의 순번(1부터)
+}
+
+// 슬롯에 이미 모인 개수(collectedCount) 다음 번호부터 이어지는 앞부분의 길이
+export function orderedPrefixLen(cards: Card[], collectedCount: number): number {
+    let p = 0;
+    while (p < cards.length && cards[p].type === 'word' && cards[p].idx === collectedCount + 1 + p) p++;
+    return p;
+}
+
+// 한 더미(스택: 아래→위 / 덱: 먼저 뽑히는 순) 안에서 ordered 카드끼리 풀 수 있는 방향으로 정렬.
+// 자리(위치)는 그대로 두고 그 자리에 놓인 카드만 큰 번호 → 작은 번호 → 카테고리 카드 순으로 재배치한다.
+export function sortOrderedInPile(pile: Card[]): Card[] {
+    const pos: number[] = [];
+    pile.forEach((c, i) => { if (c.ordered) pos.push(i); });
+    if (pos.length < 2) return pile;
+    const key = (c: Card) => (c.type === 'category' ? 0 : (c.idx ?? 0));
+    const sorted = pos.map(i => pile[i]).sort((a, b) => key(b) - key(a));
+    const out = pile.slice();
+    pos.forEach((p, i) => {
+        const c = { ...sorted[i] };
+        if (pile[p].isRevealed === undefined) delete c.isRevealed; else c.isRevealed = pile[p].isRevealed;
+        out[p] = c;
+    });
+    return out;
 }
 
 export interface ActiveSlot {
@@ -111,9 +137,9 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             let idCounter = 0;
 
             categories.forEach((cat: any) => {
-                categoryCards.push({ id: `c-${idCounter++}`, type: 'category', value: cat.name, cat: cat.id });
-                cat.words.forEach((word: string) => {
-                    wordCards.push({ id: `w-${idCounter++}`, type: 'word', value: word, cat: cat.id });
+                categoryCards.push({ id: `c-${idCounter++}`, type: 'category', value: cat.name, cat: cat.id, ...(cat.ordered ? { ordered: true } : {}) });
+                cat.words.forEach((word: string, wi: number) => {
+                    wordCards.push({ id: `w-${idCounter++}`, type: 'word', value: word, cat: cat.id, ...(cat.ordered ? { ordered: true, idx: wi + 1 } : {}) });
                 });
             });
 
@@ -168,6 +194,12 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     });
                 }
             });
+
+            const hasOrdered = categories.some((c: any) => c.ordered);
+            if (hasOrdered) {
+                for (let s = 0; s < newStacks.length; s++) newStacks[s] = sortOrderedInPile(newStacks[s]);
+                newDeck = sortOrderedInPile(newDeck);
+            }
 
             const activeSlots: Record<number, ActiveSlot | null> = {};
             for (let i = 0; i < slotCount; i++) activeSlots[i] = null;
@@ -271,11 +303,12 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
             // Recycling logic: if deck is empty, move revealed cards back to deck
             if (state.deck.length === 0) {
                 if (state.revealedDeck.length === 0) return state;
-                const recycledDeck = [...state.revealedDeck];
+                let recycledDeck = [...state.revealedDeck];
                 for (let i = recycledDeck.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [recycledDeck[i], recycledDeck[j]] = [recycledDeck[j], recycledDeck[i]];
                 }
+                recycledDeck = sortOrderedInPile(recycledDeck);
                 return {
                     ...state,
                     deck: recycledDeck,
@@ -349,6 +382,15 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     if (!slot) return state;
                     if (movingCards.some(c => c.cat !== slot.catId)) return state;
 
+                    // 순서 카테고리: 다음 번호부터 이어지는 앞부분만 받고 나머지는 스택에 남김
+                    let moveFrom = from;
+                    if (movingCards[0].ordered) {
+                        const p = orderedPrefixLen(movingCards, slot.collected.length);
+                        if (p === 0) return state;
+                        movingCards = movingCards.slice(0, p);
+                        if (from.type === 'stack') moveFrom = { ...from, count: p };
+                    }
+
                     const newSlots = { ...state.activeSlots };
                     const nextCollected = [...slot.collected, ...movingCards.map(c => c.value)];
 
@@ -359,7 +401,7 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     } else {
                         newSlots[to.index] = { ...slot, collected: nextCollected };
                     }
-                    const afterMove = updateStateAfterMove(state, from, { slots: newSlots }, movingCards.length);
+                    const afterMove = updateStateAfterMove(state, moveFrom, { slots: newSlots }, movingCards.length);
                     return { ...afterMove, lastCompletedSlot: isComplete ? to.index : null };
                 }
             }
