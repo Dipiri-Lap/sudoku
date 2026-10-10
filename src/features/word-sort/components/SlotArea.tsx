@@ -140,7 +140,7 @@ export const SlotArea: React.FC = () => {
                                         }}>
                                             <span style={{
                                                 fontSize: cardBadgeSize,
-                                                color: '#a0522d',
+                                                color: state.categories.find((c: any) => c.id === slot.catId)?.ordered ? '#1e8449' : '#a0522d',
                                                 fontWeight: '700',
                                                 opacity: 0.9
                                             }}>

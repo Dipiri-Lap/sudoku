@@ -197,7 +197,7 @@ export const StackArea: React.FC = () => {
                                                 if (isTopCard && invalidDropTarget?.type === 'stack' && invalidDropTarget.index === sIdx) {
                                                     return '3px solid #e74c3c';
                                                 }
-                                                return card.type === 'category' ? '3px solid #ff9f43' : '3px solid #999999';
+                                                return card.type === 'category' ? '3px solid #ff9f43' : card.ordered ? '3px solid #27ae60' : '3px solid #999999';
                                             })()
                                             : 'none',
                                         boxShadow: (isRevealed && card.type === 'category') ? '0 0 10px rgba(255,159,67,0.2)' : 'none',
@@ -212,7 +212,7 @@ export const StackArea: React.FC = () => {
                                             <div style={{
                                                 position: 'absolute',
                                                 inset: '2px',
-                                                border: card.type === 'category' ? '1px solid #ffba75' : '1px solid #777777',
+                                                border: card.type === 'category' ? '1px solid #ffba75' : card.ordered ? '1px solid #82e0aa' : '1px solid #777777',
                                                 borderRadius: '3px',
                                                 pointerEvents: 'none',
                                                 zIndex: 1
@@ -233,14 +233,14 @@ export const StackArea: React.FC = () => {
                                                     const category = state.categories.find(c => c.id === card.cat);
                                                     return (
                                                         <>
-                                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#ff9f43', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
+                                                            <div style={{ position: 'absolute', top: '4px', left: '6px', color: category?.ordered ? '#27ae60' : '#ff9f43', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
                                                                 0/{category?.words?.length ?? 5}
                                                             </div>
-                                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: '#ff9f43', zIndex: 2, lineHeight: 1 }}>
-                                                                <Crown size={Math.max(10, Math.round(finalCardWidth * 0.16))} fill="#ff9f43" fillOpacity={0.2} />
+                                                            <div style={{ position: 'absolute', top: '4px', right: '6px', color: category?.ordered ? '#27ae60' : '#ff9f43', zIndex: 2, lineHeight: 1 }}>
+                                                                <Crown size={Math.max(10, Math.round(finalCardWidth * 0.16))} fill={category?.ordered ? '#27ae60' : '#ff9f43'} fillOpacity={0.2} />
                                                             </div>
                                                             {category?.ordered && (
-                                                                <div style={{ position: 'absolute', bottom: '3px', left: '6px', color: '#e17055', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
+                                                                <div style={{ position: 'absolute', bottom: '3px', left: '6px', color: '#27ae60', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
                                                                     1→{category.words.length}
                                                                 </div>
                                                             )}
@@ -248,7 +248,7 @@ export const StackArea: React.FC = () => {
                                                     );
                                                 })()}
                                                 {card.type === 'word' && card.idx !== undefined && (
-                                                    <div style={{ position: 'absolute', top: '4px', left: '6px', color: '#e17055', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>
+                                                    <div style={{ position: 'absolute', top: '8px', left: '7px', width: `calc(${cardBadgeSize} * 2)`, height: `calc(${cardBadgeSize} * 2)`, borderRadius: '50%', background: '#27ae60', color: '#fff', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         {card.idx}
                                                     </div>
                                                 )}

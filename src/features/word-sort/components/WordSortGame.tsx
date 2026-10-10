@@ -25,6 +25,7 @@ import { GameOverlays } from './GameOverlays';
 import { DeckArea } from './DeckArea';
 import { SlotArea } from './SlotArea';
 import { StackArea } from './StackArea';
+import OrderedIntroOverlay from './OrderedIntroOverlay';
 import { i18n } from '../data/i18n';
 
 
@@ -307,6 +308,16 @@ const WordSortGame: React.FC = () => {
 
     // Hook: tutorial step management
     const { tutorialStep, setTutorialStep, completeTutorial, tutorialHighlightCards, tutorialHighlightSlots, tutorialHighlightDeck } = useTutorialStep({ state, dispatch, triggerDealing });
+
+    // 순서(인덱싱) 카테고리가 있는 레벨 진입 시 설명 (개발 모드는 매번, 운영은 최초 1회)
+    const orderedCat = state.categories?.find((c: any) => c.ordered);
+    const [orderedIntroDoneLevel, setOrderedIntroDoneLevel] = useState<number | null>(null);
+    const showOrderedIntro = !!orderedCat && !state.isTutorial && tutorialStep === null && orderedIntroDoneLevel !== state.level
+        && (import.meta.env.DEV || localStorage.getItem('wordSort_orderedIntroDone') !== 'true');
+    const closeOrderedIntro = () => {
+        setOrderedIntroDoneLevel(state.level);
+        try { localStorage.setItem('wordSort_orderedIntroDone', 'true'); } catch { /* ignore */ }
+    };
 
     // Hook: gather/remove animation
     const { gatheringCat, setGatheringCat, gatherPhase, setGatherPhase, gatherOffsets, handleRemoveClick, isRemovingAction, removeTargetLocation } = useGatherAnimation({ state, dispatch, slotRefs, stackRefs, setCompletingSlot, addCoins, isRemoveMode, setIsRemoveMode, spendCoins, finalCardWidth, cardHeight, deckCardRef, adUnlockedRemove, setAdUnlockedRemove, onRemoveUsed: () => markHelpUsed('remove') });
@@ -881,6 +892,15 @@ const WordSortGame: React.FC = () => {
                 levelStackTotal={levelStackTotal}
                 resetUnlocks={resetUnlocks}
             />
+
+            {showOrderedIntro && orderedCat && (
+                <OrderedIntroOverlay
+                    categoryName={orderedCat.name}
+                    words={orderedCat.words}
+                    language={language}
+                    onClose={closeOrderedIntro}
+                />
+            )}
 
             {/* Unlock Confirm Dialog */}
             {unlockConfirm && !adOfferConfig && (
