@@ -8,7 +8,7 @@ import fs from 'fs';
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, v, i, arr) => (v.startsWith('--') ? [...a, [v.slice(2), arr[i + 1]]] : a), []));
 const TRIALS = +(args.trials ?? 200);
 let BUDGET = +(args.budget ?? 20000);
-const SLOTS = +(args.slots ?? (args.level ? (JSON.parse(fs.readFileSync('src/features/word-sort/data/levels.json', 'utf8')).find((l) => l.id === +args.level)?.slots ?? 4) : 4));
+const SLOTS = +(args.slots ?? (args.draft ? JSON.parse(fs.readFileSync(args.draft, 'utf8')).slots : args.level ? (JSON.parse(fs.readFileSync('src/features/word-sort/data/levels.json', 'utf8')).find((l) => l.id === +args.level)?.slots ?? 4) : 4));
 let seed = +(args.seed ?? 1);
 const PREFIX = (args.prefix ?? '1') === '1'; // 슬롯에 묶음을 끌 때 맞는 앞부분만 받기
 const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
@@ -16,7 +16,8 @@ const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math
 
 const raw = JSON.parse(fs.readFileSync('src/features/word-sort/data/levels.json', 'utf8'));
 const allLevels = Array.isArray(raw) ? raw : raw.levels;
-const levels = args.level ? allLevels.filter((l) => l.id === +args.level) : allLevels.filter((l) => l.slots === SLOTS);
+const draftLevel = args.draft ? { id: 0, ...JSON.parse(fs.readFileSync(args.draft, 'utf8')) } : null;
+const levels = draftLevel ? [draftLevel] : args.level ? allLevels.filter((l) => l.id === +args.level) : allLevels.filter((l) => l.slots === SLOTS);
 const W = +(args.w ?? 0.6); // 이동 수 가중치(클수록 짧은 풀이 선호)
 
 // ---- 배치 (START_LEVEL 복제) ----
@@ -186,7 +187,7 @@ function solve(level, d, stackRule, extraStack, slotOrdered) {
 }
 
 // ---- 실행 (같은 배치를 기준/규칙/정렬로 짝지어 비교) ----
-const configs = args.level ? [{ name: `레벨 ${args.level} 실제 규칙(정렬배치+스택자유+부분배치)`, sorted: true, rule: 'none' }] : [
+const configs = (args.level || args.draft) ? [{ name: `레벨 ${args.level ?? '초안'} 실제 규칙(정렬배치+스택자유+부분배치)`, sorted: true, rule: 'none' }] : [
     { name: '랜덤배치 + 스택규칙 없음', sorted: false, rule: 'none' },
     { name: '정렬배치 + 스택규칙 없음', sorted: true, rule: 'none' },
     { name: '랜덤배치 + 내림차순(아무거나)', sorted: false, rule: 'desc_any' },
@@ -203,7 +204,7 @@ const stat = configs.map(() => ({ solved: 0, induced: 0, rescued: 0, steps: 0 })
 const bySize = {}; let baseSolved = 0; const baseSteps = [], cfgSteps = [];
 for (let t = 0; t < TRIALS; t++) {
     const level = levels[Math.floor(rnd() * levels.length)];
-    const cand = args.level ? [level.categories.findIndex((c) => c.ordered)] : level.categories.map((c, i) => [c, i]).filter(([c]) => c.words.length >= 3 && c.words.length <= (args.maxsize ? +args.maxsize : 6)).map(([, i]) => i);
+    const cand = (args.level || args.draft) ? [level.categories.findIndex((c) => c.ordered)] : level.categories.map((c, i) => [c, i]).filter(([c]) => c.words.length >= 3 && c.words.length <= (args.maxsize ? +args.maxsize : 6)).map(([, i]) => i);
     const d = deal(level, cand[Math.floor(rnd() * cand.length)]);
     const ds = sortedCopy(d);
     const base = solve(level, d, 'none', extra, false); // 인덱싱 규칙이 전혀 없는 같은 배치
@@ -228,6 +229,15 @@ for (let t = 0; t < TRIALS; t++) {
 const pct = (n) => +(n / TRIALS * 100).toFixed(1);
 console.log(`기준(인덱싱 규칙 없음) 풀림: ${pct(baseSolved)}% — 이 값이 100에 못 미치는 건 솔버 한계/원래 막힌 판`);
 console.table(configs.map((c, i) => ({ 구성: c.name, '풀림%': pct(stat[i].solved), '규칙유발실패%': pct(stat[i].induced), '반대로구제%': pct(stat[i].rescued), '재탐색복구%': pct(stat[i].recovered || 0), 평균이동: stat[i].solved ? +(stat[i].steps / stat[i].solved).toFixed(1) : null })));
-if (args.level) { const q = (a, p) => { const x = a.slice().sort((m, n) => m - n); return x[Math.min(x.length - 1, Math.floor(x.length * p))]; }; const av = (a) => (a.reduce((m, n) => m + n, 0) / a.length).toFixed(1); const lv = { ...levels[0], maxMoves: args.maxmoves ? +args.maxmoves : levels[0].maxMoves }; console.log(`maxMoves=${lv.maxMoves}`); console.table([{ 구분: '순서 규칙 없음(기준)', n: baseSteps.length, 평균: av(baseSteps), 중앙: q(baseSteps, 0.5), 하위10: q(baseSteps, 0.1), 상위90: q(baseSteps, 0.9), 'maxMoves이내%': +(baseSteps.filter((v) => v <= lv.maxMoves).length / TRIALS * 100).toFixed(1) }, { 구분: '순서 규칙 적용(실제)', n: cfgSteps.length, 평균: av(cfgSteps), 중앙: q(cfgSteps, 0.5), 하위10: q(cfgSteps, 0.1), 상위90: q(cfgSteps, 0.9), 'maxMoves이내%': +(cfgSteps.filter((v) => v <= lv.maxMoves).length / TRIALS * 100).toFixed(1) }]); }
+if (args.json) {
+    const q = (a, p) => { const x = a.slice().sort((m, n) => m - n); return x.length ? x[Math.min(x.length - 1, Math.floor(x.length * p))] : null; };
+    const av = (a) => (a.length ? +(a.reduce((m, n) => m + n, 0) / a.length).toFixed(1) : null);
+    const lv = levels[0];
+    const ordered = lv.categories.some((c) => c.ordered);
+    const st = ordered ? cfgSteps : baseSteps;
+    console.log('JSON:' + JSON.stringify({ id: lv.id, slots: lv.slots, cats: lv.categories.length, cards: lv.categories.reduce((m, c) => m + c.words.length + 1, 0), maxMoves: lv.maxMoves, ordered, trials: TRIALS, solved: st.length, avg: av(st), curve: args.sweep ? Object.fromEntries(args.sweep.split(',').map((m) => [m, +(st.filter((v) => v <= +m).length / TRIALS * 100).toFixed(1)])) : undefined, min: st.length ? Math.min(...st) : null, p10: q(st, 0.1), p50: q(st, 0.5), p90: q(st, 0.9), within: st.filter((v) => v <= lv.maxMoves).length }));
+    process.exit(0);
+}
+if (args.level || args.draft) { const q = (a, p) => { const x = a.slice().sort((m, n) => m - n); return x[Math.min(x.length - 1, Math.floor(x.length * p))]; }; const av = (a) => (a.reduce((m, n) => m + n, 0) / a.length).toFixed(1); const lv = { ...levels[0], maxMoves: args.maxmoves ? +args.maxmoves : levels[0].maxMoves }; console.log(`maxMoves=${lv.maxMoves}`); console.table([{ 구분: '순서 규칙 없음(기준)', n: baseSteps.length, 평균: av(baseSteps), 중앙: q(baseSteps, 0.5), 하위10: q(baseSteps, 0.1), 상위90: q(baseSteps, 0.9), 'maxMoves이내%': +(baseSteps.filter((v) => v <= lv.maxMoves).length / TRIALS * 100).toFixed(1) }, { 구분: '순서 규칙 적용(실제)', n: cfgSteps.length, 평균: av(cfgSteps), 중앙: q(cfgSteps, 0.5), 하위10: q(cfgSteps, 0.1), 상위90: q(cfgSteps, 0.9), 'maxMoves이내%': +(cfgSteps.filter((v) => v <= lv.maxMoves).length / TRIALS * 100).toFixed(1) }]); }
 if (args.bysize) console.table(Object.entries(bySize).sort((a, b) => a[0] - b[0]).map(([k, b]) => ({ 순서카테고리_단어수: +k, 판수: b.n, '풀림%': +(b.solved / b.n * 100).toFixed(1), '규칙유발실패%': +(b.induced / b.n * 100).toFixed(1), 평균이동: +(b.steps / b.solved).toFixed(1), 기준평균이동: +(b.bsteps / b.bn).toFixed(1) })));
 console.log(`소요 ${(Date.now() - t0) / 1000}s | 규칙유발실패=기준은 풀렸는데 해당 구성에서는 못 푼 판, 반대로구제=그 반대(솔버 노이즈 지표)`);
