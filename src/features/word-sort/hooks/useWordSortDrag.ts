@@ -367,9 +367,17 @@ export function useWordSortDrag(params: UseWordSortDragParams) {
             const flyingCards = dropTarget.type === 'slot' && movingCards[0].type === 'word'
                 ? movingCards.slice(0, slotWordFit(state.activeSlots[dropTarget.index], movingCards))
                 : movingCards;
-            const sfx = new Audio('/assets/word-sort/sounds/cardsfx1.wav');
-            sfx.volume = sfxVolume;
-            sfx.play().catch(() => {});
+            // 슬롯에 여러 장이 들어갈 때는 카드 수만큼 날아가는 간격(40ms)에 맞춰 차례로 소리를 낸다 (뒤로 갈수록 살짝 높아짐)
+            const playCount = dropTarget.type === 'slot' ? Math.max(1, flyingCards.length) : 1;
+            for (let i = 0; i < playCount; i++) {
+                const play = () => {
+                    const sfx = new Audio('/assets/word-sort/sounds/cardsfx1.wav');
+                    sfx.volume = sfxVolume;
+                    sfx.playbackRate = Math.min(1.6, 1 + i * 0.07);
+                    sfx.play().catch(() => {});
+                };
+                if (i === 0) play(); else setTimeout(play, i * 40);
+            }
             const containerRef = dropTarget.type === 'slot' ? slotRefs.current[dropTarget.index] : stackRefs.current[dropTarget.index];
             if (containerRef) {
                 const rect = containerRef.getBoundingClientRect();

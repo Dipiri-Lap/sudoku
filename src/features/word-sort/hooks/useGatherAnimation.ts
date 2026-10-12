@@ -19,6 +19,7 @@ interface UseGatherAnimationParams {
     adUnlockedRemove: boolean;
     setAdUnlockedRemove: React.Dispatch<React.SetStateAction<boolean>>;
     onRemoveUsed?: () => void;
+    sfxVolume: number;
 }
 
 export function useGatherAnimation(params: UseGatherAnimationParams) {
@@ -38,6 +39,7 @@ export function useGatherAnimation(params: UseGatherAnimationParams) {
         adUnlockedRemove,
         setAdUnlockedRemove,
         onRemoveUsed,
+        sfxVolume,
     } = params;
 
     const [gatheringCat, setGatheringCat] = useState<string | null>(null);
@@ -52,6 +54,11 @@ export function useGatherAnimation(params: UseGatherAnimationParams) {
         if (state.lastCompletedSlot === null) return;
         const slotIndex = state.lastCompletedSlot;
         setCompletingSlot(slotIndex);
+
+        // 카테고리 완성 효과음
+        const sfx = new Audio('/assets/word-sort/sounds/complete.wav');
+        sfx.volume = sfxVolume;
+        sfx.play().catch(() => {});
 
         const slotEl = slotRefs.current[slotIndex];
         if (slotEl) {
