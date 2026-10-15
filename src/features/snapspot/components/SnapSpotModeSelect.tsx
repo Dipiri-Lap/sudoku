@@ -5,7 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useSnapSpotProgress } from '../../../context/SnapSpotProgressContext';
 
 const IS_DEV = import.meta.env.DEV;
-const MAX_STAGE = 885;
+const MAX_STAGE = 904;
 
 // ── Mini visuals ───────────────────────────────────────────────────────────────
 
