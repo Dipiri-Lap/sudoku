@@ -404,6 +404,98 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
       restPalette: ['#fff7ed', '#ffe4d6', '#fef3c7', '#fecdd3'],
     },
   },
+  // 하이라이트 자리에 비행기 탄 코기 — 파란 기체·구름, 빨간 스카프·프로펠러, 코기 털과 크림색 날개(기본)를 영역으로 나눈다.
+  {
+    level: 435, shape: '조종사 코기', sides: [36, 38, 40], counts: [130, 150, 170, 190, 210], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'pilot_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'pilot_blue', palette: ['#2563eb', '#0ea5e9', '#1d4ed8', '#60a5fa'] },
+      ],
+      restPalette: ['#f97316', '#fb923c', '#fff7ed', '#fcd34d'],
+    },
+  },
+  // 알 속 아기 용 — 파란 비늘·날개·알 무늬, 금색 뿔·알 무늬, 흰 털과 알 껍질(기본)을 영역으로 나눈다.
+  {
+    level: 440, shape: '알 속 아기 용', sides: [36, 38, 40], counts: [120, 140, 160, 180, 200], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'babydragon_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
+        { key: 'babydragon_blue', palette: ['#2563eb', '#3b82f6', '#60a5fa', '#1d4ed8'] },
+      ],
+      restPalette: ['#f8fafc', '#e0f2fe', '#ffffff', '#dbeafe'],
+    },
+  },
+  // 꽃사슴 — 갈색 뿔·발굽, 초록 잎, 주황 털과 흰 꽃·꼬리(기본)를 영역으로 나눈다.
+  {
+    level: 445, shape: '꽃사슴', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'fawn_brown', palette: ['#78350f', '#92400e', '#a16207'] },
+        { key: 'fawn_leaf', palette: ['#22c55e', '#16a34a', '#4ade80'] },
+      ],
+      restPalette: ['#fb923c', '#f97316', '#fdba74', '#fff7ed'],
+    },
+  },
+  // 하이라이트 자리에 모험가 배낭 — 초록 천, 갈색 가죽, 금색 장식, 크림색 두루마리(기본)를 영역으로 나눈다.
+  {
+    level: 450, shape: '모험가 배낭', sides: [36, 38, 40], counts: [140, 160, 180, 200, 220], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'pack_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
+        { key: 'pack_brown', palette: ['#78350f', '#92400e', '#a16207'] },
+        { key: 'pack_green', palette: ['#15803d', '#16a34a', '#22c55e'] },
+      ],
+      restPalette: ['#fef3c7', '#fde68a', '#fcd9b6', '#f5e6d3'],
+    },
+  },
+  // 하이라이트 자리에 별밤 고래 — 흰 배·구름, 노란 달·별, 남색 몸통(기본)을 영역으로 나눈다.
+  {
+    level: 455, shape: '별밤 고래', sides: [36, 38, 40], counts: [120, 140, 160, 180, 200], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'starwhale_gold', palette: ['#facc15', '#fbbf24', '#fde047'] },
+        { key: 'starwhale_white', palette: ['#f8fafc', '#e0f2fe', '#dbeafe', '#ffffff'] },
+      ],
+      restPalette: ['#1e3a8a', '#312e81', '#4c1d95', '#1d4ed8'],
+    },
+  },
+  // 수정 테라리움 — 초록 식물, 파란 수정, 금색 틀, 흙·돌·유리(기본)를 영역으로 나눈다.
+  {
+    level: 460, shape: '수정 테라리움', sides: [26, 28, 30], counts: [50, 60, 70, 85, 100], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'terrarium_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
+        { key: 'terrarium_crystal', palette: ['#3b82f6', '#60a5fa', '#2563eb', '#93c5fd'] },
+        { key: 'terrarium_green', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] },
+      ],
+      restPalette: ['#92400e', '#a16207', '#78716c', '#bae6fd'],
+    },
+  },
+  // 하이라이트 자리에 선원 펭귄 — 금색 키, 남색 몸, 파란 파도·띠, 흰 배·모자(기본)를 영역으로 나눈다.
+  {
+    level: 465, shape: '선원 펭귄', sides: [28, 30, 32], counts: [70, 85, 100, 115, 130], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'sailorpeng_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
+        { key: 'sailorpeng_navy', palette: ['#1e293b', '#312e81', '#334155'] },
+        { key: 'sailorpeng_wave', palette: ['#3b82f6', '#60a5fa', '#0ea5e9', '#93c5fd'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#ffffff', '#dbeafe'],
+    },
+  },
+  // 동화책 마을 — 초록 숲, 빨간 지붕·리본, 파란 시냇물·폭포, 책·집·돌의 크림색(기본)을 영역으로 나눈다.
+  {
+    level: 470, shape: '동화책 마을', sides: [30, 32, 34], counts: [90, 105, 120, 140, 160], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'storybook_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'storybook_water', palette: ['#38bdf8', '#0ea5e9', '#7dd3fc', '#bae6fd'] },
+        { key: 'storybook_green', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] },
+      ],
+      restPalette: ['#fef3c7', '#fde68a', '#d6a55a', '#b45309'],
+    },
+  },
   // UFO — 이미지 색에 맞춰 파란 돔, 주황 창, 하늘색 빛줄기, 회색 접시(기본)를 영역으로 나눈다. 주위에 떠 있는 별과 구슬은 제외했다.
   {
     level: 270, shape: 'UFO', sides: [30, 32], counts: [56, 66, 76, 88],
