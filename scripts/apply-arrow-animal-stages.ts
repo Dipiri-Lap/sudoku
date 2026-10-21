@@ -496,6 +496,76 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
       restPalette: ['#fef3c7', '#fde68a', '#d6a55a', '#b45309'],
     },
   },
+  // 하이라이트 자리에 골프 티와 깃발 — 초록 잔디, 빨간 깃발, 나무 티, 흰 공(기본)을 영역으로 나눈다.
+  {
+    level: 475, shape: '골프 티와 깃발', sides: [34, 36, 38], counts: [120, 140, 160, 180, 200], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'golftee_flag', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'golftee_tee', palette: ['#d6a55a', '#b45309', '#e7c07a'] },
+        { key: 'golftee_grass', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] },
+      ],
+      restPalette: ['#f8fafc', '#e0f2fe', '#dbeafe', '#ffffff'],
+    },
+  },
+  // 권투 글러브 — 빨간 가죽, 노란 폭발 불꽃, 검은 손목 밴드, 흰 띠(기본)를 영역으로 나눈다.
+  {
+    level: 480, shape: '권투 글러브', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'gloves_black', palette: ['#1e293b', '#334155', '#0f172a'] },
+        { key: 'gloves_burst', palette: ['#facc15', '#f59e0b', '#fb923c', '#fde047'] },
+        { key: 'gloves_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#ffffff', '#cbd5e1'],
+    },
+  },
+  // 하이라이트 자리에 야구공과 방망이 — 빨간 모자챙·실밥, 파란 별·물결, 나무 손잡이, 흰 공(기본)을 영역으로 나눈다.
+  {
+    level: 485, shape: '야구공과 방망이', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'baseball_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'baseball_wood', palette: ['#d6a55a', '#b45309', '#e7c07a'] },
+        { key: 'baseball_blue', palette: ['#2563eb', '#3b82f6', '#60a5fa', '#1d4ed8'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#ffffff', '#cbd5e1'],
+    },
+  },
+  // 볼링 스트라이크 — 빨간 공, 노란 폭발·별, 흰 핀(기본)을 영역으로 나눈다.
+  {
+    level: 490, shape: '볼링 스트라이크', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
+    multi: {
+      parts: [
+        { key: 'bowling_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'bowling_burst', palette: ['#facc15', '#fbbf24', '#f59e0b', '#fde047'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#ffffff', '#cbd5e1'],
+    },
+  },
+  // 하이라이트 자리에 테니스 공과 라켓 — 라임색 공·물결, 파란 라켓 틀, 흰 줄(기본)을 영역으로 나눈다.
+  {
+    level: 495, shape: '테니스 공과 라켓', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'tennis_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8', '#60a5fa'] },
+        { key: 'tennis_lime', palette: ['#a3e635', '#84cc16', '#bef264', '#65a30d'] },
+      ],
+      restPalette: ['#f8fafc', '#e2e8f0', '#ffffff', '#cbd5e1'],
+    },
+  },
+  // 하이라이트 자리(500) 탁구 라켓과 불꽃 — 빨간 라켓, 검은 라켓, 주황 불꽃, 흰 공·나무 손잡이(기본)를 영역으로 나눈다.
+  {
+    level: 500, shape: '탁구 라켓과 불꽃', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
+    multi: {
+      parts: [
+        { key: 'pingpong_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
+        { key: 'pingpong_black', palette: ['#1e293b', '#334155', '#0f172a'] },
+        { key: 'pingpong_fire', palette: ['#f97316', '#fb923c', '#fbbf24', '#ea580c'] },
+      ],
+      restPalette: ['#f8fafc', '#e7c07a', '#d6a55a', '#ffffff'],
+    },
+  },
   // UFO — 이미지 색에 맞춰 파란 돔, 주황 창, 하늘색 빛줄기, 회색 접시(기본)를 영역으로 나눈다. 주위에 떠 있는 별과 구슬은 제외했다.
   {
     level: 270, shape: 'UFO', sides: [30, 32], counts: [56, 66, 76, 88],
