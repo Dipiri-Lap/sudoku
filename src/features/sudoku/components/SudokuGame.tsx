@@ -16,6 +16,7 @@ import { HINT_COST } from './Controls';
 import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 import { useDailyPuzzle, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
 import { getDailyPuzzle, todayKey } from '../../daily/data/loader';
+import DailyPushPrompt from '../../daily/components/DailyPushPrompt';
 import { CalendarDays } from 'lucide-react';
 
 const SudokuGame: React.FC = () => {
@@ -501,6 +502,7 @@ const SudokuGame: React.FC = () => {
                                     </span>
                                 </div>
                             )}
+                            {state.gameMode === 'Daily' && <DailyPushPrompt />}
                             {state.gameMode !== 'TimeAttack' && state.gameMode !== 'Daily' && (
                                 <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fef9e7', border: '1px solid #f4c430', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#b8860b', fontSize: '0.95rem' }}>

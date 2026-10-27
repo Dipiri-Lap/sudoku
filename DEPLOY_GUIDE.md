@@ -40,3 +40,15 @@ git push -u origin main
 
 ## 결과물 확인
 배포가 완료되면 사용자만의 고유한 `*.vercel.app` 주소가 생성됩니다. 이 주소를 도메인과 연결하여 정식 서비스로 확장하실 수 있습니다!
+
+## 오늘의 퍼즐 푸시 알림 배포 순서
+
+1. Firebase 콘솔 > 프로젝트 설정 > 클라우드 메시징 > 웹 푸시 인증서에서 키 쌍을 생성한다.
+
+2. 공개 키를 `.env.local` 과 Vercel 환경 변수에 `VITE_FIREBASE_VAPID_KEY` 로 넣고 다시 배포한다.
+
+3. `firebase deploy --only functions:dailyPuzzlePushMorning,functions:dailyPuzzlePushEvening` 로 예약 발송 함수를 올린다. (Cloud Scheduler 사용을 위해 Blaze 요금제가 필요하다.)
+
+4. 오늘의 퍼즐을 클리어한 뒤 "알림 받기"를 눌러 토큰이 `users/{uid}/pushTokens` 에 저장되는지 확인한다.
+
+5. 콘솔의 Cloud Scheduler 에서 두 작업을 "강제 실행"해 알림이 오는지 확인한다.

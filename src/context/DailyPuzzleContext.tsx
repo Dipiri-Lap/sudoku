@@ -6,6 +6,7 @@ import { useCoins } from './CoinContext';
 import { useChallenges } from './ChallengeContext';
 import { DAILY_CHALLENGES, type Challenge } from '../data/challenges';
 import { unlockAvatar, unlockFrame } from '../services/rankingService';
+import { syncPushTokenIfGranted } from '../services/pushNotification';
 
 const LS_CLEARED_KEY = 'daily_cleared_dates';
 const LS_UNLOCKED_KEY = 'daily_unlocked_dates';
@@ -101,6 +102,9 @@ export const DailyPuzzleProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 if (merged.size !== cloud.length || mergedUnlocked.size !== cloudUnlocked.length) {
                     await setDoc(ref, { clearedDates: [...merged], unlockedDates: [...mergedUnlocked] }, { merge: true });
                 }
+
+                // 이미 알림을 허용한 사용자는 토큰을 최신 상태로 다시 저장해 둔다.
+                syncPushTokenIfGranted(user.uid);
             } catch (e) {
                 console.error('DailyPuzzleContext sync error:', e);
             }

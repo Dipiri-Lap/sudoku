@@ -78,4 +78,4 @@ export const setAnalyticsUserId = (uid: string | null) => {
 };
 
 export const googleProvider = new GoogleAuthProvider();
-export { auth, db, functions, signInAnonymously, signInWithPopup, linkWithPopup };
+export { app, auth, db, functions, signInAnonymously, signInWithPopup, linkWithPopup };

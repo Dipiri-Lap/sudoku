@@ -2,6 +2,10 @@ import { onCall, HttpsError, type CallableRequest } from "firebase-functions/v2/
 import { defineSecret } from "firebase-functions/params";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import { logger } from "firebase-functions";
+import { buildEveningMessage, buildMorningMessage } from "./dailyPush";
+import { sendDailyPush } from "./dailyPushSender";
 
 initializeApp();
 const db = getFirestore();
@@ -746,3 +750,24 @@ export const syncMyPuzzlePower = onCall(async (request) => {
 
   return {changed: true, before, puzzlePower: newPP, stagePP, challengePP};
 });
+
+// ─────────────────────────────────────────────────────────────
+// 오늘의 퍼즐 웹 푸시 알림 (발송 로직: dailyPushSender.ts, 문구 판단: dailyPush.ts)
+//  - 아침 8시(한국 시간): 오늘 아직 안 푼 사람에게 "오늘의 퍼즐이 열렸어요"
+//  - 밤 9시: 연속 기록이 있는데 오늘 아직 안 푼 사람에게만 "기록이 끊겨요"
+// ─────────────────────────────────────────────────────────────
+export const dailyPuzzlePushMorning = onSchedule(
+  { schedule: "0 8 * * *", timeZone: "Asia/Seoul", timeoutSeconds: 540, memory: "512MiB" },
+  async () => {
+    const result = await sendDailyPush(db, buildMorningMessage, "daily-puzzle-morning");
+    logger.info("dailyPuzzlePushMorning", result);
+  },
+);
+
+export const dailyPuzzlePushEvening = onSchedule(
+  { schedule: "0 21 * * *", timeZone: "Asia/Seoul", timeoutSeconds: 540, memory: "512MiB" },
+  async () => {
+    const result = await sendDailyPush(db, buildEveningMessage, "daily-puzzle-evening");
+    logger.info("dailyPuzzlePushEvening", result);
+  },
+);
