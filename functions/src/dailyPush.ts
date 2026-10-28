@@ -8,6 +8,7 @@
 /** 월간 전체 클리어 보상이 있는 달과 칭호. src/data/daily-challenges.json 과 맞춰야 한다. */
 export const MONTH_REWARDS: Record<string, string> = {
   "2026-10": "스도쿠 좀비",
+  "2026-11": "단어 박사",
 };
 
 export interface PushMessage {

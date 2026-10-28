@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ChevronLeft, ChevronRight, Check, Lock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Lock, X } from 'lucide-react';
 import { useDailyPuzzle, isUnlockableDate, DAILY_UNLOCK_COST, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
-import { loadMonth, hasMonth, todayKey, toDateKey, type DailyPuzzle } from '../data/loader';
+import { loadMonth, hasMonth, getDailyPuzzle, todayKey, toDateKey, type DailyPuzzle } from '../data/loader';
 import CoinDisplay from '../../../common/components/CoinDisplay';
 import { useCoins } from '../../../context/CoinContext';
 import { frameStyle, frameClass } from '../../../common/data/avatarFrames';
@@ -29,6 +29,7 @@ const DailyPuzzleCalendar: React.FC = () => {
     const [unlockTarget, setUnlockTarget] = useState<string | null>(null);
     const [unlockError, setUnlockError] = useState<string | null>(null);
     const [unlocking, setUnlocking] = useState(false);
+    const [showReward, setShowReward] = useState(false);
 
     // 다른 게임 화면과 같은 셸을 쓴다 - 퍼즐 타일 배경 위에 밝은 패널.
     useEffect(() => {
@@ -39,6 +40,12 @@ const DailyPuzzleCalendar: React.FC = () => {
     const today = todayKey();
     const [monthKey, setMonthKey] = useState<string>(today.slice(0, 7));
     const [puzzles, setPuzzles] = useState<DailyPuzzle[]>([]);
+    const [todayPuzzle, setTodayPuzzle] = useState<DailyPuzzle | null>(null);
+    useEffect(() => {
+        let cancelled = false;
+        getDailyPuzzle(today).then(p => { if (!cancelled) setTodayPuzzle(p); });
+        return () => { cancelled = true; };
+    }, [today]);
 
     useEffect(() => {
         let cancelled = false;
@@ -107,14 +114,17 @@ const DailyPuzzleCalendar: React.FC = () => {
     const prevKey = monthKeyShifted(-1);
     const nextKey = monthKeyShifted(1);
 
+    // 달력이 다른 달을 보고 있어도 오늘 카드는 오늘 문제 기준이어야 해서 따로 읽는다
+    // 달마다 게임이 바뀐다: 스도쿠 달은 game 필드가 없다
+    const todayLabel = todayPuzzle?.game === 'word-sort' ? `워드스택 · ${todayPuzzle.difficulty}` : '스도쿠 · 보통';
     const todayDone = clearedDates.has(today);
     const todayHasPuzzle = puzzleDates.has(today);
 
     return (
         <div className="mode-select-page" style={{ maxWidth: 520 }}>
             <Helmet>
-                <title>오늘의 퍼즐 - 매일 새로운 데일리 스도쿠 | 퍼즐 가든</title>
-                <meta name="description" content="매일 새로운 스도쿠 한 문제. 클리어하면 코인 100과 퍼즐력 10을 받습니다." />
+                <title>오늘의 퍼즐 - 매일 새로운 데일리 퍼즐 | 퍼즐 가든</title>
+                <meta name="description" content="매일 새로운 퍼즐 한 문제(스도쿠·워드스택). 클리어하면 코인 100과 퍼즐력 10을 받습니다." />
                 <link rel="canonical" href="https://puzzles.tmhub.co.kr/daily" />
                 <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"오늘의 퍼즐","item":"https://puzzles.tmhub.co.kr/daily"}]}`}</script>
             </Helmet>
@@ -131,8 +141,10 @@ const DailyPuzzleCalendar: React.FC = () => {
 
             {/* 한 달 전체 클리어 보상 */}
             {monthChallenge && (
-                <div className="animate-fade-in" style={{
-                    '--delay': '0.02s',
+                <div className="animate-fade-in" onClick={() => setShowReward(true)} role="button" tabIndex={0}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowReward(true); }}
+                    style={{
+                    '--delay': '0.02s', cursor: 'pointer',
                     marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.8rem',
                     background: monthRewardDone ? 'linear-gradient(135deg, #ecfdf5, #d1fae5)' : 'linear-gradient(135deg, #fffbeb, #fef3c7)',
                     border: `1px solid ${monthRewardDone ? '#6ee7b7' : '#fcd34d'}`,
@@ -162,9 +174,10 @@ const DailyPuzzleCalendar: React.FC = () => {
                         </div>
                         <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1e293b', margin: '1px 0' }}>{monthChallenge.title}</div>
                         <div style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>
-                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? ' + 전용 아바타' : ''}{monthChallenge.reward.frame ? ' + 전용 테두리' : ''} + 칭호
+                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? ' + 전용 아바타' : ''}{monthChallenge.reward.frame ? ' + 전용 테두리' : ''}{monthChallenge.reward.cardBack ? ' + 카드 뒷면' : ''} + 칭호
                         </div>
                     </div>
+                    <ChevronRight size={18} color={monthRewardDone ? '#047857' : '#b45309'} style={{ marginLeft: 'auto', flexShrink: 0 }} />
                 </div>
             )}
 
@@ -187,7 +200,7 @@ const DailyPuzzleCalendar: React.FC = () => {
             >
                 <div>
                     <div style={{ fontSize: '0.75rem', opacity: 0.9, fontWeight: 600 }}>
-                        {Number(today.slice(5, 7))}월 {Number(today.slice(8))}일 · 보통
+                        {Number(today.slice(5, 7))}월 {Number(today.slice(8))}일 · {todayLabel}
                     </div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0.25rem 0' }}>
                         {todayDone ? '오늘 퍼즐 완료!' : '오늘의 퍼즐 풀기'}
@@ -329,6 +342,80 @@ const DailyPuzzleCalendar: React.FC = () => {
                 10월부터는 이번 달에 지나간 문제를 🪙 {DAILY_UNLOCK_COST}으로 해제해 풀 수 있어요.<br />
                 달이 바뀌면 지난달의 남은 문제는 열 수 없어요.
             </p>
+
+            {showReward && monthChallenge && (
+                <div
+                    onClick={() => setShowReward(false)}
+                    style={{
+                        position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', zIndex: 1000,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflowY: 'auto',
+                    }}
+                >
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            background: 'white', borderRadius: 20, padding: '1.4rem 1.2rem 1.2rem',
+                            width: '100%', maxWidth: 340, textAlign: 'center', position: 'relative',
+                            boxShadow: '0 12px 32px rgba(0,0,0,0.3)', margin: 'auto',
+                        }}
+                    >
+                        <button
+                            onClick={() => setShowReward(false)}
+                            aria-label="닫기"
+                            style={{ position: 'absolute', top: 10, right: 10, background: 'none', border: 'none', padding: 6, display: 'flex', color: '#64748b', cursor: 'pointer' }}
+                        ><X size={20} /></button>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: monthRewardDone ? '#047857' : '#b45309' }}>
+                            {month}월 전체 클리어 보상{monthRewardDone ? ' · 획득 완료' : ''}
+                        </div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1e293b', margin: '2px 0 4px' }}>{monthChallenge.title}</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{monthChallenge.condition}</div>
+                        <div style={{ height: 8, background: '#e2e8f0', borderRadius: 6, overflow: 'hidden', margin: '0.7rem 0 0.2rem' }}>
+                            <div style={{ width: `${totalThisMonth ? Math.min(100, (clearedThisMonth / totalThisMonth) * 100) : 0}%`, height: '100%', background: 'linear-gradient(90deg, #22c55e, #16a34a)' }} />
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>
+                            <span style={{ color: '#16a34a', fontWeight: 800 }}>{clearedThisMonth}</span> / {totalThisMonth} 완료
+                        </div>
+
+                        {/* 아바타 + 테두리, 카드 뒷면을 크게 (테두리 장식이 상자 밖으로 나오므로 여백을 둔다) */}
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '1.8rem', margin: '1.5rem 0 1rem', flexWrap: 'wrap' }}>
+                            {monthChallenge.reward.avatar && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                                    <div
+                                        className={frameClass(monthChallenge.reward.frame)}
+                                        style={{
+                                            width: 132, height: 132, boxSizing: 'border-box', borderRadius: 26,
+                                            overflow: 'hidden', flexShrink: 0,
+                                            ...(monthChallenge.reward.frame ? frameStyle(monthChallenge.reward.frame, 6, '#cbd5e1', undefined, 26) : {}),
+                                        }}
+                                    >
+                                        <img
+                                            src={`/assets/profiles/${monthChallenge.reward.avatar}.png`}
+                                            alt="전용 아바타"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                        />
+                                    </div>
+                                    <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569' }}>전용 아바타{monthChallenge.reward.frame ? ' + 테두리' : ''}</div>
+                                </div>
+                            )}
+                            {monthChallenge.reward.cardBack && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                                    <img
+                                        src={`/assets/word-sort/${monthChallenge.reward.cardBack}.webp`}
+                                        alt="전용 카드 뒷면"
+                                        style={{ width: 94, height: 132, objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}
+                                    />
+                                    <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569' }}>전용 카드 뒷면</div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <div style={{ background: '#fef9e7', border: '1px solid #f4c430', borderRadius: 20, padding: '0.35rem 0.85rem', fontWeight: 800, color: '#b8860b', fontSize: '0.88rem' }}>🪙 {monthChallenge.reward.coin}</div>
+                            <div style={{ background: '#eef2ff', border: '1px solid #6366f1', borderRadius: 20, padding: '0.35rem 0.85rem', fontWeight: 800, color: '#4338ca', fontSize: '0.88rem' }}>{monthChallenge.title} 칭호</div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {unlockTarget && (
                 <div

@@ -25,6 +25,7 @@ import RoyalMatchGame from './features/royal-match/components/RoyalMatchGame';
 import JewelKingdomGame from './features/jewel-kingdom/ui/JewelKingdomGame';
 import GardenMap from './features/garden/components/GardenMap';
 import DailyPuzzleCalendar from './features/daily/components/DailyPuzzleCalendar';
+import DailyPlay from './features/daily/components/DailyPlay';
 
 import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
@@ -135,7 +136,7 @@ const AppContent: React.FC = () => {
               <SudokuProvider>
                 <Routes>
                   <Route index element={<DailyPuzzleCalendar />} />
-                  <Route path="play" element={<SudokuGame />} />
+                  <Route path="play" element={<DailyPlay />} />
                 </Routes>
               </SudokuProvider>
               </SudokuThemeProvider>

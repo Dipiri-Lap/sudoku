@@ -15,10 +15,12 @@ interface UseTutorialStepParams {
     state: WordSolitaireState;
     dispatch: React.Dispatch<any>;
     triggerDealing: (n: number) => void;
+    /** 튜토리얼이 끝난 뒤 시작할 레벨. 없으면 1레벨 (오늘의 퍼즐은 그날의 문제를 넘긴다) */
+    nextLevelData?: any;
 }
 
 export function useTutorialStep(params: UseTutorialStepParams) {
-    const { state, dispatch, triggerDealing } = params;
+    const { state, dispatch, triggerDealing, nextLevelData } = params;
 
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
 
@@ -67,8 +69,9 @@ export function useTutorialStep(params: UseTutorialStepParams) {
     const completeTutorial = () => {
         localStorage.setItem('wordSort_tutorialDone', 'true');
         setTutorialStep(null);
-        dispatch({ type: 'START_LEVEL', levelData: levels[0] });
-        triggerDealing(levelStackTotal(levels[0]));
+        const startData = nextLevelData ?? levels[0];
+        dispatch({ type: 'START_LEVEL', levelData: startData });
+        triggerDealing(levelStackTotal(startData));
     };
 
     // Tutorial highlight sets (computed each render from tutorialStep + state)

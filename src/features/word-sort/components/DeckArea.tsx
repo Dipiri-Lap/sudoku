@@ -103,6 +103,8 @@ export const DeckArea: React.FC = () => {
                         const maxVisible = slotCount === 3 ? 3 : 4;
                         const last4 = state.revealedDeck.slice(-maxVisible);
                         const renderCards = last4.map((c, i) => ({ card: c, idx: i, isTop: i === last4.length - 1 }));
+        // 부채꼴로 보이는 장수를 넘는 카드는 맨 아래에 겹쳐 있다 — 몇 장인지 가장 오른쪽(가장 아래) 카드에 표시한다
+        const hiddenBelow = Math.max(0, state.revealedDeck.length - maxVisible);
 
                         return renderCards.map(({ card, idx, isTop }) => {
                             const isGathering = gatherOffsets.current.has(card.id);
@@ -156,6 +158,11 @@ export const DeckArea: React.FC = () => {
                                         zIndex: 1
                                     }} />
 
+                                    {idx === 0 && hiddenBelow > 0 && (
+                                        <div style={{ position: 'absolute', bottom: '3px', right: '3px', zIndex: 3, background: 'rgba(30,41,59,0.85)', color: '#fff', borderRadius: '8px', padding: '1px 4px', fontSize: cardBadgeSize, fontWeight: 900, lineHeight: 1.2, pointerEvents: 'none' }}>
+                                            +{hiddenBelow}
+                                        </div>
+                                    )}
                                     {isTop && card.type === 'category' && (
                                         <>
                                             <div style={{ position: 'absolute', top: '4px', left: '6px', color: category?.ordered ? '#27ae60' : '#ff9f43', fontSize: cardBadgeSize, fontWeight: '900', zIndex: 2, lineHeight: 1 }}>

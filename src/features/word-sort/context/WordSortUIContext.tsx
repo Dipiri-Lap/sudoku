@@ -63,6 +63,8 @@ interface WordSortUIContextType {
     // Text Size
     textSizeMultiplier: number;
     setTextSizeMultiplier: (v: number) => void;
+    // 오늘의 퍼즐로 열었을 때만 있다 (날짜와 그날의 레벨 데이터)
+    daily?: { date: string; level: any };
     // Language
     language: 'ko' | 'en';
     setLanguage: (l: 'ko' | 'en') => void;

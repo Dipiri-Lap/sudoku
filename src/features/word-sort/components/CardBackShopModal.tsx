@@ -90,7 +90,7 @@ const CardBackShopModal: React.FC<ShopProps> = ({ onClose }) => {
                         <div style={{
                             display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem'
                         }}>
-                            {cardBackDesigns.map((design) => {
+                            {cardBackDesigns.filter(d => !d.rewardOnly || hasUnlocked(d.id)).map((design) => {
                                 const unlocked = hasUnlocked(design.id);
                                 const isSelected = selectedBackId === design.id;
                                 const canAfford = coins >= 200;

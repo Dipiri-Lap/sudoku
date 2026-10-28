@@ -16,5 +16,24 @@
     "avatar": "41",
     "frame": "zombie"
     }
+  },
+  {
+    "id": "daily_2026-11",
+    "type": "STAGE",
+    "game": "daily",
+    "title": "🦉 단어 박사",
+    "condition": "2026년 11월 오늘의 퍼즐 전부 클리어",
+    "progressConfig": {
+      "source": "daily_month",
+      "target": 30,
+      "month": "2026-11"
+    },
+    "reward": {
+      "puzzle_power": 0,
+      "coin": 1000,
+      "avatar": "42",
+      "frame": "scholar",
+      "cardBack": "21"
+    }
   }
 ]

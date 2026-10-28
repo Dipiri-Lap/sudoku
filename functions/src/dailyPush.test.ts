@@ -55,8 +55,13 @@ describe('아침 알림', () => {
     const cleared = ['2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04', '2026-10-05'];
     expect(buildMorningMessage(cleared, '2026-10-29')?.body).not.toContain('보상');
   });
+  it('11월에는 단어 박사 보상 문구를 쓴다', () => {
+    // 11월 1~27일 클리어, 오늘 28일 → 남은 문제 3, 남은 날 3
+    const cleared = Array.from({ length: 27 }, (_, i) => `2026-11-${String(i + 1).padStart(2, '0')}`);
+    expect(buildMorningMessage(cleared, '2026-11-28')?.body).toBe('11월 전체 클리어 보상(단어 박사)까지 3문제 남았어요');
+  });
   it('보상이 없는 달에는 보상 문구를 쓰지 않는다', () => {
-    expect(monthProgress(['2026-11-01'], '2026-11-28')).toBeNull();
+    expect(monthProgress(['2026-12-01'], '2026-12-28')).toBeNull();
   });
 });
 

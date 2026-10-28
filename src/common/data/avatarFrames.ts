@@ -159,6 +159,8 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
         glow: '0 0 7px rgba(186, 230, 253, 0.9), 0 0 14px rgba(125, 211, 252, 0.5)', anim: 'snow' },
     // 그림 테두리 — 오늘의 퍼즐 10월 한 달 완료 보상
     { id: 'zombie', name: '좀비', color: '#a3b556', image: '/images/frames/zombie.webp', rewardOnly: true },
+    // 오늘의 퍼즐 11월 한 달 완료 보상 (좀비와 같은 크기·위치로 맞춰 둬서 .frame-image 배율을 같이 쓴다)
+    { id: 'scholar', name: '단어 박사', color: '#d97706', image: '/images/frames/scholar.webp', rewardOnly: true },
 ];
 
 /** 테두리 탭에 보여 줄 순서 — 무료 → 비싼 순. 같은 가격은 위 목록 순서를 따른다 */

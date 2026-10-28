@@ -27,10 +27,17 @@ import { SlotArea } from './SlotArea';
 import { StackArea } from './StackArea';
 import OrderedIntroOverlay from './OrderedIntroOverlay';
 import { i18n } from '../data/i18n';
+import { useDailyPuzzle } from '../../../context/DailyPuzzleContext';
+import type { WordSortDailyLevel } from '../../daily/data/loader';
 
 
 
-const WordSortGame: React.FC = () => {
+interface WordSortGameProps {
+    /** 오늘의 퍼즐로 열었을 때: 날짜와 그날의 레벨. 진행도·저장·일반 보상은 건드리지 않는다. */
+    daily?: { date: string; level: WordSortDailyLevel };
+}
+
+const WordSortGame: React.FC<WordSortGameProps> = ({ daily }) => {
     const { state, dispatch } = useWordSort();
     const { language } = state;
     const t = i18n[language];
@@ -43,6 +50,7 @@ const WordSortGame: React.FC = () => {
     const { addCoins, spendCoins, coins } = useCoins();
     const { saveWordSortProgress } = useWordSortProgress();
     const { saveWordSortHardProgress } = useWordSortHardProgress();
+    const { clearDaily, clearMonthReward } = useDailyPuzzle();
     const hasAwardedCoins = useRef(false);
     const hasSavedLevelProgress = useRef(false);
     const hasLoggedPlay = useRef(false);
@@ -307,7 +315,7 @@ const WordSortGame: React.FC = () => {
     };
 
     // Hook: tutorial step management
-    const { tutorialStep, setTutorialStep, completeTutorial, tutorialHighlightCards, tutorialHighlightSlots, tutorialHighlightDeck } = useTutorialStep({ state, dispatch, triggerDealing });
+    const { tutorialStep, setTutorialStep, completeTutorial, tutorialHighlightCards, tutorialHighlightSlots, tutorialHighlightDeck } = useTutorialStep({ state, dispatch, triggerDealing, nextLevelData: daily?.level });
 
     // 순서(인덱싱) 카테고리가 있는 레벨 진입 시 설명 (개발 모드는 매번, 운영은 최초 1회)
     const orderedCat = state.categories?.find((c: any) => c.ordered);
@@ -327,7 +335,7 @@ const WordSortGame: React.FC = () => {
 
     // Log game_play event once when a real (non-tutorial) level starts
     useEffect(() => {
-        if (tutorialStep !== null || !state.level || hasLoggedPlay.current) return;
+        if (daily || tutorialStep !== null || !state.level || hasLoggedPlay.current) return;
         hasLoggedPlay.current = true;
         logEvent('game_play', { game: 'word_sort', level: state.level });
     }, [state.level, tutorialStep]);
@@ -336,6 +344,13 @@ const WordSortGame: React.FC = () => {
     useEffect(() => {
         if (state.isWinner && tutorialStep === null && !hasAwardedCoins.current) {
             hasAwardedCoins.current = true;
+            // 오늘의 퍼즐은 보상 체계가 따로다(코인 100 + 퍼즐력 10, 한 달 완성 시 월간 보상).
+            // 일반 클리어 보상과 레벨 진행도는 건드리지 않는다.
+            if (daily) {
+                clearMonthReward();
+                clearDaily(daily.date);
+                return;
+            }
             addCoins(10);
             if (!hasSavedLevelProgress.current) {
                 hasSavedLevelProgress.current = true;
@@ -354,7 +369,7 @@ const WordSortGame: React.FC = () => {
                 }
             });
         }
-    }, [state.isWinner, tutorialStep, addCoins, state.level]);
+    }, [state.isWinner, tutorialStep, addCoins, state.level, daily, clearDaily, clearMonthReward]);
 
     // Reset coin award and level progress save flags on new game
     useEffect(() => {
@@ -425,7 +440,8 @@ const WordSortGame: React.FC = () => {
 
     // Auto-save effect
     useEffect(() => {
-        if (!state || state.isTutorial) return;
+        // 오늘의 퍼즐은 이어하기를 두지 않는다 (일반 모드의 저장 데이터를 덮어쓰지 않도록)
+        if (!state || state.isTutorial || daily) return;
 
         const saveKey = state.isHardMode ? WORDSORT_HARD_SAVE_KEY : WORDSORT_SAVE_KEY;
 
@@ -447,6 +463,18 @@ const WordSortGame: React.FC = () => {
     // Unified initialization: check URL query first, then Firebase progress, then restore
     useEffect(() => {
         const doInit = async () => {
+            if (daily) {
+                // 규칙을 처음 보는 사람은 튜토리얼을 먼저 거치고, 끝나면 그날의 문제가 시작된다.
+                if (!localStorage.getItem('wordSort_tutorialDone')) {
+                    dispatch({ type: 'START_LEVEL', levelData: tutorialLevel });
+                    setTutorialStep(1);
+                    triggerDealing(levelStackTotal(tutorialLevel));
+                    return;
+                }
+                dispatch({ type: 'START_LEVEL', levelData: daily.level });
+                triggerDealing(levelStackTotal(daily.level));
+                return;
+            }
             const tutorialDone = localStorage.getItem('wordSort_tutorialDone');
 
             // 1. Check URL query params first (for refresh/direct link level transitions)
@@ -807,6 +835,7 @@ const WordSortGame: React.FC = () => {
             stackStartIndices,
             triggerDealing,
             language: state.language,
+            daily,
             openMoveConfirm,
             openUndoConfirm,
             openRemoveConfirm,
@@ -821,6 +850,8 @@ const WordSortGame: React.FC = () => {
                 const targetTutorial = l === 'en' ? tutorialLevelEn : tutorialLevelKo;
                 const newLevelData = state.isTutorial 
                     ? targetTutorial 
+                    : daily
+                    ? daily.level
                     : targetLevels.find((lvl: any) => lvl.id === state.level) || targetLevels[0];
                 
                 dispatch({ type: 'SET_LANGUAGE', language: l, newLevelData });
@@ -851,12 +882,14 @@ const WordSortGame: React.FC = () => {
             {/* Nav bar */}
             <div className="game-nav" style={{ marginBottom: '0.25rem', marginLeft: '-1rem', marginRight: '-1rem', marginTop: '-0.5rem', borderRadius: '0' }}>
                 <div className="game-nav-left">
-                    <button className="nav-icon-btn" onClick={() => navigate('/word-sort')}>
+                    <button className="nav-icon-btn" onClick={() => navigate(daily ? '/daily' : '/word-sort')}>
                         <ChevronLeft size={22} />
                     </button>
                     {tutorialStep === null && (
                         <span style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.08em', opacity: 0.7, color: 'white' }}>
-                            {t.level.toUpperCase()} {state.level}
+                            {daily
+                                ? `${Number(daily.date.slice(5, 7))}월 ${Number(daily.date.slice(8))}일`
+                                : <>{t.level.toUpperCase()} {state.level}</>}
                         </span>
                     )}
                     {state.isHardMode && tutorialStep === null && (

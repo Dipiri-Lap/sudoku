@@ -28,6 +28,8 @@ export interface ChallengeReward {
     avatar?: string;
     /** 보상으로 함께 지급하는 테두리 id (src/common/data/avatarFrames.ts) */
     frame?: string;
+    /** 보상으로 함께 지급하는 워드스택 카드 뒷면 id (public/assets/word-sort/{id}.webp). 도전과제를 완료하면 따로 저장하지 않아도 바로 쓸 수 있다 */
+    cardBack?: string;
 }
 
 export interface Challenge {

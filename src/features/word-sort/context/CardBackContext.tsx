@@ -3,6 +3,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../../firebase';
 import { useCoins } from '../../../context/CoinContext';
+import { useChallenges } from '../../../context/ChallengeContext';
+import { ALL_CHALLENGES } from '../../../data/challenges';
+import { IS_LOCAL_ENV } from '../../../common/data/avatarFrames';
 
 export interface CardBackDesign {
     id: string;
@@ -10,17 +13,23 @@ export interface CardBackDesign {
     description: string;
     pattern: string; // CSS value for background or backgroundImage
     isImage?: boolean;
+    /** true 면 도전과제 보상으로만 얻는다. 상점에서 살 수 없고, 얻기 전에는 목록에 나타나지 않는다 (로컬 개발에서는 확인용으로 보인다) */
+    rewardOnly?: boolean;
 }
 
 const FREE_BACK_IDS = ['1','2','3','4','5','6','7','8'];
 
-export const cardBackDesigns: CardBackDesign[] = Array.from({ length: 20 }, (_, i) => ({
-    id: String(i + 1),
-    name: `디자인 ${i + 1}`,
-    description: `카드 뒷면 디자인 ${i + 1}`,
-    pattern: `url('/assets/word-sort/${i + 1}.webp')`,
-    isImage: true,
-}));
+export const cardBackDesigns: CardBackDesign[] = [
+    ...Array.from({ length: 20 }, (_, i) => ({
+        id: String(i + 1),
+        name: `디자인 ${i + 1}`,
+        description: `카드 뒷면 디자인 ${i + 1}`,
+        pattern: `url('/assets/word-sort/${i + 1}.webp')`,
+        isImage: true,
+    })),
+    // 21~ 도전과제 보상 전용 (reward.cardBack 으로 가리킨다)
+    { id: '21', name: '단어 박사', description: '오늘의 퍼즐 11월 한 달 완료 보상', pattern: "url('/assets/word-sort/21.webp')", isImage: true, rewardOnly: true },
+];
 
 const LS_UNLOCKED_KEY = 'wordSort_unlockedBacks';
 const LS_SELECTED_KEY = 'wordSort_selectedBack';
@@ -47,6 +56,7 @@ export const useCardBacks = () => {
 
 export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { spendCoins } = useCoins();
+    const { isChallengeCompleted } = useChallenges();
     
     const [selectedBackId, setSelectedBackId] = useState<string>(() => {
         return localStorage.getItem(LS_SELECTED_KEY) || '1';
@@ -92,7 +102,7 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
 
                 // 선택된 카드 동기화: 클라우드 우선, 없으면 로컬 유지
                 const cloudSelected: string | null = snap.exists() ? (snap.data().selectedWordSortBack ?? null) : null;
-                if (cloudSelected && mergedArray.includes(cloudSelected)) {
+                if (cloudSelected && (mergedArray.includes(cloudSelected) || cardBackDesigns.some(d => d.id === cloudSelected && d.rewardOnly))) {
                     setSelectedBackId(cloudSelected);
                     localStorage.setItem(LS_SELECTED_KEY, cloudSelected);
                 }
@@ -116,12 +126,22 @@ export const CardBackProvider: React.FC<{ children: ReactNode }> = ({ children }
         return unsubscribe;
     }, []);
 
+    // 보상 전용 뒷면은 따로 저장하지 않고, 그 보상을 주는 도전과제를 완료했는지로 판단한다 (기기를 바꿔도 따라온다)
+    const isRewardBackEarned = useCallback((id: string) => {
+        const source = Object.values(ALL_CHALLENGES).flat().find(c => c.reward.cardBack === id);
+        return !!source && isChallengeCompleted(source.id);
+    }, [isChallengeCompleted]);
+
     const hasUnlocked = useCallback((id: string) => {
-        return unlockedBacks.includes(id);
-    }, [unlockedBacks]);
+        if (unlockedBacks.includes(id)) return true;
+        const design = cardBackDesigns.find(d => d.id === id);
+        return !!design?.rewardOnly && (IS_LOCAL_ENV || isRewardBackEarned(id));
+    }, [unlockedBacks, isRewardBackEarned]);
 
     const unlockBack = async (id: string): Promise<boolean> => {
         if (hasUnlocked(id)) return true;
+        // 보상 전용 뒷면은 코인으로 살 수 없다
+        if (cardBackDesigns.find(d => d.id === id)?.rewardOnly) return false;
 
         const success = await spendCoins(UNLOCK_COST);
         if (!success) {

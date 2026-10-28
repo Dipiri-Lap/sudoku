@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { House, ArrowRight, Construction } from 'lucide-react';
+import DailyPushPrompt from '../../daily/components/DailyPushPrompt';
+import { useDailyPuzzle, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
 import TutorialOverlay from './TutorialOverlay';
 import { useWordSort } from '../context/WordSortContext';
 import { useWordSortUI } from '../context/WordSortUIContext';
@@ -18,6 +20,7 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
 }) => {
     const { state } = useWordSort();
     const navigate = useNavigate();
+    const { monthReward } = useDailyPuzzle();
     const [showComingSoon, setShowComingSoon] = useState(false);
 
     const levels = state.language === 'en' ? levelsEn : levelsKo;
@@ -42,6 +45,7 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
         isRemoveMode,
         gatheringCat,
         showGameOverOverlay,
+        daily,
     } = useWordSortUI();
 
     return (
@@ -88,7 +92,7 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
                         남은 횟수를 모두 소진했습니다
                     </div>
                     <a
-                        href={`/word-sort?level=${state.level}`}
+                        href={daily ? `/daily/play?date=${daily.date}` : `/word-sort?level=${state.level}`}
                         style={{
                             padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px',
                             border: 'none', background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
@@ -106,31 +110,42 @@ export const GameOverlays: React.FC<GameOverlaysProps> = ({
                     <div className="modal-overlay">
                         <div className="modal-content animate-fade-in">
                             <div className="modal-header">
-                                <h2>🎉 축하합니다!</h2>
+                                <h2>{daily ? '📅 오늘의 퍼즐 완료!' : '🎉 축하합니다!'}</h2>
                             </div>
                             <div className="modal-body">
                                 <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 600 }}>
-                                    LEVEL <span style={{ color: '#e2e8f0' }}>{state.level}</span> 클리어!
+                                    {daily
+                                        ? <>{Number(daily.date.slice(5, 7))}월 {Number(daily.date.slice(8))}일 문제 클리어!</>
+                                        : <>LEVEL <span style={{ color: '#e2e8f0' }}>{state.level}</span> 클리어!</>}
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fef9e7', border: '1px solid #f4c430', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#b8860b', fontSize: '0.95rem' }}>
-                                        🪙 +10
+                                        🪙 +{daily ? DAILY_REWARD_COIN : 10}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
-                                        ⚡ 퍼즐력 +1
+                                        ⚡ 퍼즐력 +{daily ? DAILY_REWARD_PUZZLE_POWER : 1}
                                     </div>
                                 </div>
+                                {daily && monthReward && (
+                                    <div style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '1px solid #f59e0b', borderRadius: 14, padding: '0.6rem 0.9rem', textAlign: 'center', color: '#92400e', fontWeight: 800, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                                        한 달 완성! {monthReward.title} 칭호<br />
+                                        <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>
+                                            🪙 +{monthReward.reward.coin}{monthReward.reward.avatar ? ' · 🖼 아바타 획득' : ''}{monthReward.reward.frame ? ' · 🔲 테두리 획득' : ''}{monthReward.reward.cardBack ? ' · 🃏 카드 뒷면 획득' : ''}
+                                        </span>
+                                    </div>
+                                )}
+                                {daily && <DailyPushPrompt />}
                             </div>
                             <div className="modal-footer" style={{ flexDirection: 'row', gap: '0.5rem' }}>
-                                <a href="/word-sort" className="modal-home-btn" style={{ textDecoration: 'none' }}>
+                                <a href={daily ? '/' : '/word-sort'} className="modal-home-btn" style={{ textDecoration: 'none' }}>
                                     <House size={22} />
                                 </a>
                                 <button
-                                    onClick={handleNextLevel}
+                                    onClick={daily ? () => navigate('/daily') : handleNextLevel}
                                     className="primary-btn bonus-btn"
                                     style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
                                 >
-                                    다음 레벨로 <ArrowRight size={20} />
+                                    {daily ? '달력으로' : '다음 레벨로'} <ArrowRight size={20} />
                                 </button>
                             </div>
                         </div>

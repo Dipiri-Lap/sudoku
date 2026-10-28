@@ -23,6 +23,7 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
         openUndoConfirm,
         openRemoveConfirm,
         language,
+        daily,
         isHardMode,
         isHelpBlocked,
         resetHardModeHelp,
@@ -48,7 +49,7 @@ export const GameBottomMenu: React.FC<GameBottomMenuProps> = ({ triggerDealing, 
         }}>
             <div style={{ textAlign: 'center' }}>
                 <RotateCcw size={24} style={{ cursor: 'pointer' }} onClick={() => {
-                    const currentLevelData = levels.find((l: any) => l.id === state.level) || levels[0];
+                    const currentLevelData = daily?.level ?? (levels.find((l: any) => l.id === state.level) || levels[0]);
                     resetUnlocks();
                     resetHardModeHelp();
                     dispatch({ type: 'START_LEVEL', levelData: currentLevelData, hardMode: isHardMode });

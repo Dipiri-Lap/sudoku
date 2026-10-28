@@ -30,8 +30,8 @@ interface ProfileModalProps {
 // 1-40 local avatar IDs (코인으로 해제 가능)
 const AVATAR_SEEDS = Array.from({ length: 40 }, (_, i) => String(i + 1));
 // 41~ 도전과제 보상 전용 아바타. 획득하기 전에는 목록에 나타나지 않는다.
-const REWARD_AVATAR_SEEDS = ['41'];
-const MAX_AVATAR_ID = 41;
+const REWARD_AVATAR_SEEDS = ['41', '42'];
+const MAX_AVATAR_ID = 42;
 
 export const getAvatarUrl = (seed: string) => {
     if (seed.startsWith('http') || seed.startsWith('/')) return seed;
@@ -979,6 +979,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                     )}
                                                                     {challenge.reward.frame && (
                                                                         <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold' }}>🔲 테두리</span>
+                                                                    )}
+                                                                    {challenge.reward.cardBack && (
+                                                                        <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold' }}>🃏 카드 뒷면</span>
                                                                     )}
                                                                     <span style={{ fontSize: '0.58rem', color: '#fbbf24', marginTop: '1px', alignSelf: 'center' }}>보상받기</span>
                                                                 </button>

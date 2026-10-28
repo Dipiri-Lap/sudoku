@@ -1,11 +1,32 @@
 import type { Difficulty } from '../../../engine/generator';
 
-export interface DailyPuzzle {
+/** 스도쿠 달(9~10월)의 문제. game 필드가 없는 예전 데이터는 모두 스도쿠다. */
+export interface SudokuDailyPuzzle {
     date: string; // YYYY-MM-DD
+    game?: 'sudoku';
     difficulty: Difficulty;
     board: (number | null)[][];
     solution: number[][];
 }
+
+/** 워드스택 달(11월)의 문제. level 은 levels.json 의 한 레벨과 같은 모양이다. */
+export interface WordSortDailyLevel {
+    id: number;
+    maxMoves: number;
+    slots: number;
+    categories: { id: string; name: string; target: number; words: string[] }[];
+}
+
+export interface WordSortDailyPuzzle {
+    date: string;
+    game: 'word-sort';
+    difficulty: '보통' | '어려움';
+    level: WordSortDailyLevel;
+}
+
+export type DailyPuzzle = SudokuDailyPuzzle | WordSortDailyPuzzle;
+
+export const isWordSortDaily = (p: DailyPuzzle | null | undefined): p is WordSortDailyPuzzle => p?.game === 'word-sort';
 
 /**
  * 월 단위 청크로 나눠 두고 필요한 달만 불러온다.
@@ -15,6 +36,7 @@ export interface DailyPuzzle {
 const MONTH_LOADERS: Record<string, () => Promise<{ default: unknown }>> = {
     '2026-09': () => import('../../../data/daily/2026-09.json'),
     '2026-10': () => import('../../../data/daily/2026-10.json'),
+    '2026-11': () => import('../../../data/daily/2026-11.json'),
 };
 
 /** 문제가 준비된 달 (캘린더의 이전/다음 달 이동 범위) */
