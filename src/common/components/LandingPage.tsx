@@ -615,7 +615,7 @@ const LandingPage: React.FC = () => {
                     <img src="/images/snapspot/title.webp" alt="스냅스팟" style={{ width: '100%', display: 'block' }} />
                 </a>
 
-                <a href="/arrow-puzzle" className="animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
+                <a href="/jigsaw" className="animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
                 >
@@ -627,7 +627,7 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
                         zIndex: 1,
                     }}>NEW</div>
-                    <img src="/images/arrow-puzzle/title.webp" alt="애로우웨이" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/tinypieces/title.webp" alt="Tiny Pieces" style={{ width: '100%', display: 'block' }} />
                 </a>
 
                 <a href="/word-sort" className="animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
@@ -667,7 +667,7 @@ const LandingPage: React.FC = () => {
                     <img src="/images/sudoku/title.webp" alt="스도쿠" style={{ width: '100%', display: 'block' }} />
                 </a>
 
-                <a href="/jigsaw" className="animate-fade-in" style={{ '--delay': '0.38s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
+                <a href="/arrow-puzzle" className="animate-fade-in" style={{ '--delay': '0.38s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
                 >
@@ -679,7 +679,7 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
                         zIndex: 1,
                     }}>NEW</div>
-                    <img src="/images/tinypieces/title.webp" alt="Tiny Pieces" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/arrow-puzzle/title.webp" alt="애로우웨이" style={{ width: '100%', display: 'block' }} />
                 </a>
 
                 {window.location.hostname === 'localhost' && (
