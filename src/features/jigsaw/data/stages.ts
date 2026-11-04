@@ -131,6 +131,11 @@ const RESERVED_MASTERPIECES: JigsawStage[] = [
     { id: 60, title: '진주 귀걸이 소녀', subtitle: '명화 컬렉션', image: '/images/jigsaw/pearl-earring.webp', rows: 5, cols: 6, tint: '#3d63c9' },
     { id: 80, title: '절규', subtitle: '명화 컬렉션', image: '/images/jigsaw/the-scream.webp', rows: 5, cols: 6, tint: '#e2622f' },
     { id: 100, title: '별이 빛나는 밤', subtitle: '명화 컬렉션', image: '/images/jigsaw/starry-night.webp', rows: 6, cols: 7, tint: '#26357a' },
+    { id: 120, title: '키스', subtitle: '명화 컬렉션', image: '/images/jigsaw/the-kiss.webp', rows: 6, cols: 6, tint: '#d4a017' },
+    { id: 140, title: '양산을 쓴 여인', subtitle: '명화 컬렉션', image: '/images/jigsaw/parasol.webp', rows: 6, cols: 6, tint: '#3d9be0' },
+    { id: 160, title: '그랑드 자트 섬', subtitle: '명화 컬렉션', image: '/images/jigsaw/grande-jatte.webp', rows: 6, cols: 7, tint: '#4f9a5a' },
+    { id: 180, title: '이삭 줍는 여인들', subtitle: '명화 컬렉션', image: '/images/jigsaw/gleaners.webp', rows: 6, cols: 6, tint: '#d9a441' },
+    { id: 200, title: '씨름', subtitle: '명화 컬렉션', image: '/images/jigsaw/ssireum.webp', rows: 7, cols: 7, tint: '#c98a52' },
 ];
 
 function withMasterpieces(list: JigsawStage[]): JigsawStage[] {

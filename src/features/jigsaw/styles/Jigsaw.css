@@ -826,3 +826,305 @@
     font-weight: 700;
     font-size: 0.85rem;
 }
+
+/* ============ clear screen: share-worthy card ============ */
+.jg-win { display: flex; overflow-y: auto; padding: 18px 16px; box-sizing: border-box; place-items: initial; }
+.jg-win-inner { margin: auto; max-width: 340px; padding: 4px 0 18px; }
+.jg-win-confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.jg-win-confetti i { position: absolute; top: -30px; border-radius: 2px; opacity: 0.9; animation: jg-conf-fall linear infinite; }
+@keyframes jg-conf-fall {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(110vh) rotate(540deg); }
+}
+.jg-win-top { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.jg-win-stage {
+    padding: 4px 16px 3px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--deep);
+    font-family: 'Lilita One', 'Black Han Sans', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    box-shadow: 0 3px 0 var(--flat);
+}
+.jg-win .jg-win-head { font-size: 3.5rem; }
+.jg-win-card {
+    position: relative;
+    width: 100%;
+    margin-top: 46px;
+    padding: 50px 16px 16px;
+    border-radius: 26px;
+    background: #fff;
+    color: #3a3046;
+    box-shadow: 0 10px 0 var(--flat);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    transform: rotate(-1.2deg);
+    animation: jg-card-in 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) 0.1s both;
+}
+@keyframes jg-card-in {
+    from { opacity: 0; transform: rotate(-6deg) translateY(40px) scale(0.9); }
+    to { opacity: 1; transform: rotate(-1.2deg) translateY(0) scale(1); }
+}
+.jg-win-card .jg-win-stars { position: absolute; top: -46px; left: 0; right: 0; margin: 0; justify-content: center; }
+.jg-win-card .jg-win-photo { width: 100%; margin: 0; animation: none; }
+.jg-win-card .jg-win-photo img { border-radius: 16px; box-shadow: none; }
+.jg-win-card .jg-win-buddy { right: -26px; bottom: -34px; }
+.jg-win-card .jg-win-title { margin: 22px 0 0; font-size: 1.55rem; line-height: 1.2; }
+.jg-win-card .jg-win-score { margin: 6px 0 4px; color: var(--deep); }
+.jg-win-card .jg-win-score .num { font-size: 2.2rem; text-shadow: none; }
+.jg-win-card .jg-win-score .lbl { font-size: 1.05rem; opacity: 1; }
+.jg-win-rewards { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 30px 0 14px; min-height: 40px; }
+.jg-win-rewards.note { align-items: center; font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 0.82rem; opacity: 0.85; }
+.jg-reward-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px 6px;
+    border-radius: 99px;
+    background: #fff;
+    color: var(--deep);
+    font-size: 1.15rem;
+    box-shadow: 0 4px 0 var(--flat);
+    animation: jg-chip-pop 0.5s cubic-bezier(0.2, 1.7, 0.4, 1) both;
+}
+.jg-reward-chip img { width: 20px; height: 20px; }
+@keyframes jg-chip-pop {
+    from { opacity: 0; transform: scale(0.3) translateY(14px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.jg-share-row { display: flex; gap: 10px; width: 100%; }
+.jg-share-btn {
+    flex: 1;
+    height: 60px;
+    border-radius: 18px;
+    background: #ffcb2f;
+    color: #7a4a00;
+    font-size: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 7px 0 #c99a12, 0 12px 22px rgba(0, 0, 0, 0.12);
+    animation: jg-share-pulse 1.8s ease-in-out infinite;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.jg-share-btn:active { transform: translateY(6px); box-shadow: 0 1px 0 #c99a12; animation: none; }
+.jg-share-btn:disabled, .jg-save-btn:disabled { opacity: 0.6; }
+@keyframes jg-share-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+.jg-save-btn {
+    flex: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    color: var(--deep);
+    box-shadow: 0 7px 0 var(--flat);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.jg-save-btn:active { transform: translateY(6px); box-shadow: 0 1px 0 var(--flat); }
+.jg-win .jg-win-actions { margin-top: 20px; }
+@media (prefers-reduced-motion: reduce) {
+    .jg-win-confetti, .jg-share-btn, .jg-win-card, .jg-reward-chip { animation: none !important; }
+}
+
+/* ---- clear screen: hype layer ---- */
+.jg-win-rays {
+    position: fixed;
+    left: 50%;
+    top: 46%;
+    width: 170vmax;
+    height: 170vmax;
+    translate: -50% -50%;
+    z-index: 0;
+    pointer-events: none;
+    background: repeating-conic-gradient(rgba(255, 255, 255, 0.16) 0deg 9deg, transparent 9deg 18deg);
+    -webkit-mask-image: radial-gradient(circle, #000 12%, transparent 48%);
+    mask-image: radial-gradient(circle, #000 12%, transparent 48%);
+    animation: jg-frame-spin 40s linear infinite;
+}
+.jg-win-inner { position: relative; z-index: 1; }
+.jg-win-stamp {
+    position: absolute;
+    right: -14px;
+    top: 34px;
+    z-index: 5;
+    padding: 6px 12px 4px;
+    border-radius: 12px;
+    border: 3px solid #fff;
+    font-family: 'Lilita One', 'Black Han Sans', sans-serif;
+    font-size: 1.35rem;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: #ff5f8a;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+    rotate: 14deg;
+    animation: jg-stamp-slam 0.45s cubic-bezier(0.2, 1.8, 0.4, 1) 1.35s both;
+}
+.jg-win-stamp.g2 { background: #ffb020; }
+.jg-win-stamp.g1, .jg-win-stamp.g0 { background: #4aa3e8; }
+@keyframes jg-stamp-slam {
+    0% { opacity: 0; transform: scale(3); }
+    60% { opacity: 1; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.jg-win-card.masterpiece { background: linear-gradient(135deg, #ffe58a, #f2b52a 40%, #ffe9a0 60%, #d99512); padding: 50px 14px 16px; }
+.jg-win-card.masterpiece .jg-win-photo img { border: 6px solid #fff; box-sizing: border-box; }
+.jg-win-card.masterpiece .jg-win-title, .jg-win-card.masterpiece .jg-win-score { color: #5a3a00; }
+.jg-win-mp {
+    position: absolute;
+    left: -10px;
+    top: 30px;
+    z-index: 5;
+    padding: 5px 12px 4px;
+    border-radius: 10px;
+    background: #3a3046;
+    color: #ffd34d;
+    font-size: 0.85rem;
+    rotate: -10deg;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+.jg-win-collect {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: -4px 0 14px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    background: rgba(0, 0, 0, 0.16);
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+.jg-win-collect b { font-family: 'Black Han Sans', sans-serif; font-weight: 400; font-size: 1rem; }
+.jg-win-collect .jg-fstar { display: inline-block; }
+.jg-share-hint { margin: 12px 0 0; font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 0.8rem; opacity: 0.9; text-align: center; }
+.jg-win .jg-win-actions { margin-top: 14px; }
+@media (prefers-reduced-motion: reduce) {
+    .jg-win-rays, .jg-win-stamp { animation: none !important; }
+}
+/* fit the whole clear screen on one phone screen */
+.jg-win { padding: 10px 16px; }
+.jg-win-inner { max-width: 312px; padding: 0 0 8px; }
+.jg-win .jg-win-head { font-size: 2.9rem; }
+.jg-win-card { margin-top: 40px; padding: 46px 14px 12px; }
+.jg-win-card.masterpiece { padding: 46px 12px 12px; }
+.jg-win-card .jg-win-title { margin-top: 16px; font-size: 1.4rem; }
+.jg-win-card .jg-win-score { margin: 2px 0 0; }
+.jg-win-card .jg-win-score .num { font-size: 1.9rem; }
+.jg-win-rewards { margin: 22px 0 8px; min-height: 36px; }
+.jg-win-collect { margin: 0 0 10px; }
+.jg-share-btn { height: 56px; font-size: 1.35rem; }
+.jg-save-btn { width: 56px; height: 56px; }
+.jg-share-hint { margin-top: 10px; font-size: 0.75rem; }
+.jg-win .jg-win-actions { margin-top: 10px; }
+.jg-win .jg-win-actions .jg-round { width: 52px; height: 52px; }
+.jg-win .jg-win-actions .jg-play-btn.small { height: 52px; }
+
+/* ---- 3-star stages: gold frame + random light glint ---- */
+.jg-gold {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 3px #ffe27a, 0 0 0 6px #d99512, 0 0 16px 4px rgba(255, 196, 60, 0.55), 0 9px 0 var(--flat);
+}
+.jg-card-img.jg-gold { box-shadow: 0 0 0 4px #ffe27a, 0 0 0 8px #d99512, 0 0 22px 6px rgba(255, 196, 60, 0.6), 0 12px 0 var(--flat); }
+/* inner bevel so the gold reads as a frame on top of the picture */
+.jg-gold::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 2px rgba(255, 246, 200, 0.9), inset 0 0 0 4px rgba(217, 149, 18, 0.55);
+    pointer-events: none;
+}
+/* light sweep */
+.jg-gold::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    bottom: -30%;
+    left: -80%;
+    width: 50%;
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.25) 30%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.25) 70%, transparent 100%);
+    transform: skewX(-18deg);
+    animation: jg-gold-shine var(--shine-dur, 5s) ease-in-out var(--shine-delay, 0s) infinite;
+}
+@keyframes jg-gold-shine {
+    0% { left: -80%; }
+    25% { left: 140%; }
+    100% { left: 140%; }
+}
+.jg-tile.current .jg-tile-face.jg-gold { box-shadow: 0 0 0 3px #ffe27a, 0 0 0 6px #d99512, 0 0 0 9px #fff, 0 9px 0 var(--flat); }
+@media (prefers-reduced-motion: reduce) {
+    .jg-gold::after { animation: none; display: none; }
+}
+/* brighter, snappier glint: bright core + thin trailing streak, plus a sparkle pop and a gold glow pulse */
+.jg-gold::after {
+    width: 70%;
+    left: -90%;
+    background:
+        linear-gradient(100deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0) 18%,
+            rgba(255, 255, 255, 0.55) 30%,
+            #ffffff 38%,
+            rgba(255, 250, 220, 0.95) 42%,
+            rgba(255, 255, 255, 0.4) 50%,
+            transparent 56%,
+            rgba(255, 255, 255, 0.9) 64%,
+            transparent 69%,
+            transparent 100%);
+    mix-blend-mode: screen;
+    filter: blur(0.5px);
+    animation: jg-gold-shine var(--shine-dur, 5s) cubic-bezier(0.45, 0, 0.25, 1) var(--shine-delay, 0s) infinite;
+}
+@keyframes jg-gold-shine {
+    0% { left: -90%; opacity: 1; }
+    16% { left: 130%; opacity: 1; }
+    17%, 100% { left: 130%; opacity: 0; }
+}
+.jg-gold { animation: jg-gold-glow var(--shine-dur, 5s) ease-in-out var(--shine-delay, 0s) infinite; }
+@keyframes jg-gold-glow {
+    0%, 22%, 100% { filter: brightness(1); }
+    8% { filter: brightness(1.12) saturate(1.1); }
+}
+.jg-gold > img { position: relative; z-index: 1; }
+/* sparkle that pops on the corner right after the glint passes */
+.jg-card-img.jg-gold .jg-gold-spark,
+.jg-tile-face.jg-gold .jg-gold-spark {
+    position: absolute;
+    right: 8%;
+    top: 8%;
+    z-index: 4;
+    width: 22%;
+    aspect-ratio: 1;
+    pointer-events: none;
+    background: #fff;
+    clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+    filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px rgba(255, 214, 90, 0.9));
+    opacity: 0;
+    animation: jg-gold-spark var(--shine-dur, 5s) ease-out var(--shine-delay, 0s) infinite;
+}
+@keyframes jg-gold-spark {
+    0%, 12% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+    17% { opacity: 1; transform: scale(1.1) rotate(45deg); }
+    26%, 100% { opacity: 0; transform: scale(0.4) rotate(90deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .jg-gold, .jg-gold .jg-gold-spark { animation: none; }
+}
+/* list tiles: number badge above the gold frame layers; bigger stars, clear of the gold ring */
+.jg-tile-face .no { z-index: 5; }
+.jg-tile { gap: 0; }
+.jg-tile-stars { gap: 3px; margin-top: 11px; }
+.jg-tile-stars i { width: 14px; height: 14px; }

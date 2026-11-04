@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Eye, Shuffle, Home, Play, RotateCcw, LayoutGrid, Music, VolumeX, Check, Undo2, Magnet, Paintbrush, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Shuffle, Home, Play, RotateCcw, LayoutGrid, Music, VolumeX, Check, Undo2, Magnet, Paintbrush, X, Share2, Download } from 'lucide-react';
 import { useCoins } from '../../../context/CoinContext';
 import { bgm, BGM_TRACKS, loadBgmPref, saveBgmPref, loadVolumes, saveVolumes } from '../utils/bgm';
 import { JIGSAW_STAGES, CHAPTER_SIZE, RANGE_SIZE, isStageUnlocked, lastUnlockedIdx, loadStars, saveStars, starsFor, type JigsawStage } from '../data/stages';
@@ -18,6 +18,7 @@ import '../styles/JigsawFrames.css';
 import { useBoardFrames } from '../data/boardFrames';
 import { GRADES, GRADE_ORDER, priceOf, type Cosmetic, type CosmeticStore } from '../data/cosmetics';
 import { Buddy } from './Buddy';
+import { shareClear, saveClearCard, type ShareCardInput } from '../utils/shareCard';
 import { BUDDY_SKINS, useBuddySkins, type BuddySkin } from '../data/buddySkins';
 
 /* ---------- sound ---------- */
@@ -28,6 +29,8 @@ let sfxVolume = loadVolumes().sfx;
 /** coin prices of the in-game helpers */
 const MAGNET_COST = 50;
 const UNDO_COST = 20;
+/** first-clear reward of a stage (same amounts as the other games) */
+const CLEAR_COIN_REWARD = 10;
 const PEEK_COST = 20;
 /** free original-image peeks per round, by piece count */
 const freePeeks = (pieces: number) => (pieces <= 12 ? 3 : pieces <= 20 ? 2 : 1);
@@ -62,6 +65,26 @@ function randomPerm(n: number): Board {
     }
     return b;
 }
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+/** per-stage pseudo-random shine timing so 3-star cards glint at different moments */
+const shineStyle = (id: number) =>
+    ({
+        '--shine-dur': `${4 + ((id * 37) % 30) / 10}s`,
+        '--shine-delay': `${-((id * 53) % 50) / 10}s`,
+    }) as React.CSSProperties;
+const GRADE = ['GOOD', 'GOOD', 'GREAT', 'PERFECT'] as const;
+const isMasterpiece = (st: JigsawStage) => st.subtitle === '명화 컬렉션';
+
+/** deterministic flat confetti for the clear screen */
+const CLEAR_CONFETTI = Array.from({ length: 18 }, (_, i) => ({
+    left: (i * 37 + 11) % 100,
+    delay: ((i * 53) % 40) / 10,
+    dur: 4 + ((i * 29) % 30) / 10,
+    color: ['#ffffff', '#ffcb2f', '#ff8fb5', '#9bf2b7', '#8fd3ff'][i % 5],
+    rot: (i * 47) % 360,
+    w: 8 + ((i * 13) % 8),
+}));
 
 /** Stage-clear fanfare: bouncy melody + chord stabs + a sparkle run, all scaled by the SFX volume. */
 function playClearFanfare() {
@@ -213,7 +236,8 @@ function HomeScreen({
                     <ChevronLeft size={30} strokeWidth={3.4} />
                 </button>
                 <div key={stage.id} className={`jg-card ${dir > 0 ? 'from-r' : 'from-l'}`} onClick={() => unlocked && onPlay(stage)}>
-                    <div className={`jg-card-img ${got > 0 ? '' : 'hidden'}`}>
+                    <div className={`jg-card-img ${got > 0 ? '' : 'hidden'} ${got >= 3 ? 'jg-gold' : ''}`} style={got >= 3 ? shineStyle(stage.id) : undefined}>
+                        {got >= 3 && <i className="jg-gold-spark" aria-hidden />}
                         {got > 0 ? (
                             <img src={stage.image} alt="" draggable={false} />
                         ) : unlocked ? (
@@ -371,7 +395,8 @@ function StageList({ current, onPick, onBack }: { current: number; onPick: (idx:
                                     ].join(' ');
                                     return (
                                         <button key={st.id} data-idx={i} className={cls} disabled={!open} onClick={() => onPick(i)} aria-label={`스테이지 ${st.id}`}>
-                                            <span className="jg-tile-face">
+                                            <span className={`jg-tile-face ${g >= 3 ? 'jg-gold' : ''}`} style={g >= 3 ? shineStyle(st.id) : undefined}>
+                                                {g >= 3 && <i className="jg-gold-spark" aria-hidden />}
                                                 {g ? (
                                                     <img src={st.image} alt="" loading="lazy" decoding="async" draggable={false} />
                                                 ) : open ? (
@@ -571,7 +596,7 @@ function PlayView({
     const [bgmId, setBgmId] = useState<string>(loadBgmPref);
     const [bgmMenu, setBgmMenu] = useState(false);
     const [vols, setVols] = useState(loadVolumes);
-    const { coins, spendCoins } = useCoins();
+    const { coins, spendCoins, addCoins } = useCoins();
     /** board/moves snapshots before each drag, for undo */
     const historyRef = useRef<{ board: Board; moves: number }[]>([]);
     const [historyLen, setHistoryLen] = useState(0);
@@ -596,8 +621,9 @@ function PlayView({
     const [pulse, setPulse] = useState<Set<number>>(new Set());
     const [peek, setPeek] = useState(false);
     const [won, setWon] = useState(false);
-    const [result, setResult] = useState<{ stars: number; record: boolean } | null>(null);
+    const [result, setResult] = useState<{ stars: number; record: boolean; firstClear: boolean } | null>(null);
     const [shownStars, setShownStars] = useState(0);
+    const [sharing, setSharing] = useState(false);
     const [splashes, setSplashes] = useState<{ id: number; x: number; y: number }[]>([]);
     const boardRef = useRef<HTMLDivElement>(null);
 
@@ -654,12 +680,22 @@ function PlayView({
     useEffect(() => {
         if (!won) return;
         const stars = starsFor(stage, moves);
+        // reward only the first clear of a stage (matches the server-side puzzle-power recount, no farming by replays)
+        const firstClear = !(loadStars()[stage.id] > 0);
         const record = saveStars(stage.id, stars);
+        if (firstClear) {
+            void addCoins(CLEAR_COIN_REWARD);
+            import('../../../firebase').then(({ auth }) => {
+                const uid = auth.currentUser?.uid;
+                if (!uid) return;
+                import('../../../services/rankingService').then((m) => m.incrementPuzzlePower(uid)).catch(console.error);
+            });
+        }
         // clear: the fanfare replaces the BGM (it comes back when the next round starts)
         bgm.stop();
         playClearFanfare();
         const timers: ReturnType<typeof setTimeout>[] = [];
-        timers.push(setTimeout(() => setResult({ stars, record }), 1100));
+        timers.push(setTimeout(() => setResult({ stars, record, firstClear }), 1100));
         for (let k = 1; k <= stars; k++) {
             timers.push(
                 setTimeout(() => {
@@ -854,6 +890,46 @@ function PlayView({
         saveBgmPref(id);
         setBgmMenu(false);
     };
+
+    const cardInput = (): ShareCardInput => ({
+        image: stage.image,
+        title: stage.title,
+        stageId: stage.id,
+        stars: result?.stars ?? 0,
+        moves,
+        tint: stage.tint,
+        masterpiece: isMasterpiece(stage),
+        buddySvg: document.querySelector<SVGElement>('.jg-win-buddy svg'),
+    });
+    const doShare = async () => {
+        if (sharing || !result) return;
+        setSharing(true);
+        try {
+            if ((await shareClear(cardInput())) === 'saved') showToast('이미지를 저장했어요 · 공유 문구도 복사됐어요');
+        } catch {
+            showToast('공유하지 못했어요');
+        }
+        setSharing(false);
+    };
+    const doSave = async () => {
+        if (sharing || !result) return;
+        setSharing(true);
+        try {
+            await saveClearCard(cardInput());
+            showToast('이미지를 저장했어요');
+        } catch {
+            showToast('저장하지 못했어요');
+        }
+        setSharing(false);
+    };
+
+    const collection = useMemo(() => {
+        if (!result) return null;
+        const all = loadStars();
+        const ids = new Set(JIGSAW_STAGES.map((x) => x.id));
+        const vals = Object.entries(all).filter(([id]) => ids.has(Number(id))).map(([, v]) => v);
+        return { cleared: vals.filter((v) => v > 0).length, stars: vals.reduce((a, b) => a + b, 0) };
+    }, [result]);
 
     const dragSet = useMemo(() => new Set(drag?.slots ?? []), [drag]);
     const placed = useMemo(() => board.filter((p, s) => p === s).length, [board]);
@@ -1082,30 +1158,80 @@ function PlayView({
             {result && (
                 <div className="jg-win">
                     <div className="jg-pattern" aria-hidden />
+                    <div className="jg-win-rays" aria-hidden />
+                    <div className="jg-win-confetti" aria-hidden>
+                        {CLEAR_CONFETTI.map((c, i) => (
+                            <i
+                                key={i}
+                                style={{
+                                    left: `${c.left}%`,
+                                    width: c.w,
+                                    height: c.w * 1.4,
+                                    background: c.color,
+                                    animationDelay: `${c.delay}s`,
+                                    animationDuration: `${c.dur}s`,
+                                    rotate: `${c.rot}deg`,
+                                }}
+                            />
+                        ))}
+                    </div>
                     <div className="jg-win-inner">
-                        <span className="jg-win-head">완성!</span>
-                        <div className="jg-win-stars">
-                            {[1, 2, 3].map((k) => (
-                                <span key={k} className={`slot s${k} ${shownStars >= k ? 'lit' : ''}`}>
-                                    <FlatStar on={false} size={k === 2 ? 76 : 60} />
-                                    <span className="on-star">
-                                        <FlatStar on size={k === 2 ? 76 : 60} />
-                                    </span>
-                                </span>
-                            ))}
+                        <div className="jg-win-top">
+                            <span className="jg-win-stage">STAGE {pad2(stage.id)}</span>
+                            <span className="jg-win-head">완성!</span>
                         </div>
-                        <div className="jg-win-photo">
-                            <img src={stage.image} alt="" />
-                            <div className="jg-win-buddy">
-                                <Buddy size={72} mood="happy" skin={buddy} />
+                        <div className={`jg-win-card ${isMasterpiece(stage) ? 'masterpiece' : ''}`}>
+                            {isMasterpiece(stage) && <span className="jg-win-mp">명화 컬렉션</span>}
+                            <span className={`jg-win-stamp g${result.stars}`}>{GRADE[result.stars]}</span>
+                            <div className="jg-win-stars">
+                                {[1, 2, 3].map((k) => (
+                                    <span key={k} className={`slot s${k} ${shownStars >= k ? 'lit' : ''}`}>
+                                        <FlatStar on={false} size={k === 2 ? 76 : 60} />
+                                        <span className="on-star">
+                                            <FlatStar on size={k === 2 ? 76 : 60} />
+                                        </span>
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="jg-win-photo">
+                                <img src={stage.image} alt="" />
+                                <div className="jg-win-buddy">
+                                    <Buddy size={78} mood="happy" skin={buddy} />
+                                </div>
+                            </div>
+                            <div className="jg-win-title">{stage.title}</div>
+                            <div className="jg-win-score">
+                                <span className="num">{moves}</span>
+                                <span className="lbl">번 만에 완성</span>
+                                {result.record && <span className="jg-best">BEST</span>}
                             </div>
                         </div>
-                        <div className="jg-win-score">
-                            <span className="num">{moves}</span>
-                            <span className="lbl">번 만에 완성</span>
-                            {result.record && <span className="jg-best">BEST</span>}
+                        {result.firstClear ? (
+                            <div className="jg-win-rewards">
+                                <span className="jg-reward-chip" style={{ animationDelay: '0.9s' }}>
+                                    <img src="/coin_Icon.png" alt="" />+{CLEAR_COIN_REWARD}
+                                </span>
+                                <span className="jg-reward-chip" style={{ animationDelay: '1.1s' }}>
+                                    <FlatStar size={20} />퍼즐력 +1
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="jg-win-rewards note">처음 클리어할 때만 보상을 받아요</div>
+                        )}
+                        {collection && (
+                            <div className="jg-win-collect">
+                                그림 <b>{collection.cleared}</b> / {JIGSAW_STAGES.length} 수집 · <FlatStar size={15} /> <b>{collection.stars}</b>
+                            </div>
+                        )}
+                        <div className="jg-share-row">
+                            <button className="jg-share-btn" onClick={doShare} disabled={sharing}>
+                                <Share2 size={26} strokeWidth={3} /> 친구에게 자랑하기
+                            </button>
+                            <button className="jg-save-btn" onClick={doSave} disabled={sharing} aria-label="이미지 저장">
+                                <Download size={24} strokeWidth={3} />
+                            </button>
                         </div>
-
+                        <p className="jg-share-hint">친구에게 도전장을 보내 보세요 ✉️</p>
                         <div className="jg-win-actions">
                             <button className="jg-round" onClick={onExit} aria-label="홈">
                                 <Home size={24} strokeWidth={2.8} />
