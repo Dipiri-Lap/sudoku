@@ -1145,6 +1145,16 @@ export default function JigsawGame() {
     const idx = stage ? JIGSAW_STAGES.findIndex((s) => s.id === stage.id) : -1;
     const next = idx >= 0 && idx < JIGSAW_STAGES.length - 1 ? JIGSAW_STAGES[idx + 1] : null;
 
+    /** 스테이지를 깬 뒤 다음으로 넘어갈 때 — 전면 광고를 한 번 띄운다(다른 게임과 같은 방식) */
+    const goNextWithAd = (s: JigsawStage) => {
+        bgm.stop();
+        if (import.meta.env.DEV || !window.adBreak) {
+            play(s);
+            return;
+        }
+        window.adBreak({ type: 'next', name: 'jigsaw-stage-complete', adBreakDone: () => play(s) });
+    };
+
     const play = (s: JigsawStage) => {
         setStage(s);
         setColor(s.tint);
@@ -1169,7 +1179,7 @@ export default function JigsawGame() {
                     key={stage.id}
                     stage={stage}
                     onExit={exitToHome}
-                    onNext={next ? () => play(next) : null}
+                    onNext={next ? () => goNextWithAd(next) : null}
                     frame={frames.selected}
                     buddy={buddy}
                     onOpenShop={() => setShopOpen(true)}
