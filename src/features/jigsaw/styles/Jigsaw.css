@@ -1128,3 +1128,6 @@
 .jg-tile { gap: 0; }
 .jg-tile-stars { gap: 3px; margin-top: 11px; }
 .jg-tile-stars i { width: 14px; height: 14px; }
+/* sticky list header must stay above tile badges / gold layers while scrolling */
+.jg-list-head { z-index: 30; }
+.jg-tile-face { isolation: isolate; }
