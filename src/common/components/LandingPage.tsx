@@ -5,6 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { useCrossumProgress } from '../../features/cross-math/stage/progress';
 import { useArrowProgress } from '../../features/arrow-puzzle/hooks/useArrowProgress';
+import { useJigsawProgress } from '../../features/jigsaw/hooks/useJigsawProgress';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { auth } from '../../firebase';
 import { signOut } from '../../services/authService';
@@ -41,6 +42,7 @@ const LandingPage: React.FC = () => {
     const { snapSpotProgress } = useSnapSpotProgress();
     const { stageProgress: crossumProgress } = useCrossumProgress();
     const { progress: arrowProgress } = useArrowProgress();
+    const { progress: jigsawProgress, stars: jigsawStars } = useJigsawProgress();
     const { clearedDates: dailyClearedDates } = useDailyPuzzle();
     const hasUnclaimed = Object.values(ALL_CHALLENGES).flat().some(c => {
         if (challenges.isChallengeCompleted(c.id)) return false;
@@ -53,6 +55,8 @@ const LandingPage: React.FC = () => {
         if (source === 'snapspot_stage') return Math.min(snapSpotProgress, target) >= target;
         if (source === 'crossum_stage') return Math.min(crossumProgress - 1, target) >= target;
         if (source === 'arrow_stage') return Math.min(arrowProgress, target) >= target;
+        if (source === 'jigsaw_stage') return Math.min(jigsawProgress, target) >= target;
+        if (source === 'jigsaw_stars') return Math.min(jigsawStars, target) >= target;
         if (source === 'daily_month') {
             const month = c.progressConfig.month ?? '';
             return [...dailyClearedDates].filter(d => d.startsWith(month)).length >= target;
@@ -661,6 +665,21 @@ const LandingPage: React.FC = () => {
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
                 >
                     <img src="/images/sudoku/title.webp" alt="스도쿠" style={{ width: '100%', display: 'block' }} />
+                </a>
+
+                <a href="/jigsaw" className="animate-fade-in" style={{ '--delay': '0.38s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                >
+                    <div style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        backgroundColor: '#ef4444', color: 'white',
+                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
+                        padding: '2px 7px', borderRadius: '999px',
+                        boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
+                        zIndex: 1,
+                    }}>NEW</div>
+                    <img src="/images/tinypieces/title.webp" alt="Tiny Pieces" style={{ width: '100%', display: 'block' }} />
                 </a>
 
                 {window.location.hostname === 'localhost' && (

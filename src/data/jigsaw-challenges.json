@@ -1,0 +1,274 @@
+[
+  {
+    "id": "jigsaw_stage_5",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🧩 첫 조각 맞추기",
+    "condition": "스테이지 5 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 5
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
+  },
+  {
+    "id": "jigsaw_stage_10",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🖼️ 그림 수집가",
+    "condition": "스테이지 10 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 10
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 25
+    }
+  },
+  {
+    "id": "jigsaw_stage_25",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🎨 조각 장인",
+    "condition": "스테이지 25 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 25
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 50
+    }
+  },
+  {
+    "id": "jigsaw_stage_50",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🏅 퍼즐 탐험가",
+    "condition": "스테이지 50 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 50
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 75
+    }
+  },
+  {
+    "id": "jigsaw_stage_100",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🌟 명화 감상가",
+    "condition": "스테이지 100 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 100
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 100
+    }
+  },
+  {
+    "id": "jigsaw_stage_300",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🧠 조각의 달인",
+    "condition": "스테이지 300 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 300
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 300
+    }
+  },
+  {
+    "id": "jigsaw_stage_500",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🏛️ 미술관 관장",
+    "condition": "스테이지 500 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 500
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 400,
+      "frame": "jigsaw"
+    }
+  },
+  {
+    "id": "jigsaw_stage_700",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "👑 그림 속 여행자",
+    "condition": "스테이지 700 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 700
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 500
+    }
+  },
+  {
+    "id": "jigsaw_stage_1000",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "💎 천 개의 그림",
+    "condition": "스테이지 1000 클리어",
+    "progressConfig": {
+      "source": "jigsaw_stage",
+      "target": 1000
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 500,
+      "avatar": "43"
+    }
+  },
+  {
+    "id": "jigsaw_stars_10",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "⭐ 반짝 별 하나둘",
+    "condition": "별 10개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 10
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 10
+    }
+  },
+  {
+    "id": "jigsaw_stars_30",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🌟 별 모으기",
+    "condition": "별 30개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 30
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 25
+    }
+  },
+  {
+    "id": "jigsaw_stars_75",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "✨ 별빛 수집가",
+    "condition": "별 75개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 75
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 50
+    }
+  },
+  {
+    "id": "jigsaw_stars_150",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "💫 은하 산책",
+    "condition": "별 150개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 150
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 75
+    }
+  },
+  {
+    "id": "jigsaw_stars_300",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🌠 별똥별 사냥꾼",
+    "condition": "별 300개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 300
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 100
+    }
+  },
+  {
+    "id": "jigsaw_stars_600",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🌌 별자리 장인",
+    "condition": "별 600개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 600
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 200
+    }
+  },
+  {
+    "id": "jigsaw_stars_1000",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🪐 행성의 주인",
+    "condition": "별 1000개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 1000
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 300
+    }
+  },
+  {
+    "id": "jigsaw_stars_1500",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "☀️ 태양보다 밝게",
+    "condition": "별 1500개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 1500
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 400
+    }
+  },
+  {
+    "id": "jigsaw_stars_3000",
+    "type": "STAGE",
+    "game": "jigsaw",
+    "title": "🌞 별들의 왕",
+    "condition": "별 3000개 모으기",
+    "progressConfig": {
+      "source": "jigsaw_stars",
+      "target": 3000
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 500
+    }
+  }
+]

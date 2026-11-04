@@ -6,12 +6,13 @@ import crossumChallenges from './crossum-challenges.json';
 import arrowChallenges from './arrow-challenges.json';
 import { ARROW_MAX_STAGE } from '../features/arrow-puzzle/data/limits';
 import dailyChallenges from './daily-challenges.json';
+import jigsawChallenges from './jigsaw-challenges.json';
 
 export type ChallengeType = 'STAGE' | 'TIME_ATTACK';
 
-export type GameKey = 'sudoku' | 'word-sort' | 'queens' | 'snapspot' | 'crossum' | 'arrow' | 'daily';
+export type GameKey = 'sudoku' | 'word-sort' | 'queens' | 'snapspot' | 'crossum' | 'arrow' | 'jigsaw' | 'daily';
 
-export type ProgressSource = 'regular_stage' | 'beginner_stage' | 'time_attack' | 'word_sort_stage' | 'word_sort_hard_stage' | 'queens_stage' | 'snapspot_stage' | 'crossum_stage' | 'arrow_stage' | 'daily_month';
+export type ProgressSource = 'regular_stage' | 'beginner_stage' | 'time_attack' | 'word_sort_stage' | 'word_sort_hard_stage' | 'queens_stage' | 'snapspot_stage' | 'crossum_stage' | 'arrow_stage' | 'jigsaw_stage' | 'jigsaw_stars' | 'daily_month';
 
 export interface ChallengeProgressConfig {
     source: ProgressSource;
@@ -52,6 +53,7 @@ export const ARROW_CHALLENGES: Challenge[] = (arrowChallenges as Challenge[]).fi
     (c) => (c.progressConfig?.target ?? 0) <= ARROW_MAX_STAGE
 );
 export const DAILY_CHALLENGES: Challenge[] = dailyChallenges as Challenge[];
+export const JIGSAW_CHALLENGES: Challenge[] = jigsawChallenges as Challenge[];
 
 /** 게임별 도전과제 목록 — 게임 추가 시 여기에 등록 */
 export const ALL_CHALLENGES: Record<GameKey, Challenge[]> = {
@@ -61,6 +63,7 @@ export const ALL_CHALLENGES: Record<GameKey, Challenge[]> = {
     snapspot: SNAPSPOT_CHALLENGES,
     crossum: CROSSUM_CHALLENGES,
     arrow: ARROW_CHALLENGES,
+    jigsaw: JIGSAW_CHALLENGES,
     daily: DAILY_CHALLENGES,
 };
 

@@ -24,6 +24,7 @@ import CrossMathGame from './features/cross-math/components/CrossMathGame';
 import RoyalMatchGame from './features/royal-match/components/RoyalMatchGame';
 import JewelKingdomGame from './features/jewel-kingdom/ui/JewelKingdomGame';
 import GardenMap from './features/garden/components/GardenMap';
+import JigsawGame from './features/jigsaw/components/JigsawGame';
 import DailyPuzzleCalendar from './features/daily/components/DailyPuzzleCalendar';
 import DailyPlay from './features/daily/components/DailyPlay';
 
@@ -161,6 +162,7 @@ const AppContent: React.FC = () => {
           {window.location.hostname === 'localhost' && (
             <Route path="/garden" element={<GardenMap />} />
           )}
+          <Route path="/jigsaw" element={<JigsawGame />} />
           {window.location.hostname === 'localhost' && (
             <Route path="/arrow-level-editor" element={<ArrowLevelEditor />} />
           )}

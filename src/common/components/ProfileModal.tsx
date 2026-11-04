@@ -15,6 +15,7 @@ import { useQueensProgress } from '../../context/QueensProgressContext';
 import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
 import { useCrossumProgress } from '../../features/cross-math/stage/progress';
 import { useArrowProgress } from '../../features/arrow-puzzle/hooks/useArrowProgress';
+import { useJigsawProgress } from '../../features/jigsaw/hooks/useJigsawProgress';
 import { useDailyPuzzle } from '../../context/DailyPuzzleContext';
 
 interface ProfileModalProps {
@@ -30,8 +31,8 @@ interface ProfileModalProps {
 // 1-40 local avatar IDs (코인으로 해제 가능)
 const AVATAR_SEEDS = Array.from({ length: 40 }, (_, i) => String(i + 1));
 // 41~ 도전과제 보상 전용 아바타. 획득하기 전에는 목록에 나타나지 않는다.
-const REWARD_AVATAR_SEEDS = ['41', '42'];
-const MAX_AVATAR_ID = 42;
+const REWARD_AVATAR_SEEDS = ['41', '42', '43'];
+const MAX_AVATAR_ID = 43;
 
 export const getAvatarUrl = (seed: string) => {
     if (seed.startsWith('http') || seed.startsWith('/')) return seed;
@@ -51,8 +52,20 @@ const GAME_LABELS: Record<GameKey, string> = {
     snapspot: '스냅스팟',
     crossum: '크로썸',
     arrow: '애로우웨이',
+    jigsaw: 'Tiny Pieces',
     daily: '오늘의 퍼즐',
 };
+
+type RewardItem = { kind: 'avatar' | 'frame' | 'cardBack'; id: string };
+
+/** 도전과제가 주는 아이템 보상(아바타·테두리·카드 뒷면) 목록 */
+const rewardItems = (c: Challenge): RewardItem[] => [
+    ...(c.reward.avatar ? [{ kind: 'avatar' as const, id: c.reward.avatar }] : []),
+    ...(c.reward.frame ? [{ kind: 'frame' as const, id: c.reward.frame }] : []),
+    ...(c.reward.cardBack ? [{ kind: 'cardBack' as const, id: c.reward.cardBack }] : []),
+];
+
+const REWARD_KIND_LABEL: Record<RewardItem['kind'], string> = { avatar: '아바타', frame: '테두리', cardBack: '카드 뒷면' };
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
     uid,
@@ -67,6 +80,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const [nickname, setNickname] = useState(currentNickname);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedPhoto, setSelectedPhoto] = useState<string | null>(currentPhotoURL);
+    /** 도전과제 보상 아이템 미리보기 팝업 */
+    const [rewardPreview, setRewardPreview] = useState<{ challenge: Challenge; item: RewardItem } | null>(null);
     const [unlockedAvatars, setUnlockedAvatars] = useState<string[]>(['1', '2', '3', '4', '5', '6', '7', '8']);
     const [pendingUnlockAvatar, setPendingUnlockAvatar] = useState<string | null>(null);
     const [activeTitle, setActiveTitle] = useState<string | null>(null);
@@ -83,6 +98,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const { snapSpotProgress } = useSnapSpotProgress();
     const { stageProgress: crossumProgress } = useCrossumProgress();
     const { progress: arrowProgress } = useArrowProgress();
+    const { progress: jigsawProgress, stars: jigsawStars } = useJigsawProgress();
     const { clearedDates: dailyClearedDates } = useDailyPuzzle();
 
     /** Returns { current, target } for the challenge's progress bar */
@@ -106,6 +122,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 return { current: Math.min(crossumProgress - 1, target), target };
             case 'arrow_stage':
                 return { current: Math.min(arrowProgress, target), target };
+            case 'jigsaw_stage':
+                return { current: Math.min(jigsawProgress, target), target };
+            case 'jigsaw_stars':
+                return { current: Math.min(jigsawStars, target), target };
             case 'daily_month': {
                 const month = challenge.progressConfig.month ?? '';
                 const count = [...dailyClearedDates].filter(d => d.startsWith(month)).length;
@@ -131,6 +151,31 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
     // 월간 칭호(오늘의 퍼즐)는 달성하기 전에는 목록에 드러나지 않는다. 달이 계속 추가되므로
     // 진행도 없이 달성한 것(수령 대기 포함)만 보여 준다.
+    /** 보상 아이템 그림. 테두리는 지금 내 아바타에 씌운 모습으로 보여준다 */
+    const renderRewardVisual = (item: RewardItem, size: number, withAvatar = true) => {
+        const myAvatar = selectedPhoto || '/assets/profiles/1.png';
+        if (item.kind === 'frame') {
+            const bw = Math.max(2, Math.round(size / 24));
+            return (
+                <div className={frameClass(item.id)} style={{
+                    width: size, height: size, borderRadius: Math.round(size * 0.22),
+                    ...frameStyle(item.id, bw, withAvatar ? '#cbd5e1' : 'rgba(255,255,255,0.06)', undefined, Math.round(size * 0.22)),
+                    overflow: 'hidden', boxSizing: 'border-box',
+                }}>
+                    {withAvatar && <img src={myAvatar} alt="" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/assets/profiles/1.png'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />}
+                </div>
+            );
+        }
+        const src = item.kind === 'avatar' ? getAvatarUrl(item.id) : `/assets/word-sort/${item.id}.webp`;
+        return (
+            <img src={src} alt="" style={{
+                width: size, height: size, objectFit: 'cover', display: 'block',
+                borderRadius: Math.round(size * 0.22),
+                border: '2px solid rgba(255,255,255,0.15)', boxSizing: 'border-box',
+            }} />
+        );
+    };
+
     const visibleChallenges = Object.entries(ALL_CHALLENGES).map(([game, list]) => [
         game,
         game === 'daily' ? list.filter(c => challenges.isChallengeCompleted(c.id) || isReadyToClaim(c)) : list,
@@ -895,6 +940,41 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                 </div>}
                                                             </div>
 
+                                                            {/* Item rewards (avatar / frame / card back) — tap to preview */}
+                                                            {rewardItems(challenge).length > 0 && (
+                                                                <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                                                                    {rewardItems(challenge).map((item) => (
+                                                                        <button
+                                                                            key={item.kind + item.id}
+                                                                            onClick={() => setRewardPreview({ challenge, item })}
+                                                                            title={`${REWARD_KIND_LABEL[item.kind]} 미리보기`}
+                                                                            style={{
+                                                                                position: 'relative', padding: '5px', border: 'none',
+                                                                                background: 'transparent', cursor: 'pointer',
+                                                                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+                                                                            }}
+                                                                        >
+                                                                            <div style={{ filter: completed || cleared ? 'none' : 'brightness(0.85) saturate(0.75)' }}>
+                                                                                {renderRewardVisual(item, 34, false)}
+                                                                            </div>
+                                                                            <span style={{
+                                                                                position: 'absolute', right: '0px', top: '0px',
+                                                                                width: '15px', height: '15px', borderRadius: '50%',
+                                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                                fontSize: '0.55rem',
+                                                                                background: completed ? '#22c55e' : cleared ? '#f59e0b' : '#475569',
+                                                                                border: '1.5px solid #1e293b', color: 'white',
+                                                                            }}>
+                                                                                {completed ? <Check size={9} strokeWidth={4} /> : cleared ? '!' : <Lock size={8} strokeWidth={3} />}
+                                                                            </span>
+                                                                            <span style={{ fontSize: '0.55rem', color: completed ? '#86efac' : cleared ? '#fde047' : '#64748b', fontWeight: 'bold' }}>
+                                                                                {REWARD_KIND_LABEL[item.kind]}
+                                                                            </span>
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+
                                                             {/* Reward box / action */}
                                                             {completed ? (
                                                                 <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', minWidth: '62px' }}>
@@ -974,15 +1054,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                     <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
                                                                         <CoinImg size={10} />코인 +{challenge.reward.coin}
                                                                     </span>
-                                                                    {challenge.reward.avatar && (
-                                                                        <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold' }}>🖼 아바타</span>
-                                                                    )}
-                                                                    {challenge.reward.frame && (
-                                                                        <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold' }}>🔲 테두리</span>
-                                                                    )}
-                                                                    {challenge.reward.cardBack && (
-                                                                        <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold' }}>🃏 카드 뒷면</span>
-                                                                    )}
                                                                     <span style={{ fontSize: '0.58rem', color: '#fbbf24', marginTop: '1px', alignSelf: 'center' }}>보상받기</span>
                                                                 </button>
                                                             ) : (
@@ -1247,6 +1318,58 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             })()}
 
             {/* Custom Unlock Confirmation Modal */}
+            {rewardPreview && (() => {
+                const { challenge: pc, item } = rewardPreview;
+                const done = challenges.isChallengeCompleted(pc.id);
+                const ready = !done && isReadyToClaim(pc);
+                const { current, target } = getProgress(pc);
+                const name = item.kind === 'frame' ? findFrame(item.id).name
+                    : item.kind === 'avatar' ? '전용 아바타' : '전용 카드 뒷면';
+                return (
+                    <div
+                        onClick={() => setRewardPreview(null)}
+                        style={{
+                            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000,
+                        }}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                background: '#3a3c5a', borderRadius: '16px', padding: '1.6rem 1.4rem 1.2rem',
+                                textAlign: 'center', width: '250px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', color: 'white',
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'center', margin: '0.4rem 0 1rem' }}>
+                                {renderRewardVisual(item, 104)}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'bold' }}>
+                                {GAME_LABELS[pc.game]} · {REWARD_KIND_LABEL[item.kind]}
+                            </div>
+                            <div style={{ fontWeight: 800, fontSize: '1.05rem', margin: '4px 0 8px' }}>{name}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+                                {pc.title}
+                                <br />
+                                {pc.condition} 시 획득
+                            </div>
+                            {item.kind === 'frame' && (
+                                <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '6px' }}>지금 내 아바타에 씌운 모습이에요</div>
+                            )}
+                            <div style={{
+                                marginTop: '0.9rem', padding: '0.45rem', borderRadius: '10px', fontSize: '0.78rem', fontWeight: 'bold',
+                                background: done ? 'rgba(34,197,94,0.18)' : ready ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.07)',
+                                color: done ? '#86efac' : ready ? '#fde047' : '#cbd5e1',
+                            }}>
+                                {done ? '획득 완료' : ready ? '보상받기에서 바로 받을 수 있어요' : `진행 ${current} / ${target}`}
+                            </div>
+                            <button
+                                onClick={() => setRewardPreview(null)}
+                                style={{ marginTop: '0.8rem', padding: '0.45rem 1.4rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.85rem' }}
+                            >닫기</button>
+                        </div>
+                    </div>
+                );
+            })()}
             {pendingUnlockAvatar && (
                 <div style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
