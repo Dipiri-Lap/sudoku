@@ -148,6 +148,15 @@ const BASE_STAGES: JigsawStage[] = [
     { id: 141, title: '전통시장 장터', subtitle: '떡볶이 냄새 솔솔', image: '/images/jigsaw/korean-market.webp', rows: 4, cols: 5, tint: '#b5502f' },
     { id: 142, title: '마녀 빗자루 주차장', subtitle: '옥상 주차 중', image: '/images/jigsaw/broom-parking.webp', rows: 4, cols: 5, tint: '#6b3f93' },
     { id: 143, title: '오리 보트 호수', subtitle: '줄지어 따라와요', image: '/images/jigsaw/duck-boat.webp', rows: 4, cols: 4, tint: '#3fb0e0' },
+    { id: 144, title: '다람쥐 나무집', subtitle: '도토리 창고', image: '/images/jigsaw/squirrel-treehouse.webp', rows: 4, cols: 4, tint: '#6fbf5a' },
+    { id: 145, title: '사자 미용실', subtitle: '갈기 손질 중', image: '/images/jigsaw/lion-salon.webp', rows: 4, cols: 4, tint: '#7fd6a8' },
+    { id: 146, title: '찜질방 휴게실', subtitle: '양머리 수건', image: '/images/jigsaw/sauna-jjim.webp', rows: 4, cols: 5, tint: '#e8a45a' },
+    { id: 147, title: '신나는 오락실', subtitle: '한 판 더!', image: '/images/jigsaw/arcade.webp', rows: 5, cols: 6, tint: '#7a3fc0' },
+    { id: 148, title: '과학 실험실', subtitle: '뻥! 폭발 실험', image: '/images/jigsaw/science-lab.webp', rows: 5, cols: 5, tint: '#6fd6a0' },
+    { id: 149, title: '야구장 응원 열기', subtitle: '안타를 쳐라', image: '/images/jigsaw/baseball-stadium.webp', rows: 5, cols: 6, tint: '#4fa840' },
+    { id: 151, title: '이삿날', subtitle: '짐이 산더미', image: '/images/jigsaw/moving-day.webp', rows: 4, cols: 5, tint: '#f08a3a' },
+    { id: 152, title: '전통 혼례식', subtitle: '절 올립니다', image: '/images/jigsaw/hanbok-wedding.webp', rows: 5, cols: 5, tint: '#e8a838' },
+    { id: 153, title: '너구리 라면 포장마차', subtitle: '비 오는 밤 한 그릇', image: '/images/jigsaw/raccoon-ramen.webp', rows: 4, cols: 4, tint: '#1f3566' },
 ];
 
 /** DEV only: `/jigsaw?fake=1000` pads the list with copies of the real stages to test large stage counts. */
