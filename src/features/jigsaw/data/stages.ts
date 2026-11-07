@@ -183,6 +183,15 @@ const BASE_STAGES: JigsawStage[] = [
     { id: 179, title: '소원 등불 축제', subtitle: '하늘로 날려요', image: '/images/jigsaw/lantern-festival.webp', rows: 6, cols: 6, tint: '#1c2a5e' },
     { id: 181, title: '알파카 털실 가게', subtitle: '포근한 목도리', image: '/images/jigsaw/alpaca-yarn-shop.webp', rows: 4, cols: 4, tint: '#c89a68' },
     { id: 182, title: '가을 산사', subtitle: '낙엽 쓰는 아침', image: '/images/jigsaw/temple-autumn.webp', rows: 4, cols: 5, tint: '#d9602f' },
+    { id: 183, title: '바이킹 마을', subtitle: '롱쉽이 도착했어요', image: '/images/jigsaw/viking-village.webp', rows: 5, cols: 5, tint: '#3f9fd8' },
+    { id: 184, title: '길거리 농구', subtitle: '덩크 한 방', image: '/images/jigsaw/street-basketball.webp', rows: 5, cols: 6, tint: '#f09a3a' },
+    { id: 185, title: '국궁장', subtitle: '활시위를 당겨요', image: '/images/jigsaw/archery-range.webp', rows: 5, cols: 6, tint: '#5aa65a' },
+    { id: 186, title: '펫숍', subtitle: '어떤 친구가 좋을까', image: '/images/jigsaw/pet-shop.webp', rows: 5, cols: 5, tint: '#f4c860' },
+    { id: 187, title: '마술쇼', subtitle: '짜잔! 토끼가 나왔어요', image: '/images/jigsaw/magic-show.webp', rows: 5, cols: 6, tint: '#8a1f3a' },
+    { id: 188, title: '과일 가게 골목', subtitle: '싱싱한 제철 과일', image: '/images/jigsaw/fruit-stand.webp', rows: 5, cols: 5, tint: '#e8503a' },
+    { id: 189, title: '벼룩시장', subtitle: '보물 찾기', image: '/images/jigsaw/flea-market.webp', rows: 6, cols: 6, tint: '#e89a3a' },
+    { id: 191, title: '곤충 채집', subtitle: '잠자리채 출동', image: '/images/jigsaw/bug-catching.webp', rows: 4, cols: 5, tint: '#58b848' },
+    { id: 192, title: '서부 마을', subtitle: '보안관 납시오', image: '/images/jigsaw/wild-west-town.webp', rows: 5, cols: 5, tint: '#e8a850' },
 ];
 
 /** DEV only: `/jigsaw?fake=1000` pads the list with copies of the real stages to test large stage counts. */
