@@ -15,8 +15,8 @@ import { generateShapedLevel, generateRegionedLevel } from '../src/features/arro
 import type { LevelData, Direction, PieceData } from '../src/features/arrow-puzzle/data/levels';
 import { SHAPES, buildMask, fitMask, shapeFromGrid } from '../src/features/arrow-puzzle/utils/shapes';
 
-// 301번 이후는 stages.full.json 에만 있다 — STAGES_PATH=src/features/arrow-puzzle/data/stages.full.json 으로 돌린다.
-const STAGES_PATH = process.env.STAGES_PATH ?? 'src/features/arrow-puzzle/data/stages.json';
+// 원본은 stages.full.json. 돌린 뒤 node scripts/split-arrow-stages.mjs 로 앱용 묶음을 다시 만든다.
+const STAGES_PATH = process.env.STAGES_PATH ?? 'src/features/arrow-puzzle/data/stages.full.json';
 
 // 쉐이프는 이웃보다 살짝 어렵게.
 const SHAPE_MULT = 1.25;
@@ -24,7 +24,10 @@ const SHAPE_MULT = 1.25;
 // 자리 → 동물. 난이도가 오를수록 판도 커진다. 작은 판에서도 윤곽이 살아 있는 동물(펭귄·토끼·강아지)을 앞에,
 // 가시·눈 같은 잔 디테일이 있는 동물(고슴도치·판다)을 큰 판이 나오는 뒤쪽에 둔다.
 // sides: 그 자리만 쓸 판 크기(생략하면 기본 SIDES). counts: 피스 수 후보(생략하면 기본).
-// mult: 그 자리만 쓸 난이도 배율(생략하면 SHAPE_MULT). 하이라이트 자리(5, 15, 25...)는 곡선의 1.6배를 노린다.
+// mult: 그 자리만 쓸 난이도 배율(생략하면 SHAPE_MULT).
+// 자리는 10스테이지마다(10, 20, ... 900)로 통일했다. 한때 100번 이후엔 하이라이트 자리(105, 115...)에도 모양을 넣어
+//   5스테이지마다였는데, 순서를 유지한 채 10 간격으로 뒤로 밀었고 비게 된 끝자리 5 자리는
+//   scripts/regen-arrow-highlight-rects.ts 로 사각 하이라이트 판(곡선의 1.6배)을 다시 채웠다.
 // split: 모양을 두 영역(부분 마스크 + 나머지)으로 나눠 영역별로 화살을 따로 만든다 — 피스가 경계를 넘지 않아
 //   경계가 또렷하게 보이고, 영역마다 다른 색을 쓴다. crustKey 는 emoji-masks.json 의 부분 마스크 키.
 //   minComponent: 지정하면 "영역마다 가장 큰 덩어리만 남김" 대신, 이 칸 수 미만의 낱조각만 반대 영역으로 넘긴다
@@ -44,11 +47,11 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   { level: 70, shape: '여우', sides: [24, 26] },
   { level: 80, shape: '고슴도치', sides: [26] },
   // 하이라이트 자리에 오각별 — 꼭짓점이 또렷하게 남도록 24칸 이상에서 만든다.
-  { level: 105, shape: '오각별', sides: [24, 26, 28], counts: [12, 14, 16, 18, 20, 24, 28, 32], mult: 1.6 },
+  { level: 110, shape: '오각별', sides: [24, 26, 28], counts: [12, 14, 16, 18, 20, 24, 28, 32] },
   // 위쪽 가운데가 파이고 아래가 뾰족한 하트 — 20칸 이상에서 윤곽이 또렷하다.
   // 하이라이트 자리에 햄버거 — 이미지 색에 맞춰 초록 양상추, 빨간 토마토·보라 양파, 노란 치즈, 갈색 패티, 주황 빵(기본)을 층별 영역으로 나눈다.
   {
-    level: 275, shape: '햄버거', sides: [30, 32], counts: [56, 66, 76, 88], mult: 1.6,
+    level: 450, shape: '햄버거', sides: [30, 32], counts: [56, 66, 76, 88],
     multi: {
       parts: [
         { key: 'burger_lettuce', palette: ['#22c55e', '#16a34a', '#4ade80'] },
@@ -61,7 +64,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 선물상자 — 이미지 색에 맞춰 빨간 리본·나비 매듭, 크림색 상자(기본)를 영역으로 나눈다.
   {
-    level: 280, shape: '선물상자', sides: [30, 32], counts: [56, 66, 76, 88],
+    level: 460, shape: '선물상자', sides: [30, 32], counts: [56, 66, 76, 88],
     multi: {
       parts: [{ key: 'gift_ribbon', palette: ['#ef4444', '#dc2626', '#b91c1c'] }],
       restPalette: ['#fef3c7', '#fde68a', '#fcd9b6', '#f5e6d3'],
@@ -69,7 +72,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 등불 — 이미지 색에 맞춰 노랑·주황으로 빛나는 유리와 청동색 틀(기본)을 영역으로 나눈다.
   {
-    level: 285, shape: '등불', sides: [32, 34], counts: [80, 96, 112, 130], mult: 1.6,
+    level: 470, shape: '등불', sides: [32, 34], counts: [80, 96, 112, 130],
     multi: {
       parts: [{ key: 'lantern_glow', palette: ['#facc15', '#fbbf24', '#fde047', '#f59e0b'] }],
       restPalette: ['#b45309', '#92400e', '#d97706', '#78350f'],
@@ -77,17 +80,17 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 원숭이 — 원본이 흑백이라 검은 털·눈·윤곽(짙은 회색 화살)과 흰 얼굴·배(흰색 화살)를 영역으로 나눠 흑백 무늬를 살린다.
   {
-    level: 290, shape: '원숭이', sides: [30, 32], counts: [56, 66, 76, 88],
+    level: 480, shape: '원숭이', sides: [30, 32], counts: [56, 66, 76, 88],
     split: { partKey: 'monkey_dark', partPalette: ['#475569', '#334155', '#64748b'], restPalette: ['#f8fafc', '#e2e8f0'], minComponent: 3 },
   },
   // 하이라이트 자리에 기타 — 검은 윤곽·줄받침·사운드홀(회색 화살)과 안쪽 흰 몸통(흰색 화살)을 영역으로 나눠 아이콘의 무늬를 살린다.
   {
-    level: 295, shape: '기타', sides: [32, 34], counts: [100, 115, 130, 150], mult: 1.6,
+    level: 490, shape: '기타', sides: [32, 34], counts: [100, 115, 130, 150],
     split: { partKey: 'guitar_line', partPalette: ['#475569', '#334155', '#64748b'], restPalette: ['#f8fafc', '#e2e8f0'], minComponent: 3 },
   },
   // 장난감 자동차 — 이미지 색에 맞춰 파란 창문, 노란 전조등, 회색 바퀴·범퍼, 빨간 차체(기본)를 영역으로 나눈다.
   {
-    level: 300, shape: '장난감 자동차', sides: [30, 32], counts: [46, 56, 66, 76],
+    level: 500, shape: '장난감 자동차', sides: [30, 32], counts: [46, 56, 66, 76],
     multi: {
       parts: [
         { key: 'toycar_lights', palette: ['#facc15', '#fbbf24'] },
@@ -100,7 +103,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   // 하이라이트 자리에 카메라 — 이미지 색에 맞춰 갈색 가죽 끈, 보라·파랑 렌즈 유리, 은색·회색 본체(기본)를 영역으로 나눈다.
   // (처음 275번 → 햄버거에 밀려 280번 → 선물상자에 밀려 285번 → 등불에 밀려 290번 → 원숭이에 밀려 295번 → 기타에 밀려 300번 → 자동차에 밀려 305번으로 옮겼다.)
   {
-    level: 305, shape: '카메라', sides: [32, 34], counts: [100, 115, 130, 150], mult: 1.6, minCells: 14,
+    level: 510, shape: '카메라', sides: [32, 34], counts: [100, 115, 130, 150], minCells: 14,
     multi: {
       parts: [
         { key: 'camera_strap', palette: ['#b45309', '#92400e', '#d97706'] },
@@ -111,7 +114,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 달리는 코기 — 이미지 색에 맞춰 빨간 목도리, 흰 털(얼굴·배·발·꼬리 끝), 주황 털(기본)을 영역으로 나눈다.
   {
-    level: 310, shape: '달리는 코기', sides: [30, 32], counts: [56, 66, 76, 88],
+    level: 520, shape: '달리는 코기', sides: [30, 32], counts: [56, 66, 76, 88],
     multi: {
       parts: [
         { key: 'corgi_run_scarf', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -122,7 +125,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 렌치와 드라이버 — 이미지 색에 맞춰 빨간 손잡이와 은색 금속(기본)을 영역으로 나눈다.
   {
-    level: 315, shape: '공구', sides: [32, 34], counts: [100, 115, 130, 150], mult: 1.6,
+    level: 530, shape: '공구', sides: [32, 34], counts: [100, 115, 130, 150],
     multi: {
       parts: [{ key: 'tools_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] }],
       restPalette: ['#94a3b8', '#64748b', '#cbd5e1', '#475569'],
@@ -130,7 +133,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 전동 드릴 — 이미지 색에 맞춰 노란 몸체와 검은·회색 부품(기본)을 영역으로 나눈다.
   {
-    level: 320, shape: '전동 드릴', sides: [32, 34], counts: [100, 115, 130, 150],
+    level: 540, shape: '전동 드릴', sides: [32, 34], counts: [100, 115, 130, 150],
     multi: {
       parts: [{ key: 'drill_yellow', palette: ['#facc15', '#fbbf24', '#f59e0b'] }],
       restPalette: ['#334155', '#475569', '#1e293b', '#64748b'],
@@ -138,7 +141,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 비행기 — 이미지 색에 맞춰 파란 날개 끝·꼬리·조종석과 흰 동체(기본)를 영역으로 나눈다.
   {
-    level: 325, shape: '비행기', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    level: 550, shape: '비행기', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240],
     multi: {
       parts: [{ key: 'plane_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8'] }],
       restPalette: ['#f8fafc', '#e2e8f0', '#fb923c', '#cbd5e1'],
@@ -146,7 +149,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 스쿨버스 — 이미지 색에 맞춰 파란 유리, 노란 차체, 검은 범퍼·바퀴(기본)를 영역으로 나눈다.
   {
-    level: 330, shape: '스쿨버스', sides: [32, 34], counts: [100, 115, 130, 150],
+    level: 560, shape: '스쿨버스', sides: [32, 34], counts: [100, 115, 130, 150],
     multi: {
       parts: [
         { key: 'bus_blue', palette: ['#2563eb', '#3b82f6', '#60a5fa'] },
@@ -157,7 +160,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 헬리콥터 — 이미지 색에 맞춰 파란 조종석·꼬리, 빨간 꼬리 날개·줄무늬, 흰 동체와 회색 로터(기본)를 영역으로 나눈다.
   {
-    level: 335, shape: '헬리콥터', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    level: 570, shape: '헬리콥터', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240],
     multi: {
       parts: [
         { key: 'heli_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -168,7 +171,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 열기구 — 이미지 색에 맞춰 빨강·파랑·초록·노랑 띠와 주황·흰 띠, 갈색 바구니(기본)를 영역으로 나눈다.
   {
-    level: 340, shape: '열기구', sides: [30, 32, 34], counts: [50, 60, 70, 80, 95, 110],
+    level: 580, shape: '열기구', sides: [30, 32, 34], counts: [50, 60, 70, 80, 95, 110],
     multi: {
       parts: [
         { key: 'balloon_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -181,7 +184,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 돛단배 — 이미지 색에 맞춰 파란 물결·돛 띠, 주황 돛대·선체 테두리, 흰 돛과 선체(기본)를 영역으로 나눈다.
   {
-    level: 345, shape: '돛단배', sides: [34, 36, 38], counts: [120, 140, 160, 185, 210], mult: 1.6,
+    level: 590, shape: '돛단배', sides: [34, 36, 38], counts: [120, 140, 160, 185, 210],
     multi: {
       parts: [
         { key: 'boat_wood', palette: ['#f59e0b', '#d97706', '#b45309'] },
@@ -192,7 +195,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 여행 가방 — 이미지 색에 맞춰 파란 리본·스티커, 밀짚모자, 노란 몸통, 검은 손잡이·바퀴(기본)를 영역으로 나눈다.
   {
-    level: 350, shape: '여행 가방', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
+    level: 600, shape: '여행 가방', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
     multi: {
       parts: [
         { key: 'suitcase_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8'] },
@@ -204,7 +207,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 골프백 — 이미지 색에 맞춰 남색 가방, 초록 잔디, 금색 지퍼, 흰 가방 면·공(기본)을 영역으로 나눈다.
   {
-    level: 355, shape: '골프백', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    level: 610, shape: '골프백', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240],
     multi: {
       parts: [
         { key: 'golf_grass', palette: ['#22c55e', '#16a34a', '#4ade80'] },
@@ -216,7 +219,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 몬스테라 화분 — 이미지 색에 맞춰 초록 잎과 흰 화분(기본)을 영역으로 나눈다.
   {
-    level: 360, shape: '몬스테라 화분', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
+    level: 620, shape: '몬스테라 화분', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
     multi: {
       parts: [{ key: 'plant_leaf', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] }],
       restPalette: ['#f8fafc', '#e2e8f0', '#cbd5e1', '#94a3b8'],
@@ -224,7 +227,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 지구본 — 이미지 색에 맞춰 초록 육지, 금색 받침, 흰 구름, 파란 바다(기본)를 영역으로 나눈다.
   {
-    level: 365, shape: '지구본', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    level: 630, shape: '지구본', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240],
     multi: {
       parts: [
         { key: 'globe_cloud', palette: ['#f8fafc', '#e2e8f0', '#ffffff'] },
@@ -236,7 +239,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 잠자는 달 — 이미지 색에 맞춰 검은 윤곽선·눈, 흰 하이라이트, 주황 그림자, 노란 몸통(기본)을 영역으로 나눈다.
   {
-    level: 370, shape: '잠자는 달', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
+    level: 640, shape: '잠자는 달', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
     multi: {
       parts: [
         { key: 'moon_dark', palette: ['#334155', '#1e293b', '#475569'] },
@@ -248,7 +251,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 팔레트와 붓 — 이미지 색에 맞춰 빨강·노랑·초록·파랑 물감과 나무색 팔레트(기본)를 영역으로 나눈다.
   {
-    level: 375, shape: '팔레트와 붓', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240], mult: 1.6,
+    level: 650, shape: '팔레트와 붓', sides: [36, 38, 40], counts: [150, 170, 190, 215, 240],
     multi: {
       parts: [
         { key: 'palette_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -261,7 +264,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 망원경 — 이미지 색에 맞춰 파란 렌즈, 금색 테, 갈색 다리, 은색 몸통(기본)을 영역으로 나눈다.
   {
-    level: 380, shape: '망원경', sides: [34, 36, 38], counts: [120, 140, 160, 185, 210],
+    level: 660, shape: '망원경', sides: [34, 36, 38], counts: [120, 140, 160, 185, 210],
     multi: {
       parts: [
         { key: 'scope_lens', palette: ['#2563eb', '#1d4ed8', '#3b82f6'] },
@@ -273,7 +276,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 요리사 모자 — 이미지 색에 맞춰 빨간 스카프, 회색 포크·뒤집개, 나무 손잡이, 흰 모자(기본)를 영역으로 나눈다.
   {
-    level: 385, shape: '요리사 모자', sides: [30, 32, 34], counts: [70, 85, 100, 115, 130], mult: 1.6,
+    level: 670, shape: '요리사 모자', sides: [30, 32, 34], counts: [70, 85, 100, 115, 130],
     multi: {
       parts: [
         { key: 'chef_scarf', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -285,7 +288,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 로봇 — 이미지 색에 맞춰 검은 화면·관절, 하늘색 눈·귀·안테나, 흰 몸통(기본)을 영역으로 나눈다.
   {
-    level: 390, shape: '로봇', sides: [30, 32, 34], counts: [80, 95, 110, 125, 140],
+    level: 680, shape: '로봇', sides: [30, 32, 34], counts: [80, 95, 110, 125, 140],
     multi: {
       parts: [
         { key: 'robot_dark', palette: ['#1e293b', '#334155', '#0f172a'] },
@@ -296,7 +299,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 물약 병 — 이미지 색에 맞춰 파란 물약, 코르크·끈·태그의 황토색, 유리(기본)를 영역으로 나눈다.
   {
-    level: 395, shape: '물약 병', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6,
+    level: 690, shape: '물약 병', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190],
     multi: {
       parts: [
         { key: 'potion_tan', palette: ['#d6a55a', '#b45309', '#e7c07a', '#c08a3e'] },
@@ -307,7 +310,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 축음기 — 이미지 색에 맞춰 금색 나팔, 검은 레코드판, 빨간 라벨, 갈색 나무 상자(기본)를 영역으로 나눈다.
   {
-    level: 400, shape: '축음기', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
+    level: 700, shape: '축음기', sides: [32, 34, 36], counts: [100, 115, 130, 150, 170],
     multi: {
       parts: [
         { key: 'gramo_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -319,7 +322,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 라멘 — 이미지 색에 맞춰 빨간 그릇, 검은 김, 초록 파, 주황 노른자, 크림색 면(기본)을 영역으로 나눈다.
   {
-    level: 405, shape: '라멘', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6,
+    level: 710, shape: '라멘', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190],
     multi: {
       parts: [
         { key: 'ramen_nori', palette: ['#1e293b', '#14532d', '#334155'] },
@@ -332,7 +335,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 포도 — 알 17개를 각각 별도 영역으로 두어(화살이 알 경계를 넘지 않는다) 한 알 한 알이 또렷하게 보이게 한다. 잎 2장·줄기도 따로.
   {
-    level: 410, shape: '포도', sides: [36, 38, 40], counts: [160, 190, 220, 250, 280], minCells: 3,
+    level: 720, shape: '포도', sides: [36, 38, 40], counts: [160, 190, 220, 250, 280], minCells: 3,
     multi: {
       parts: [
         { key: 'grape_1', palette: ['#7c3aed', '#8b5cf6'] },
@@ -362,7 +365,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   // 하이라이트 자리에 사과 — 세 영역(1 꼭지·이파리, 2 사과 몸통, 3 오른쪽 아래 사과 조각)으로 나눈다. 영역마다 화살을 따로 만들어
   // 화살이 영역 경계를 넘지 않으므로 세 덩어리의 구분이 또렷하다.
   {
-    level: 415, shape: '사과', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], mult: 1.6, minCells: 3,
+    level: 730, shape: '사과', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], minCells: 3,
     multi: {
       parts: [
         { key: 'apple_top', palette: ['#16a34a', '#22c55e', '#15803d', '#92400e'] },
@@ -373,7 +376,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 딸기 — 세 영역(1 꼭지 잎, 2 뒤쪽 온전한 딸기, 3 앞쪽 반으로 자른 단면)으로 나눈다. 영역마다 화살을 따로 만들어 경계를 넘지 않는다.
   {
-    level: 420, shape: '딸기 단면', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], minCells: 3,
+    level: 740, shape: '딸기 단면', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], minCells: 3,
     multi: {
       parts: [
         { key: 'berry_leaf', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] },
@@ -384,7 +387,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 파인애플 — 세 영역(1 초록 잎, 2 파인애플 몸통, 3 잘라 놓은 노란 조각)으로 나눈다. 영역마다 화살을 따로 만들어 경계를 넘지 않는다.
   {
-    level: 425, shape: '파인애플 단면', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
+    level: 750, shape: '파인애플 단면', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
     multi: {
       parts: [
         { key: 'pine_crown', palette: ['#16a34a', '#22c55e', '#15803d', '#4ade80'] },
@@ -395,7 +398,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 구름 위에서 자는 고양이 — 세 영역(주황 털, 흰 털(기본), 구름)으로 나눈다. 영역마다 화살을 따로 만들어 경계를 넘지 않는다.
   {
-    level: 430, shape: '구름 위 고양이', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
+    level: 760, shape: '구름 위 고양이', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
     multi: {
       parts: [
         { key: 'catcloud_orange', palette: ['#f97316', '#fb923c', '#ea580c', '#fdba74'] },
@@ -406,7 +409,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 비행기 탄 코기 — 파란 기체·구름, 빨간 스카프·프로펠러, 코기 털과 크림색 날개(기본)를 영역으로 나눈다.
   {
-    level: 435, shape: '조종사 코기', sides: [36, 38, 40], counts: [130, 150, 170, 190, 210], mult: 1.6, minCells: 3,
+    level: 770, shape: '조종사 코기', sides: [36, 38, 40], counts: [130, 150, 170, 190, 210], minCells: 3,
     multi: {
       parts: [
         { key: 'pilot_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -417,7 +420,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 알 속 아기 용 — 파란 비늘·날개·알 무늬, 금색 뿔·알 무늬, 흰 털과 알 껍질(기본)을 영역으로 나눈다.
   {
-    level: 440, shape: '알 속 아기 용', sides: [36, 38, 40], counts: [120, 140, 160, 180, 200], minCells: 3,
+    level: 780, shape: '알 속 아기 용', sides: [36, 38, 40], counts: [120, 140, 160, 180, 200], minCells: 3,
     multi: {
       parts: [
         { key: 'babydragon_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
@@ -428,7 +431,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 꽃사슴 — 갈색 뿔·발굽, 초록 잎, 주황 털과 흰 꽃·꼬리(기본)를 영역으로 나눈다.
   {
-    level: 445, shape: '꽃사슴', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], minCells: 3,
+    level: 790, shape: '꽃사슴', sides: [34, 36, 38], counts: [100, 120, 140, 160, 180], minCells: 3,
     multi: {
       parts: [
         { key: 'fawn_brown', palette: ['#78350f', '#92400e', '#a16207'] },
@@ -439,7 +442,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 모험가 배낭 — 초록 천, 갈색 가죽, 금색 장식, 크림색 두루마리(기본)를 영역으로 나눈다.
   {
-    level: 450, shape: '모험가 배낭', sides: [36, 38, 40], counts: [140, 160, 180, 200, 220], mult: 1.6, minCells: 3,
+    level: 800, shape: '모험가 배낭', sides: [36, 38, 40], counts: [140, 160, 180, 200, 220], mult: 1.6, minCells: 3,
     multi: {
       parts: [
         { key: 'pack_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
@@ -451,7 +454,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 별밤 고래 — 흰 배·구름, 노란 달·별, 남색 몸통(기본)을 영역으로 나눈다.
   {
-    level: 455, shape: '별밤 고래', sides: [36, 38, 40], counts: [120, 140, 160, 180, 200], mult: 1.6, minCells: 3,
+    level: 810, shape: '별밤 고래', sides: [36, 38, 40], counts: [120, 140, 160, 180, 200], minCells: 3,
     multi: {
       parts: [
         { key: 'starwhale_gold', palette: ['#facc15', '#fbbf24', '#fde047'] },
@@ -462,7 +465,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 수정 테라리움 — 초록 식물, 파란 수정, 금색 틀, 흙·돌·유리(기본)를 영역으로 나눈다.
   {
-    level: 460, shape: '수정 테라리움', sides: [26, 28, 30], counts: [50, 60, 70, 85, 100], minCells: 3,
+    level: 820, shape: '수정 테라리움', sides: [26, 28, 30], counts: [50, 60, 70, 85, 100], minCells: 3,
     multi: {
       parts: [
         { key: 'terrarium_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
@@ -474,7 +477,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 선원 펭귄 — 금색 키, 남색 몸, 파란 파도·띠, 흰 배·모자(기본)를 영역으로 나눈다.
   {
-    level: 465, shape: '선원 펭귄', sides: [28, 30, 32], counts: [70, 85, 100, 115, 130], mult: 1.6, minCells: 3,
+    level: 830, shape: '선원 펭귄', sides: [28, 30, 32], counts: [70, 85, 100, 115, 130], minCells: 3,
     multi: {
       parts: [
         { key: 'sailorpeng_gold', palette: ['#f59e0b', '#fbbf24', '#d97706'] },
@@ -486,7 +489,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 동화책 마을 — 초록 숲, 빨간 지붕·리본, 파란 시냇물·폭포, 책·집·돌의 크림색(기본)을 영역으로 나눈다.
   {
-    level: 470, shape: '동화책 마을', sides: [30, 32, 34], counts: [90, 105, 120, 140, 160], minCells: 3,
+    level: 840, shape: '동화책 마을', sides: [30, 32, 34], counts: [90, 105, 120, 140, 160], minCells: 3,
     multi: {
       parts: [
         { key: 'storybook_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -498,7 +501,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 골프 티와 깃발 — 초록 잔디, 빨간 깃발, 나무 티, 흰 공(기본)을 영역으로 나눈다.
   {
-    level: 475, shape: '골프 티와 깃발', sides: [34, 36, 38], counts: [120, 140, 160, 180, 200], mult: 1.6, minCells: 3,
+    level: 850, shape: '골프 티와 깃발', sides: [34, 36, 38], counts: [120, 140, 160, 180, 200], minCells: 3,
     multi: {
       parts: [
         { key: 'golftee_flag', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -510,7 +513,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 권투 글러브 — 빨간 가죽, 노란 폭발 불꽃, 검은 손목 밴드, 흰 띠(기본)를 영역으로 나눈다.
   {
-    level: 480, shape: '권투 글러브', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
+    level: 860, shape: '권투 글러브', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
     multi: {
       parts: [
         { key: 'gloves_black', palette: ['#1e293b', '#334155', '#0f172a'] },
@@ -522,7 +525,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 야구공과 방망이 — 빨간 모자챙·실밥, 파란 별·물결, 나무 손잡이, 흰 공(기본)을 영역으로 나눈다.
   {
-    level: 485, shape: '야구공과 방망이', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
+    level: 870, shape: '야구공과 방망이', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
     multi: {
       parts: [
         { key: 'baseball_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -534,7 +537,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 볼링 스트라이크 — 빨간 공, 노란 폭발·별, 흰 핀(기본)을 영역으로 나눈다.
   {
-    level: 490, shape: '볼링 스트라이크', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
+    level: 880, shape: '볼링 스트라이크', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
     multi: {
       parts: [
         { key: 'bowling_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -545,7 +548,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 테니스 공과 라켓 — 라임색 공·물결, 파란 라켓 틀, 흰 줄(기본)을 영역으로 나눈다.
   {
-    level: 495, shape: '테니스 공과 라켓', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
+    level: 890, shape: '테니스 공과 라켓', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], minCells: 3,
     multi: {
       parts: [
         { key: 'tennis_blue', palette: ['#2563eb', '#3b82f6', '#1d4ed8', '#60a5fa'] },
@@ -556,7 +559,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리(500) 탁구 라켓과 불꽃 — 빨간 라켓, 검은 라켓, 주황 불꽃, 흰 공·나무 손잡이(기본)를 영역으로 나눈다.
   {
-    level: 500, shape: '탁구 라켓과 불꽃', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
+    level: 900, shape: '탁구 라켓과 불꽃', sides: [34, 36, 38], counts: [110, 130, 150, 170, 190], mult: 1.6, minCells: 3,
     multi: {
       parts: [
         { key: 'pingpong_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -568,7 +571,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // UFO — 이미지 색에 맞춰 파란 돔, 주황 창, 하늘색 빛줄기, 회색 접시(기본)를 영역으로 나눈다. 주위에 떠 있는 별과 구슬은 제외했다.
   {
-    level: 270, shape: 'UFO', sides: [30, 32], counts: [56, 66, 76, 88],
+    level: 440, shape: 'UFO', sides: [30, 32], counts: [56, 66, 76, 88],
     multi: {
       parts: [
         { key: 'ufo_lights', palette: ['#f59e0b', '#f97316', '#fbbf24'] },
@@ -580,19 +583,19 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 악어 — 원본이 흑백이라 검은 비늘·눈·윤곽(짙은 회색 화살)과 흰 주둥이·배(흰색 화살)를 영역으로 나눈다.
   {
-    level: 265, shape: '악어', sides: [30, 32], counts: [56, 66, 76, 88], mult: 1.6,
+    level: 430, shape: '악어', sides: [30, 32], counts: [56, 66, 76, 88],
     split: { partKey: 'croc_dark', partPalette: ['#475569', '#334155', '#64748b'], restPalette: ['#f8fafc', '#e2e8f0'], minComponent: 3 },
   },
   // 앵무새 — 원본이 흑백이라 검은 깃털·눈·윤곽(짙은 회색 화살)과 흰 무늬(흰색 화살)를 영역으로 나눠 흑백 무늬를 살린다.
   {
-    level: 260, shape: '앵무새', sides: [30, 32], counts: [46, 56, 66, 76],
+    level: 420, shape: '앵무새', sides: [30, 32], counts: [46, 56, 66, 76],
     split: { partKey: 'parrot_dark', partPalette: ['#475569', '#334155', '#64748b'], restPalette: ['#f8fafc', '#e2e8f0'], minComponent: 3 },
   },
   // 눈사람 — 이미지 색에 맞춰 빨간 모자·목도리, 갈색 나뭇가지 팔, 흰 눈사람(기본)을 영역으로 나눈다. 주위에 떠 있는 눈덩이는 제외했다.
   // (250번에 있던 큰 개구리는 이 슬롯으로 대체되었다. 개구리를 다시 넣으려면 shapes.ts 의 '개구리 그림' 모양으로 아래 옛 설정을 다른 번호에 쓰면 된다.
   //  옛 설정: level: 250, shape: '개구리 그림', sides: [32, 34], counts: [50, 60, 72, 86, 100, 120], palette: ['#22c55e', '#16a34a', '#4ade80', '#15803d'])
   {
-    level: 250, shape: '눈사람', sides: [30, 32], counts: [56, 66, 76, 88],
+    level: 400, shape: '눈사람', sides: [30, 32], counts: [56, 66, 76, 88],
     multi: {
       parts: [
         { key: 'snowman_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -614,7 +617,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   //       },
   //     },
   {
-    level: 255, shape: '보물상자', sides: [30, 32], counts: [56, 66, 76, 88], mult: 1.6,
+    level: 410, shape: '보물상자', sides: [30, 32], counts: [56, 66, 76, 88],
     multi: {
       parts: [{ key: 'chest_gold', palette: ['#facc15', '#fbbf24', '#f59e0b', '#eab308'] }],
       restPalette: ['#92400e', '#78350f', '#b45309', '#a16207'],
@@ -622,7 +625,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 야자수 섬 — 이미지 색에 맞춰 파란 바다, 갈색 줄기, 노란 모래, 초록 잎(기본)을 영역으로 나눈다.
   {
-    level: 245, shape: '야자수 섬', sides: [30, 32], counts: [56, 66, 76, 88], mult: 1.6,
+    level: 390, shape: '야자수 섬', sides: [30, 32], counts: [56, 66, 76, 88],
     multi: {
       parts: [
         { key: 'palm_island_water', palette: ['#38bdf8', '#0ea5e9', '#7dd3fc'] },
@@ -634,7 +637,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 우주인 — 이미지 색에 맞춰 짙은 남색 헬멧 유리, 파란 장갑·부츠, 빨강·주황 배낭, 흰 우주복(기본)으로 나눈다. 떠 있는 별은 제외했다.
   {
-    level: 240, shape: '우주인', sides: [30, 32], counts: [56, 66, 76, 88],
+    level: 380, shape: '우주인', sides: [30, 32], counts: [56, 66, 76, 88],
     multi: {
       parts: [
         { key: 'astronaut_visor', palette: ['#1e3a8a', '#172554', '#1e40af'] },
@@ -646,7 +649,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 게임패드 — 이미지 색에 맞춰 색색의 버튼(파랑·초록·빨강·노랑), 어두운 회색(십자키·케이블·윤곽), 흰/연보라 몸통(기본)으로 나눈다.
   {
-    level: 235, shape: '게임패드', sides: [30, 32], counts: [46, 56, 66, 76], mult: 1.6,
+    level: 370, shape: '게임패드', sides: [30, 32], counts: [46, 56, 66, 76],
     multi: {
       parts: [
         { key: 'gamepad_buttons', palette: ['#3b82f6', '#22c55e', '#ef4444', '#eab308'] },
@@ -657,7 +660,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 선인장 — 이미지 색에 맞춰 주황 화분, 분홍 꽃, 초록 선인장(기본)을 영역으로 나눈다.
   {
-    level: 230, shape: '선인장', sides: [28, 30, 32], counts: [46, 56, 66, 76],
+    level: 360, shape: '선인장', sides: [28, 30, 32], counts: [46, 56, 66, 76],
     multi: {
       parts: [
         { key: 'cactus_pot', palette: ['#ea580c', '#c2410c', '#f97316'] },
@@ -668,7 +671,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 화려한 왕관 — 이미지 색에 맞춰 빨간 벨벳, 파란 보석, 금색 틀(기본)을 영역으로 나눈다.
   {
-    level: 225, shape: '화려한 왕관', sides: [30, 32], counts: [50, 60, 72, 86], mult: 1.6,
+    level: 350, shape: '화려한 왕관', sides: [30, 32], counts: [50, 60, 72, 86],
     multi: {
       parts: [
         { key: 'royal_crown_red', palette: ['#ef4444', '#dc2626', '#b91c1c'] },
@@ -679,7 +682,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 아기 공룡 — 이미지 색에 맞춰 주황 날개·등 뿔, 크림색 배·뿔·발톱, 초록 몸통(기본)을 영역으로 나눈다.
   {
-    level: 220, shape: '아기 공룡', sides: [30, 32], counts: [46, 56, 66, 76],
+    level: 340, shape: '아기 공룡', sides: [30, 32], counts: [46, 56, 66, 76],
     multi: {
       parts: [
         { key: 'dragon_orange', palette: ['#f97316', '#fb923c', '#f59e0b'] },
@@ -690,7 +693,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 해바라기 — 이미지 색에 맞춰 갈색 씨앗판, 초록 잎, 노랑·주황 꽃잎(기본)을 영역으로 나눈다.
   {
-    level: 215, shape: '해바라기', sides: [30, 32], counts: [50, 60, 72, 86], mult: 1.6,
+    level: 330, shape: '해바라기', sides: [30, 32], counts: [50, 60, 72, 86],
     multi: {
       parts: [
         { key: 'sunflower_disc', palette: ['#78350f', '#92400e', '#a16207'] },
@@ -701,7 +704,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 거북이 — 이미지 색에 맞춰 주황 갈색 등껍질, 연한 크림색 얼굴·배, 청록 몸통·지느러미(기본)를 영역으로 나눈다.
   {
-    level: 210, shape: '거북이', sides: [30, 32], counts: [46, 56, 66, 76],
+    level: 320, shape: '거북이', sides: [30, 32], counts: [46, 56, 66, 76],
     multi: {
       parts: [
         { key: 'turtle_shell', palette: ['#ea580c', '#c2410c', '#f97316', '#b45309'] },
@@ -712,7 +715,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 귀여운 고래 — 이미지 색에 맞춰 흰 배(연한 색 화살)와 파란 몸통(기본)을 영역으로 나눈다. 눈은 빈 칸이다.
   {
-    level: 205, shape: '귀여운 고래', sides: [30, 32], counts: [40, 48, 56, 66], mult: 1.6,
+    level: 310, shape: '귀여운 고래', sides: [30, 32], counts: [40, 48, 56, 66],
     multi: {
       parts: [{ key: 'whale_cute_belly', palette: ['#f8fafc', '#e0f2fe', '#bae6fd'] }],
       restPalette: ['#3b82f6', '#2563eb', '#60a5fa', '#1d4ed8'],
@@ -720,7 +723,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 마법사 모자 — 이미지 색에 맞춰 보라색 모자(기본), 주황 띠, 띠 위의 노란 별을 영역으로 나눈다. 모자 옆의 반짝이는 별은 제외했다.
   {
-    level: 200, shape: '마법사 모자', sides: [30, 32], counts: [40, 48, 56, 66],
+    level: 300, shape: '마법사 모자', sides: [30, 32], counts: [40, 48, 56, 66],
     multi: {
       parts: [
         { key: 'wizard_star', palette: ['#facc15', '#fde047'] },
@@ -731,7 +734,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 종 — 이미지 색에 맞춰 빨간 리본, 종 입구 안쪽의 갈색, 금색 종(기본)을 영역으로 나눈다.
   {
-    level: 195, shape: '종', sides: [30, 32], counts: [46, 56, 66, 76], mult: 1.6,
+    level: 290, shape: '종', sides: [30, 32], counts: [46, 56, 66, 76],
     multi: {
       parts: [
         { key: 'bell_bow', palette: ['#ef4444', '#dc2626', '#f87171'] },
@@ -742,7 +745,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 알람시계 — 이미지 색에 맞춰 크림색 얼굴, 금색 꼭지·발, 빨간 몸통·종(기본)을 영역으로 나눈다. 바늘·눈금은 가늘어 판에는 거의 안 나온다.
   {
-    level: 190, shape: '시계', sides: [30, 32], counts: [34, 40, 46, 54],
+    level: 280, shape: '시계', sides: [30, 32], counts: [34, 40, 46, 54],
     multi: {
       parts: [
         { key: 'clock_face', palette: ['#fef3c7', '#fff7ed'] },
@@ -753,7 +756,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 하이라이트 자리에 다이아몬드 — 이미지 색조에 맞춰 흰색·연한 하늘색 면, 짙은 파랑 면, 밝은 파랑(기본) 영역으로 나눈다.
   {
-    level: 185, shape: '다이아몬드', sides: [30, 32], counts: [46, 56, 68, 82, 96], mult: 1.6,
+    level: 270, shape: '다이아몬드', sides: [30, 32], counts: [46, 56, 68, 82, 96],
     multi: {
       parts: [
         { key: 'diamond_light', palette: ['#f8fafc', '#e0f2fe', '#bae6fd'] },
@@ -765,12 +768,12 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   // 네잎클로버 — 원본 도트 그림은 네 잎이 한 덩어리로 뭉쳐 알아보기 어려워 하트 모양 잎 네 장을 도형으로 직접 그렸다
   // (shapes.ts 의 cloverDrawing). 위·아래의 갈라진 홈과 좌우의 잘록한 허리, 줄기로 네 잎이 읽힌다. 초록 계열 팔레트.
   {
-    level: 180, shape: '네잎클로버', sides: [28, 30, 32], counts: [30, 36, 44, 54, 66],
+    level: 260, shape: '네잎클로버', sides: [28, 30, 32], counts: [30, 36, 44, 54, 66],
     palette: ['#22c55e', '#16a34a', '#4ade80', '#15803d'],
   },
   // 하이라이트 자리에 케이크 — 이미지 색에 맞춰 딸기 잎(초록), 딸기·잼(빨강), 크림(흰색), 스펀지(노랑)를 영역으로 나눈다.
   {
-    level: 175, shape: '케이크', sides: [30, 32], counts: [36, 44, 52, 60, 72], mult: 1.6,
+    level: 250, shape: '케이크', sides: [30, 32], counts: [36, 44, 52, 60, 72],
     multi: {
       parts: [
         { key: 'cake_leaf', palette: ['#22c55e', '#16a34a'] },
@@ -783,12 +786,12 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   // 음표 — 검은 윤곽(회색 화살)과 안쪽 흰 면(흰색 화살)을 영역으로 나눠 원본의 "검은 테두리 + 흰 면" 느낌을 낸다.
   // 양옆의 반짝이는 별은 음표와 떨어진 별도 덩어리다.
   {
-    level: 170, shape: '음표', sides: [28, 32], counts: [40, 50, 60, 72, 86],
+    level: 240, shape: '음표', sides: [28, 32], counts: [40, 50, 60, 72, 86],
     split: { partKey: 'note_line', partPalette: ['#94a3b8', '#64748b', '#a8b3c4'], restPalette: ['#f8fafc', '#e2e8f0'], minComponent: 3 },
   },
   // 하이라이트 자리에 바나나 — 이미지 색에 맞춰 벗겨진 크림색 속살과 노랑 껍질을 영역으로 나눈다.
   {
-    level: 165, shape: '바나나', sides: [30, 32], counts: [50, 60, 72, 86, 100], mult: 1.6,
+    level: 230, shape: '바나나', sides: [30, 32], counts: [50, 60, 72, 86, 100],
     multi: {
       parts: [{ key: 'banana_fruit', palette: ['#fef3c7', '#fde68a', '#fffbeb'] }],
       restPalette: ['#facc15', '#eab308', '#f59e0b'],
@@ -796,7 +799,7 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
   },
   // 트로피 — 이미지 색에 맞춰 금색 컵·손잡이(기본), 컵 가운데의 적갈색 별, 갈색 받침을 영역으로 나눈다.
   {
-    level: 160, shape: '트로피', sides: [30, 32], counts: [30, 36, 44, 54, 66],
+    level: 220, shape: '트로피', sides: [30, 32], counts: [30, 36, 44, 54, 66],
     multi: {
       parts: [
         { key: 'trophy_star', palette: ['#9a3412', '#7c2d12'] },
@@ -806,38 +809,38 @@ const SLOTS: { level: number; shape: string; sides?: number[]; counts?: number[]
     },
   },
   // 하이라이트 자리에 해골 — 두 눈구멍·코 구멍과 떨어진 턱이 뭉개지지 않도록 24칸 이상에서 만든다.
-  { level: 155, shape: '해골', sides: [24, 26, 28], counts: [14, 16, 18, 20, 24, 28, 32], mult: 1.6 },
+  { level: 210, shape: '해골', sides: [24, 26, 28], counts: [14, 16, 18, 20, 24, 28, 32] },
   // 물고기 아이콘 — 윤곽·아가미·눈(파랑)과 채워진 안쪽 면(연노랑)을 영역으로 나눠 아이콘의 무늬를 화살로 살린다.
   // 선 영역이 얇은 고리라 판이 크면(500칸 이상) 생성이 거의 실패하므로 22~24칸에서 만든다.
   {
-    level: 150, shape: '물고기 아이콘', sides: [22, 24], counts: [16, 20, 24, 28, 34, 40],
+    level: 200, shape: '물고기 아이콘', sides: [22, 24], counts: [16, 20, 24, 28, 34, 40],
     split: { partKey: 'fish_pix_line', partPalette: ['#38bdf8', '#0ea5e9'], restPalette: ['#fde68a', '#fbbf24'], minComponent: 5 },
   },
   // 하이라이트 자리에 왕관 — 속이 빈 테두리와 아래 받침 막대가 끊기지 않도록 28칸 이상에서 만든다.
-  { level: 145, shape: '왕관', sides: [28, 30, 32], counts: [14, 16, 18, 20, 24, 28, 32], mult: 1.6 },
+  { level: 190, shape: '왕관', sides: [28, 30, 32], counts: [14, 16, 18, 20, 24, 28, 32] },
   // 닻 — 위쪽 고리 구멍과 가늘게 굽은 팔이 뭉개지지 않도록 28칸 이상에서 만든다.
-  { level: 140, shape: '닻', sides: [28, 32], counts: [14, 16, 18, 20, 24, 28, 32] },
+  { level: 180, shape: '닻', sides: [28, 32], counts: [14, 16, 18, 20, 24, 28, 32] },
   // 하이라이트 자리에 스시 — 회(주황)와 밥(흰색)을 영역으로 나눠 화살이 구분되게 한다.
   {
-    level: 135, shape: '스시', sides: [26, 28], counts: [14, 16, 18, 20, 24, 28, 32], mult: 1.6,
+    level: 170, shape: '스시', sides: [26, 28], counts: [14, 16, 18, 20, 24, 28, 32],
     split: { partKey: 'sushi_fish', partPalette: ['#fb923c', '#f97316'], restPalette: ['#f8fafc', '#cbd5e1'] },
   },
   // 딸기 — 잎(초록)과 열매(빨강)를 영역으로 나눠 화살이 구분되게 한다. 잎과 열매 사이의 틈이 남도록 28칸 이상.
   {
-    level: 130, shape: '딸기', sides: [28, 30], counts: [14, 16, 18, 20, 24, 28, 32],
+    level: 160, shape: '딸기', sides: [28, 30], counts: [14, 16, 18, 20, 24, 28, 32],
     split: { partKey: 'strawberry_leaf', partPalette: ['#22c55e', '#16a34a'], restPalette: ['#ef4444', '#dc2626'] },
   },
   // 하이라이트 자리에 피자 조각 — 끝이 뾰족한 쐐기가 뭉개지지 않도록 26칸 이상에서 만든다.
   // 빵 테두리(주황)와 토핑 부분(노랑)을 영역으로 나눠 화살이 구분되게 한다.
   {
-    level: 125, shape: '피자', sides: [26, 28], counts: [14, 16, 18, 20, 24, 28, 32], mult: 1.6,
+    level: 150, shape: '피자', sides: [26, 28], counts: [14, 16, 18, 20, 24, 28, 32],
     split: { partKey: 'pizza_crust', partPalette: ['#f59e0b', '#ea580c'], restPalette: ['#fde68a', '#facc15'] },
   },
   // 도넛 — 가운데 구멍이 또렷하게 보이도록 22칸 이상에서 만든다.
-  { level: 120, shape: '도넛', sides: [22, 24], counts: [12, 14, 16, 18, 20, 24, 28] },
+  { level: 140, shape: '도넛', sides: [22, 24], counts: [12, 14, 16, 18, 20, 24, 28] },
   // 하이라이트 자리에 체리 — 28칸부터 두 열매 사이 틈이 생겨 두 알로 읽힌다(24칸은 붙어 버린다).
-  { level: 115, shape: '체리', sides: [28, 30], counts: [14, 16, 18, 20, 24, 28, 32, 36], mult: 1.6 },
-  { level: 110, shape: '하트', sides: [20, 22, 24], counts: [12, 14, 16, 18, 20, 24, 28] },
+  { level: 130, shape: '체리', sides: [28, 30], counts: [14, 16, 18, 20, 24, 28, 32, 36] },
+  { level: 120, shape: '하트', sides: [20, 22, 24], counts: [12, 14, 16, 18, 20, 24, 28] },
   { level: 90, shape: '판다', sides: [26, 28], counts: [14, 16, 18, 20, 22, 24, 28, 32, 36] },
 ];
 
@@ -1054,6 +1057,7 @@ const stages: Stage[] = JSON.parse(readFileSync(STAGES_PATH, 'utf-8'));
 const slotLevels = new Set(SLOTS.map(s => s.level));
 const onlyArg = process.argv.find(a => a.startsWith('--only='));
 const only = onlyArg ? new Set(onlyArg.slice('--only='.length).split(',').map(Number)) : null;
+const WIDEN = process.argv.includes('--widen');
 
 function median(xs: number[]): number {
   const s = [...xs].sort((a, b) => a - b);
@@ -1075,14 +1079,23 @@ for (const slot of SLOTS) {
   if (!shape) { console.error(`모양 '${slot.shape}' 없음`); process.exit(1); }
   const target = trendAt(slot.level) * (slot.mult ?? SHAPE_MULT);
 
+  // --widen: 자리를 옮긴 그림처럼 손으로 고른 counts 로는 목표에 닿지 않을 때, 지금 그 자리에 있는 판의
+  // 피스 수를 기준으로 목표 쪽(쉬우면 더 많이, 어려우면 더 적게)으로 피스 수 후보를 넓힌다.
+  const current = stages[slot.level - 1];
+  const widenFactors = !WIDEN || current.shape !== slot.shape ? null
+    : current.searchCost < target ? [1, 1.2, 1.45, 1.75, 2.1, 2.5] : [0.4, 0.5, 0.6, 0.72, 0.85, 1];
+
   const cands: { lv: LevelData; rough: number }[] = [];
   for (const side of slot.sides ?? SIDES) {
     const fitted = fitMask(buildMask(shape, side, side));
     const { cols, rows } = fitted;
     const mask = dropTinyComponents(fitted.mask);
+    const counts = widenFactors
+      ? [...new Set(widenFactors.map(f => Math.max(3, Math.min(Math.floor(mask.length / 3), Math.round(current.pieces.length * f)))))]
+      : slot.counts ?? PIECE_COUNTS;
     const parts = slot.split ? splitRegions(shape, slot.split, side) : null;
     const multiParts = slot.multi ? splitMulti(shape, slot.multi, side, slot.minCells ?? 3) : null;
-    for (const n of slot.counts ?? PIECE_COUNTS) {
+    for (const n of counts) {
       for (let k = 0; k < PER_COMBO; k++) {
         const lv = multiParts
           ? generateRegionedLevel(

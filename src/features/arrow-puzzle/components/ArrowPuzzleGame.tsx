@@ -2,7 +2,8 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, RotateCcw, RefreshCw, Store, ArrowRight, Heart, Star, House, Settings } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { levels, stages, shapeStages, type PieceData, type LevelData, type Direction } from '../data/levels';
+import { levels, shapeStages, type PieceData, type LevelData, type Direction } from '../data/levels';
+import { STAGE_COUNT, loadStage, prefetchStage } from '../data/stageLoader';
 import { type Difficulty, DIFFICULTY_CONFIGS, generateLevelForDifficulty } from '../utils/levelGenerator';
 import { useArrowConcept } from '../hooks/useArrowConcept';
 import { useArrowProgress } from '../hooks/useArrowProgress';
@@ -890,14 +891,25 @@ const ArrowPuzzleGame: React.FC = () => {
     loadLevel(levelData);
   }, [levelData, loadLevel]);
 
-  const handleSelectStage = useCallback((level: number) => {
-    const stage = stages[level - 1];
-    if (!stage) return;
+  // 스테이지 데이터는 100개 묶음으로 지연 로딩한다. 받는 사이 다른 스테이지를 누르면 늦게 온 응답은 버린다.
+  const stageRequestRef = useRef(0);
+  const handleSelectStage = useCallback(async (level: number) => {
+    const req = ++stageRequestRef.current;
+    let stage;
+    try {
+      stage = await loadStage(level);
+    } catch (e) {
+      console.error(e);
+      if (req === stageRequestRef.current) alert('스테이지를 불러오지 못했어요. 네트워크 연결을 확인하고 다시 시도해 주세요.');
+      return;
+    }
+    if (req !== stageRequestRef.current) return;
     setDifficulty(null);
     setStageNo(level);
     setIsShapeMode(false);
     loadLevel(stage);
     setScreen('playing');
+    prefetchStage(level + 1);
   }, [loadLevel]);
 
   /** 스테이지를 깬 뒤 다음으로 넘어갈 때 — 전면 광고를 한 번 띄운다(다른 게임과 같은 방식) */
@@ -908,12 +920,13 @@ const ArrowPuzzleGame: React.FC = () => {
 
   const handleDevStageGo = () => {
     const n = parseInt(devStage, 10);
-    if (n >= 1 && n <= stages.length) handleSelectStage(n);
+    if (n >= 1 && n <= STAGE_COUNT) handleSelectStage(n);
   };
 
   const handleSelectShapeStage = useCallback((level: number) => {
     const stage = shapeStages[level - 1];
     if (!stage) return;
+    stageRequestRef.current++; // 받는 중인 캠페인 스테이지가 있으면 무시
     setDifficulty(null);
     setStageNo(level);
     setIsShapeMode(true);
@@ -1151,14 +1164,14 @@ const ArrowPuzzleGame: React.FC = () => {
               alt="스테이지 모드"
               className="animate-fade-in"
               style={modeBtnStyle('0.1s')}
-              onClick={() => handleSelectStage(Math.min(progress + 1, stages.length))}
+              onClick={() => handleSelectStage(Math.min(progress + 1, STAGE_COUNT))}
               onMouseEnter={modeHoverOn}
               onMouseLeave={modeHoverOff}
             />
             <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
               {progress > 0
-                ? `Stage ${Math.min(progress + 1, stages.length)}/${stages.length} 이어하기`
-                : `Stage 1/${stages.length} 시작하기`}
+                ? `Stage ${Math.min(progress + 1, STAGE_COUNT)}/${STAGE_COUNT} 이어하기`
+                : `Stage 1/${STAGE_COUNT} 시작하기`}
             </span>
           </div>
         </div>
@@ -1171,8 +1184,8 @@ const ArrowPuzzleGame: React.FC = () => {
             <input
               type="number"
               min={1}
-              max={stages.length}
-              placeholder={`스테이지 번호 (1~${stages.length})`}
+              max={STAGE_COUNT}
+              placeholder={`스테이지 번호 (1~${STAGE_COUNT})`}
               value={devStage}
               onChange={e => setDevStage(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') handleDevStageGo(); }}
@@ -1226,7 +1239,7 @@ const ArrowPuzzleGame: React.FC = () => {
 
   if (screen === 'stages') {
     // 클리어한 다음 한 판까지 열어둔다
-    const unlocked = Math.min(progress + 1, stages.length);
+    const unlocked = Math.min(progress + 1, STAGE_COUNT);
     return (
       <div className="ap-page">
         <header className="ap-header">
@@ -1239,19 +1252,18 @@ const ArrowPuzzleGame: React.FC = () => {
 
         <div className="ap-stage-screen">
           <div className="ap-stage-grid">
-            {stages.map(st => {
-              const cleared = st.level <= progress;
-              const locked = st.level > unlocked;
+            {Array.from({ length: STAGE_COUNT }, (_, i) => i + 1).map(level => {
+              const cleared = level <= progress;
+              const locked = level > unlocked;
               return (
                 <button
-                  key={st.level}
+                  key={level}
                   className={`ap-stage-btn${cleared ? ' cleared' : ''}${locked ? ' locked' : ''}`}
                   disabled={locked}
-                  onClick={() => handleSelectStage(st.level)}
-                  title={`${st.gridCols}×${st.gridRows} · ${st.pieces.length}피스`}
+                  onClick={() => handleSelectStage(level)}
                 >
-                  <span className="ap-stage-no">{st.level}</span>
-                  <StageStars earned={stageStars[st.level] ?? 0} />
+                  <span className="ap-stage-no">{level}</span>
+                  <StageStars earned={stageStars[level] ?? 0} />
                 </button>
               );
             })}
@@ -1553,7 +1565,7 @@ const ArrowPuzzleGame: React.FC = () => {
                       </button>
                     );
                   })()
-                ) : stageNo !== null && stageNo < stages.length ? (
+                ) : stageNo !== null && stageNo < STAGE_COUNT ? (
                   <button className="ap-btn-primary" onClick={() => handleNextStage(stageNo + 1)}>
                     다음 레벨 <ArrowRight size={18} />
                   </button>

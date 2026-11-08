@@ -107,7 +107,7 @@ const SHAPE_EVERY_PLATEAU = 10; // 정체기 간격
 // 모양 스테이지는 사용자가 이미지로 따로 만들어 대체할 예정이라 메인 생성에서는 넣지 않는다(SHAPES_IN_MAIN).
 const KEEP_UNTIL = 100;
 const SHAPES_IN_MAIN = false;
-const existing: Stage[] = KEEP_UNTIL > 0 ? JSON.parse(readFileSync('src/features/arrow-puzzle/data/stages.json', 'utf-8')) : [];
+const existing: Stage[] = KEEP_UNTIL > 0 ? JSON.parse(readFileSync('src/features/arrow-puzzle/data/stages.full.json', 'utf-8')) : [];
 
 // 하이라이트 판 — 곡선을 따라 오르다가 5번째마다(5, 15, 25...) 한 번씩 눈에 띄게 어려운 판을 끼운다.
 // 쉐이프(10의 배수)와 겹치지 않는 자리이고, 도입부(1~10)는 크기가 고정이라 15번부터 적용된다.
@@ -386,5 +386,5 @@ const rampSteps = out.slice(1, RAMP_END).map((s, i) => s.searchCost / out[i].sea
 console.log(`\n램프(L${INTRO.length + 1}~L${RAMP_END}) 레벨당 상승률: 최소 ${(Math.min(...rampSteps) * 100 - 100).toFixed(0)}%  중앙값 ${((rampSteps.sort((a, b) => a - b)[Math.floor(rampSteps.length / 2)]) * 100 - 100).toFixed(0)}%  최대 ${(Math.max(...rampSteps) * 100 - 100).toFixed(0)}%`);
 console.log(`정체기(L${RAMP_END + 1}~L${COUNT}) 비용 범위: ${bandLow.toFixed(1)} ~ ${hiMax.toFixed(1)} (주기 ${CYCLE}판마다 오르내림)`);
 
-writeFileSync('src/features/arrow-puzzle/data/stages.json', JSON.stringify(out) + '\n');
-console.log(`${out.length}개 저장 → src/features/arrow-puzzle/data/stages.json`);
+writeFileSync('src/features/arrow-puzzle/data/stages.full.json', JSON.stringify(out) + '\n');
+console.log(`${out.length}개 저장 → src/features/arrow-puzzle/data/stages.full.json (앱용 묶음: node scripts/split-arrow-stages.mjs)`);
