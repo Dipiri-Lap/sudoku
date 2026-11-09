@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Eye, Shuffle, Home, Play, RotateCcw, LayoutGrid, Music, VolumeX, Check, Undo2, Magnet, Paintbrush, X, Share2, Download } from 'lucide-react';
 import { useCoins } from '../../../context/CoinContext';
+import { logEvent } from '../../../firebase';
 import { bgm, BGM_TRACKS, loadBgmPref, saveBgmPref, loadVolumes, saveVolumes } from '../utils/bgm';
 import { JIGSAW_STAGES, CHAPTER_SIZE, RANGE_SIZE, isStageUnlocked, lastUnlockedIdx, loadStars, saveStars, starsFor, type JigsawStage } from '../data/stages';
 import {
@@ -680,6 +681,7 @@ function PlayView({
     useEffect(() => {
         if (!won) return;
         const stars = starsFor(stage, moves);
+        logEvent('stage_clear', { game: 'jigsaw', stage: stage.id });
         // reward only the first clear of a stage (matches the server-side puzzle-power recount, no farming by replays)
         const firstClear = !(loadStars()[stage.id] > 0);
         const record = saveStars(stage.id, stars);
@@ -1265,6 +1267,13 @@ export default function JigsawGame() {
     const [color, setColor] = useState(JIGSAW_STAGES[homeIdx].tint);
     const [listOpen, setListOpen] = useState(false);
     const [shopOpen, setShopOpen] = useState(false);
+    // 게임 시작을 한 번만 기록한다(스테이지가 넘어갈 때마다 세면 게임별 비교가 망가진다).
+    const hasLoggedPlay = useRef(false);
+    useEffect(() => {
+        if (!stage || hasLoggedPlay.current) return;
+        hasLoggedPlay.current = true;
+        logEvent('game_play', { game: 'jigsaw', stage: stage.id });
+    }, [stage]);
     const frames = useBoardFrames();
     const buddies = useBuddySkins();
     const buddy = BUDDY_SKINS.find((b) => b.id === buddies.selected) ?? BUDDY_SKINS[0];

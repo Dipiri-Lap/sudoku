@@ -12,7 +12,7 @@ import ArrowConceptShopModal from './ArrowConceptShopModal';
 import ArrowAbout from './ArrowAbout';
 import ArrowSettingsModal from './ArrowSettingsModal';
 import { useCoins } from '../../../context/CoinContext';
-import { auth } from '../../../firebase';
+import { auth, logEvent } from '../../../firebase';
 import '../styles/ArrowPuzzle.css';
 
 const CLEAR_COIN_REWARD = 10; // 다른 게임과 동일한 클리어 보상 액수
@@ -606,6 +606,13 @@ const ArrowPuzzleGame: React.FC = () => {
   const [devStage, setDevStage] = useState(''); // 개발용 스테이지 바로가기 입력값
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [stageNo, setStageNo] = useState<number | null>(null);
+  // 게임 시작을 한 번만 기록한다(스테이지가 넘어갈 때마다 세면 게임별 비교가 망가진다).
+  const hasLoggedPlayRef = useRef(false);
+  useEffect(() => {
+    if (screen !== 'playing' || testLevel || hasLoggedPlayRef.current) return;
+    hasLoggedPlayRef.current = true;
+    logEvent('game_play', { game: 'arrow_way', level: stageNo ?? 0 });
+  }, [screen, testLevel, stageNo]);
   const [isShapeMode, setIsShapeMode] = useState(false);
   // 클리어한 최고 스테이지 번호(다음 한 판까지 열린다). 로그인하면 서버와 병합되어 도전과제에도 쓰인다.
   const { progress, clearStage } = useArrowProgress();
@@ -777,6 +784,7 @@ const ArrowPuzzleGame: React.FC = () => {
       const t = setTimeout(() => {
         setIsCleared(true);
         playClearSfx();
+        if (!testLevel) logEvent('stage_clear', { game: 'arrow_way', level: stageNo ?? 0 });
         if (stageNo !== null) {
           if (isShapeMode) {
             saveShapeCleared(stageNo);
@@ -815,7 +823,7 @@ const ArrowPuzzleGame: React.FC = () => {
       }, 200);
       return () => clearTimeout(t);
     }
-  }, [activePieces.length, escapingPieces.length, stageNo, isShapeMode, addCoins, clearStage]);
+  }, [activePieces.length, escapingPieces.length, stageNo, isShapeMode, addCoins, clearStage, testLevel]);
 
   useEffect(() => {
     return () => {
