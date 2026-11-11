@@ -14,6 +14,8 @@
     "generate-stages": "tsx scripts/generate-stages.ts",
     "generate-cross-math-stages": "tsx scripts/generate-cross-math-stages.ts",
     "generate-queens": "tsx scripts/generate-queens.ts",
+    "queens-difficulty": "tsx scripts/queens-difficulty.ts",
+    "queens-append": "tsx scripts/queens-append.ts",
     "generate-big-sudoku": "tsx scripts/generate-big-sudoku.ts",
     "extract-jewels": "node scripts/extract-jewels.mjs",
     "optimize-assets": "node scripts/optimize-assets.mjs",

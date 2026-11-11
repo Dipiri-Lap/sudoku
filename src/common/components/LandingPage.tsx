@@ -651,12 +651,12 @@ const LandingPage: React.FC = () => {
                 >
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
-                        backgroundColor: '#f97316', color: 'white',
+                        backgroundColor: '#7b6cf0', color: 'white',
                         fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
                         padding: '2px 7px', borderRadius: '999px',
-                        boxShadow: '0 2px 6px rgba(249,115,22,0.5)',
+                        boxShadow: '0 2px 6px rgba(123,108,240,0.5)',
                         zIndex: 1,
-                    }}>HOT</div>
+                    }}>UPDATE</div>
                     <img src="/images/crownquest/title.webp" alt="크라운 퀘스트" style={{ width: '100%', display: 'block' }} />
                 </a>
 

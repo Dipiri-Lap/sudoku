@@ -31,8 +31,8 @@ interface ProfileModalProps {
 // 1-40 local avatar IDs (코인으로 해제 가능)
 const AVATAR_SEEDS = Array.from({ length: 40 }, (_, i) => String(i + 1));
 // 41~ 도전과제 보상 전용 아바타. 획득하기 전에는 목록에 나타나지 않는다.
-const REWARD_AVATAR_SEEDS = ['41', '42', '43'];
-const MAX_AVATAR_ID = 43;
+const REWARD_AVATAR_SEEDS = ['41', '42', '43', '44'];
+const MAX_AVATAR_ID = 44;
 
 export const getAvatarUrl = (seed: string) => {
     if (seed.startsWith('http') || seed.startsWith('/')) return seed;

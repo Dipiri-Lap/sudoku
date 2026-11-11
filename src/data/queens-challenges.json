@@ -131,7 +131,68 @@
     },
     "reward": {
       "puzzle_power": 10,
-      "coin": 500
+      "coin": 500,
+      "frame": "crownquest"
+    }
+  },
+  {
+    "id": "cq_600",
+    "type": "STAGE",
+    "game": "queens",
+    "title": "🛡️ 왕실 근위대장",
+    "condition": "스테이지 600 클리어",
+    "progressConfig": {
+      "source": "queens_stage",
+      "target": 600
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 600
+    }
+  },
+  {
+    "id": "cq_700",
+    "type": "STAGE",
+    "game": "queens",
+    "title": "🎖️ 왕국의 원로",
+    "condition": "스테이지 700 클리어",
+    "progressConfig": {
+      "source": "queens_stage",
+      "target": 700
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 700
+    }
+  },
+  {
+    "id": "cq_800",
+    "type": "STAGE",
+    "game": "queens",
+    "title": "🏯 성채의 군주",
+    "condition": "스테이지 800 클리어",
+    "progressConfig": {
+      "source": "queens_stage",
+      "target": 800
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 800
+    }
+  },
+  {
+    "id": "cq_900",
+    "type": "STAGE",
+    "game": "queens",
+    "title": "🌙 왕관의 수호성",
+    "condition": "스테이지 900 클리어",
+    "progressConfig": {
+      "source": "queens_stage",
+      "target": 900
+    },
+    "reward": {
+      "puzzle_power": 10,
+      "coin": 900
     }
   },
   {
@@ -146,7 +207,8 @@
     },
     "reward": {
       "puzzle_power": 10,
-      "coin": 1000
+      "coin": 1000,
+      "avatar": "44"
     }
   }
 ]

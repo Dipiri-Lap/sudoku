@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { X as XIcon, Settings } from 'lucide-react';
+import { X as XIcon, ChevronLeft, RotateCcw, Pencil, Volume2, VolumeX, Home, Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
@@ -248,7 +248,6 @@ const QueensGame: React.FC = () => {
   const { selectedIcon } = useQueensIcon();
   const hasAwardedCoins = useRef(false);
   const [showIconShop, setShowIconShop] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [sfxEnabled, setSfxEnabled] = useState(() => localStorage.getItem('queens_sfx') !== 'false');
   const sfxEnabledRef = useRef(sfxEnabled);
   useEffect(() => { sfxEnabledRef.current = sfxEnabled; }, [sfxEnabled]);
@@ -746,54 +745,37 @@ const QueensGame: React.FC = () => {
 
   return (
     <div className="queens-game">
+      <div className="qq-pattern" aria-hidden />
       {isWrongFlash && <div className="queens-error-flash" />}
-      <div className="queens-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <button className="queens-back-btn" onClick={() => navigate('/queens')}>←</button>
-          <button className="queens-reset-btn" onClick={handleReset}>재시작</button>
-        </div>
-        <span className="queens-level-name">{k === 2 ? `더블 - ${level.name}` : level.name}</span>
-        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-          <button
-            onClick={() => setShowIconShop(true)}
-            style={{
-              background: 'linear-gradient(135deg, #4a90e2, #7c3aed)',
-              border: '2px solid rgba(255,255,255,0.25)',
-              borderRadius: '10px',
-              padding: '0.35rem 0.65rem',
-              fontSize: '1.4rem',
-              cursor: 'pointer',
-              lineHeight: 1,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-            }}
-            title="퀸 아이콘 변경"
-          >
-            <img src={getIconUrl(selectedIcon.id)} alt="crown" style={{ width: 28, height: 28, objectFit: 'contain' }} />
-            <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.85)', fontWeight: 700, letterSpacing: '0.02em' }}>변경</span>
+      <header className="qq-top">
+        <div className="qq-top-left">
+          <button className="qq-ghost-btn" onClick={() => navigate('/queens')} aria-label="나가기">
+            <ChevronLeft size={32} strokeWidth={3.2} />
           </button>
-          <button onClick={() => setShowSettings(true)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0.3rem', display: 'flex', alignItems: 'center' }}>
-            <Settings size={20} />
-          </button>
-        </div>
-      </div>
-
-      <div className="queens-status-row">
-        <div className="queens-hearts">
-          {Array.from({ length: MAX_HEARTS }, (_, i) => (
-            <span key={i} className={`queens-heart ${i < hearts ? 'alive' : 'dead'}`}>♥</span>
-          ))}
-        </div>
-        <div className="queens-progress">
-          <span className="queens-crown-icon">👑</span>
-          <div className="queens-progress-bar">
-            <div className="queens-progress-fill" style={{ width: `${(placed.length / (n * k)) * 100}%` }} />
+          <div className="qq-level">
+            <span className="qq-level-label">{isTutorial ? 'TUTORIAL' : k === 2 ? 'DOUBLE' : 'LEVEL'}</span>
+            <span key={level.id} className="qq-level-no">{isTutorial ? '?' : level.id}</span>
           </div>
-          <span className="queens-progress-text">{placed.length}/{n * k}</span>
         </div>
-      </div>
+        <div className="qq-top-right">
+          <div className="qq-top-btns">
+            <button className="qq-top-btn crown" onClick={() => setShowIconShop(true)} aria-label="왕관 바꾸기">
+              <img src={getIconUrl(selectedIcon.id)} alt="" />
+            </button>
+            <button className={`qq-top-btn${sfxEnabled ? '' : ' off'}`} onClick={toggleSfx} aria-label={sfxEnabled ? '효과음 끄기' : '효과음 켜기'}>
+              {sfxEnabled ? <Volume2 size={18} strokeWidth={2.6} /> : <VolumeX size={18} strokeWidth={2.6} />}
+            </button>
+          </div>
+          <div className="qq-status">
+            {Array.from({ length: MAX_HEARTS }, (_, i) => (
+              <span key={i} className={`qq-heart ${i < hearts ? 'alive' : 'dead'}`} aria-label={i < hearts ? '하트' : '잃은 하트'}>♥</span>
+            ))}
+            <span className="qq-count">
+              <b key={placed.length}>{placed.length}</b>/{n * k}
+            </span>
+          </div>
+        </div>
+      </header>
 
       <div
         className={boardClass}
@@ -879,24 +861,41 @@ const QueensGame: React.FC = () => {
       )}
 
       {!isTutorial && (
-        <div className="queens-hint">
-          <button className={`queens-memo-btn${isMemoMode ? ' active' : ''}`} onClick={() => setIsMemoMode(m => !m)}>
-            📝 메모
-          </button>
-          <span className="queens-hint-text">
-            탭: ✕ &nbsp;|&nbsp; 두 번 탭: 👑 &nbsp;|&nbsp; 드래그: 연속
-          </span>
-          <button
-            className={`queens-queen-hint-btn${queenHintUsed ? ' used' : ''}`}
-            onClick={handleQueenHint}
-            disabled={queenHintUsed || won || gameOver}
-          >
-            {queenHintUsed
-              ? '사용됨'
-              : <><span>👑</span><img src="/coin_Icon.png" alt="coin" style={{ width: 13, height: 13, verticalAlign: 'middle', margin: '0 1px' }} /><span>50</span></>
-            }
-          </button>
-        </div>
+        <>
+          <div className="qq-controls">
+            <button className="qq-round item" onClick={handleReset} disabled={won || gameOver} aria-label="다시 시작">
+              <RotateCcw size={22} strokeWidth={2.8} />
+              <span className="qq-cost free">재시작</span>
+            </button>
+            <button
+              className={`qq-round big item${isMemoMode ? ' pressed' : ''}`}
+              onClick={() => setIsMemoMode(m => !m)}
+              aria-pressed={isMemoMode}
+              aria-label="메모 모드"
+            >
+              <Pencil size={30} strokeWidth={2.8} />
+              <span className={`qq-cost free${isMemoMode ? ' on' : ''}`}>{isMemoMode ? '메모 켜짐' : '메모'}</span>
+            </button>
+            <button
+              className="qq-round item"
+              onClick={handleQueenHint}
+              disabled={queenHintUsed || won || gameOver}
+              aria-label="왕관 힌트"
+            >
+              <img className="qq-round-crown" src={getIconUrl(selectedIcon.id)} alt="" />
+              {queenHintUsed
+                ? <span className="qq-cost free">사용함</span>
+                : <span className="qq-cost"><img src="/coin_Icon.png" alt="" />50</span>}
+            </button>
+          </div>
+          <p className="qq-hint">
+            {isMemoMode ? '메모 모드: 연하게 표시돼서 마음껏 추리해요' : '탭 ✕ · 두 번 탭 왕관 · 드래그로 ✕ 여러 칸'}
+          </p>
+          <div className="qq-coins-left">
+            <img src="/coin_Icon.png" alt="" />
+            {coins.toLocaleString()}
+          </div>
+        </>
       )}
 
       {/* ── Step 0: Full intro overlay ── */}
@@ -904,7 +903,7 @@ const QueensGame: React.FC = () => {
         <div className="tut-intro-overlay">
           <div className="tut-intro-card">
             <div className="tut-intro-crown">👑</div>
-            <h1 className="tut-intro-title">퀸즈</h1>
+            <h1 className="tut-intro-title">크라운 퀘스트</h1>
             <p className="tut-intro-sub">4×4 보드에 퀸 4개를 올바르게 배치하는 퍼즐이에요.</p>
             <button className="tut-start-btn" onClick={() => setTutorialStep(1)}>
               규칙 알아보기 →
@@ -995,23 +994,6 @@ const QueensGame: React.FC = () => {
 
       {showIconShop && <QueensIconShopModal onClose={() => setShowIconShop(false)} />}
 
-      {showSettings && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }} onClick={() => setShowSettings(false)}>
-          <div style={{ background: '#1e293b', borderRadius: '20px', padding: '1.5rem', width: '280px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-              <span style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>설정</span>
-              <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><XIcon size={20} /></button>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 0', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <span style={{ color: '#e2e8f0', fontSize: '0.95rem' }}>🔊 효과음</span>
-              <div onClick={toggleSfx} style={{ width: 48, height: 26, borderRadius: 13, background: sfxEnabled ? '#4ade80' : '#475569', cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                <div style={{ position: 'absolute', top: 3, left: sfxEnabled ? 25 : 3, width: 20, height: 20, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {doubleIntroStep !== null && (
         <DoubleIntroOverlay
           step={doubleIntroStep}
@@ -1022,44 +1004,54 @@ const QueensGame: React.FC = () => {
       )}
 
       {won && (
-        <div className="queens-win-overlay">
-          <div className="queens-win-modal">
-            <div style={{ fontSize: '4rem', lineHeight: 1 }}>👑</div>
-            <h2>레벨 클리어</h2>
+        <div className="qq-win">
+          <div className="qq-win-rays" aria-hidden />
+          <div className="qq-win-inner">
+            <span className="qq-win-stage">{isTutorial ? 'TUTORIAL' : k === 2 ? `DOUBLE ${level.id}` : `LEVEL ${level.id}`}</span>
+            <span className="qq-win-head">클리어!</span>
+            <div className="qq-win-crown">
+              <img src={getIconUrl(selectedIcon.id)} alt="" />
+            </div>
             {!isTutorial && (
-              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center', margin: '0.4rem 0 0.8rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fef9e7', border: '1px solid #f4c430', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#b8860b', fontSize: '0.95rem' }}>
-                  🪙 +10
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
-                  ⚡ 퍼즐력 +1
-                </div>
+              <div className="qq-win-rewards">
+                <span className="qq-chip"><img src="/coin_Icon.png" alt="" />+10</span>
+                <span className="qq-chip" style={{ animationDelay: '0.12s' }}>⚡ 퍼즐력 +1</span>
               </div>
             )}
             {levelIdx < LEVELS.length - 1 && (
-              <button className="queens-win-btn" onClick={handleNextLevel}>
-                다음 레벨 →
+              <button className="qq-play-btn" onClick={handleNextLevel}>
+                <Play size={26} strokeWidth={0} fill="currentColor" />
+                다음 레벨
               </button>
             )}
-            <button
-              className={levelIdx < LEVELS.length - 1 ? 'queens-home-btn' : 'queens-win-btn'}
-              onClick={handleReset}
-            >
-              다시 시도
-            </button>
-            <button className="queens-home-btn" onClick={() => navigate('/')}>홈으로</button>
+            <div className="qq-win-actions">
+              <button className="qq-round" onClick={() => navigate('/queens')} aria-label="크라운 퀘스트 홈">
+                <Home size={24} strokeWidth={2.8} />
+              </button>
+              <button className="qq-round" onClick={handleReset} aria-label="다시 하기">
+                <RotateCcw size={24} strokeWidth={2.8} />
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {gameOver && (
-        <div className="queens-win-overlay">
-          <div className="queens-win-modal">
-            <div style={{ fontSize: '4rem', lineHeight: 1 }}>💔</div>
-            <h2 style={{ color: '#ef4444' }}>실패!</h2>
-            <p>하트를 모두 잃었습니다.</p>
-            <button className="queens-win-btn" onClick={handleReset}>다시 시도</button>
-            <button className="queens-home-btn" onClick={() => navigate('/')}>홈으로</button>
+        <div className="qq-win fail">
+          <div className="qq-win-inner">
+            <span className="qq-win-stage">{k === 2 ? `DOUBLE ${level.id}` : `LEVEL ${level.id}`}</span>
+            <span className="qq-win-head">아쉬워요!</span>
+            <div className="qq-win-heart">♥</div>
+            <p className="qq-win-note">틀린 칸에 왕관을 놓아서 하트를 잃었어요</p>
+            <button className="qq-play-btn" onClick={handleReset}>
+              <RotateCcw size={24} strokeWidth={3} />
+              다시 하기
+            </button>
+            <div className="qq-win-actions">
+              <button className="qq-round" onClick={() => navigate('/queens')} aria-label="크라운 퀘스트 홈">
+                <Home size={24} strokeWidth={2.8} />
+              </button>
+            </div>
           </div>
         </div>
       )}

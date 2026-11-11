@@ -17,8 +17,8 @@ export const COLOR_PALETTE = [
   '#F87171', // red
   '#FDE047', // yellow
   '#2DD4BF', // teal
-  '#FB923C', // amber
-  '#818CF8', // indigo
+  '#7C2D12', // 적갈색 (was amber #FB923C — too close to orange)
+  '#166534', // 진초록 (was indigo #818CF8 — too close to blue)
   '#1A237E', // 남색
   '#BDBDBD', // 밝은 회색
 ];

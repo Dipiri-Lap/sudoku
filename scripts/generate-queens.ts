@@ -1,5 +1,9 @@
 /**
- * Queens level batch generator
+ * Queens level batch generator  (LEGACY — 처음 500판을 만들 때 쓴 고정 크기 계획)
+ *
+ * 2026-11 이후로 스테이지 순서는 scripts/queens-reorder.ts 의 난이도 곡선을 따르고,
+ * 새 스테이지 추가는 `npm run queens-append -- --count 50` 을 사용합니다.
+ * 이 스크립트를 --reset 으로 다시 돌리면 난이도 곡선이 사라집니다.
  *
  * Usage:
  *   npm run generate-queens               # continue from where left off

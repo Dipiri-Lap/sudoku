@@ -163,6 +163,8 @@ export const AVATAR_FRAMES: AvatarFrame[] = [
     { id: 'scholar', name: '단어 박사', color: '#d97706', image: '/images/frames/scholar.webp', rewardOnly: true },
     // Tiny Pieces 500스테이지 클리어 보상 (좀비·단어 박사와 같은 크기·위치로 맞춰 .frame-image 배율을 같이 쓴다)
     { id: 'jigsaw', name: '퍼즐 조각', color: '#f59e0b', image: '/images/frames/jigsaw.webp', rewardOnly: true },
+    // 크라운 퀘스트 500스테이지 클리어 보상 (다른 그림 테두리와 같은 링 위치에 맞춰 .frame-image 배율을 같이 쓴다)
+    { id: 'crownquest', name: '크라운 퀘스트', color: '#f59e0b', image: '/images/frames/crownquest.webp', rewardOnly: true },
 ];
 
 /** 테두리 탭에 보여 줄 순서 — 무료 → 비싼 순. 같은 가격은 위 목록 순서를 따른다 */

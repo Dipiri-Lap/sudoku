@@ -347,6 +347,7 @@ const VALID_CHALLENGE_IDS = new Set([
   "word_st_150", "word_st_200", "word_st_250", "word_st_300", "word_hard_1", "word_hard_50",
   "word_hard_100", "word_hard_150", "word_hard_200", "cq_1", "cq_10", "cq_25",
   "cq_50", "cq_100", "cq_200", "cq_300", "cq_400", "cq_500",
+  "cq_600", "cq_700", "cq_800", "cq_900",
   "cq_1000", "ss_1", "ss_10", "ss_30", "ss_50", "ss_100",
   "ss_200", "ss_300", "ss_500",
   "crossum_stage_5", "crossum_stage_10", "crossum_stage_25", "crossum_stage_50", "crossum_stage_100",
