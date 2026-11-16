@@ -1,0 +1,70 @@
+{
+  "seo": {
+    "title": "오늘의 퍼즐 - 매일 새로운 데일리 퍼즐 | 퍼즐 가든",
+    "description": "매일 새로운 퍼즐 한 문제(스도쿠·워드스택). 클리어하면 코인 100과 퍼즐력 10을 받습니다."
+  },
+  "back": "뒤로",
+  "close": "닫기",
+  "dateLabel": "{{month}}월 {{day}}일",
+  "monthTitle": "{{year}}년 {{month}}월",
+  "progress": "<green>{{cleared}}</green> / {{total}} 완료",
+  "weekdays": {
+    "sun": "일",
+    "mon": "월",
+    "tue": "화",
+    "wed": "수",
+    "thu": "목",
+    "fri": "금",
+    "sat": "토"
+  },
+  "reward": {
+    "header": "{{month}}월 전체 클리어 보상",
+    "claimed": " · 획득 완료",
+    "avatarAlt": "월간 보상 아바타",
+    "plusAvatar": " + 전용 아바타",
+    "plusFrame": " + 전용 테두리",
+    "plusCardBack": " + 카드 뒷면",
+    "plusTitle": " + 칭호",
+    "exclusiveAvatar": "전용 아바타",
+    "plusFrameShort": " + 테두리",
+    "exclusiveCardBack": "전용 카드 뒷면",
+    "titleChip": "{{title}} 칭호"
+  },
+  "today": {
+    "done": "오늘 퍼즐 완료!",
+    "play": "오늘의 퍼즐 풀기",
+    "nextTomorrow": "내일 새 문제가 열려요",
+    "rewardHint": "클리어 시 🪙 {{coin}} + ⚡ 퍼즐력 {{pp}}"
+  },
+  "nav": {
+    "prevMonth": "이전 달",
+    "nextMonth": "다음 달"
+  },
+  "day": {
+    "unlockHint": "🪙 {{cost}}으로 해제",
+    "missedHint": "지나간 날은 다시 풀 수 없어요"
+  },
+  "legend": {
+    "cleared": "완료",
+    "today": "오늘",
+    "missed": "놓친 날"
+  },
+  "footnote": "매일 자정에 새 문제가 열립니다.<br/>10월부터는 이번 달에 지나간 문제를 🪙 {{cost}}으로 해제해 풀 수 있어요.<br/>달이 바뀌면 지난달의 남은 문제는 열 수 없어요.",
+  "unlock": {
+    "title": "{{date}} 문제 해제",
+    "body": "🪙 {{cost}}을 사용해 이 날의 퍼즐을 풀 수 있어요.<br/>클리어하면 보상도 그대로 받아요.",
+    "owned": "보유 🪙 {{coins}}",
+    "notEnough": "코인이 부족해요",
+    "cancel": "취소",
+    "confirm": "🪙 {{cost}} 해제"
+  },
+  "push": {
+    "ask": "🔔 내일 새 퍼즐이 열리면 알려드릴까요?",
+    "accept": "알림 받기",
+    "working": "설정 중…",
+    "later": "나중에",
+    "done": "🔔 알림을 켰어요. 내일 아침에 알려드릴게요!",
+    "denied": "알림이 꺼져 있어요. 나중에 브라우저 설정에서 켤 수 있어요.",
+    "error": "알림을 켜지 못했어요. 잠시 뒤 다시 시도해 주세요."
+  }
+}

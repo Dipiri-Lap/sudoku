@@ -9,6 +9,7 @@ import koQueens from '../locales/ko/queens.json';
 import koJigsaw from '../locales/ko/jigsaw.json';
 import koSnapspot from '../locales/ko/snapspot.json';
 import koModals from '../locales/ko/modals.json';
+import koDaily from '../locales/ko/daily.json';
 
 import enCommon from '../locales/en/common.json';
 import enLanding from '../locales/en/landing.json';
@@ -17,6 +18,7 @@ import enQueens from '../locales/en/queens.json';
 import enJigsaw from '../locales/en/jigsaw.json';
 import enSnapspot from '../locales/en/snapspot.json';
 import enModals from '../locales/en/modals.json';
+import enDaily from '../locales/en/daily.json';
 
 import jaCommon from '../locales/ja/common.json';
 import jaLanding from '../locales/ja/landing.json';
@@ -25,6 +27,7 @@ import jaQueens from '../locales/ja/queens.json';
 import jaJigsaw from '../locales/ja/jigsaw.json';
 import jaSnapspot from '../locales/ja/snapspot.json';
 import jaModals from '../locales/ja/modals.json';
+import jaDaily from '../locales/ja/daily.json';
 
 // 한국어가 원본. 키 타입은 ko json 에서 나온다(./types.d.ts).
 export const resources = {
@@ -36,6 +39,7 @@ export const resources = {
         jigsaw: koJigsaw,
         snapspot: koSnapspot,
         modals: koModals,
+        daily: koDaily,
     },
     en: {
         common: enCommon,
@@ -45,6 +49,7 @@ export const resources = {
         jigsaw: enJigsaw,
         snapspot: enSnapspot,
         modals: enModals,
+        daily: enDaily,
     },
     ja: {
         common: jaCommon,
@@ -54,6 +59,7 @@ export const resources = {
         jigsaw: jaJigsaw,
         snapspot: jaSnapspot,
         modals: jaModals,
+        daily: jaDaily,
     },
 } as const;
 

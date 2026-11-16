@@ -64,6 +64,7 @@ const AppContent: React.FC = () => {
   const { t } = useTranslation();
 
   // 해외판(/en/..., /ja/...)은 INTL_AVAILABLE_GAMES 에 든 게임만 연다. 나머지는 그 언어 홈(/en/, /ja/)으로.
+  // 오늘의 퍼즐(/daily)은 isDailyAvailable() — 이번 달(로컬 날짜) 게임이 그 목록에 있을 때만 — 을 따른다(isGameAvailable 안에서 처리).
   // 한국어는 이 분기를 타지 않는다.
   if (!isKo) {
     const firstSegment = pathname.split('/')[1] ?? '';

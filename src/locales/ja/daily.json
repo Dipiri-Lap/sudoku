@@ -1,0 +1,70 @@
+{
+  "seo": {
+    "title": "今日のパズル - 毎日新しいパズル | パズルガーデン",
+    "description": "毎日1問、新しいパズルが登場。クリアするとコイン100とパズル力10がもらえます。"
+  },
+  "back": "戻る",
+  "close": "閉じる",
+  "dateLabel": "{{month}}月{{day}}日",
+  "monthTitle": "{{year}}年{{month}}月",
+  "progress": "<green>{{cleared}}</green> / {{total}} クリア",
+  "weekdays": {
+    "sun": "日",
+    "mon": "月",
+    "tue": "火",
+    "wed": "水",
+    "thu": "木",
+    "fri": "金",
+    "sat": "土"
+  },
+  "reward": {
+    "header": "{{month}}月の全クリア報酬",
+    "claimed": " · 獲得済み",
+    "avatarAlt": "月間報酬アバター",
+    "plusAvatar": " + 限定アバター",
+    "plusFrame": " + 限定フレーム",
+    "plusCardBack": " + カード裏面",
+    "plusTitle": " + 称号",
+    "exclusiveAvatar": "限定アバター",
+    "plusFrameShort": " + フレーム",
+    "exclusiveCardBack": "限定カード裏面",
+    "titleChip": "称号「{{title}}」"
+  },
+  "today": {
+    "done": "今日のパズル完了！",
+    "play": "今日のパズルを解く",
+    "nextTomorrow": "明日また新しい問題が出ます",
+    "rewardHint": "クリアで 🪙 {{coin}} + ⚡ パズル力 {{pp}}"
+  },
+  "nav": {
+    "prevMonth": "前の月",
+    "nextMonth": "次の月"
+  },
+  "day": {
+    "unlockHint": "🪙 {{cost}}で解放",
+    "missedHint": "過ぎた日はもう解けません"
+  },
+  "legend": {
+    "cleared": "クリア",
+    "today": "今日",
+    "missed": "見逃した日"
+  },
+  "footnote": "毎日0時に新しい問題が出ます。<br/>今月の過ぎた日の問題は 🪙 {{cost}}で解放して解けます。<br/>月が変わると、前の月の残りの問題は開けません。",
+  "unlock": {
+    "title": "{{date}}の問題を解放",
+    "body": "🪙 {{cost}}を使って、この日のパズルを解けます。<br/>クリアすれば報酬もそのままもらえます。",
+    "owned": "所持 🪙 {{coins}}",
+    "notEnough": "コインが足りません",
+    "cancel": "キャンセル",
+    "confirm": "🪙 {{cost}} 解放"
+  },
+  "push": {
+    "ask": "🔔 明日の新しいパズルが出たらお知らせしましょうか？",
+    "accept": "通知を受け取る",
+    "working": "設定中…",
+    "later": "あとで",
+    "done": "🔔 通知をオンにしました。明日の朝お知らせします！",
+    "denied": "通知がオフになっています。あとでブラウザの設定からオンにできます。",
+    "error": "通知をオンにできませんでした。しばらくしてからもう一度お試しください。"
+  }
+}

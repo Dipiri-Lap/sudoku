@@ -43,6 +43,22 @@
       ]
     },
     {
+      "collectionGroup": "pushTokens",
+      "fieldPath": "pushHourUtc",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
+      "collectionGroup": "pushTokens",
+      "fieldPath": "updatedAt",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
       "collectionGroup": "snapspotProgress",
       "fieldPath": "clearedStage",
       "indexes": [

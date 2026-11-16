@@ -399,6 +399,15 @@ const QueensGame: React.FC = () => {
     }
   }, [queens]);
 
+  // Analytics: stage_clear (once per win)
+  const clearLoggedRef = useRef(false);
+  useEffect(() => {
+    if (!won) { clearLoggedRef.current = false; return; }
+    if (clearLoggedRef.current) return;
+    clearLoggedRef.current = true;
+    logEvent('stage_clear', { game: 'queens', level: level.id });
+  }, [won, level.id]);
+
   // Coin & puzzle power reward on win
   useEffect(() => {
     if (won && !isTutorial && !hasAwardedCoins.current) {

@@ -1,16 +1,31 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useTranslation, Trans } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Check, Lock, X } from 'lucide-react';
 import { useDailyPuzzle, isUnlockableDate, DAILY_UNLOCK_COST, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
-import { loadMonth, hasMonth, getDailyPuzzle, todayKey, toDateKey, type DailyPuzzle } from '../data/loader';
+import { loadMonth, hasMonth, getDailyPuzzle, todayKey, toDateKey, dailyGameOf, type DailyPuzzle } from '../data/loader';
+import { isDailyGameAvailable, localeHref } from '../../../i18n/locale';
+import { challengeTitle, challengeCondition } from '../../../common/utils/localizedData';
 import CoinDisplay from '../../../common/components/CoinDisplay';
 import { useCoins } from '../../../context/CoinContext';
 import { frameStyle, frameClass } from '../../../common/data/avatarFrames';
 import { useChallenges } from '../../../context/ChallengeContext';
 import { DAILY_CHALLENGES } from '../../../data/challenges';
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const WEEKDAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+const SITE = 'https://puzzles.tmhub.co.kr';
+
+/** 데일리 게임 id → common.games.<key>.name */
+const GAME_NAME_KEY = { sudoku: 'sudoku', 'word-sort': 'wordSort', snapspot: 'snapspot', queens: 'queens', jigsaw: 'jigsaw' } as const;
+/** 데이터의 영문 난이도 → common.difficulty.<key> (워드스택 달은 한국어 난이도를 그대로 쓴다: 한국어판 전용) */
+const DIFFICULTY_KEY = {
+    'Very Easy': 'veryEasy', Easy: 'easy', Beginner: 'beginner', Medium: 'medium',
+    Hard: 'hard', Expert: 'expert', Master: 'master',
+} as const;
+
+/** 이 달로 이동할 수 있는지: 문제가 있고, 그 달 게임이 현재 언어에서 열려 있어야 한다(한국어는 문제만 있으면). */
+const canShowMonth = (key: string): boolean => hasMonth(key) && isDailyGameAvailable(dailyGameOf(key) ?? undefined);
 const IS_DEV = import.meta.env.DEV;
 
 /** 하루 칸의 상태 */
@@ -23,6 +38,8 @@ type DayState =
 
 const DailyPuzzleCalendar: React.FC = () => {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation('daily');
+    const { t: tc } = useTranslation('common');
     const { clearedDates, unlockedDates, unlockDaily } = useDailyPuzzle();
     const { coins } = useCoins();
     const { isChallengeCompleted } = useChallenges();
@@ -55,6 +72,20 @@ const DailyPuzzleCalendar: React.FC = () => {
 
     const puzzleDates = useMemo(() => new Set(puzzles.map(p => p.date)), [puzzles]);
     const [year, month] = monthKey.split('-').map(Number);
+
+    // 날짜 표기는 언어마다 달라서 월 이름(영어)도 같이 넘긴다. ko/ja 는 숫자만 쓴다.
+    const monthNameOf = (y: number, m: number, style: 'long' | 'short'): string => {
+        try {
+            return new Intl.DateTimeFormat(i18n.language, { month: style, timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 1)));
+        } catch {
+            return String(m);
+        }
+    };
+    const dateLabel = (date: string): string => {
+        const y = Number(date.slice(0, 4)), m = Number(date.slice(5, 7)), d = Number(date.slice(8));
+        return t('dateLabel', { month: m, day: d, monthShort: monthNameOf(y, m, 'short') });
+    };
+    const monthName = monthNameOf(year, month, 'long');
 
     // 달력 격자: 1일이 시작되는 요일만큼 앞을 비운다.
     const cells = useMemo(() => {
@@ -96,7 +127,7 @@ const DailyPuzzleCalendar: React.FC = () => {
             setUnlockTarget(null);
             navigate(`/daily/play?date=${date}`);
         } else {
-            setUnlockError('코인이 부족해요');
+            setUnlockError(t('unlock.notEnough'));
         }
     };
 
@@ -116,24 +147,29 @@ const DailyPuzzleCalendar: React.FC = () => {
 
     // 달력이 다른 달을 보고 있어도 오늘 카드는 오늘 문제 기준이어야 해서 따로 읽는다
     // 달마다 게임이 바뀐다: 스도쿠 달은 game 필드가 없다
-    const todayLabel = todayPuzzle?.game === 'word-sort' ? `워드스택 · ${todayPuzzle.difficulty}` : '스도쿠 · 보통';
+    // (불러오기 전에는 예전처럼 스도쿠 · 보통)
+    const todayGame = todayPuzzle?.game ?? 'sudoku';
+    const todayDifficultyKey = todayPuzzle ? DIFFICULTY_KEY[todayPuzzle.difficulty as keyof typeof DIFFICULTY_KEY] : 'medium';
+    const todayLabel = `${tc(`games.${GAME_NAME_KEY[todayGame]}.name`)} · ${todayDifficultyKey ? tc(`difficulty.${todayDifficultyKey}`) : todayPuzzle?.difficulty ?? ''}`;
+    // 문제 파일이 아직 없는 달(로컬 날짜가 한국보다 앞선 사용자가 월말에 다음 달로 넘어간 경우 등)은 날짜만 보여 준다.
+    const todayMonthReady = hasMonth(today.slice(0, 7));
     const todayDone = clearedDates.has(today);
     const todayHasPuzzle = puzzleDates.has(today);
 
     return (
         <div className="mode-select-page" style={{ maxWidth: 520 }}>
             <Helmet>
-                <title>오늘의 퍼즐 - 매일 새로운 데일리 퍼즐 | 퍼즐 가든</title>
-                <meta name="description" content="매일 새로운 퍼즐 한 문제(스도쿠·워드스택). 클리어하면 코인 100과 퍼즐력 10을 받습니다." />
-                <link rel="canonical" href="https://puzzles.tmhub.co.kr/daily" />
-                <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"오늘의 퍼즐","item":"https://puzzles.tmhub.co.kr/daily"}]}`}</script>
+                <title>{t('seo.title')}</title>
+                <meta name="description" content={t('seo.description')} />
+                <link rel="canonical" href={`${SITE}${localeHref('/daily')}`} />
+                <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"${tc('brand')}","item":"${SITE}${localeHref('/')}"},{"@type":"ListItem","position":2,"name":"${tc('games.daily.name')}","item":"${SITE}${localeHref('/daily')}"}]}`}</script>
             </Helmet>
 
             <header className="mode-header" style={{ marginBottom: '1.5rem' }}>
-                <button className="back-btn" onClick={() => navigate('/')} aria-label="뒤로">
+                <button className="back-btn" onClick={() => navigate('/')} aria-label={t('back')}>
                     <ChevronLeft size={28} />
                 </button>
-                <h1>오늘의 퍼즐</h1>
+                <h1>{tc('games.daily.name')}</h1>
                 <div style={{ marginLeft: 'auto' }}>
                     <CoinDisplay />
                 </div>
@@ -163,18 +199,18 @@ const DailyPuzzleCalendar: React.FC = () => {
                         >
                             <img
                                 src={`/assets/profiles/${monthChallenge.reward.avatar}.png`}
-                                alt="월간 보상 아바타"
+                                alt={t('reward.avatarAlt')}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                             />
                         </div>
                     )}
                     <div style={{ minWidth: 0 }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: 700, color: monthRewardDone ? '#047857' : '#b45309' }}>
-                            {month}월 전체 클리어 보상{monthRewardDone ? ' · 획득 완료' : ''}
+                            {t('reward.header', { month, monthName })}{monthRewardDone ? t('reward.claimed') : ''}
                         </div>
-                        <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1e293b', margin: '1px 0' }}>{monthChallenge.title}</div>
+                        <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1e293b', margin: '1px 0' }}>{challengeTitle(monthChallenge)}</div>
                         <div style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>
-                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? ' + 전용 아바타' : ''}{monthChallenge.reward.frame ? ' + 전용 테두리' : ''}{monthChallenge.reward.cardBack ? ' + 카드 뒷면' : ''} + 칭호
+                            🪙 {monthChallenge.reward.coin}{monthChallenge.reward.avatar ? t('reward.plusAvatar') : ''}{monthChallenge.reward.frame ? t('reward.plusFrame') : ''}{monthChallenge.reward.cardBack ? t('reward.plusCardBack') : ''}{t('reward.plusTitle')}
                         </div>
                     </div>
                     <ChevronRight size={18} color={monthRewardDone ? '#047857' : '#b45309'} style={{ marginLeft: 'auto', flexShrink: 0 }} />
@@ -200,15 +236,15 @@ const DailyPuzzleCalendar: React.FC = () => {
             >
                 <div>
                     <div style={{ fontSize: '0.75rem', opacity: 0.9, fontWeight: 600 }}>
-                        {Number(today.slice(5, 7))}월 {Number(today.slice(8))}일 · {todayLabel}
+                        {dateLabel(today)}{todayMonthReady ? ` · ${todayLabel}` : ''}
                     </div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0.25rem 0' }}>
-                        {todayDone ? '오늘 퍼즐 완료!' : '오늘의 퍼즐 풀기'}
+                        {todayDone ? t('today.done') : t('today.play')}
                     </div>
                     <div style={{ fontSize: '0.8rem', opacity: 0.95 }}>
                         {todayDone
-                            ? '내일 새 문제가 열려요'
-                            : `클리어 시 🪙 ${DAILY_REWARD_COIN} + ⚡ 퍼즐력 ${DAILY_REWARD_PUZZLE_POWER}`}
+                            ? t('today.nextTomorrow')
+                            : t('today.rewardHint', { coin: DAILY_REWARD_COIN, pp: DAILY_REWARD_PUZZLE_POWER })}
                     </div>
                 </div>
                 <div style={{
@@ -234,31 +270,31 @@ const DailyPuzzleCalendar: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.7rem' }}>
                     <button
                         onClick={() => setMonthKey(prevKey)}
-                        disabled={!hasMonth(prevKey)}
+                        disabled={!canShowMonth(prevKey)}
                         style={{
                             background: 'none', border: 'none', padding: 6, display: 'flex',
-                            color: hasMonth(prevKey) ? '#334155' : '#cbd5e1',
-                            cursor: hasMonth(prevKey) ? 'pointer' : 'default',
+                            color: canShowMonth(prevKey) ? '#334155' : '#cbd5e1',
+                            cursor: canShowMonth(prevKey) ? 'pointer' : 'default',
                         }}
-                        aria-label="이전 달"
+                        aria-label={t('nav.prevMonth')}
                     >
                         <ChevronLeft size={20} />
                     </button>
                     <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1e293b' }}>{year}년 {month}월</div>
+                        <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1e293b' }}>{t('monthTitle', { year, month, monthName })}</div>
                         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginTop: 2 }}>
-                            <span style={{ color: '#16a34a', fontWeight: 800 }}>{clearedThisMonth}</span> / {totalThisMonth} 완료
+                            <Trans t={t} i18nKey="progress" values={{ cleared: clearedThisMonth, total: totalThisMonth }} components={{ green: <span style={{ color: '#16a34a', fontWeight: 800 }} /> }} />
                         </div>
                     </div>
                     <button
                         onClick={() => setMonthKey(nextKey)}
-                        disabled={!hasMonth(nextKey)}
+                        disabled={!canShowMonth(nextKey)}
                         style={{
                             background: 'none', border: 'none', padding: 6, display: 'flex',
-                            color: hasMonth(nextKey) ? '#334155' : '#cbd5e1',
-                            cursor: hasMonth(nextKey) ? 'pointer' : 'default',
+                            color: canShowMonth(nextKey) ? '#334155' : '#cbd5e1',
+                            cursor: canShowMonth(nextKey) ? 'pointer' : 'default',
                         }}
-                        aria-label="다음 달"
+                        aria-label={t('nav.nextMonth')}
                     >
                         <ChevronRight size={20} />
                     </button>
@@ -269,7 +305,7 @@ const DailyPuzzleCalendar: React.FC = () => {
                         <div key={w} style={{
                             textAlign: 'center', fontSize: '0.72rem', fontWeight: 700, padding: '0.3rem 0',
                             color: i === 0 ? '#ef4444' : i === 6 ? '#3b82f6' : '#64748b',
-                        }}>{w}</div>
+                        }}>{t(`weekdays.${w}`)}</div>
                     ))}
                 </div>
 
@@ -301,7 +337,7 @@ const DailyPuzzleCalendar: React.FC = () => {
                                     else if (unlockable) { setUnlockError(null); setUnlockTarget(date); }
                                 }}
                                 disabled={!playable && !unlockable}
-                                title={unlockable ? `🪙 ${DAILY_UNLOCK_COST}으로 해제` : st === 'missed' ? '지나간 날은 다시 풀 수 없어요' : undefined}
+                                title={unlockable ? t('day.unlockHint', { cost: DAILY_UNLOCK_COST }) : st === 'missed' ? t('day.missedHint') : undefined}
                                 style={{
                                     aspectRatio: '1 / 1',
                                     display: 'flex', flexDirection: 'column',
@@ -332,15 +368,13 @@ const DailyPuzzleCalendar: React.FC = () => {
                 display: 'flex', justifyContent: 'center', gap: '0.9rem',
                 marginTop: '0.9rem', fontSize: '0.72rem', color: '#475569', fontWeight: 600, flexWrap: 'wrap',
             }}>
-                <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 3, background: '#22c55e', marginRight: 4 }} />완료</span>
-                <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 3, background: '#8b5cf6', marginRight: 4 }} />오늘</span>
-                <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 3, background: '#cbd5e1', marginRight: 4 }} />놓친 날</span>
+                <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 3, background: '#22c55e', marginRight: 4 }} />{t('legend.cleared')}</span>
+                <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 3, background: '#8b5cf6', marginRight: 4 }} />{t('legend.today')}</span>
+                <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 3, background: '#cbd5e1', marginRight: 4 }} />{t('legend.missed')}</span>
             </div>
 
             <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#64748b', marginTop: '0.9rem', lineHeight: 1.6 }}>
-                매일 자정에 새 문제가 열립니다.<br />
-                10월부터는 이번 달에 지나간 문제를 🪙 {DAILY_UNLOCK_COST}으로 해제해 풀 수 있어요.<br />
-                달이 바뀌면 지난달의 남은 문제는 열 수 없어요.
+                <Trans t={t} i18nKey="footnote" values={{ cost: DAILY_UNLOCK_COST }} />
             </p>
 
             {showReward && monthChallenge && (
@@ -361,19 +395,19 @@ const DailyPuzzleCalendar: React.FC = () => {
                     >
                         <button
                             onClick={() => setShowReward(false)}
-                            aria-label="닫기"
+                            aria-label={t('close')}
                             style={{ position: 'absolute', top: 10, right: 10, background: 'none', border: 'none', padding: 6, display: 'flex', color: '#64748b', cursor: 'pointer' }}
                         ><X size={20} /></button>
                         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: monthRewardDone ? '#047857' : '#b45309' }}>
-                            {month}월 전체 클리어 보상{monthRewardDone ? ' · 획득 완료' : ''}
+                            {t('reward.header', { month, monthName })}{monthRewardDone ? t('reward.claimed') : ''}
                         </div>
-                        <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1e293b', margin: '2px 0 4px' }}>{monthChallenge.title}</div>
-                        <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{monthChallenge.condition}</div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1e293b', margin: '2px 0 4px' }}>{challengeTitle(monthChallenge)}</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{challengeCondition(monthChallenge)}</div>
                         <div style={{ height: 8, background: '#e2e8f0', borderRadius: 6, overflow: 'hidden', margin: '0.7rem 0 0.2rem' }}>
                             <div style={{ width: `${totalThisMonth ? Math.min(100, (clearedThisMonth / totalThisMonth) * 100) : 0}%`, height: '100%', background: 'linear-gradient(90deg, #22c55e, #16a34a)' }} />
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>
-                            <span style={{ color: '#16a34a', fontWeight: 800 }}>{clearedThisMonth}</span> / {totalThisMonth} 완료
+                            <Trans t={t} i18nKey="progress" values={{ cleared: clearedThisMonth, total: totalThisMonth }} components={{ green: <span style={{ color: '#16a34a', fontWeight: 800 }} /> }} />
                         </div>
 
                         {/* 아바타 + 테두리, 카드 뒷면을 크게 (테두리 장식이 상자 밖으로 나오므로 여백을 둔다) */}
@@ -390,28 +424,28 @@ const DailyPuzzleCalendar: React.FC = () => {
                                     >
                                         <img
                                             src={`/assets/profiles/${monthChallenge.reward.avatar}.png`}
-                                            alt="전용 아바타"
+                                            alt={t('reward.exclusiveAvatar')}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                                         />
                                     </div>
-                                    <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569' }}>전용 아바타{monthChallenge.reward.frame ? ' + 테두리' : ''}</div>
+                                    <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569' }}>{t('reward.exclusiveAvatar')}{monthChallenge.reward.frame ? t('reward.plusFrameShort') : ''}</div>
                                 </div>
                             )}
                             {monthChallenge.reward.cardBack && (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
                                     <img
                                         src={`/assets/word-sort/${monthChallenge.reward.cardBack}.webp`}
-                                        alt="전용 카드 뒷면"
+                                        alt={t('reward.exclusiveCardBack')}
                                         style={{ width: 94, height: 132, objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}
                                     />
-                                    <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569' }}>전용 카드 뒷면</div>
+                                    <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569' }}>{t('reward.exclusiveCardBack')}</div>
                                 </div>
                             )}
                         </div>
 
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                             <div style={{ background: '#fef9e7', border: '1px solid #f4c430', borderRadius: 20, padding: '0.35rem 0.85rem', fontWeight: 800, color: '#b8860b', fontSize: '0.88rem' }}>🪙 {monthChallenge.reward.coin}</div>
-                            <div style={{ background: '#eef2ff', border: '1px solid #6366f1', borderRadius: 20, padding: '0.35rem 0.85rem', fontWeight: 800, color: '#4338ca', fontSize: '0.88rem' }}>{monthChallenge.title} 칭호</div>
+                            <div style={{ background: '#eef2ff', border: '1px solid #6366f1', borderRadius: 20, padding: '0.35rem 0.85rem', fontWeight: 800, color: '#4338ca', fontSize: '0.88rem' }}>{t('reward.titleChip', { title: challengeTitle(monthChallenge) })}</div>
                         </div>
                     </div>
                 </div>
@@ -434,13 +468,12 @@ const DailyPuzzleCalendar: React.FC = () => {
                         }}
                     >
                         <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1e293b', marginBottom: '0.4rem' }}>
-                            {Number(unlockTarget.slice(5, 7))}월 {Number(unlockTarget.slice(8))}일 문제 해제
+                            {t('unlock.title', { date: dateLabel(unlockTarget) })}
                         </div>
                         <div style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, marginBottom: '0.3rem' }}>
-                            🪙 {DAILY_UNLOCK_COST}을 사용해 이 날의 퍼즐을 풀 수 있어요.<br />
-                            클리어하면 보상도 그대로 받아요.
+                            <Trans t={t} i18nKey="unlock.body" values={{ cost: DAILY_UNLOCK_COST }} />
                         </div>
-                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '0.6rem' }}>보유 🪙 {coins}</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '0.6rem' }}>{t('unlock.owned', { coins })}</div>
                         {unlockError && (
                             <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: 700, marginBottom: '0.6rem' }}>{unlockError}</div>
                         )}
@@ -449,7 +482,7 @@ const DailyPuzzleCalendar: React.FC = () => {
                                 onClick={() => setUnlockTarget(null)}
                                 disabled={unlocking}
                                 style={{ flex: 1, padding: '0.7rem', borderRadius: 12, border: '1px solid #e1e8ed', background: 'white', color: '#475569', fontWeight: 700, cursor: 'pointer' }}
-                            >취소</button>
+                            >{t('unlock.cancel')}</button>
                             <button
                                 onClick={confirmUnlock}
                                 disabled={unlocking || coins < DAILY_UNLOCK_COST}
@@ -458,7 +491,7 @@ const DailyPuzzleCalendar: React.FC = () => {
                                     background: coins < DAILY_UNLOCK_COST ? '#cbd5e1' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                                     cursor: coins < DAILY_UNLOCK_COST ? 'not-allowed' : 'pointer',
                                 }}
-                            >🪙 {DAILY_UNLOCK_COST} 해제</button>
+                            >{t('unlock.confirm', { cost: DAILY_UNLOCK_COST })}</button>
                         </div>
                     </div>
                 </div>

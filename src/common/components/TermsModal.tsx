@@ -141,17 +141,18 @@ const buildTermsContent = (t: TFunction<'modals'>): Record<TermsType, { title: s
                         </tbody>
                     </table>
                 </Section>
-                {/* 해외(영어판) 이용자용 — 애드센스 쿠키 고지, GDPR/CCPA 권리. 한국어판 방침은 기존 문구 그대로 둔다. */}
+                {/* 광고 쿠키 고지(애드센스 정책상 필수) — 모든 언어에 표시 */}
+                <Section title={t('terms.privacy.cookies.title')}>
+                    <ul>
+                        <li>{t('terms.privacy.cookies.i1')}</li>
+                        <li>{t('terms.privacy.cookies.i2')}</li>
+                        <li>{t('terms.privacy.cookies.i3')}</li>
+                        <li>{t('terms.privacy.cookies.i4')}</li>
+                    </ul>
+                </Section>
+                {/* 해외 이용자 권리(GDPR/CCPA) — 해외판에만 표시 */}
                 {!isKo && (
                     <>
-                        <Section title={t('terms.privacy.cookies.title')}>
-                            <ul>
-                                <li>{t('terms.privacy.cookies.i1')}</li>
-                                <li>{t('terms.privacy.cookies.i2')}</li>
-                                <li>{t('terms.privacy.cookies.i3')}</li>
-                                <li>{t('terms.privacy.cookies.i4')}</li>
-                            </ul>
-                        </Section>
                         <Section title={t('terms.privacy.international.title')}>
                             <ul>
                                 <li>{t('terms.privacy.international.i1')}</li>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { dismissPushPrompt, enablePush, shouldAskPush } from '../../../services/pushNotification';
 
 type Phase = 'hidden' | 'ask' | 'working' | 'done' | 'denied' | 'error';
@@ -8,6 +9,7 @@ type Phase = 'hidden' | 'ask' | 'working' | 'done' | 'denied' | 'error';
  * 이미 허용·차단했거나 최근에 "나중에"를 눌렀다면 아무것도 보이지 않는다.
  */
 const DailyPushPrompt: React.FC = () => {
+    const { t } = useTranslation('daily');
     const [phase, setPhase] = useState<Phase>('hidden');
 
     useEffect(() => {
@@ -37,27 +39,27 @@ const DailyPushPrompt: React.FC = () => {
         fontSize: '0.88rem', fontWeight: 700, lineHeight: 1.5,
     };
 
-    if (phase === 'done') return <div style={box}>🔔 알림을 켰어요. 내일 아침에 알려드릴게요!</div>;
-    if (phase === 'denied') return <div style={{ ...box, background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569' }}>알림이 꺼져 있어요. 나중에 브라우저 설정에서 켤 수 있어요.</div>;
-    if (phase === 'error') return <div style={{ ...box, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>알림을 켜지 못했어요. 잠시 뒤 다시 시도해 주세요.</div>;
+    if (phase === 'done') return <div style={box}>{t('push.done')}</div>;
+    if (phase === 'denied') return <div style={{ ...box, background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569' }}>{t('push.denied')}</div>;
+    if (phase === 'error') return <div style={{ ...box, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>{t('push.error')}</div>;
 
     return (
         <div style={box}>
-            <div>🔔 내일 새 퍼즐이 열리면 알려드릴까요?</div>
+            <div>{t('push.ask')}</div>
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.55rem' }}>
                 <button
                     onClick={accept}
                     disabled={phase === 'working'}
                     style={{ padding: '0.4rem 1rem', borderRadius: 10, border: 'none', background: '#2563eb', color: 'white', fontWeight: 700, cursor: 'pointer' }}
                 >
-                    {phase === 'working' ? '설정 중…' : '알림 받기'}
+                    {phase === 'working' ? t('push.working') : t('push.accept')}
                 </button>
                 <button
                     onClick={later}
                     disabled={phase === 'working'}
                     style={{ padding: '0.4rem 1rem', borderRadius: 10, border: '1px solid #93c5fd', background: 'white', color: '#1e3a8a', fontWeight: 700, cursor: 'pointer' }}
                 >
-                    나중에
+                    {t('push.later')}
                 </button>
             </div>
         </div>

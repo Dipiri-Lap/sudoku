@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
-  addDays, buildEveningMessage, buildMorningMessage, computeStreak, daysInMonth, kstDateKey, monthProgress,
+  addDays, buildEveningMessage, buildMorningMessage, computeStreak, dailyLinkFor, daysInMonth, eveningQueryHour,
+  isDailyOpenFor, kstDateKey, localDateKey, localHour, monthProgress, morningHourUtc, normalizeLang,
+  normalizeTimeZone, slotDecision,
 } from './dailyPush';
+import { tokenDefaultsPatch } from './dailyPushSender';
 
 describe('날짜 계산', () => {
   it('한국 시간 기준 날짜 키', () => {
@@ -74,5 +77,87 @@ describe('저녁 알림', () => {
     expect(buildEveningMessage(['2026-10-28'], '2026-10-28')).toBeNull();
     expect(buildEveningMessage([], '2026-10-28')).toBeNull();
     expect(buildEveningMessage(['2026-10-20'], '2026-10-28')).toBeNull();
+  });
+});
+
+describe('사용자 시간대', () => {
+  it('로컬 날짜·시', () => {
+    const now = new Date('2026-11-16T05:00:00Z'); // KST 14시 / LA 전날 21시 / 런던 5시
+    expect(localDateKey(now, 'Asia/Seoul')).toBe('2026-11-16');
+    expect(localDateKey(now, 'America/Los_Angeles')).toBe('2026-11-15');
+    expect(localHour(now, 'America/Los_Angeles')).toBe(21);
+    expect(localHour(now, 'Europe/London')).toBe(5);
+    expect(localHour(new Date('2026-11-16T00:00:00Z'), 'Europe/London')).toBe(0);
+  });
+  it('잘못된 시간대·언어는 기본값', () => {
+    expect(normalizeTimeZone('Not/AZone')).toBe('Asia/Seoul');
+    expect(normalizeTimeZone(undefined)).toBe('Asia/Seoul');
+    expect(normalizeLang('fr')).toBe('ko');
+    expect(normalizeLang('ja')).toBe('ja');
+  });
+  it('아침 8시가 되는 UTC 시 (pushHourUtc)', () => {
+    const winter = new Date('2026-11-16T12:00:00Z');
+    const summer = new Date('2026-07-01T12:00:00Z');
+    expect(morningHourUtc('Asia/Seoul', winter)).toBe(23);
+    expect(morningHourUtc('America/Los_Angeles', winter)).toBe(16); // PST UTC-8
+    expect(morningHourUtc('America/Los_Angeles', summer)).toBe(15); // PDT UTC-7
+    expect(morningHourUtc('Asia/Tokyo', winter)).toBe(23);
+    expect(morningHourUtc('Asia/Kolkata', winter)).toBe(3); // UTC+5:30 → 3:00 UTC 에 로컬 8:30
+    expect(morningHourUtc('Pacific/Kiritimati', winter)).toBe(18); // UTC+14
+  });
+  it('저녁 슬롯은 아침 pushHourUtc 보다 13시간 뒤에 조회한다', () => {
+    expect(eveningQueryHour(12)).toBe(23); // KST 21시 = UTC 12시 → 아침 pushHourUtc 23
+    expect(eveningQueryHour(5)).toBe(16); // LA 21시(PST) = UTC 5시 → 아침 16
+    expect(eveningQueryHour(13)).toBe(0);
+  });
+  it('어긋난 pushHourUtc 처리: 제시간·한 시간 늦음은 보내고, 한 시간 이르면 다음 정각으로', () => {
+    // LA, PDT→PST 로 바뀌었는데 pushHourUtc 가 15(PDT) 로 남은 경우: 15시 UTC = 로컬 7시
+    expect(slotDecision(new Date('2026-11-16T15:00:00Z'), 'America/Los_Angeles', 8)).toBe('later');
+    expect(slotDecision(new Date('2026-11-16T16:00:00Z'), 'America/Los_Angeles', 8)).toBe('send');
+    // 반대(PST→PDT): 16시 UTC = 로컬 9시 → 한 시간 늦게라도 보낸다
+    expect(slotDecision(new Date('2026-07-01T16:00:00Z'), 'America/Los_Angeles', 8)).toBe('send');
+    expect(slotDecision(new Date('2026-07-01T20:00:00Z'), 'America/Los_Angeles', 8)).toBe('skip');
+    expect(slotDecision(new Date('2026-11-16T12:00:00Z'), 'Asia/Seoul', 21)).toBe('send');
+  });
+  it('예전 토큰은 한국 시간·한국어로 채운다', () => {
+    const now = new Date('2026-11-16T12:00:00Z');
+    expect(tokenDefaultsPatch({ token: 'x' }, now)).toEqual({ tz: 'Asia/Seoul', lang: 'ko', pushHourUtc: 23 });
+    expect(tokenDefaultsPatch({ token: 'x', tz: 'America/Los_Angeles', lang: 'en', pushHourUtc: 16 }, now)).toBeNull();
+    expect(tokenDefaultsPatch({ token: 'x', tz: 'America/Los_Angeles', lang: 'en' }, now)).toEqual({ pushHourUtc: 16 });
+  });
+});
+
+describe('언어별 문구', () => {
+  it('영어·일본어 아침 문구', () => {
+    // 2026-12 는 등록된 달이 아니라 해외판에서는 닫혀 있으므로, 해외 공개 달(10월, 스도쿠)로 확인한다.
+    const cleared = ['2026-10-04', '2026-10-05'];
+    expect(buildMorningMessage(cleared, '2026-10-06', 'en')).toEqual({ title: "🧩 Today's puzzle is here!", body: "You're on a 2-day streak" });
+    expect(buildMorningMessage([], '2026-10-06', 'ja')?.body).toBe('今日も1問解いてみませんか？');
+  });
+  it('월간 보상 칭호도 언어에 맞춘다', () => {
+    const cleared = Array.from({ length: 28 }, (_, i) => `2026-10-${String(i + 1).padStart(2, '0')}`);
+    expect(buildMorningMessage(cleared, '2026-10-29', 'en')?.body).toBe('3 more to go for the October full-clear reward (Sudoku Zombie)');
+    expect(buildMorningMessage(cleared, '2026-10-29', 'ja')?.body).toBe('10月の全クリア報酬（数独ゾンビ）まであと3問です');
+    expect(monthProgress(cleared, '2026-10-29', 'ja')?.title).toBe('数独ゾンビ');
+  });
+  it('영어·일본어 저녁 문구', () => {
+    const cleared = ['2026-10-25', '2026-10-26', '2026-10-27'];
+    expect(buildEveningMessage(cleared, '2026-10-28', 'en')?.body).toBe("Solve today's puzzle to keep your 3-day streak");
+    expect(buildEveningMessage(['2026-10-27'], '2026-10-28', 'en')?.body).toBe("Solve today's puzzle to keep your 1-day streak");
+    expect(buildEveningMessage(cleared, '2026-10-28', 'ja')?.body).toBe('今日解かないと3日連続の記録が途切れます');
+  });
+  it('해외판은 그 달 게임이 해외 공개일 때만 보낸다 (워드스택 달·미등록 달은 닫힘)', () => {
+    expect(isDailyOpenFor('ko', '2026-11-16')).toBe(true);
+    expect(isDailyOpenFor('en', '2026-10-16')).toBe(true);
+    expect(isDailyOpenFor('en', '2026-11-16')).toBe(false);
+    expect(isDailyOpenFor('ja', '2027-01-01')).toBe(false);
+    expect(buildMorningMessage([], '2026-11-16', 'en')).toBeNull();
+    expect(buildMorningMessage([], '2026-11-16', 'ko')).not.toBeNull();
+    expect(buildEveningMessage(['2026-11-15'], '2026-11-16', 'ja')).toBeNull();
+  });
+  it('알림 링크', () => {
+    expect(dailyLinkFor('ko')).toBe('/daily');
+    expect(dailyLinkFor('en')).toBe('/en/daily');
+    expect(dailyLinkFor('ja')).toBe('/ja/daily');
   });
 });

@@ -2,6 +2,8 @@
 // 예외 하나: 홈(/) 첫 화면에서는 index.html 의 인라인 스크립트가 저장된 선택(LANG_PREF_KEY) 또는
 // 브라우저 언어를 보고 /en/ · /ja/ 로 보낸다(검색 봇 제외). 게임 주소로 직접 온 경우는 자동 이동하지 않는다.
 
+import { dailyGameOf, monthKeyOf, todayKey } from '../features/daily/data/months';
+
 /** 지원 언어. 첫 번째(ko)가 원본이자 접두사 없는 기본 언어. */
 export const LANGS = ['ko', 'en', 'ja'] as const;
 export type Lang = (typeof LANGS)[number];
@@ -73,8 +75,36 @@ export const EN_AVAILABLE_GAMES = INTL_AVAILABLE_GAMES;
 /** @deprecated IntlGameId 를 쓸 것. */
 export type EnGameId = IntlGameId;
 
+const isIntlGame = (gameId: string): boolean => (INTL_AVAILABLE_GAMES as readonly string[]).includes(gameId);
+
+/** 데일리(오늘의 퍼즐) 라우트 id. 해외판에서는 그 달의 게임에 따라 열고 닫힌다. */
+export const DAILY_ROUTE_ID = 'daily';
+
+function isDailyAvailableIn(lang: Lang, monthKey: string): boolean {
+    if (lang === 'ko') return true;
+    const game = dailyGameOf(monthKey);
+    return game !== null && isIntlGame(game);
+}
+
+/**
+ * 오늘의 퍼즐이 현재 언어에서 열려 있는지. 한국어는 항상 true.
+ * 해외판은 그 달(기본: 사용자 로컬 날짜의 이번 달)의 게임이 INTL_AVAILABLE_GAMES 에 있을 때만 연다
+ * (예: 워드스택 달은 닫고 스도쿠·스냅스팟 달은 연다). 문제 파일이 아직 없는 달도 닫는다.
+ * isGameAvailable('daily') 도 이 판단을 따르므로 App 라우트 게이트·랜딩·언어 전환이 같이 움직인다.
+ */
+export function isDailyAvailable(monthKey: string = monthKeyOf(todayKey())): boolean {
+    return isDailyAvailableIn(currentLang, monthKey);
+}
+
+/** 데일리 한 문제의 게임(game 필드, 없으면 sudoku)이 현재 언어에서 열려 있는지. 한국어는 항상 true. */
+export function isDailyGameAvailable(game: string | undefined): boolean {
+    return isKo || isIntlGame(game ?? 'sudoku');
+}
+
 function isGameAvailableIn(lang: Lang, gameId: string): boolean {
-    return lang === 'ko' || (INTL_AVAILABLE_GAMES as readonly string[]).includes(gameId);
+    if (lang === 'ko') return true;
+    if (gameId === DAILY_ROUTE_ID) return isDailyAvailableIn(lang, monthKeyOf(todayKey()));
+    return isIntlGame(gameId);
 }
 
 /** 게임 id(=라우트 첫 세그먼트)가 현재 언어에서 열려 있는지. 한국어는 항상 true. */

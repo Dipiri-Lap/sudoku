@@ -5,6 +5,9 @@ import WordSortGame from '../../word-sort/components/WordSortGame';
 import { WordSortProvider } from '../../word-sort/context/WordSortContext';
 import { useDailyPuzzle } from '../../../context/DailyPuzzleContext';
 import { getDailyPuzzle, isWordSortDaily, todayKey, type DailyPuzzle } from '../data/loader';
+import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
+import { isDailyGameAvailable, isKo } from '../../../i18n/locale';
 
 /**
  * /daily/play — 그날의 문제가 어떤 게임인지(game 필드)에 따라 화면을 고른다.
@@ -14,6 +17,7 @@ import { getDailyPuzzle, isWordSortDaily, todayKey, type DailyPuzzle } from '../
 const DailyPlay: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { t } = useTranslation('daily');
     const { clearedDates, unlockedDates } = useDailyPuzzle();
     const date = new URLSearchParams(location.search).get('date') || todayKey();
     const [puzzle, setPuzzle] = useState<DailyPuzzle | null>(null);
@@ -23,7 +27,8 @@ const DailyPlay: React.FC = () => {
         setPuzzle(null);
         getDailyPuzzle(date).then(p => {
             if (cancelled) return;
-            if (!p) navigate('/daily', { replace: true });
+            // 문제가 없거나(파일이 아직 없는 달 포함), 해외판에서 열지 않는 게임(워드스택 등)의 날이면 캘린더로.
+            if (!p || !isDailyGameAvailable(p.game)) navigate('/daily', { replace: true });
             else setPuzzle(p);
         });
         return () => { cancelled = true; };
@@ -45,7 +50,13 @@ const DailyPlay: React.FC = () => {
         );
     }
 
-    return <SudokuGame />;
+    return (
+        <>
+            {/* 해외판은 index.html 의 한국어 기본 제목이 남지 않게 덮는다(한국어판은 예전 그대로) */}
+            {!isKo && <Helmet><title>{t('seo.title')}</title></Helmet>}
+            <SudokuGame />
+        </>
+    );
 };
 
 export default DailyPlay;

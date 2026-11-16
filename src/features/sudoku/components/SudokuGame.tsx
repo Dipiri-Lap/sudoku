@@ -9,7 +9,7 @@ import type { Difficulty } from '../../../engine/generator';
 import { Play, Pause, ChevronLeft, ArrowRight, Trophy, Heart, House, Palette } from 'lucide-react';
 import { useSudokuTheme, ALL_THEME_CLASSES } from '../context/SudokuThemeContext';
 import SudokuThemeModal from './SudokuThemeModal';
-import { auth } from '../../../firebase';
+import { auth, logEvent } from '../../../firebase';
 import { getUserProfile, saveRecord, updateProfileInfo } from '../../../services/rankingService';
 import { useCoins } from '../../../context/CoinContext';
 import { HINT_COST } from './Controls';
@@ -17,6 +17,7 @@ import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 import { useDailyPuzzle, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
 import { getDailyPuzzle, todayKey } from '../../daily/data/loader';
 import DailyPushPrompt from '../../daily/components/DailyPushPrompt';
+import { challengeTitle } from '../../../common/utils/localizedData';
 import { CalendarDays } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../i18n';
@@ -94,6 +95,8 @@ const SudokuGame: React.FC = () => {
     useEffect(() => {
         if (state.isWinner && !hasAwardedCoins.current) {
             hasAwardedCoins.current = true;
+            const clearMode = { TimeAttack: 'time_attack', Stage: 'stage', Beginner: 'beginner', BigSize: 'big_size', Daily: 'daily' }[state.gameMode];
+            logEvent('stage_clear', { game: 'sudoku', mode: clearMode, level: state.currentLevel ?? 0, difficulty: state.difficulty });
             // 오늘의 퍼즐은 보상 체계가 따로다(코인 100 + 퍼즐력 10).
             // 일반 클리어 보상과 겹쳐 주지 않는다.
             if (state.gameMode === 'Daily') {
@@ -501,7 +504,7 @@ const SudokuGame: React.FC = () => {
                             )}
                             {state.gameMode === 'Daily' && monthReward && (
                                 <div style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '1px solid #f59e0b', borderRadius: 14, padding: '0.6rem 0.9rem', textAlign: 'center', color: '#92400e', fontWeight: 800, fontSize: '0.9rem', lineHeight: 1.5 }}>
-                                    {t('game.monthComplete', { title: monthReward.title })}<br />
+                                    {t('game.monthComplete', { title: challengeTitle(monthReward) })}<br />
                                     <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>
                                         🪙 +{monthReward.reward.coin}{monthReward.reward.avatar ? t('game.rewardAvatar') : ''}{monthReward.reward.frame ? t('game.rewardFrame') : ''}{monthReward.reward.cardBack ? t('game.rewardCardBack') : ''}
                                     </span>

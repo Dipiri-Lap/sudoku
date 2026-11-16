@@ -183,7 +183,6 @@ function HomeScreen({
     onOpenShop: () => void;
 }) {
     const { t } = useTranslation('jigsaw');
-    const { t: tc } = useTranslation('common');
     const navigate = useNavigate();
     const stars = loadStars();
     const total = Object.values(stars).reduce((a, b) => a + b, 0);
@@ -209,7 +208,10 @@ function HomeScreen({
     return (
         <div className="jg-screen jg-home">
             {/* PWA 서비스 워커가 재방문 때 기본 index.html(한국어 홈 제목)을 내주므로 탭 제목을 직접 세팅한다 */}
-            <Helmet><title>{`${tc('games.jigsaw.name')} - ${tc('brand')}`}</title></Helmet>
+            <Helmet>
+                <title>{t('seo.title')}</title>
+                <meta name="description" content={t('seo.description')} />
+            </Helmet>
             <header className="jg-top">
                 <button className="jg-ghost-btn" onClick={() => navigate('/')} aria-label={t('home.homeAria')}>
                     <ChevronLeft size={28} strokeWidth={3.2} />

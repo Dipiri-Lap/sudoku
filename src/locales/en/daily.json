@@ -1,0 +1,70 @@
+{
+  "seo": {
+    "title": "Daily Puzzle - A New Puzzle Every Day | Puzzle Garden",
+    "description": "One fresh puzzle every day. Clear it to earn 100 coins and 10 Puzzle Power."
+  },
+  "back": "Back",
+  "close": "Close",
+  "dateLabel": "{{monthShort}} {{day}}",
+  "monthTitle": "{{monthName}} {{year}}",
+  "progress": "<green>{{cleared}}</green> / {{total}} cleared",
+  "weekdays": {
+    "sun": "S",
+    "mon": "M",
+    "tue": "T",
+    "wed": "W",
+    "thu": "T",
+    "fri": "F",
+    "sat": "S"
+  },
+  "reward": {
+    "header": "{{monthName}} full-clear reward",
+    "claimed": " · Claimed",
+    "avatarAlt": "Monthly reward avatar",
+    "plusAvatar": " + exclusive avatar",
+    "plusFrame": " + exclusive frame",
+    "plusCardBack": " + card back",
+    "plusTitle": " + title",
+    "exclusiveAvatar": "Exclusive avatar",
+    "plusFrameShort": " + frame",
+    "exclusiveCardBack": "Exclusive card back",
+    "titleChip": "{{title}} title"
+  },
+  "today": {
+    "done": "Today's puzzle done!",
+    "play": "Play today's puzzle",
+    "nextTomorrow": "A new puzzle opens tomorrow",
+    "rewardHint": "Clear it for 🪙 {{coin}} + ⚡ {{pp}} Puzzle Power"
+  },
+  "nav": {
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month"
+  },
+  "day": {
+    "unlockHint": "Unlock for 🪙 {{cost}}",
+    "missedHint": "Past days can't be replayed"
+  },
+  "legend": {
+    "cleared": "Cleared",
+    "today": "Today",
+    "missed": "Missed"
+  },
+  "footnote": "A new puzzle opens every day at midnight.<br/>Missed a day this month? Unlock it for 🪙 {{cost}}.<br/>Once the month ends, its leftover puzzles stay locked.",
+  "unlock": {
+    "title": "Unlock {{date}}",
+    "body": "Spend 🪙 {{cost}} to play this day's puzzle.<br/>You still get the full reward when you clear it.",
+    "owned": "You have 🪙 {{coins}}",
+    "notEnough": "Not enough coins",
+    "cancel": "Cancel",
+    "confirm": "Unlock 🪙 {{cost}}"
+  },
+  "push": {
+    "ask": "🔔 Want a heads-up when tomorrow's puzzle opens?",
+    "accept": "Notify me",
+    "working": "Setting up…",
+    "later": "Later",
+    "done": "🔔 Notifications on. See you tomorrow morning!",
+    "denied": "Notifications are off. You can turn them on later in your browser settings.",
+    "error": "Couldn't turn on notifications. Please try again in a bit."
+  }
+}

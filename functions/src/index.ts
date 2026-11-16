@@ -4,8 +4,7 @@ import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { logger } from "firebase-functions";
-import { buildEveningMessage, buildMorningMessage } from "./dailyPush";
-import { sendDailyPush } from "./dailyPushSender";
+import { fillMissingPushTokenFields, sendDailyPushSlot } from "./dailyPushSender";
 
 initializeApp();
 const db = getFirestore();
@@ -760,21 +759,22 @@ export const syncMyPuzzlePower = onCall(async (request) => {
 
 // ─────────────────────────────────────────────────────────────
 // 오늘의 퍼즐 웹 푸시 알림 (발송 로직: dailyPushSender.ts, 문구 판단: dailyPush.ts)
-//  - 아침 8시(한국 시간): 오늘 아직 안 푼 사람에게 "오늘의 퍼즐이 열렸어요"
-//  - 밤 9시: 연속 기록이 있는데 오늘 아직 안 푼 사람에게만 "기록이 끊겨요"
+//  - 매시 정각(UTC)에 돌면서, 토큰에 저장된 시간대(tz)로 그 사용자의 로컬 시각을 본다.
+//  - 로컬 아침 8시: 오늘(로컬 날짜) 아직 안 푼 사람에게 "오늘의 퍼즐이 열렸어요"
+//  - 로컬 밤 9시: 연속 기록이 있는데 오늘 아직 안 푼 사람에게만 "기록이 끊겨요"
+//  - 문구는 토큰의 lang(ko/en/ja)으로 쓴다.
 // ─────────────────────────────────────────────────────────────
-export const dailyPuzzlePushMorning = onSchedule(
-  { schedule: "0 8 * * *", timeZone: "Asia/Seoul", timeoutSeconds: 540, memory: "512MiB" },
+export const dailyPuzzlePushHourly = onSchedule(
+  { schedule: "0 * * * *", timeZone: "Etc/UTC", timeoutSeconds: 540, memory: "512MiB" },
   async () => {
-    const result = await sendDailyPush(db, buildMorningMessage, "daily-puzzle-morning");
-    logger.info("dailyPuzzlePushMorning", result);
-  },
-);
+    const now = new Date();
+    // 시간대 필드가 없는 토큰(예전 토큰, 옛 앱 캐시가 새로 저장한 토큰)을 한국 시간·한국어로 채운다.
+    // 첫 실행은 전체, 그 뒤로는 지난 실행 이후 저장된 토큰만 읽는다.
+    const filled = await fillMissingPushTokenFields(db, now);
+    if (filled.updated > 0) logger.info("dailyPuzzlePush fill defaults", filled);
 
-export const dailyPuzzlePushEvening = onSchedule(
-  { schedule: "0 21 * * *", timeZone: "Asia/Seoul", timeoutSeconds: 540, memory: "512MiB" },
-  async () => {
-    const result = await sendDailyPush(db, buildEveningMessage, "daily-puzzle-evening");
-    logger.info("dailyPuzzlePushEvening", result);
+    const morning = await sendDailyPushSlot(db, "morning", now);
+    const evening = await sendDailyPushSlot(db, "evening", now);
+    logger.info("dailyPuzzlePushHourly", { morning, evening });
   },
 );

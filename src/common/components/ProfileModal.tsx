@@ -18,6 +18,7 @@ import { useCrossumProgress } from '../../features/cross-math/stage/progress';
 import { useArrowProgress } from '../../features/arrow-puzzle/hooks/useArrowProgress';
 import { useJigsawProgress } from '../../features/jigsaw/hooks/useJigsawProgress';
 import { useDailyPuzzle } from '../../context/DailyPuzzleContext';
+import { challengeTitle, challengeEmoji, challengeTitleText, challengeCondition, frameName } from '../utils/localizedData';
 
 interface ProfileModalProps {
     uid: string;
@@ -863,8 +864,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                     const completed = challenges.isChallengeCompleted(challenge.id);
                                                     const cleared = isReadyToClaim(challenge);
                                                     const { current, target } = getProgress(challenge);
-                                                    const emoji = challenge.title.split(' ')[0];
-                                                    const titleText = challenge.title.split(' ').slice(1).join(' ');
+                                                    const emoji = challengeEmoji(challenge);
+                                                    const titleText = challengeTitleText(challenge);
                                                     const done = cleared || completed;
                                                     return (
                                                         <div
@@ -920,7 +921,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                     {titleText}
                                                                 </div>
                                                                 <div style={{ color: '#94a3b8', fontSize: '0.68rem', marginTop: '2px', lineHeight: 1.3 }}>
-                                                                    {challenge.condition}
+                                                                    {challengeCondition(challenge)}
                                                                 </div>
                                                                 {/* Progress bar */}
                                                                 {challenge.progressConfig.source !== 'daily_month' && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '5px' }}>
@@ -1250,7 +1251,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                 {isMe && <span style={{ fontSize: '0.7rem', color: '#3b82f6', flexShrink: 0 }}>{t('profile.ranking.me')}</span>}
                                                                 {user.activeTitle && CHALLENGE_MAP[user.activeTitle] && (
                                                                     <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#fde047', background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: '3px', padding: '0 4px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                                                                        {CHALLENGE_MAP[user.activeTitle].title}
+                                                                        {challengeTitle(CHALLENGE_MAP[user.activeTitle])}
                                                                     </span>
                                                                 )}
                                                             </div>
@@ -1294,7 +1295,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 overflow: 'hidden', margin: '0 auto 0.75rem',
                                 ...frameStyle(f.id, 4, '#334155', '0 4px 12px rgba(0,0,0,0.3)', 14)
                             }} />
-                            <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>{t('profile.unlockFrameTitle', { name: f.name })}</div>
+                            <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>{t('profile.unlockFrameTitle', { name: frameName(f) })}</div>
                             <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)', marginBottom: '0.75rem', lineHeight: 1.8 }}>
                                 {t('profile.unlockPrefix')}
                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: '700', color: '#fde047' }}>
@@ -1328,7 +1329,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 const done = challenges.isChallengeCompleted(pc.id);
                 const ready = !done && isReadyToClaim(pc);
                 const { current, target } = getProgress(pc);
-                const name = item.kind === 'frame' ? findFrame(item.id).name
+                const name = item.kind === 'frame' ? frameName(findFrame(item.id))
                     : item.kind === 'avatar' ? t('profile.exclusiveAvatar') : t('profile.exclusiveCardBack');
                 return (
                     <div
@@ -1353,9 +1354,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             </div>
                             <div style={{ fontWeight: 800, fontSize: '1.05rem', margin: '4px 0 8px' }}>{name}</div>
                             <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
-                                {pc.title}
+                                {challengeTitle(pc)}
                                 <br />
-                                {t('profile.rewardCondition', { condition: pc.condition })}
+                                {t('profile.rewardCondition', { condition: challengeCondition(pc) })}
                             </div>
                             {item.kind === 'frame' && (
                                 <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '6px' }}>{t('profile.frameOnAvatar')}</div>

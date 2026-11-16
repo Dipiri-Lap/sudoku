@@ -305,6 +305,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     }
     if (!hasAwardedCoins.current) {
       hasAwardedCoins.current = true;
+      logEvent('stage_clear', { game: 'snapspot', mode, stage: stageId });
       confetti({ particleCount: 90, angle: 60,  spread: 60, origin: { x: 0, y: 0.6 }, colors: ['#fbbf24','#22c55e','#6366f1','#f472b6','#fb923c'] });
       confetti({ particleCount: 90, angle: 120, spread: 60, origin: { x: 1, y: 0.6 }, colors: ['#fbbf24','#22c55e','#6366f1','#f472b6','#fb923c'] });
       if (clearSfxRef.current) { clearSfxRef.current.currentTime = 0; clearSfxRef.current.volume = 0.8 * sfxVolumeRef.current; clearSfxRef.current.play().catch(() => {}); }

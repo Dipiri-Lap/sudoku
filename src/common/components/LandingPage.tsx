@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation, Trans } from 'react-i18next';
-import { isKo, currentLang, isGameAvailable, localeHref, localeAbsoluteUrl, paidCoinsEnabled } from '../../i18n/locale';
+import { isKo, currentLang, isGameAvailable, isDailyAvailable, localeHref, localeAbsoluteUrl, paidCoinsEnabled } from '../../i18n/locale';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Play, Download, LogIn, LogOut, Share2, ShoppingBag, BookOpen } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -20,6 +20,7 @@ import TermsModal, { type TermsType } from './TermsModal';
 import { db } from '../../firebase';
 import { doc, writeBatch, collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { CHALLENGE_MAP, ALL_CHALLENGES } from '../../data/challenges';
+import { challengeTitle } from '../utils/localizedData';
 import { useDailyPuzzle } from '../../context/DailyPuzzleContext';
 import { todayKey, toDateKey, loadMonth, type DailyPuzzle } from '../../features/daily/data/loader';
 import { useChallenges } from '../../context/ChallengeContext';
@@ -95,13 +96,23 @@ const LandingPage: React.FC = () => {
 
     // 이번 달 문제 목록 - 도장판 진행도를 랜딩에서 바로 보여 주려고 읽는다.
     const [dailyMonth, setDailyMonth] = useState<DailyPuzzle[]>([]);
+    // 최근 7일 도장이 지난달에 걸치면 지난달 문제도 있어야 '놓친 날'로 보인다.
+    const [dailyPrevMonth, setDailyPrevMonth] = useState<DailyPuzzle[]>([]);
     useEffect(() => {
         let cancelled = false;
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 6);
+        const prevKey = toDateKey(weekAgo).slice(0, 7);
         loadMonth(dailyToday.slice(0, 7)).then(list => { if (!cancelled) setDailyMonth(list); });
+        if (prevKey !== dailyToday.slice(0, 7)) loadMonth(prevKey).then(list => { if (!cancelled) setDailyPrevMonth(list); });
+        else setDailyPrevMonth([]);
         return () => { cancelled = true; };
     }, [dailyToday]);
 
-    const dailyPuzzleDates = useMemo(() => new Set(dailyMonth.map(p => p.date)), [dailyMonth]);
+    const dailyPuzzleDates = useMemo(
+        () => new Set([...dailyPrevMonth, ...dailyMonth].map(p => p.date)),
+        [dailyMonth, dailyPrevMonth]
+    );
     const dailyTotalThisMonth = dailyMonth.length;
     const dailyClearedThisMonth = useMemo(
         () => [...clearedDates].filter(d => d.startsWith(dailyToday.slice(0, 7))).length,
@@ -411,7 +422,7 @@ const LandingPage: React.FC = () => {
                                             padding: '1px 5px',
                                             whiteSpace: 'nowrap',
                                         }}>
-                                            {CHALLENGE_MAP[activeTitle].title}
+                                            {challengeTitle(CHALLENGE_MAP[activeTitle])}
                                         </span>
                                     )}
                                 </div>
@@ -439,11 +450,13 @@ const LandingPage: React.FC = () => {
                 <div style={{
                     display: 'flex',
                     justifyContent: 'flex-end',
+                    flexWrap: 'wrap', // 360px 같은 아주 좁은 폰에서는 잘리는 대신 두 줄로
+                    rowGap: '0.4rem',
                     alignItems: 'center',
-                    gap: '0.4rem',
+                    gap: 'clamp(0.2rem, 0.8vw, 0.4rem)', // 좁은 폰(390px 이하)에서 줄이 왼쪽 밖으로 밀리지 않게 간격·여백이 같이 줄어든다
                     width: '100%',
                     marginBottom: '0.75rem',
-                    padding: '0 0.25rem',
+                    padding: '0 clamp(0rem, 0.5vw, 0.25rem)',
                 }}>
                     <CoinDisplay onClick={() => setShowCoinShop(true)} />
                     <button
@@ -452,7 +465,7 @@ const LandingPage: React.FC = () => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.3rem',
-                            padding: '0.35rem 0.7rem',
+                            padding: '0.35rem clamp(0.5rem, 2vw, 0.7rem)',
                             borderRadius: '8px',
                             border: 'none',
                             backgroundColor: '#f59e0b',
@@ -473,7 +486,7 @@ const LandingPage: React.FC = () => {
                         title={t('header.guide')}
                         aria-label={t('header.guide')}
                         style={{
-                            padding: '0.5rem', borderRadius: '50%',
+                            padding: 'clamp(0.3rem, 1.1vw, 0.5rem)', borderRadius: '50%',
                             border: '1px solid rgba(255,255,255,0.1)',
                             backgroundColor: 'rgba(255,255,255,0.1)',
                             color: '#fff',
@@ -487,7 +500,7 @@ const LandingPage: React.FC = () => {
                         onClick={handleShare}
                         title={t('header.invite')}
                         style={{
-                            padding: '0.5rem', borderRadius: '50%',
+                            padding: 'clamp(0.3rem, 1.1vw, 0.5rem)', borderRadius: '50%',
                             border: '1px solid rgba(255,255,255,0.1)',
                             backgroundColor: 'rgba(255,255,255,0.1)',
                             color: '#fff', cursor: 'pointer',
@@ -503,7 +516,7 @@ const LandingPage: React.FC = () => {
                             onClick={promptToInstall}
                             title={isMobile ? t('header.installMobile') : t('header.installDesktop')}
                             style={{
-                                padding: '0.5rem', borderRadius: '50%',
+                                padding: 'clamp(0.3rem, 1.1vw, 0.5rem)', borderRadius: '50%',
                                 border: 'none',
                                 backgroundColor: '#4a90e2',
                                 color: 'white', cursor: 'pointer',
@@ -520,7 +533,7 @@ const LandingPage: React.FC = () => {
                             onClick={handleSignOut}
                             title={t('header.logout')}
                             style={{
-                                padding: '0.5rem',
+                                padding: 'clamp(0.3rem, 1.1vw, 0.5rem)',
                                 borderRadius: '50%',
                                 border: '1px solid rgba(255,255,255,0.1)',
                                 backgroundColor: 'rgba(255,255,255,0.1)',
@@ -541,7 +554,7 @@ const LandingPage: React.FC = () => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.3rem',
-                                padding: '0.35rem 0.8rem',
+                                padding: '0.35rem clamp(0.5rem, 2vw, 0.8rem)',
                                 borderRadius: '8px',
                                 border: 'none',
                                 backgroundColor: '#4a90e2',
@@ -560,9 +573,9 @@ const LandingPage: React.FC = () => {
                     )}
                 </div>
 
-                {/* 오늘의 퍼즐 - 랜딩에서 바로 도장판이 보여야 빈칸이 눈에 밟힌다 (영어판 미제공) */}
-                {isGameAvailable('daily') && <a
-                    href="/daily"
+                {/* 오늘의 퍼즐 - 랜딩에서 바로 도장판이 보여야 빈칸이 눈에 밟힌다 (해외판은 isDailyAvailable: 그 달 게임이 해외 공개 게임일 때만) */}
+                {isDailyAvailable() && <a
+                    href={localeHref('/daily')}
                     className="animate-fade-in"
                     style={{
                         '--delay': '0.05s',
