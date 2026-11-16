@@ -1,0 +1,124 @@
+{
+  "modeSelect": {
+    "seoTitle": "Fehlersuchbild kostenlos - Unterschiede finden | Puzzle Garden",
+    "seoDescription": "Fehlersuchbild kostenlos online spielen: Zwei Fotos vergleichen, jeden Unterschied antippen. SnapSpot: Normal-, Zeitrennen- und Arcade-Modus, 750+ Stufen.",
+    "miniOriginal": "Original",
+    "miniModified": "Bearbeitet",
+    "miniHeartLeft": "Noch 1 Herz",
+    "stageAlt": "Stufe",
+    "arcadeAlt": "Arcade",
+    "loading": "Lädt …",
+    "continueStage": "Stufe {{n}}/{{max}} fortsetzen",
+    "startStage": "Stufe 1/{{max}} starten",
+    "aboutTitle": "Was ist SnapSpot?",
+    "aboutBody": "SnapSpot ist ein Fehlersuchbild-Spiel: Vergleiche zwei Fotos nebeneinander und finde jeden <strong>versteckten Unterschied</strong>. Mit über 750 Stufen und einem Arcade-Zeitrennen ist es ein tolles Training für Konzentration und Blick fürs Detail!",
+    "tips": {
+      "compare": {
+        "label": "Grundlagen",
+        "title": "Zwei Fotos vergleichen",
+        "desc": "Sieh dir das Original und das bearbeitete Foto nebeneinander an und finde, was anders ist. Kleine Änderungen bei Farbe, Größe oder Position verstecken sich darin."
+      },
+      "tap": {
+        "label": "Steuerung",
+        "title": "Zum Prüfen antippen",
+        "desc": "Tippe (oder klicke) auf die Stelle, an der du einen Unterschied vermutest, und er wird sofort geprüft. Ein Treffer hinterlässt eine Markierung."
+      },
+      "zoom": {
+        "label": "Zoom",
+        "title": "Zum Zoomen zwei Finger nutzen",
+        "desc": "Siehst du nichts? Zoome per Pinch-Geste oder Mausrad bis auf das Dreifache."
+      },
+      "stage": {
+        "label": "Stufe",
+        "title": "Spar deine Herzen",
+        "desc": "Im Stufen-Modus kostet jeder falsche Tipp ein Herz. Sind alle weg, ist das Spiel vorbei, also tippe mit Bedacht!"
+      }
+    }
+  },
+  "game": {
+    "seoTitle": "SnapSpot Fehlersuchbild - Puzzle Garden",
+    "seoDescription": "Vergleiche zwei Fotos und finde die Unterschiede. Stell deine Augen auf die Probe!",
+    "loading": "Lädt …",
+    "alertAdDismissed": "Sieh dir die ganze Werbung an, um einen Tipp zu nutzen.",
+    "alertNoAd": "Gerade ist keine Werbung verfügbar. Bitte versuche es später noch einmal.",
+    "soundSettings": "Toneinstellungen",
+    "markerShop": "Markierungs-Shop",
+    "altOriginal": "Original",
+    "altModified": "Bearbeitet",
+    "modeSelect": "Modi",
+    "win": {
+      "title": "Alle gefunden!",
+      "body_one": "Du hast den {{count}} Unterschied gefunden.",
+      "body_other": "Du hast alle {{count}} Unterschiede gefunden.",
+      "puzzlePower": "Rätselkraft +1",
+      "nextStage": "Nächste Stufe"
+    },
+    "over": {
+      "title": "Game Over",
+      "body": "Du hast keine Herzen mehr.",
+      "retry": "Nochmal"
+    },
+    "hint": {
+      "title": "Nicht genug Münzen",
+      "adPrompt": "Sieh dir eine Werbung an, um einen Tipp zu nutzen",
+      "adUsed": "Du hast in dieser Runde schon eine Werbung gesehen",
+      "balance": "Du hast {{coins}}🪙 · Benötigt: {{cost}}🪙",
+      "cancel": "Abbrechen",
+      "adLoading": "Lädt …",
+      "watchAd": "Werbung ansehen",
+      "ok": "OK"
+    }
+  },
+  "settings": {
+    "title": "Toneinstellungen",
+    "sfx": "Soundeffekte"
+  },
+  "markerShop": {
+    "title": "Markierungs-Shop",
+    "balance": "Deine Münzen",
+    "applied": "Aktiv",
+    "select": "Wählen",
+    "free": "Gratis",
+    "unlock": "Freischalten",
+    "confirmSpend": "{{cost}} Münzen ausgeben?",
+    "cancel": "Abbrechen",
+    "ok": "OK",
+    "designs": {
+      "circle": "Kreis",
+      "check": "Haken",
+      "star": "Stern",
+      "thumbs": "Daumen hoch",
+      "dart": "Dart",
+      "hundred": "100",
+      "gem": "Edelstein",
+      "smile": "Smiley",
+      "magnify": "Lupe",
+      "pin": "Stecknadel",
+      "dizzy": "Schwindelstern",
+      "target": "Zielscheibe",
+      "clover": "Kleeblatt",
+      "frog": "Frosch",
+      "cherry": "Kirschblüte",
+      "cactus": "Kaktus",
+      "hue": "Farbkreis",
+      "robot": "Roboter",
+      "lightning": "Blitz",
+      "sparkle": "Funkeln",
+      "bulb": "Glühbirne",
+      "paw": "Pfotenabdruck",
+      "butterfly": "Schmetterling",
+      "cat": "Katze",
+      "fox": "Fuchs",
+      "panda": "Panda",
+      "bomb": "Bombe",
+      "heart": "Herz",
+      "magic": "Zauberstab",
+      "eyes": "Augen",
+      "crown": "Krone",
+      "rainbow": "Regenbogen",
+      "portal": "Portal",
+      "arc": "Lichtbogen",
+      "matrix": "Matrix"
+    }
+  }
+}

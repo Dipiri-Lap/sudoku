@@ -24,7 +24,7 @@
   flex-direction: column;
   align-items: center;
   padding: 0 20px 28px;
-  font-family: 'Black Han Sans', 'Pretendard', "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Black Han Sans', "Arial Black", 'Lilita One', 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   box-sizing: border-box;
   user-select: none;
   -webkit-user-select: none;
@@ -77,7 +77,7 @@
 .qq-ghost-btn:active { transform: scale(0.88); }
 .qq-level { display: flex; flex-direction: column; align-items: flex-start; }
 .qq-level-label {
-  font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-size: 0.95rem;
   letter-spacing: 0.14em;
   opacity: 0.85;
@@ -110,7 +110,7 @@
 .qq-top-btn:active { transform: scale(0.9); }
 .qq-status { display: flex; align-items: center; gap: 10px; }
 .qq-heart {
-  font-family: "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-size: 1.7rem;
   line-height: 1;
   color: #ff5f7a;
@@ -185,7 +185,7 @@
 .qq-round:disabled .qq-cost { filter: grayscale(0.6); }
 .qq-hint {
   margin: 26px 0 0;
-  font-family: 'Pretendard', "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.75);
@@ -245,7 +245,7 @@
   border-radius: 99px;
   background: rgba(255, 255, 255, 0.92);
   color: var(--deep);
-  font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-size: 1rem;
   letter-spacing: 0.12em;
   box-shadow: 0 3px 0 var(--flat);
@@ -290,7 +290,7 @@
 }
 .qq-win-heart {
   margin: 26px 0 6px;
-  font-family: "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-size: 8rem;
   line-height: 1;
   color: rgba(255, 255, 255, 0.4);
@@ -303,7 +303,7 @@
   padding: 6px 14px;
   border-radius: 99px;
   background: rgba(0, 0, 0, 0.16);
-  font-family: 'Pretendard', "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 0.85rem;
   text-align: center;
@@ -1069,7 +1069,7 @@
 .tut-rule-title,
 .queens-ad-title,
 .dbl-intro-title {
-  font-family: 'Black Han Sans', 'Pretendard', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Black Han Sans', "Arial Black", 'Lilita One', 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-weight: 400;
   color: #3d3480;
 }
@@ -1079,9 +1079,9 @@
 .tut-intro-sub,
 .tut-rule-desc,
 .queens-ad-desc,
-.dbl-intro-desc { font-family: 'Pretendard', "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; color: #6b6480; }
+.dbl-intro-desc { font-family: 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; color: #6b6480; }
 .tut-rule-label,
-.tut-interact-count { font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; font-weight: 400; letter-spacing: 0.1em; color: #a59fc0; }
+.tut-interact-count { font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; font-weight: 400; letter-spacing: 0.1em; color: #a59fc0; }
 .tut-dot { background: #e6e2f5; }
 .tut-dot.active,
 .tut-idot.done { background: #7b6cf0; }
@@ -1089,7 +1089,7 @@
 .tut-start-btn,
 .tut-next,
 .queens-ad-btn-primary {
-  font-family: 'Black Han Sans', 'Pretendard', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Black Han Sans', "Arial Black", 'Lilita One', 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-weight: 400;
   font-size: 1.2rem;
   background: #7b6cf0;
@@ -1108,7 +1108,7 @@
 .queens-ad-btn-primary { margin-bottom: 0.75rem; }
 .tut-prev,
 .queens-ad-btn-secondary {
-  font-family: 'Black Han Sans', 'Pretendard', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Black Han Sans', "Arial Black", 'Lilita One', 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   font-weight: 400;
   font-size: 1.05rem;
   background: #efecfb;
@@ -1122,8 +1122,8 @@
   border-radius: 20px;
   box-shadow: 0 6px 0 var(--flat);
 }
-.tut-interact-title { font-family: 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; font-weight: 400; font-size: 1.25rem; color: #fff; text-shadow: 0 3px 0 var(--flat); }
-.tut-interact-desc { font-family: 'Pretendard', "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; font-weight: 600; color: rgba(255, 255, 255, 0.85); }
+.tut-interact-title { font-family: 'Black Han Sans', "Arial Black", 'Lilita One', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; font-weight: 400; font-size: 1.25rem; color: #fff; text-shadow: 0 3px 0 var(--flat); }
+.tut-interact-desc { font-family: 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; font-weight: 600; color: rgba(255, 255, 255, 0.85); }
 .tut-idot { background: rgba(255, 255, 255, 0.3); }
 .tut-idot.current { background: #ffcb2f; }
 .tut-interact-count { color: rgba(255, 255, 255, 0.7); }
@@ -1147,7 +1147,7 @@
   justify-content: center;
   padding: 16px;
   background: color-mix(in srgb, #7b6cf0 80%, transparent);
-  font-family: 'Black Han Sans', 'Pretendard', "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Black Han Sans', "Arial Black", 'Lilita One', 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   animation: fade-in 0.18s ease both;
 }
 .qs-panel {
@@ -1273,7 +1273,7 @@
 }
 .qs-confirm-title { font-size: 1.4rem; color: #3d3480; }
 .qs-confirm img { width: 92px; height: 92px; object-fit: contain; }
-.qs-confirm p { margin: 0; display: inline-flex; align-items: center; gap: 5px; font-family: 'Pretendard', "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; font-weight: 700; font-size: 0.95rem; color: #6b6480; }
+.qs-confirm p { margin: 0; display: inline-flex; align-items: center; gap: 5px; font-family: 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; font-weight: 700; font-size: 0.95rem; color: #6b6480; }
 .qs-confirm-btns { display: flex; gap: 10px; width: 100%; margin-top: 6px; }
 .qs-btn { flex: 1; height: 50px; border-radius: 14px; font-size: 1.1rem; transition: transform 0.08s ease, box-shadow 0.08s ease; }
 .qs-btn.ghost { background: #efecfb; color: #6b6480; }

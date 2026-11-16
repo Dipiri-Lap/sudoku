@@ -5,6 +5,8 @@
  * 함께 갱신된다. 랜딩에 노출되는 실서비스 게임만 등록한다(개발 중인 게임 제외).
  */
 
+import { existsSync } from 'fs';
+
 export const BASE_URL = 'https://puzzles.tmhub.co.kr';
 
 /** BreadcrumbList 스키마 — 홈 > 게임 2단계 고정 */
@@ -715,19 +717,203 @@ const jaRoutes = [
 }));
 routes.push(...jaRoutes);
 
-/** 이 라우트의 ko/en/ja 쌍(hreflang) — 세 언어가 모두 있어야 한다. x-default 는 영어판 */
+
+/* ------------------------------------------------------------------ *
+ * 언어 레지스트리 + 신규 언어(de/es/fr/pt/zh) 자동 등록
+ *
+ * scripts/seo-lang/<lang>.mjs (데이터 전용, 형식은 scripts/seo-lang/README.md)가
+ * 있으면 아래 빌더가 en 과 같은 구조의 라우트를 만들어 routes 에 추가한다.
+ * 파일이 없으면 조용히 건너뛴다 (0~5개 모두 빌드 통과). `_` 로 시작하는 파일은 무시.
+ * ------------------------------------------------------------------ */
+
+/** 언어 레지스트리. prefix '' 는 루트(한국어). */
+export const LANGS = {
+  ko: { prefix: '', htmlLang: 'ko', hreflang: 'ko', ogLocale: 'ko_KR', siteName: '퍼즐 가든', currency: 'KRW' },
+  en: { prefix: 'en', htmlLang: 'en', hreflang: 'en', ogLocale: 'en_US', siteName: 'Puzzle Garden', currency: 'USD' },
+  ja: { prefix: 'ja', htmlLang: 'ja', hreflang: 'ja', ogLocale: 'ja_JP', siteName: 'パズルガーデン', currency: 'JPY' },
+  de: { prefix: 'de', htmlLang: 'de', hreflang: 'de', ogLocale: 'de_DE', siteName: 'Puzzle Garden', currency: 'EUR' },
+  es: { prefix: 'es', htmlLang: 'es', hreflang: 'es', ogLocale: 'es_ES', siteName: 'Puzzle Garden', currency: 'EUR' },
+  fr: { prefix: 'fr', htmlLang: 'fr', hreflang: 'fr', ogLocale: 'fr_FR', siteName: 'Puzzle Garden', currency: 'EUR' },
+  pt: { prefix: 'pt', htmlLang: 'pt-BR', hreflang: 'pt-BR', ogLocale: 'pt_BR', siteName: 'Puzzle Garden', currency: 'BRL' },
+  zh: { prefix: 'zh', htmlLang: 'zh-Hant', hreflang: 'zh-Hant', ogLocale: 'zh_TW', siteName: '益智花園', currency: 'TWD' },
+};
+
+/** 신규 언어 데이터 모듈이 채워야 하는 게임 페이지 (순서 = 홈 ItemList·내부 링크 순서) */
+export const PAGE_SLUGS = ['sudoku', 'queens', 'jigsaw', 'snapspot'];
+export const NEW_LANGS = ['de', 'es', 'fr', 'pt', 'zh'];
+
+/** 신규 언어 모듈 로더 — validator 에서도 재사용한다. 없는 언어는 생략 */
+export const loadLangModules = async (only) => {
+  const dir = new URL('./seo-lang/', import.meta.url);
+  const out = {};
+  for (const lang of only ?? NEW_LANGS) {
+    const file = new URL(`${lang}.mjs`, dir);
+    if (!existsSync(file)) continue;
+    out[lang] = (await import(file.href)).default;
+  }
+  return out;
+};
+
+/** 속성값(title/description/keywords)용: 평문을 받아 & " < > 를 이스케이프 */
+export const escAttr = (s) => String(s)
+  .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const escText = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** 본문용: 평문 + <strong>..</strong> 만 허용, [[slug|텍스트]] 는 게임 링크 */
+const fmt = (text, lang) => escText(text)
+  .replace(/&lt;strong&gt;/g, '<strong>').replace(/&lt;\/strong&gt;/g, '</strong>')
+  .replace(/\[\[([a-z]+)\|([^\]]+)\]\]/g, (_, slug, t) => `<a href="${BASE_URL}/${LANGS[lang].prefix}/${slug}"><strong>${t}</strong></a>`);
+
+/** JSON-LD 직렬화: </script> 주입 방지를 위해 '<' 이스케이프 */
+const ld = (obj) => JSON.stringify(obj).replace(/</g, '\\u003c');
+
+const buildSections = (sections, lang) => sections.map((sec) => {
+  const blocks = sec.blocks ?? [];
+  return `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">${fmt(sec.h2, lang)}</h2>
+        <p style="${S.lead}">${fmt(sec.lead, lang)}</p>${blocks.map((b, i) => `
+        <h3 style="${S.h3}">${fmt(b.h3, lang)}</h3>
+        <p style="${i === blocks.length - 1 ? S.pLast : S.p}">${fmt(b.p, lang)}</p>`).join('')}
+      </section>`;
+}).join('');
+
+/** 데이터 모듈 하나 → en 과 동일한 구조의 라우트 5개(홈 + 게임 4) */
+const buildLangRoutes = (m) => {
+  const { lang } = m;
+  const L = LANGS[lang];
+  const prefix = L.prefix;
+  const brand = m.brand;
+  const pageRoutes = PAGE_SLUGS.map((slug) => {
+    const p = m.pages[slug];
+    return {
+      path: `${prefix}/${slug}`,
+      slug,
+      name: p.name,
+      title: escAttr(p.title),
+      description: escAttr(p.description),
+      keywords: escAttr(p.keywords),
+      priority: '0.9',
+      changefreq: slug === 'jigsaw' || slug === 'snapspot' ? 'weekly' : 'monthly',
+      ogImage: `${BASE_URL}/images/og/${slug}.jpg`,
+      faqPairs: p.faq,
+      seoContent: buildSections(p.sections, lang),
+      lang,
+      lastmod: m.lastmod ?? '2026-11-16',
+      canonical: `${BASE_URL}/${prefix}/${slug}`,
+      breadcrumbSchema: ld({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: brand, item: `${BASE_URL}/${prefix}/` },
+          { '@type': 'ListItem', position: 2, name: p.name, item: `${BASE_URL}/${prefix}/${slug}` },
+        ],
+      }),
+      softwareSchema: ld({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: `${p.name} - ${brand}`,
+        applicationCategory: 'GameApplication',
+        operatingSystem: 'Web Browser',
+        inLanguage: L.htmlLang,
+        offers: { '@type': 'Offer', price: '0', priceCurrency: L.currency },
+      }),
+      faqSchema: ld({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: p.faq.map(([name, text]) => ({
+          '@type': 'Question', name, acceptedAnswer: { '@type': 'Answer', text },
+        })),
+      }),
+      extraSchemas: [],
+    };
+  });
+
+  const h = m.home;
+  const homeRoute = {
+    path: prefix,
+    slug: '',
+    name: brand,
+    title: escAttr(h.title),
+    description: escAttr(h.description),
+    keywords: escAttr(h.keywords),
+    priority: '1.0',
+    changefreq: 'daily',
+    ogImage: `${BASE_URL}/images/og/home.jpg`,
+    seoContent: buildSections([{ h2: h.h2, lead: h.lead, blocks: h.blocks }], lang),
+    lang,
+    lastmod: undefined,
+    canonical: `${BASE_URL}/${prefix}/`,
+    breadcrumbSchema: null,
+    softwareSchema: null,
+    faqSchema: null,
+    extraSchemas: [
+      ld({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: brand,
+        url: `${BASE_URL}/${prefix}/`,
+        description: h.siteDescription,
+        inLanguage: L.htmlLang,
+      }),
+      ld({
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: h.itemListName,
+        itemListElement: PAGE_SLUGS.map((slug, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          item: {
+            '@type': 'VideoGame',
+            name: m.pages[slug].name,
+            description: h.games[slug],
+            url: `${BASE_URL}/${prefix}/${slug}`,
+            genre: 'Puzzle',
+            gamePlatform: 'Browser',
+            inLanguage: L.htmlLang,
+            isAccessibleForFree: true,
+          },
+        })),
+      }),
+    ],
+  };
+  return [homeRoute, ...pageRoutes];
+};
+
+/** 언어별 "다른 게임" 문구 (신규 언어는 모듈의 ui 에서) */
+const uiStrings = {};
+{
+  const mods = await loadLangModules();
+  for (const lang of NEW_LANGS) {
+    const m = mods[lang];
+    if (!m) continue;
+    if (m.lang !== lang) throw new Error(`seo-lang/${lang}.mjs: lang 필드가 '${lang}' 가 아닙니다 (${m.lang})`);
+    uiStrings[lang] = { more: m.ui.moreGames, home: m.ui.homeLink };
+    routes.push(...buildLangRoutes(m));
+  }
+}
+
+/** 이 슬러그(''=홈)를 가진 언어 목록 — 레지스트리 순서 */
+const langsWithPage = (slug) => Object.keys(LANGS).filter((lang) => {
+  const prefix = LANGS[lang].prefix;
+  if (lang === 'ko') return slug === '' || routes.some(r => r.lang === 'ko' && r.path === slug);
+  return routes.some(r => r.lang === lang && r.path === (slug ? `${prefix}/${slug}` : prefix));
+});
+
+/** hreflang 쌍: 해당 페이지가 있는 모든 언어 + x-default(영어). ko·en 이 없으면 null */
 export const alternates = (route) => {
   const slug = route.lang === 'ko' ? route.path : route.slug;
-  const has = (lang, p) => routes.some(r => r.lang === lang && r.path === p);
-  const koExists = slug === '' || has('ko', slug);
-  if (!koExists || !has('en', slug ? `en/${slug}` : 'en') || !has('ja', slug ? `ja/${slug}` : 'ja')) return null;
-  const en = slug ? `${BASE_URL}/en/${slug}` : `${BASE_URL}/en/`;
-  const ja = slug ? `${BASE_URL}/ja/${slug}` : `${BASE_URL}/ja/`;
+  const present = langsWithPage(slug);
+  if (!present.includes('ko') || !present.includes('en')) return null;
+  const href = (lang) => {
+    const prefix = LANGS[lang].prefix;
+    if (!prefix) return slug ? `${BASE_URL}/${slug}` : `${BASE_URL}/`;
+    return slug ? `${BASE_URL}/${prefix}/${slug}` : `${BASE_URL}/${prefix}/`;
+  };
   return [
-    { hreflang: 'ko', href: slug ? `${BASE_URL}/${slug}` : `${BASE_URL}/` },
-    { hreflang: 'en', href: en },
-    { hreflang: 'ja', href: ja },
-    { hreflang: 'x-default', href: en },
+    ...present.map((lang) => ({ hreflang: LANGS[lang].hreflang, href: href(lang) })),
+    { hreflang: 'x-default', href: href('en') },
   ];
 };
 
@@ -747,6 +933,16 @@ export const relatedLinks = (currentPath) => {
       <nav style="${S.section}">
         <h3 style="${S.h3}">More puzzle games</h3>
         <p style="${S.pLast}">${others.map(r => `<a href="${BASE_URL}/${r.path}">${r.name}</a>`).join(' · ')}${others.length ? ' · ' : ''}<a href="${BASE_URL}/en/">Puzzle Garden home</a></p>
+      </nav>`;
+  }
+  const newLang = NEW_LANGS.find(l => currentPath === LANGS[l].prefix || currentPath.startsWith(`${LANGS[l].prefix}/`));
+  if (newLang && uiStrings[newLang]) {
+    const prefix = LANGS[newLang].prefix;
+    const others = routes.filter(r => r.lang === newLang && r.path !== prefix && r.path !== currentPath);
+    return `
+      <nav style="${S.section}">
+        <h3 style="${S.h3}">${escText(uiStrings[newLang].more)}</h3>
+        <p style="${S.pLast}">${others.map(r => `<a href="${BASE_URL}/${r.path}">${escText(r.name)}</a>`).join(' · ')}${others.length ? ' · ' : ''}<a href="${BASE_URL}/${prefix}/">${escText(uiStrings[newLang].home)}</a></p>
       </nav>`;
   }
   return `

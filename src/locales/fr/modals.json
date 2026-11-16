@@ -1,0 +1,334 @@
+{
+  "coinShop": {
+    "title": "Boutique de pièces",
+    "owned": "Mes pièces",
+    "buyTitle": "Acheter des pièces",
+    "freeTitle": "Pièces gratuites",
+    "watchAdTitle": "Regardez une pub, gagnez 🪙 50",
+    "nextAdIn": "Prochaine pub dans {{time}}",
+    "availableNow": "Disponible maintenant",
+    "loading": "Chargement...",
+    "watchAd": "Voir la pub",
+    "watch": "Voir",
+    "close": "Fermer",
+    "toast": {
+      "earned": "🪙 50 pièces gagnées !",
+      "earnedDev": "🪙 50 pièces gagnées ! (mode dev)",
+      "adDismissed": "Regardez la pub en entier pour gagner des pièces.",
+      "noAd": "Aucune pub disponible pour le moment. Réessayez dans un instant.",
+      "granted": "🪙 {{coins}} pièces ajoutées !",
+      "verifyError": "Une erreur s'est produite lors de la vérification du paiement. Réessayez dans un instant."
+    }
+  },
+  "login": {
+    "title": "Que change la connexion ?",
+    "close": "Fermer",
+    "guest": "Invité",
+    "guestSaveLocal": "Sauvegarde sur cet appareil uniquement",
+    "guestDataLoss": "Données perdues si vous supprimez l'appli",
+    "guestRankAnon": "Anonyme dans les classements",
+    "login": "Connecté",
+    "loginSync": "Synchronisation entre appareils",
+    "loginBackup": "Sauvegarde sécurisée des données",
+    "loginRankNamed": "Votre nom dans les classements",
+    "migration": "🎮 Nous transférons votre progression actuelle vers votre compte !",
+    "signingIn": "Connexion...",
+    "google": "Se connecter avec Google",
+    "continueGuest": "Continuer en invité",
+    "popupBlocked": "La fenêtre contextuelle a été bloquée. Autorisez les pop-ups dans votre navigateur, puis réessayez.",
+    "failed": "Échec de la connexion. Veuillez réessayer."
+  },
+  "rewardToast": {
+    "coins": "🪙 +{{n}} pièces"
+  },
+  "profile": {
+    "title": "Profil",
+    "nickname": "Pseudo",
+    "tabs": {
+      "avatar": "Avatar",
+      "frame": "Cadre",
+      "ranking": "Classement",
+      "challenge": "Défis"
+    },
+    "chooseAvatar": "Choisir un avatar",
+    "chooseFrame": "Choisir un cadre",
+    "puzzlePower": "Puissance puzzle",
+    "rewardKind": {
+      "avatar": "Avatar",
+      "frame": "Cadre",
+      "cardBack": "Dos de carte"
+    },
+    "rewardPreview": "Aperçu : {{kind}}",
+    "challenge": {
+      "inUse": "Utilisé",
+      "setTitle": "Choisir ce titre",
+      "puzzlePowerPlus": "Puissance puzzle +{{n}}",
+      "coinPlus": "Pièces +{{n}}",
+      "claim": "Récupérer"
+    },
+    "ranking": {
+      "myRank": "Mon rang",
+      "top100": "Top 100",
+      "players_one": "{{count}} joueur",
+      "players_many": "{{count}} joueurs",
+      "players_other": "{{count}} joueurs",
+      "loading": "Chargement...",
+      "me": "(vous)",
+      "puzzlePower": "Puissance puzzle {{n}}"
+    },
+    "unlock": "Débloquer",
+    "unlockFrameTitle": "Débloquer le cadre {{name}}",
+    "unlockPrefix": "Dépenser ",
+    "unlockSuffix": " pour débloquer ?",
+    "notEnoughCoins": "Pas assez de pièces (vous en avez {{coins}})",
+    "cancel": "Annuler",
+    "ok": "OK",
+    "close": "Fermer",
+    "alert": {
+      "notEnoughCoins": "Pas assez de pièces !",
+      "unlockError": "Une erreur s'est produite lors du déblocage. Veuillez réessayer."
+    },
+    "exclusiveAvatar": "Avatar exclusif",
+    "exclusiveCardBack": "Dos de carte exclusif",
+    "rewardCondition": "À obtenir : {{condition}}",
+    "frameOnAvatar": "Affiché sur votre avatar actuel",
+    "rewardDone": "Obtenu",
+    "rewardReady": "À récupérer maintenant",
+    "rewardProgress": "Progression {{current}} / {{target}}"
+  },
+  "terms": {
+    "ok": "OK",
+    "contactLink": "Contacter l'assistance",
+    "effective": "Date d'entrée en vigueur : 1er janvier 2024",
+    "title": {
+      "service": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité"
+    },
+    "service": {
+      "purpose": {
+        "title": "Article 1 (Objet)",
+        "body": "Les présentes conditions définissent les droits, obligations et responsabilités entre ToMixSoft (la « Société ») et les utilisateurs dans le cadre de l'utilisation de Puzzle Garden (puzzles.tmhub.co.kr, le « Service »), exploité par la Société."
+      },
+      "definitions": {
+        "title": "Article 2 (Définitions)",
+        "i1": "« Service » désigne l'ensemble des services de jeux de puzzle en ligne fournis par la Société.",
+        "i2": "« Utilisateur » désigne toute personne qui accepte les présentes conditions et utilise le Service.",
+        "i3": "« Pièces » désigne la monnaie virtuelle utilisée au sein du Service."
+      },
+      "changes": {
+        "title": "Article 3 (Entrée en vigueur et modification des conditions)",
+        "i1": "Les présentes conditions entrent en vigueur dès leur publication sur le Service.",
+        "i2": "La Société peut modifier les présentes conditions dans les limites permises par la législation applicable, et en informera les utilisateurs au préalable."
+      },
+      "use": {
+        "title": "Article 4 (Utilisation du Service)",
+        "i1": "Le Service est en principe accessible 24 heures sur 24 et 7 jours sur 7, mais peut être suspendu temporairement, par exemple pour cause de maintenance.",
+        "i2": "Les utilisateurs doivent respecter la législation applicable, les présentes conditions ainsi que les consignes d'utilisation et avis du Service."
+      },
+      "liability": {
+        "title": "Article 5 (Limitation de responsabilité)",
+        "i1": "La Société n'est pas responsable si elle ne peut fournir le Service en raison de catastrophes naturelles, de cas de force majeure ou de causes similaires.",
+        "i2": "La Société n'est pas responsable des perturbations d'utilisation du Service causées par l'utilisateur."
+      },
+      "disputes": {
+        "title": "Article 6 (Règlement des litiges)",
+        "body": "Tout litige lié à l'utilisation du Service relève de la compétence du tribunal central du district de Séoul."
+      }
+    },
+    "privacy": {
+      "intro": "ToMixSoft (la « Société ») accorde une grande importance aux données personnelles des utilisateurs et respecte la législation applicable, notamment la loi coréenne sur la protection des informations personnelles.",
+      "collect": {
+        "title": "1. Données personnelles collectées",
+        "i1": "En cas de connexion via un compte social : adresse e-mail, photo de profil et pseudo (informations fournies par votre compte Google/Apple)",
+        "i2": "Collectées automatiquement lors de l'utilisation du Service : informations sur l'appareil, adresse IP et historique de jeu"
+      },
+      "purpose": {
+        "title": "2. Finalités de la collecte et de l'utilisation",
+        "i1": "Identifier les membres et fournir le Service",
+        "i2": "Sauvegarder la progression de jeu et gérer les classements",
+        "i3": "Traiter les demandes et réclamations des clients",
+        "i4": "Améliorer le Service et développer de nouveaux services"
+      },
+      "retention": {
+        "title": "3. Durée de conservation et d'utilisation",
+        "i1": "Les données sont conservées jusqu'à la suppression de votre compte, puis détruites immédiatement.",
+        "i2": "Lorsque la législation applicable impose une conservation, les données sont conservées pendant la durée requise."
+      },
+      "thirdParty": {
+        "title": "4. Communication à des tiers",
+        "body": "En principe, la Société ne communique pas les données personnelles des utilisateurs à des tiers, sauf si l'utilisateur y a consenti ou si la loi l'exige."
+      },
+      "outsourcing": {
+        "title": "5. Sous-traitance du traitement des données personnelles",
+        "intro": "Afin de fournir le Service dans de bonnes conditions, la Société confie le traitement de données personnelles à des sous-traitants, comme suit.",
+        "colVendor": "Sous-traitant",
+        "colTask": "Tâche confiée",
+        "firebaseTask": "Services de base de données et d'authentification (situés aux États-Unis)"
+      },
+      "cookies": {
+        "title": "6. Cookies et publicité",
+        "i1": "Nous utilisons Google AdSense pour afficher des publicités. Google et ses partenaires utilisent des cookies et des technologies similaires pour afficher des publicités en fonction de vos visites précédentes sur ce site et sur d'autres.",
+        "i2": "Vous pouvez désactiver les publicités personnalisées dans les paramètres des annonces Google (adssettings.google.com). Pour en savoir plus sur l'utilisation des informations par Google, consultez policies.google.com/technologies/ads.",
+        "i3": "Nous utilisons Google Analytics pour Firebase afin de comprendre comment le Service est utilisé, par exemple quelles pages sont consultées et quelles actions sont effectuées en jeu.",
+        "i4": "Lorsque la loi l'exige, par exemple dans l'EEE, au Royaume-Uni et en Suisse, nous demandons votre consentement avant d'utiliser des cookies pour les publicités personnalisées. Vous pouvez modifier votre choix à tout moment."
+      },
+      "international": {
+        "title": "7. Utilisateurs hors de Corée",
+        "i1": "Vos informations sont traitées en République de Corée et aux États-Unis (Google Firebase).",
+        "i2": "Utilisateurs de l'EEE et du Royaume-Uni : nous traitons les données personnelles pour fournir le Service que vous demandez, pour notre intérêt légitime à l'exploiter et à l'améliorer et, pour les publicités personnalisées, sur la base de votre consentement. Vous avez le droit d'accéder à vos données, de les rectifier, de les supprimer, d'en limiter le traitement ou de vous y opposer, à la portabilité de vos données, de retirer votre consentement à tout moment et d'introduire une réclamation auprès de l'autorité locale de protection des données.",
+        "i3": "Utilisateurs californiens : vous pouvez demander à savoir quelles données personnelles nous détenons, à les rectifier ou à les supprimer, et vous pouvez refuser l'utilisation de vos informations à des fins de publicité ciblée en utilisant les options ci-dessus. Nous ne vendons pas de données personnelles contre de l'argent.",
+        "i4": "Le Service ne s'adresse pas aux enfants de moins de 13 ans, et nous ne collectons pas sciemment leurs données personnelles."
+      },
+      "rights": {
+        "title": "8. Vos droits",
+        "body": "Vous pouvez à tout moment demander l'accès à vos données personnelles, leur rectification, leur suppression ou la suspension de leur traitement. Veuillez nous contacter via <contact/> (070-8984-4679)."
+      },
+      "officer": {
+        "title": "9. Responsable de la protection des données personnelles",
+        "name": "Nom : Dokyun Kim",
+        "contact": "Contact : <contact/> (070-8984-4679)"
+      }
+    }
+  },
+  "challengeConditions": {
+    "stageN": "Terminer le niveau {{n}}",
+    "beginnerStageN": "Terminer le niveau Débutant {{n}}",
+    "nStages": "Terminer {{n}} niveaux",
+    "hardNStages": "Terminer {{n}} niveaux en mode Difficile",
+    "starsN": "Récolter {{n}} étoiles",
+    "dailyMonth": "Terminer tous les puzzles du jour de {{month}}"
+  },
+  "frameNames": {
+    "yellow": "Jaune",
+    "orange": "Orange",
+    "red": "Rouge",
+    "pink": "Rose",
+    "purple": "Violet",
+    "blue": "Bleu",
+    "green": "Vert",
+    "white": "Blanc",
+    "gold": "Or",
+    "silver": "Argent",
+    "bronze": "Bronze",
+    "sakura": "Cerisier en fleurs",
+    "sunset": "Coucher de soleil",
+    "aurora": "Aurore boréale",
+    "ocean": "Océan",
+    "forest": "Forêt",
+    "neon": "Néon",
+    "diamond": "Diamant",
+    "flame": "Flamme",
+    "moonlight": "Clair de lune",
+    "electric": "Électrique",
+    "lava": "Lave",
+    "galaxy": "Galaxie",
+    "goldtwin": "Double or",
+    "aurorax": "Aurore tournante",
+    "ruby": "Rubis",
+    "sapphire": "Saphir",
+    "toxic": "Toxique",
+    "rainbow": "Arc-en-ciel",
+    "phoenix": "Phénix",
+    "crown": "Couronne",
+    "blackhole": "Trou noir",
+    "ripple": "Ondulation",
+    "comet": "Comète",
+    "neonsign": "Enseigne néon",
+    "glitch": "Glitch",
+    "stardust": "Poussière d'étoiles",
+    "snow": "Flocon de neige",
+    "zombie": "Zombie",
+    "scholar": "Érudit des mots",
+    "jigsaw": "Pièce de puzzle",
+    "crownquest": "Crown Quest"
+  },
+  "challengeTitles": {
+    "stage_001": "Novice du sudoku",
+    "stage_005": "Détective débutant",
+    "stage_5": "Chasseur d'indices",
+    "stage_10": "Analyste logique",
+    "stage_25": "Solveur aguerri",
+    "stage_50": "Gardien des neuf",
+    "stage_100": "Vétéran du sudoku",
+    "stage_200": "Œil intuitif",
+    "stage_300": "Expert du sudoku",
+    "stage_400": "Maître du sudoku",
+    "stage_500": "Mordu du sudoku",
+    "stage_1000": "Roi du sudoku",
+    "word_st_1": "Premiers mots empilés",
+    "word_st_10": "Apprenti du tri de mots",
+    "word_st_25": "Bases du tri",
+    "word_st_50": "Collectionneur de mots",
+    "word_st_75": "Explorateur du vocabulaire",
+    "word_st_100": "Pro du tri",
+    "word_st_150": "Alchimiste des mots",
+    "word_st_200": "Spécialiste du tri",
+    "word_st_250": "Potier des mots",
+    "word_st_300": "Génie du tri",
+    "word_hard_1": "Piquant",
+    "word_hard_50": "Piquant niveau 1",
+    "word_hard_100": "Accro au piment",
+    "word_hard_150": "Fan du mode Difficile",
+    "word_hard_200": "Amoureux des mots empilés",
+    "cq_1": "Première couronne",
+    "cq_10": "Chevalier du royaume",
+    "cq_25": "Seigneur du château",
+    "cq_50": "Œil de la reine",
+    "cq_100": "Gardien du royaume",
+    "cq_200": "Maître du trône",
+    "cq_300": "Grand explorateur de couronnes",
+    "cq_400": "Chevalier légendaire",
+    "cq_500": "Légende du royaume",
+    "cq_600": "Capitaine de la garde royale",
+    "cq_700": "Ancien du royaume",
+    "cq_800": "Seigneur de la forteresse",
+    "cq_900": "Étoile de la couronne",
+    "cq_1000": "Maître de la couronne",
+    "ss_1": "Première trouvaille",
+    "ss_10": "Yeux perçants",
+    "ss_30": "Yeux de hibou",
+    "ss_50": "Observateur affûté",
+    "ss_100": "Yeux d'aigle",
+    "ss_200": "Regard perçant",
+    "ss_300": "Yeux de léopard",
+    "ss_500": "Clairvoyance",
+    "crossum_stage_5": "Première équation",
+    "crossum_stage_10": "Texte à trous",
+    "crossum_stage_25": "Première porte franchie",
+    "crossum_stage_50": "Apprenti calculateur",
+    "crossum_stage_100": "Architecte d'équations",
+    "crossum_stage_300": "Maître du calcul mental",
+    "crossum_stage_500": "Équilibre des égaux",
+    "crossum_stage_700": "Accordeur de trois nombres",
+    "crossum_stage_1000": "Maître de Crossum",
+    "arrow_stage_5": "Premier tir",
+    "arrow_stage_10": "Ouvreur de voies",
+    "arrow_stage_25": "Démêleur",
+    "arrow_stage_50": "Évadé du labyrinthe",
+    "arrow_stage_100": "Artisan des flèches",
+    "arrow_stage_300": "Pro de l'orientation",
+    "arrow_stage_500": "Labyrinthe sans fin",
+    "arrow_stage_700": "Maître de l'évasion",
+    "arrow_stage_1000": "Maître d'Arroway",
+    "daily_2026-10": "Zombie du sudoku",
+    "daily_2026-11": "Érudit des mots",
+    "jigsaw_stage_5": "Premières pièces",
+    "jigsaw_stage_10": "Collectionneur d'images",
+    "jigsaw_stage_25": "Artisan des pièces",
+    "jigsaw_stage_50": "Explorateur de puzzles",
+    "jigsaw_stage_100": "Admirateur de chefs-d'œuvre",
+    "jigsaw_stage_300": "Maître des pièces",
+    "jigsaw_stage_500": "Directeur de musée",
+    "jigsaw_stage_700": "Voyageur dans les tableaux",
+    "jigsaw_stage_1000": "Mille images",
+    "jigsaw_stars_10": "Scintille, petite étoile",
+    "jigsaw_stars_30": "Cueilleur d'étoiles",
+    "jigsaw_stars_75": "Collectionneur de lumière stellaire",
+    "jigsaw_stars_150": "Balade galactique",
+    "jigsaw_stars_300": "Chasseur d'étoiles filantes",
+    "jigsaw_stars_600": "Bâtisseur de constellations",
+    "jigsaw_stars_1000": "Seigneur des planètes",
+    "jigsaw_stars_1500": "Plus brillant que le soleil",
+    "jigsaw_stars_3000": "Roi des étoiles"
+  }
+}

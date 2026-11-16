@@ -1,14 +1,15 @@
 import i18n from '../../i18n';
+import { intlLocale } from '../../i18n/locale';
 import type { Challenge } from '../../data/challenges';
 import type { AvatarFrame } from '../data/avatarFrames';
 
 /**
  * Korean data files (challenges, avatar frames) stay the source. English/Japanese strings live in
- * locales/{en,ja}/modals.json under challengeTitles / challengeConditions / frameNames.
+ * locales/<lang>/modals.json under challengeTitles / challengeConditions / frameNames.
  * A missing key (e.g. a challenge added later) falls back to the Korean value, so nothing breaks.
  */
 
-/** 현재 언어 → 대체 언어 순(ja 는 en 으로)으로 문자열 리소스를 찾는다. 없으면 undefined(=한국어 원본 사용). */
+/** 현재 언어 → 대체 언어 순(ko 외에는 en → ko)으로 문자열 리소스를 찾는다. 없으면 undefined(=한국어 원본 사용). */
 function lookup(key: string): string | undefined {
     for (const lng of i18n.languages ?? [i18n.language]) {
         const v: unknown = i18n.getResource(lng, 'modals', key);
@@ -37,7 +38,7 @@ export function challengeEmoji(c: Pick<Challenge, 'title'>): string {
 
 const monthLabel = (year: string, month: string): string => {
     try {
-        return new Intl.DateTimeFormat(i18n.language, { year: 'numeric', month: 'long', timeZone: 'UTC' })
+        return new Intl.DateTimeFormat(intlLocale, { year: 'numeric', month: 'long', timeZone: 'UTC' })
             .format(new Date(Date.UTC(Number(year), Number(month) - 1, 1)));
     } catch {
         return `${year}-${month}`;

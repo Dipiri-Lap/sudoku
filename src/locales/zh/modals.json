@@ -1,0 +1,343 @@
+{
+  "coinShop": {
+    "title": "金幣商店",
+    "owned": "持有金幣",
+    "starterDiscount": "55% 折扣",
+    "buyTitle": "購買金幣",
+    "freeTitle": "免費金幣",
+    "watchAdTitle": "看廣告，領 🪙 50",
+    "nextAdIn": "距離下次廣告還有 {{time}}",
+    "availableNow": "現在就能領取",
+    "loading": "載入中...",
+    "watchAd": "觀看廣告",
+    "watch": "觀看",
+    "close": "關閉",
+    "toast": {
+      "earned": "🪙 獲得 50 金幣！",
+      "earnedDev": "🪙 獲得 50 金幣！（開發模式）",
+      "adDismissed": "要看完整支廣告才能獲得金幣喔。",
+      "noAd": "目前沒有可播放的廣告，請稍後再試。",
+      "paymentCancelled": "付款已取消。",
+      "granted": "🪙 已發放 {{coins}} 金幣！",
+      "verifyError": "驗證付款時發生錯誤，請稍後再試。"
+    }
+  },
+  "login": {
+    "title": "登入後有什麼不一樣？",
+    "close": "關閉",
+    "guest": "訪客",
+    "guestSaveLocal": "僅儲存在這台裝置",
+    "guestDataLoss": "刪除 App 後資料會消失",
+    "guestRankAnon": "以匿名參與排行榜",
+    "login": "已登入",
+    "loginSync": "跨裝置同步資料",
+    "loginBackup": "安全備份資料",
+    "loginRankNamed": "排行榜顯示你的名字",
+    "migration": "🎮 我們會把你現有的遊玩資料轉移到帳號！",
+    "signingIn": "登入中...",
+    "google": "使用 Google 登入",
+    "continueGuest": "以訪客身分繼續",
+    "popupBlocked": "彈出視窗被封鎖了。請在瀏覽器中允許彈出視窗後再試一次。",
+    "failed": "登入失敗，請再試一次。"
+  },
+  "rewardToast": {
+    "coins": "🪙 +{{n}} 金幣"
+  },
+  "profile": {
+    "title": "個人檔案",
+    "nickname": "暱稱",
+    "tabs": {
+      "avatar": "頭像",
+      "frame": "邊框",
+      "ranking": "排行榜",
+      "challenge": "挑戰任務"
+    },
+    "chooseAvatar": "選擇頭像",
+    "chooseFrame": "選擇邊框",
+    "puzzlePower": "解謎力",
+    "rewardKind": {
+      "avatar": "頭像",
+      "frame": "邊框",
+      "cardBack": "卡片背面"
+    },
+    "rewardPreview": "{{kind}}預覽",
+    "challenge": {
+      "inUse": "使用中",
+      "setTitle": "設為稱號",
+      "puzzlePowerPlus": "解謎力 +{{n}}",
+      "coinPlus": "金幣 +{{n}}",
+      "claim": "領取獎勵"
+    },
+    "ranking": {
+      "myRank": "我的排名",
+      "top100": "前 100 名",
+      "players_other": "{{count}} 人",
+      "loading": "載入中...",
+      "me": "（我）",
+      "puzzlePower": "解謎力 {{n}}"
+    },
+    "unlock": "解鎖",
+    "unlockFrameTitle": "解鎖「{{name}}」邊框",
+    "unlockPrefix": "要花費 ",
+    "unlockSuffix": " 金幣來解鎖嗎？",
+    "notEnoughCoins": "金幣不足（目前 {{coins}} 個）",
+    "cancel": "取消",
+    "ok": "確定",
+    "close": "關閉",
+    "alert": {
+      "notEnoughCoins": "金幣不足！",
+      "unlockError": "解鎖時發生錯誤，請再試一次。"
+    },
+    "exclusiveAvatar": "專屬頭像",
+    "exclusiveCardBack": "專屬卡片背面",
+    "rewardCondition": "達成條件：{{condition}}",
+    "frameOnAvatar": "這是套用在你目前頭像上的樣子",
+    "rewardDone": "已獲得",
+    "rewardReady": "現在就能領取",
+    "rewardProgress": "進度 {{current}} / {{target}}"
+  },
+  "terms": {
+    "ok": "確定",
+    "contactLink": "聯絡客服",
+    "effective": "生效日期：2024 年 1 月 1 日",
+    "title": {
+      "service": "服務條款",
+      "privacy": "隱私權政策"
+    },
+    "service": {
+      "purpose": {
+        "title": "第 1 條（目的）",
+        "body": "本條款旨在規範 ToMixSoft（以下稱「本公司」）營運之益智花園（Puzzle Garden，puzzles.tmhub.co.kr，以下稱「本服務」）之使用，以及本公司與使用者之間的權利、義務與責任。"
+      },
+      "definitions": {
+        "title": "第 2 條（定義）",
+        "i1": "「本服務」指本公司提供的所有網頁版益智遊戲服務。",
+        "i2": "「使用者」指同意本條款並使用本服務之人。",
+        "i3": "「金幣」指在本服務內使用的虛擬貨幣。"
+      },
+      "changes": {
+        "title": "第 3 條（條款之效力與修改）",
+        "i1": "本條款自刊登於本服務畫面時起生效。",
+        "i2": "本公司得於不違反相關法令之範圍內修改本條款，並將於修改前事先公告。"
+      },
+      "use": {
+        "title": "第 4 條（服務之使用）",
+        "i1": "本服務原則上全年無休、每日 24 小時提供，惟可能因網站維護等原因而暫時中斷。",
+        "i2": "使用者應遵守相關法令、本條款，以及本服務之使用說明與公告。"
+      },
+      "refund": {
+        "title": "第 5 條（金幣購買與退款）",
+        "i1": "金幣可透過本服務內提供的付款方式購買。",
+        "i2": "依電子商務消費者保護相關法令，已購買但尚未使用的金幣，得於購買日起 7 日內申請退款。",
+        "i3": "已使用的金幣不予退款。",
+        "i4": "退款諮詢：<contact/>（070-8984-4679）"
+      },
+      "liability": {
+        "title": "第 5 條（責任限制）",
+        "i1": "因天災、不可抗力或類似原因致本公司無法提供本服務時，本公司不負責任。",
+        "i2": "因使用者之事由造成服務使用障礙者，本公司不負責任。"
+      },
+      "disputes": {
+        "title": "第 6 條（爭議解決）",
+        "body": "因使用本服務所生之爭議，以首爾中央地方法院為管轄法院。"
+      }
+    },
+    "privacy": {
+      "intro": "ToMixSoft（以下稱「本公司」）重視使用者的個人資料，並遵守包括韓國《個人資訊保護法》在內的相關法令。",
+      "collect": {
+        "title": "1. 蒐集的個人資料項目",
+        "i1": "使用社群帳號登入時：電子郵件地址、個人頭像與暱稱（由您的 Google/Apple 帳號提供之資訊）",
+        "i2": "使用本服務時自動蒐集：裝置資訊、IP 位址及遊戲紀錄"
+      },
+      "purpose": {
+        "title": "2. 蒐集及使用目的",
+        "i1": "辨識會員並提供本服務",
+        "i2": "儲存遊戲進度及管理排行榜",
+        "i3": "處理客戶諮詢及申訴",
+        "i4": "改善本服務及開發新服務"
+      },
+      "retention": {
+        "title": "3. 保存及使用期間",
+        "i1": "保存至您退出會員為止，並於退出後立即銷毀。",
+        "i2": "依相關法令須保存者，將於法令要求之期間內保存。"
+      },
+      "thirdParty": {
+        "title": "4. 向第三方提供",
+        "body": "原則上，本公司不會向外部提供使用者的個人資料，但經使用者同意或依法令規定者除外。"
+      },
+      "outsourcing": {
+        "title": "5. 個人資料處理之委外",
+        "intro": "為順利提供本服務，本公司將個人資料處理業務委託予下列業者。",
+        "colVendor": "受託業者",
+        "colTask": "委託業務內容",
+        "firebaseTask": "資料庫及驗證服務（位於美國）",
+        "portoneName": "Korea PortOne Co., Ltd.",
+        "portoneTask": "提供付款串接服務"
+      },
+      "cookies": {
+        "title": "6. Cookie 與廣告",
+        "i1": "我們使用 Google AdSense 來顯示廣告。Google 及其合作夥伴會使用 Cookie 及類似技術，根據您先前造訪本網站及其他網站的紀錄來顯示廣告。",
+        "i2": "您可以在 Google 廣告設定（adssettings.google.com）中關閉個人化廣告。有關 Google 如何使用資訊的詳細說明，請參閱 policies.google.com/technologies/ads。",
+        "i3": "我們使用 Google Analytics for Firebase 來了解本服務的使用情形，例如瀏覽了哪些頁面、進行了哪些遊戲內操作。",
+        "i4": "在法令有所要求的地區（例如歐洲經濟區、英國與瑞士），我們會在使用個人化廣告 Cookie 之前徵求您的同意，您也可以隨時變更您的選擇。"
+      },
+      "international": {
+        "title": "7. 韓國境外的使用者",
+        "i1": "您的資訊將在大韓民國及美國（Google Firebase）處理。",
+        "i2": "歐洲經濟區（EEA）及英國的使用者：我們處理個人資料，是為了提供您所要求的服務、基於營運及改善服務的正當利益，以及（就個人化廣告而言）基於您的同意。您有權存取、更正、刪除您的資料，限制或反對資料之處理，要求資料可攜，隨時撤回同意，並向您所在地的資料保護主管機關提出申訴。",
+        "i3": "加州使用者：您可以要求得知、更正或刪除您的個人資料，也可以透過上述選項，選擇不將您的資訊用於定向廣告。我們不會為換取金錢而出售個人資料。",
+        "i4": "本服務並非以 13 歲以下兒童為對象，我們也不會在明知的情況下蒐集其個人資料。"
+      },
+      "rights": {
+        "title": "8. 您的權利",
+        "body": "您可以隨時要求存取、更正、刪除您的個人資料，或要求停止處理。請透過 <contact/>（070-8984-4679）與我們聯絡。"
+      },
+      "officer": {
+        "title": "9. 個人資料保護負責人",
+        "name": "姓名：Dokyun Kim",
+        "contact": "聯絡方式：<contact/>（070-8984-4679）"
+      }
+    }
+  },
+  "challengeConditions": {
+    "stageN": "通關第 {{n}} 關",
+    "beginnerStageN": "通關入門第 {{n}} 關",
+    "nStages": "通關 {{n}} 個關卡",
+    "hardNStages": "在困難模式中通關 {{n}} 個關卡",
+    "starsN": "收集 {{n}} 顆星星",
+    "dailyMonth": "完成 {{month}}的所有每日謎題"
+  },
+  "challengeTitles": {
+    "stage_001": "數獨新手",
+    "stage_005": "初階偵探",
+    "stage_5": "線索追蹤者",
+    "stage_10": "邏輯分析師",
+    "stage_25": "資深解題者",
+    "stage_50": "九宮守護者",
+    "stage_100": "數獨老手",
+    "stage_200": "直覺之眼",
+    "stage_300": "數獨達人",
+    "stage_400": "數獨大師",
+    "stage_500": "數獨狂熱者",
+    "stage_1000": "數獨之王",
+    "word_st_1": "文字堆疊起步",
+    "word_st_10": "文字堆疊新手",
+    "word_st_25": "分類入門",
+    "word_st_50": "單字收藏家",
+    "word_st_75": "詞彙探險家",
+    "word_st_100": "分類高手",
+    "word_st_150": "文字鍊金師",
+    "word_st_200": "分類專家",
+    "word_st_250": "文字陶藝家",
+    "word_st_300": "分類天才",
+    "word_hard_1": "小辣椒",
+    "word_hard_50": "辣度一級",
+    "word_hard_100": "嗜辣成癮",
+    "word_hard_150": "困難模式愛好者",
+    "word_hard_200": "文字堆疊狂粉",
+    "cq_1": "第一頂皇冠",
+    "cq_10": "王國騎士",
+    "cq_25": "城堡領主",
+    "cq_50": "女王之眼",
+    "cq_100": "王國守護者",
+    "cq_200": "王座主人",
+    "cq_300": "大皇冠探險家",
+    "cq_400": "傳奇騎士",
+    "cq_500": "王國傳說",
+    "cq_600": "皇家衛隊長",
+    "cq_700": "王國長老",
+    "cq_800": "要塞領主",
+    "cq_900": "皇冠之星",
+    "cq_1000": "皇冠大師",
+    "ss_1": "初次發現",
+    "ss_10": "敏銳眼力",
+    "ss_30": "貓頭鷹之眼",
+    "ss_50": "細心觀察家",
+    "ss_100": "鷹眼",
+    "ss_200": "洞悉之眼",
+    "ss_300": "獵豹之眼",
+    "ss_500": "千里眼",
+    "crossum_stage_5": "第一道算式",
+    "crossum_stage_10": "填空高手",
+    "crossum_stage_25": "第一道關門",
+    "crossum_stage_50": "算術學徒",
+    "crossum_stage_100": "算式建築師",
+    "crossum_stage_300": "心算大師",
+    "crossum_stage_500": "等式的平衡",
+    "crossum_stage_700": "三數調音師",
+    "crossum_stage_1000": "Crossum 大師",
+    "arrow_stage_5": "第一箭",
+    "arrow_stage_10": "開路者",
+    "arrow_stage_25": "解結高手",
+    "arrow_stage_50": "迷宮逃脫者",
+    "arrow_stage_100": "箭頭工匠",
+    "arrow_stage_300": "尋路專家",
+    "arrow_stage_500": "無盡迷宮",
+    "arrow_stage_700": "逃脫大師",
+    "arrow_stage_1000": "Arroway 大師",
+    "daily_2026-10": "數獨殭屍",
+    "daily_2026-11": "文字學者",
+    "jigsaw_stage_5": "初識拼圖片",
+    "jigsaw_stage_10": "圖片收藏家",
+    "jigsaw_stage_25": "拼圖工匠",
+    "jigsaw_stage_50": "拼圖探險家",
+    "jigsaw_stage_100": "名畫愛好者",
+    "jigsaw_stage_300": "拼圖大師",
+    "jigsaw_stage_500": "美術館館長",
+    "jigsaw_stage_700": "畫中旅人",
+    "jigsaw_stage_1000": "千幅圖畫",
+    "jigsaw_stars_10": "一閃一閃",
+    "jigsaw_stars_30": "星星採集者",
+    "jigsaw_stars_75": "星光收藏家",
+    "jigsaw_stars_150": "銀河漫步",
+    "jigsaw_stars_300": "流星獵人",
+    "jigsaw_stars_600": "星座創作者",
+    "jigsaw_stars_1000": "行星領主",
+    "jigsaw_stars_1500": "比太陽更耀眼",
+    "jigsaw_stars_3000": "星星之王"
+  },
+  "frameNames": {
+    "yellow": "黃色",
+    "orange": "橘色",
+    "red": "紅色",
+    "pink": "粉紅色",
+    "purple": "紫色",
+    "blue": "藍色",
+    "green": "綠色",
+    "white": "白色",
+    "gold": "金色",
+    "silver": "銀色",
+    "bronze": "銅色",
+    "sakura": "櫻花",
+    "sunset": "夕陽",
+    "aurora": "極光",
+    "ocean": "海洋",
+    "forest": "森林",
+    "neon": "霓虹",
+    "diamond": "鑽石",
+    "flame": "火焰",
+    "moonlight": "月光",
+    "electric": "電光",
+    "lava": "熔岩",
+    "galaxy": "銀河",
+    "goldtwin": "雙金",
+    "aurorax": "旋轉極光",
+    "ruby": "紅寶石",
+    "sapphire": "藍寶石",
+    "toxic": "劇毒",
+    "rainbow": "彩虹",
+    "phoenix": "鳳凰",
+    "crown": "皇冠",
+    "blackhole": "黑洞",
+    "ripple": "漣漪",
+    "comet": "彗星",
+    "neonsign": "霓虹招牌",
+    "glitch": "故障特效",
+    "stardust": "星塵",
+    "snow": "雪花",
+    "zombie": "殭屍",
+    "scholar": "文字學者",
+    "jigsaw": "拼圖片",
+    "crownquest": "Crown Quest"
+  }
+}

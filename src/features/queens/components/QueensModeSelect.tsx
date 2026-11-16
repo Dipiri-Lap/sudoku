@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation, Trans } from 'react-i18next';
 import i18n from '../../../i18n';
-import { localeHref, isEn } from '../../../i18n/locale';
+import { localeHref } from '../../../i18n/locale';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Play } from 'lucide-react';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
@@ -123,8 +123,9 @@ const QueensModeSelect: React.FC = () => {
         <div className="qh-logo">
           <span className="l1">Crown</span>
           <span className="l2">Quest</span>
-          {/* 영어에선 로고 글자(Crown/Quest)와 같은 말이 반복되므로 h1은 화면에서만 숨긴다(SEO용 유지). 일본어는 한국어처럼 보여 준다(クラウンクエスト). */}
-          <h1 style={isEn ? VISUALLY_HIDDEN : undefined}>{tc('games.queens.name')}</h1>
+          {/* 게임 이름이 로고 글자(Crown Quest)와 똑같은 언어(영어, 브랜드명을 그대로 쓰는 언어)에선 h1을 화면에서만 숨긴다(SEO용 유지).
+              일본어(クラウンクエスト)처럼 다르게 쓰는 언어는 한국어처럼 보여 준다. */}
+          <h1 style={tc('games.queens.name') === 'Crown Quest' ? VISUALLY_HIDDEN : undefined}>{tc('games.queens.name')}</h1>
         </div>
 
         <button className="qh-card" onClick={() => { if (isSynced) navigate('/queens/play'); }} disabled={!isSynced} aria-label={t('home.startNextAria')}>

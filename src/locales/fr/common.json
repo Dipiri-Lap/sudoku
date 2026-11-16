@@ -1,0 +1,50 @@
+{
+  "brand": "Puzzle Garden",
+  "games": {
+    "sudoku": {
+      "name": "Sudoku"
+    },
+    "queens": {
+      "name": "Crown Quest"
+    },
+    "jigsaw": {
+      "name": "Tiny Pieces"
+    },
+    "snapspot": {
+      "name": "SnapSpot"
+    },
+    "wordSort": {
+      "name": "Word Stack"
+    },
+    "crossMath": {
+      "name": "Crossum"
+    },
+    "arrowPuzzle": {
+      "name": "Arroway"
+    },
+    "daily": {
+      "name": "Puzzle du jour"
+    }
+  },
+  "difficulty": {
+    "veryEasy": "Très facile",
+    "easy": "Facile",
+    "beginner": "Débutant",
+    "medium": "Moyen",
+    "hard": "Difficile",
+    "expert": "Expert",
+    "master": "Maître"
+  },
+  "app": {
+    "initializing": "Chargement..."
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "switchLabel": "Langue",
+    "enBanner": "English version available →",
+    "jaBanner": "日本語版はこちら →",
+    "dismiss": "Fermer"
+  }
+}

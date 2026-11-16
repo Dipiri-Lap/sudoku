@@ -1,0 +1,139 @@
+{
+  "controls": {
+    "adDismissed": "要看完廣告才能使用提示。",
+    "noAd": "目前沒有可播放的廣告，請稍後再試。",
+    "hintTitle": "使用提示",
+    "noCoinsTitle": "金幣不足",
+    "hintDescConfirm": "選一個想填入的格子",
+    "hintDescAd": "觀看廣告即可使用一次提示",
+    "hintDescUsed": "這一局已經看過廣告了",
+    "owned": "持有",
+    "cost": "花費",
+    "cancel": "取消",
+    "pickCell": "選擇格子",
+    "loading": "載入中…",
+    "watchAd": "觀看廣告",
+    "ok": "確定",
+    "free": "免費",
+    "pickGuide": "請選擇要填入的格子"
+  },
+  "tutorial": {
+    "title": "玩法說明",
+    "body": "填滿空格，讓每個<row>橫列</row>、<col>直行</col>與<box>{{size}} 宮格</box>內，<br/>數字都不重複。",
+    "ok": "確定"
+  },
+  "theme": {
+    "names": {
+      "default": "經典",
+      "dark": "深色",
+      "paper": "紙張",
+      "gameboy": "Game Boy",
+      "chalkboard": "黑板",
+      "blossom": "櫻花",
+      "ocean": "海洋",
+      "mocha": "摩卡",
+      "dusk": "黃昏",
+      "mintchoco": "薄荷巧克力",
+      "newspaper": "報紙",
+      "blueprint": "藍圖",
+      "terminal": "終端機",
+      "watercolor": "水彩",
+      "hanji": "韓紙",
+      "space": "太空",
+      "notepad": "記事本",
+      "highlighter": "螢光筆"
+    },
+    "grades": {
+      "free": "免費",
+      "common": "普通",
+      "rare": "稀有",
+      "epic": "史詩"
+    }
+  },
+  "themeModal": {
+    "title": "🎨 佈景商店",
+    "coins": "持有金幣",
+    "applied": "使用中",
+    "select": "選擇",
+    "free": "免費",
+    "unlockTitle": "解鎖佈景",
+    "confirmSpend": "要花費 {{cost}} 金幣嗎？",
+    "cancel": "取消",
+    "ok": "確定"
+  },
+  "difficulty": {
+    "title": "選擇難度",
+    "myBest": "我的紀錄：{{time}}",
+    "worldBest": "第1名：{{time}}"
+  },
+  "game": {
+    "levelLocked": "你還沒有到達這個等級！（目前挑戰中：Level {{level}}）",
+    "nicknameChanged": "暱稱已變更。",
+    "changeTheme": "更換佈景",
+    "dailyDate": "{{month}}月{{day}}日",
+    "beginnerLevel": "入門 {{level}}",
+    "paused": "已暫停",
+    "resume": "繼續",
+    "mistakes_other": "你犯了 {{count}} 次錯誤",
+    "back": "返回",
+    "retry": "再試一次 🔄",
+    "dailyComplete": "📅 每日謎題完成！",
+    "congrats": "🎉 恭喜！",
+    "newRecord": "刷新紀錄！",
+    "timeLabel": "花費時間：",
+    "puzzlePower": "⚡ 解謎力 +{{n}}",
+    "monthComplete": "整月完成！獲得「{{title}}」稱號",
+    "rewardAvatar": " · 🖼 獲得頭像",
+    "rewardFrame": " · 🔲 獲得邊框",
+    "rewardCardBack": " · 🃏 獲得卡背",
+    "nickname": "暱稱",
+    "change": "變更",
+    "toCalendar": "回到日曆",
+    "nextLevel": "下一個等級",
+    "nextStage": "下一關",
+    "doneHome": "完成！回首頁",
+    "ok": "確定"
+  },
+  "modeSelect": {
+    "altBeginner": "入門模式",
+    "altStage": "關卡模式",
+    "altBig": "大盤面模式",
+    "altTimeAttack": "計時挑戰模式",
+    "restart": "從頭開始",
+    "start": "開始 Level {{level}}/{{max}}",
+    "continue": "繼續 Level {{level}}/{{max}}",
+    "play": "開始遊玩",
+    "seo": {
+      "title": "數獨線上免費玩 - 經典數獨遊戲、免費數獨題目 | 益智花園",
+      "description": "免費線上玩數獨遊戲：從 6×6 入門到高難度大盤面，支援筆記、提示與計時挑戰模式，不用下載、不用註冊，打開網頁就能玩，隨時來一題。",
+      "appName": "數獨 - 益智花園",
+      "currency": "TWD",
+      "summary": "什麼是數獨？免費線上數獨遊戲",
+      "h2": "數獨怎麼玩",
+      "h3": "挑選難度的小指南",
+      "h4": "數獨的腦力訓練效果",
+      "p1": "<strong>數獨（Sudoku）</strong>是在 9×9 方格中填入數字的邏輯謎題。每一橫列、每一直行與每個 3×3 宮格，都必須剛好填入一次 1 到 9。不需要數學能力，只靠邏輯與專注力就能解開，是全世界都喜愛的<strong>益智遊戲</strong>。",
+      "p2": "點選一個空格，輸入符合條件的 1 到 9 數字。同一橫列、直行或宮格內已經出現過的數字，就不能再使用。卡關時可以利用提示功能。第一次玩的話，建議從<strong>入門數獨</strong>或<strong>簡單難度</strong>開始。",
+      "p3": "<strong>入門 · 簡單</strong>：給第一次接觸數獨的玩家，提供許多線索。<br/><strong>普通</strong>：熟悉基本規則後可以挑戰，需要一些邏輯推理。<br/><strong>困難 · 計時挑戰</strong>：要在時限內完成的速度挑戰模式，適合高手。",
+      "p4": "數獨能有效提升<strong>專注力、邏輯思考與短期記憶</strong>。研究指出，每天持續解 10 到 15 分鐘，有助於維持認知能力。用益智花園的免費線上數獨，每天刺激一下大腦吧。",
+      "faq": {
+        "q1": {
+          "q": "什麼是數獨？",
+          "a": "數獨是在 9×9 方格中填入 1 到 9 數字的邏輯謎題。每一橫列、每一直行與每個 3×3 宮格內，數字都不能重複。它不靠數學能力，而是純粹靠邏輯推理的益智遊戲。"
+        },
+        "q2": {
+          "q": "數獨可以免費玩嗎？",
+          "a": "可以，益智花園的數獨完全免費。不用註冊就能直接開始玩，並提供從入門到困難的多種難度。"
+        },
+        "q3": {
+          "q": "新手要從哪個難度開始？",
+          "a": "第一次玩的話，建議從入門模式開始。難度會一步一步提高，可以慢慢累積實力。熟悉之後，再試試計時挑戰模式。"
+        },
+        "q4": {
+          "q": "數獨對大腦有幫助嗎？",
+          "a": "有。數獨有助於提升專注力、邏輯思考與短期記憶。一般認為每天持續解 10 到 15 分鐘，有助於維持認知能力。"
+        }
+      }
+    }
+  }
+}

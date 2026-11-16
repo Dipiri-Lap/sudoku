@@ -1,0 +1,182 @@
+{
+  "grade": {
+    "common": "Comum",
+    "rare": "Raro",
+    "epic": "Épico",
+    "legendary": "Lendário"
+  },
+  "nav": {
+    "prev": "Voltar",
+    "prevArrow": "← Voltar",
+    "next": "Próximo →",
+    "start": "Começar →"
+  },
+  "double": {
+    "step0": {
+      "title": "Bem-vindo ao modo Duplo!",
+      "desc": "O dobro de rainhas neste nível!\nVamos ver as regras."
+    },
+    "step1": {
+      "label": "Regra 1 / 3",
+      "title": "2 rainhas por cor",
+      "desc": "Coloque exatamente 2 rainhas\nem cada região colorida."
+    },
+    "step2": {
+      "label": "Regra 2 / 3",
+      "title": "2 rainhas por linha e coluna",
+      "desc": "Cada linha e cada coluna\ntambém deve ter exatamente 2 rainhas."
+    },
+    "step3": {
+      "label": "Regra 3 / 3",
+      "title": "Rainhas não podem se tocar",
+      "desc": "Duas rainhas não podem se tocar,\nnem na diagonal."
+    }
+  },
+  "tutorial": {
+    "step0": {
+      "title": "Bem-vindo ao Queens!",
+      "desc": "Coloque 4 rainhas em um tabuleiro 4×4 sem quebrar as regras.\nVamos ver uma por uma."
+    },
+    "step1": {
+      "label": "Regra 1 / 4",
+      "title": "Uma rainha por cor",
+      "desc": "O tabuleiro é dividido em 4 regiões coloridas.\nColoque exatamente uma rainha em cada região."
+    },
+    "step2": {
+      "label": "Regra 2 / 4",
+      "title": "Uma rainha por linha",
+      "desc": "Cada linha comporta só uma rainha.\nDuas ou mais na mesma linha quebram a regra!"
+    },
+    "step3": {
+      "label": "Regra 3 / 4",
+      "title": "Uma rainha por coluna",
+      "desc": "Cada coluna também comporta só uma rainha."
+    },
+    "step4": {
+      "label": "Regra 4 / 4",
+      "title": "Rainhas não podem se tocar",
+      "desc": "Duas rainhas não podem se tocar!\nIsso vale para as diagonais."
+    },
+    "step5": {
+      "title": "Prática: marcar ✕",
+      "desc": "Toque para marcar ✕ nas células em que uma rainha não pode ficar.\nToque na célula brilhante!"
+    },
+    "step6": {
+      "title": "Prática: colocar uma rainha",
+      "desc": "Toque duas vezes rápido para colocar uma rainha.\nColoque a rainha laranja na célula brilhante!"
+    },
+    "step7": {
+      "title": "Eliminação por linha",
+      "desc": "A rainha laranja está na linha 0.\nNenhuma outra rainha pode ficar nessa linha,\nentão marque ✕ na célula azul (0,3)!"
+    },
+    "step8": {
+      "title": "Coloque a rainha azul",
+      "desc": "Com a linha 0 descartada, só sobra (1,3)\nna região azul!\nToque duas vezes para colocar a rainha azul."
+    },
+    "step9": {
+      "title": "Eliminação por vizinhança",
+      "desc": "(2,2) toca a rainha azul (1,3)\nna diagonal, então está fora.\nMarque com ✕!"
+    },
+    "step10": {
+      "title": "Coloque a rainha roxa",
+      "desc": "Descarte a coluna 1 e as células que se tocam,\ne só sobra (3,2) na região roxa!\nToque duas vezes para colocar a rainha roxa."
+    },
+    "step11": {
+      "title": "Última rainha!",
+      "desc": "Com três rainhas no tabuleiro, só sobra (2,0)\nna região verde. Toque duas vezes\npara terminar o quebra-cabeça! 🎉"
+    },
+    "introSub": "Coloque 4 rainhas em um tabuleiro 4×4 sem quebrar as regras.",
+    "learnRules": "Ver as regras →",
+    "skip": "Pular",
+    "tryIt": "Experimentar →"
+  },
+  "game": {
+    "exit": "Sair",
+    "changeCrown": "Trocar coroa",
+    "sfxOff": "Desligar o som",
+    "sfxOn": "Ligar o som",
+    "heart": "Coração",
+    "lostHeart": "Coração perdido",
+    "doubleRuleColor": "2 rainhas<br/>por cor",
+    "doubleRuleRowCol": "2 rainhas por<br/>linha e coluna",
+    "doubleRuleTouch": "Rainhas não<br/>se tocam",
+    "restart": "Reiniciar",
+    "restartAria": "Reiniciar",
+    "memoAria": "Modo anotações",
+    "memoOn": "Anotações ativas",
+    "memo": "Anotações",
+    "hintAria": "Dica de coroa",
+    "hintUsed": "Usada",
+    "hintMemo": "Modo anotações: marcas discretas, para pensar à vontade",
+    "hintDefault": "Toque ✕ · Toque duplo na rainha · Arraste para marcar ✕",
+    "adDismissed": "Assista ao anúncio inteiro para usar este recurso."
+  },
+  "ad": {
+    "readyTitle": "Anúncio pronto",
+    "noCoinsTitle": "Moedas insuficientes",
+    "readyDesc": "Toque no botão abaixo para iniciar o anúncio.",
+    "noCoinsDesc": "Suas moedas: {{coins}} / Necessário: 50<br/>Assista a um anúncio para colocar uma coroa de graça.",
+    "start": "Iniciar anúncio",
+    "loading": "Carregando anúncio...",
+    "watch": "Ver anúncio",
+    "cancel": "Cancelar"
+  },
+  "result": {
+    "cleared": "Fase concluída!",
+    "puzzlePower": "⚡ Poder puzzle +1",
+    "nextLevel": "Próximo nível",
+    "homeAria": "Início do Crown Quest",
+    "retryAria": "Tentar de novo",
+    "failHead": "Quase!",
+    "failNote": "Você colocou uma coroa em uma célula errada e perdeu um coração",
+    "retry": "Tentar de novo"
+  },
+  "home": {
+    "metaTitle": "Jogo de Lógica Queens Online Grátis - Crown Quest | Puzzle Garden",
+    "metaDesc": "Jogue o quebra-cabeça das rainhas (Queens) grátis online. Coloque uma rainha em cada região colorida, sem que se toquem. Crown Quest tem 1000 fases grátis.",
+    "homeAria": "Início do Puzzle Garden",
+    "startNextAria": "Começar a próxima fase",
+    "double": "Duplo",
+    "tutorial": "Tutorial",
+    "allDone": "Tudo concluído!",
+    "freshSub": "Aprenda as regras primeiro",
+    "allDoneSub": "Você concluiu todas as fases",
+    "twoCrowns": " · 2 coroas cada",
+    "loading": "Carregando...",
+    "start": "Começar",
+    "play": "Jogar",
+    "cleared": "Concluído",
+    "whatIs": "O que é o Crown Quest?",
+    "intro": "O Crown Quest é um quebra-cabeça de lógica em que você coloca exatamente uma coroa em cada <strong>região colorida, linha e coluna</strong> do tabuleiro. Duas coroas não podem se tocar, nem na diagonal, e todas as condições valem ao mesmo tempo. Conforme você avança, os tabuleiros crescem e as posições ficam mais difíceis!",
+    "rule1": {
+      "label": "Regra 1",
+      "title": "Uma rainha por cor",
+      "desc": "Coloque exatamente uma rainha em cada região colorida."
+    },
+    "rule2": {
+      "label": "Regra 2",
+      "title": "Uma rainha por linha e coluna",
+      "desc": "Cada linha e cada coluna também comporta só uma rainha."
+    },
+    "rule3": {
+      "label": "Regra 3",
+      "title": "Rainhas não podem se tocar",
+      "desc": "Duas rainhas não podem se tocar. Isso vale para vizinhas na horizontal, na vertical e na diagonal."
+    }
+  },
+  "shop": {
+    "title": "Loja de coroas",
+    "close": "Fechar",
+    "wallet": "Suas moedas",
+    "free": "Grátis",
+    "selectedAria": "Coroa equipada",
+    "selectAria": "Selecionar coroa",
+    "unlockAria": "Desbloquear por {{cost}} moedas",
+    "equipped": "Equipada",
+    "select": "Usar",
+    "unlockTitle": "Desbloquear",
+    "confirm": "Gastar {{cost}} moedas?",
+    "cancel": "Cancelar",
+    "unlock": "Desbloquear"
+  }
+}

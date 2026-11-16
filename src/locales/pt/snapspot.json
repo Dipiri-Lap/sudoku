@@ -1,0 +1,125 @@
+{
+  "modeSelect": {
+    "seoTitle": "Jogo dos 7 Erros Online Grátis - Ache as Diferenças | SnapSpot",
+    "seoDescription": "Jogue o jogo dos 7 erros grátis online. Compare duas fotos e encontre todas as diferenças nos modos Normal, Contra o Tempo e Arcade, com mais de 750 fases.",
+    "miniOriginal": "Original",
+    "miniModified": "Editada",
+    "miniHeartLeft": "1 coração restante",
+    "stageAlt": "Fase",
+    "arcadeAlt": "Arcade",
+    "loading": "Carregando...",
+    "continueStage": "Continuar fase {{n}}/{{max}}",
+    "startStage": "Começar fase 1/{{max}}",
+    "aboutTitle": "O que é o SnapSpot?",
+    "aboutBody": "O SnapSpot é um jogo dos 7 erros: compare duas fotos lado a lado e encontre todas as <strong>diferenças escondidas</strong>. Com mais de 750 fases e um modo Arcade contra o tempo, é uma ótima forma de afiar o foco e o olhar para os detalhes!",
+    "tips": {
+      "compare": {
+        "label": "Básico",
+        "title": "Compare as duas fotos",
+        "desc": "Olhe a foto original e a editada lado a lado e descubra o que mudou. Pequenas mudanças de cor, tamanho ou posição estão escondidas ali."
+      },
+      "tap": {
+        "label": "Controles",
+        "title": "Toque para conferir",
+        "desc": "Toque (ou clique) onde você acha que está a diferença para conferir na hora. Um toque certo deixa uma marca."
+      },
+      "zoom": {
+        "label": "Zoom",
+        "title": "Pinça para dar zoom",
+        "desc": "Não está vendo? Faça o gesto de pinça ou use a roda do mouse para ampliar até 3x."
+      },
+      "stage": {
+        "label": "Fases",
+        "title": "Poupe seus corações",
+        "desc": "No modo Fases, cada toque errado custa um coração. Se perder todos, é fim de jogo, então toque com cuidado!"
+      }
+    }
+  },
+  "game": {
+    "seoTitle": "SnapSpot - Jogo dos 7 Erros - Puzzle Garden",
+    "seoDescription": "Compare duas fotos e encontre as diferenças. Teste a sua visão!",
+    "loading": "Carregando...",
+    "alertAdDismissed": "Assista ao anúncio inteiro para usar uma dica.",
+    "alertNoAd": "Nenhum anúncio disponível agora. Tente novamente mais tarde.",
+    "soundSettings": "Configurações de som",
+    "markerShop": "Loja de marcadores",
+    "altOriginal": "Original",
+    "altModified": "Editada",
+    "modeSelect": "Modos",
+    "win": {
+      "title": "Você achou todas!",
+      "body_one": "Você achou {{count}} diferença.",
+      "body_many": "Você achou todas as {{count}} diferenças.",
+      "body_other": "Você achou todas as {{count}} diferenças.",
+      "puzzlePower": "Poder puzzle +1",
+      "nextStage": "Próxima fase"
+    },
+    "over": {
+      "title": "Fim de jogo",
+      "body": "Seus corações acabaram.",
+      "retry": "Tentar de novo"
+    },
+    "hint": {
+      "title": "Moedas insuficientes",
+      "adPrompt": "Assista a um anúncio para usar uma dica",
+      "adUsed": "Você já assistiu a um anúncio nesta rodada",
+      "balance": "Você tem {{coins}}🪙 · Precisa de {{cost}}🪙",
+      "cancel": "Cancelar",
+      "adLoading": "Carregando…",
+      "watchAd": "Ver anúncio",
+      "ok": "OK"
+    }
+  },
+  "settings": {
+    "title": "Configurações de som",
+    "sfx": "Efeitos sonoros"
+  },
+  "markerShop": {
+    "title": "Loja de marcadores",
+    "balance": "Suas moedas",
+    "applied": "Em uso",
+    "select": "Usar",
+    "free": "Grátis",
+    "unlock": "Desbloquear",
+    "confirmSpend": "Gastar {{cost}} moedas?",
+    "cancel": "Cancelar",
+    "ok": "OK",
+    "designs": {
+      "circle": "Círculo",
+      "check": "Visto",
+      "star": "Estrela",
+      "thumbs": "Joinha",
+      "dart": "Dardo",
+      "hundred": "100",
+      "gem": "Gema",
+      "smile": "Carinha",
+      "magnify": "Lupa",
+      "pin": "Alfinete",
+      "dizzy": "Estrela tonta",
+      "target": "Alvo",
+      "clover": "Trevo",
+      "frog": "Sapo",
+      "cherry": "Cerejeira",
+      "cactus": "Cacto",
+      "hue": "Roda de cores",
+      "robot": "Robô",
+      "lightning": "Raio",
+      "sparkle": "Brilho",
+      "bulb": "Lâmpada",
+      "paw": "Patinha",
+      "butterfly": "Borboleta",
+      "cat": "Gato",
+      "fox": "Raposa",
+      "panda": "Panda",
+      "bomb": "Bomba",
+      "heart": "Coração",
+      "magic": "Varinha mágica",
+      "eyes": "Olhos",
+      "crown": "Coroa",
+      "rainbow": "Arco-íris",
+      "portal": "Portal",
+      "arc": "Arco elétrico",
+      "matrix": "Matrix"
+    }
+  }
+}

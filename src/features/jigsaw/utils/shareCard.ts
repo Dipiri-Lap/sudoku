@@ -114,7 +114,8 @@ export async function buildShareCard(input: ShareCardInput): Promise<Blob> {
     const mpLabel = i18n.t('jigsaw:win.masterpiece');
     await Promise.all([
         document.fonts.load('170px "Lilita One"', 'CLEAR!STAGE 0123456789Tiny Pieces'),
-        document.fonts.load('62px "Black Han Sans"', `${input.title}${scoreLine}${challengeLine}${mpLabel}`),
+        // 목록 전체를 넘겨야 Black Han Sans 에 없는 글자(악센트 라틴·가나·한자)용 웹 글꼴도 미리 받는다.
+        document.fonts.load('62px "Black Han Sans", "Lilita One", "M PLUS Rounded 1c", "Chiron GoRound TC"', `${input.title}${scoreLine}${challengeLine}${mpLabel}`),
     ]).catch(() => undefined);
     const [pic, buddy] = await Promise.all([loadImage(input.image), loadBuddy(input.buddySvg)]);
 
@@ -217,15 +218,15 @@ export async function buildShareCard(input: ShareCardInput): Promise<Blob> {
 
     // title + score
     const ink = input.masterpiece ? '#5a3a00' : '#3a3046';
-    text(ctx, input.title, cardX + cardW / 2, picY + picSize + 78, '62px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif', ink, undefined, !isKo ? cardW - 60 : undefined);
-    text(ctx, scoreLine, cardX + cardW / 2, picY + picSize + 138, '40px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif', input.masterpiece ? '#7a5200' : deep, undefined, !isKo ? cardW - 60 : undefined);
+    text(ctx, input.title, cardX + cardW / 2, picY + picSize + 78, '62px "Black Han Sans", "Arial Black", "Lilita One", "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif', ink, undefined, !isKo ? cardW - 60 : undefined);
+    text(ctx, scoreLine, cardX + cardW / 2, picY + picSize + 138, '40px "Black Han Sans", "Arial Black", "Lilita One", "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif', input.masterpiece ? '#7a5200' : deep, undefined, !isKo ? cardW - 60 : undefined);
 
     // masterpiece label (top-left of the card)
     if (input.masterpiece) {
         ctx.save();
         ctx.translate(cardX + 40, cardY + 70);
         ctx.rotate(-0.17);
-        ctx.font = '34px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif';
+        ctx.font = '34px "Black Han Sans", "Arial Black", "Lilita One", "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif';
         const lw = ctx.measureText(mpLabel).width + 44;
         ctx.fillStyle = 'rgba(0,0,0,0.2)';
         roundRect(ctx, -lw / 2, -30 + 7, lw, 60, 18);
@@ -233,7 +234,7 @@ export async function buildShareCard(input: ShareCardInput): Promise<Blob> {
         ctx.fillStyle = '#3a3046';
         roundRect(ctx, -lw / 2, -30, lw, 60, 18);
         ctx.fill();
-        text(ctx, mpLabel, 0, 12, '34px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif', '#ffd34d');
+        text(ctx, mpLabel, 0, 12, '34px "Black Han Sans", "Arial Black", "Lilita One", "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif', '#ffd34d');
         ctx.restore();
     }
 
@@ -275,7 +276,7 @@ export async function buildShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.restore();
 
     // challenge line + brand
-    text(ctx, challengeLine, W / 2, 1236, '44px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif', '#ffffff', { dy: 4, color: 'rgba(0,0,0,0.18)' });
+    text(ctx, challengeLine, W / 2, 1236, '44px "Black Han Sans", "Arial Black", "Lilita One", "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif', '#ffffff', { dy: 4, color: 'rgba(0,0,0,0.18)' });
     text(ctx, 'Tiny Pieces', W / 2, 1310, '64px "Lilita One"', '#ffffff', { dy: 6, color: 'rgba(0,0,0,0.2)' });
 
     return new Promise((resolve, reject) =>

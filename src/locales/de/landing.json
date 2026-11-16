@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "title": "Puzzle Garden - Kostenlose Rätselspiele online: Sudoku & Puzzle",
+    "description": "Rätselspiele kostenlos online spielen: Sudoku, Online-Puzzle, Queens-Logikrätsel und Fehlersuchbilder. Direkt im Browser, ohne Download und ohne Anmeldung."
+  },
+  "toast": {
+    "welcome": "Willkommen!",
+    "signedOut": "Du wurdest abgemeldet.",
+    "linkCopied": "Link kopiert!",
+    "profileUpdated": "Profil aktualisiert."
+  },
+  "share": {
+    "textWithPower": "Meine Rätselkraft liegt bei {{power}}! Trainiere mit mir dein Gehirn im Puzzle Garden 🧩",
+    "text": "Weck dein Gehirn mit kniffligen Rätseln im Puzzle Garden auf 🧩"
+  },
+  "profile": {
+    "avatarAlt": "Profil",
+    "puzzlePower": "Rätselkraft:",
+    "rank": "Rang:"
+  },
+  "header": {
+    "shop": "Shop",
+    "guide": "Spielanleitung",
+    "invite": "Freunde einladen",
+    "installMobile": "Zum Startbildschirm",
+    "installDesktop": "Auf den Desktop",
+    "logout": "Abmelden",
+    "login": "Anmelden"
+  },
+  "daily": {
+    "badgeDone": "FERTIG",
+    "badgeToday": "HEUTE",
+    "dateLabel": "{{day}}.{{month}}.",
+    "done": "Heute geschafft!",
+    "play": "Heutiges Rätsel spielen",
+    "monthProgress": "Diesen Monat: <green>{{cleared}}</green> / {{total}} gelöst"
+  },
+  "kakao": {
+    "copyPrompt": "Kopiere diesen Link:",
+    "title": "Bitte mit Safari anmelden",
+    "body": "Aus Sicherheitsgründen unterstützt der In-App-Browser von KakaoTalk<br/><strong>keine Anmeldung mit Google.</strong><br/><br/>Kopiere den Link unten und füge ihn in Safari ein,<br/>um dich normal anzumelden.",
+    "copied": "✅ Kopiert!",
+    "copy": "🔗 Link kopieren",
+    "close": "Schließen"
+  },
+  "seo": {
+    "summary": "Kostenlose Rätselspiele, die dein Gehirn wecken",
+    "intro": "Puzzle Garden ist eine Sammlung <strong>kostenloser Denkspiele</strong>, die du jederzeit und überall spielen kannst. Sudoku, Fehlersuchbilder (SnapSpot), Queens und Online-Puzzles: ohne Installation direkt im Browser.",
+    "sudoku": {
+      "title": "🔢 Sudoku",
+      "body": "Das klassische Logikrätsel: Ein 9×9-Gitter wird mit den Ziffern 1 bis 9 gefüllt. Von sanften Einsteigerfeldern bis zu kniffligen Expertenstufen wartet immer die nächste Herausforderung. Tägliches Sudoku ist ein tolles Training für Konzentration und logisches Denken."
+    },
+    "wordSort": {
+      "title": "🃏 Word Stack",
+      "body": "Ein <strong>Wortkarten-Spiel</strong>, bei dem du Karten ziehst und Wörter nach Thema sortierst."
+    },
+    "queens": {
+      "title": "👑 Crown Quest",
+      "body": "Ein <strong>Logikrätsel zum Platzieren</strong>: In jedem farbigen Bereich steht genau eine Dame, je eine pro Zeile und Spalte, und keine zwei Damen berühren sich, auch nicht diagonal. Einfache Regeln, überraschend tiefes Nachdenken."
+    },
+    "crossMath": {
+      "title": "➕ Crossum",
+      "body": "Ein <strong>Mathe-Kreuzworträtsel</strong>, bei dem du die Lücken sich kreuzender Gleichungen mit Zahlenplättchen füllst."
+    },
+    "benefits": {
+      "title": "Warum Rätsel gut für dich sind",
+      "body": "Rätsel machen nicht nur Spaß, sie sind ein echtes Training für dein <strong>Gehirn</strong>. Studien bringen sie mit besserer Konzentration, schärferem Kurzzeitgedächtnis und weniger Stress in Verbindung. Die Spiele im Puzzle Garden geben deinem Kopf auch in ein paar freien Minuten einen schnellen, wirksamen Schub."
+    }
+  },
+  "footer": {
+    "copyright": "Copyright © ToMixSoft. All Rights Reserved",
+    "bizNumber": "Business Registration No. 574-14-01507",
+    "mailOrder": "Mail-Order Business Registration No. 2024-Seoul Gwanak-1874",
+    "ceo": "CEO: Dokyun Kim",
+    "address": "49-11 Nakseongdaeyeok 8-gil, Gwanak-gu, Seoul 08799, Republic of Korea",
+    "supportLabel": "Support:",
+    "supportLink": "Kontakt",
+    "termsHeading": "ToMixSoft Bedingungen",
+    "termsService": "Nutzungsbedingungen",
+    "termsPrivacy": "Datenschutzerklärung",
+    "termsFinance": "Bedingungen für elektronische Finanztransaktionen"
+  }
+}

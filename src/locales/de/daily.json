@@ -1,0 +1,70 @@
+{
+  "seo": {
+    "title": "Tägliches Rätsel - jeden Tag ein neues Rätsel | Puzzle Garden",
+    "description": "Jeden Tag ein frisches Rätsel. Löse es und erhalte 100 Münzen und 10 Rätselkraft."
+  },
+  "back": "Zurück",
+  "close": "Schließen",
+  "dateLabel": "{{day}}. {{monthShort}}",
+  "monthTitle": "{{monthName}} {{year}}",
+  "progress": "<green>{{cleared}}</green> / {{total}} geschafft",
+  "weekdays": {
+    "sun": "S",
+    "mon": "M",
+    "tue": "D",
+    "wed": "M",
+    "thu": "D",
+    "fri": "F",
+    "sat": "S"
+  },
+  "reward": {
+    "header": "Belohnung für {{monthName}} komplett",
+    "claimed": " · Abgeholt",
+    "avatarAlt": "Avatar der Monatsbelohnung",
+    "plusAvatar": " + exklusiver Avatar",
+    "plusFrame": " + exklusiver Rahmen",
+    "plusCardBack": " + Kartenrücken",
+    "plusTitle": " + Titel",
+    "exclusiveAvatar": "Exklusiver Avatar",
+    "plusFrameShort": " + Rahmen",
+    "exclusiveCardBack": "Exklusiver Kartenrücken",
+    "titleChip": "Titel: {{title}}"
+  },
+  "today": {
+    "done": "Heutiges Rätsel geschafft!",
+    "play": "Heutiges Rätsel spielen",
+    "nextTomorrow": "Morgen gibt es ein neues Rätsel",
+    "rewardHint": "Löse es für 🪙 {{coin}} + ⚡ {{pp}} Rätselkraft"
+  },
+  "nav": {
+    "prevMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat"
+  },
+  "day": {
+    "unlockHint": "Freischalten für 🪙 {{cost}}",
+    "missedHint": "Vergangene Tage kannst du nicht nachholen"
+  },
+  "legend": {
+    "cleared": "Geschafft",
+    "today": "Heute",
+    "missed": "Verpasst"
+  },
+  "footnote": "Jeden Tag um Mitternacht gibt es ein neues Rätsel.<br/>Einen Tag in diesem Monat verpasst? Schalte ihn für 🪙 {{cost}} frei.<br/>Nach Monatsende bleiben die übrigen Rätsel gesperrt.",
+  "unlock": {
+    "title": "{{date}} freischalten",
+    "body": "Gib 🪙 {{cost}} aus, um das Rätsel dieses Tages zu spielen.<br/>Beim Lösen bekommst du die volle Belohnung.",
+    "owned": "Du hast 🪙 {{coins}}",
+    "notEnough": "Nicht genug Münzen",
+    "cancel": "Abbrechen",
+    "confirm": "Freischalten 🪙 {{cost}}"
+  },
+  "push": {
+    "ask": "🔔 Möchtest du erfahren, wenn morgen das neue Rätsel startet?",
+    "accept": "Benachrichtigen",
+    "working": "Wird eingerichtet …",
+    "later": "Später",
+    "done": "🔔 Benachrichtigungen sind an. Bis morgen früh!",
+    "denied": "Benachrichtigungen sind aus. Du kannst sie später in den Browser-Einstellungen einschalten.",
+    "error": "Benachrichtigungen konnten nicht aktiviert werden. Bitte versuche es gleich noch einmal."
+  }
+}

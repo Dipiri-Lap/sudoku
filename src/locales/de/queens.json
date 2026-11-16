@@ -1,0 +1,182 @@
+{
+  "grade": {
+    "common": "Gewöhnlich",
+    "rare": "Selten",
+    "epic": "Episch",
+    "legendary": "Legendär"
+  },
+  "nav": {
+    "prev": "Zurück",
+    "prevArrow": "← Zurück",
+    "next": "Weiter →",
+    "start": "Los →"
+  },
+  "double": {
+    "step0": {
+      "title": "Willkommen im Double-Modus!",
+      "desc": "Doppelt so viele Damen in diesem Level!\nGehen wir die Regeln durch."
+    },
+    "step1": {
+      "label": "Regel 1 / 3",
+      "title": "2 Damen pro Farbe",
+      "desc": "Setze genau 2 Damen\nin jeden farbigen Bereich."
+    },
+    "step2": {
+      "label": "Regel 2 / 3",
+      "title": "2 Damen pro Zeile & Spalte",
+      "desc": "Auch jede Zeile und jede Spalte\nmuss genau 2 Damen enthalten."
+    },
+    "step3": {
+      "label": "Regel 3 / 3",
+      "title": "Damen dürfen sich nicht berühren",
+      "desc": "Keine zwei Damen dürfen sich berühren,\nauch nicht diagonal."
+    }
+  },
+  "tutorial": {
+    "step0": {
+      "title": "Willkommen bei Queens!",
+      "desc": "Setze 4 Damen auf ein 4×4-Brett, ohne die Regeln zu brechen.\nWir gehen sie nacheinander durch."
+    },
+    "step1": {
+      "label": "Regel 1 / 4",
+      "title": "Eine Dame pro Farbe",
+      "desc": "Das Brett ist in 4 farbige Bereiche unterteilt.\nSetze in jeden Bereich genau eine Dame."
+    },
+    "step2": {
+      "label": "Regel 2 / 4",
+      "title": "Eine Dame pro Zeile",
+      "desc": "In jeder Zeile darf nur eine Dame stehen.\nZwei oder mehr in einer Zeile sind verboten!"
+    },
+    "step3": {
+      "label": "Regel 3 / 4",
+      "title": "Eine Dame pro Spalte",
+      "desc": "Auch in jeder Spalte darf nur eine Dame stehen."
+    },
+    "step4": {
+      "label": "Regel 4 / 4",
+      "title": "Damen dürfen sich nicht berühren",
+      "desc": "Keine zwei Damen dürfen sich berühren!\nDas gilt auch diagonal."
+    },
+    "step5": {
+      "title": "Übung: ✕ markieren",
+      "desc": "Tippe, um ✕ auf Felder zu setzen, auf denen keine Dame stehen kann.\nTippe das leuchtende Feld an!"
+    },
+    "step6": {
+      "title": "Übung: Dame setzen",
+      "desc": "Tippe schnell doppelt, um eine Dame zu setzen.\nSetze die orange Dame auf das leuchtende Feld!"
+    },
+    "step7": {
+      "title": "Zeile ausschließen",
+      "desc": "Die orange Dame steht in Zeile 0.\nKeine andere Dame darf in diese Zeile,\ndarum markierst du das blaue Feld (0,3) mit ✕!"
+    },
+    "step8": {
+      "title": "Blaue Dame setzen",
+      "desc": "Ohne Zeile 0 bleibt im blauen Bereich\nnur (1,3) übrig!\nTippe doppelt, um die blaue Dame zu setzen."
+    },
+    "step9": {
+      "title": "Nachbarfelder ausschließen",
+      "desc": "(2,2) berührt die blaue Dame (1,3)\ndiagonal und scheidet aus.\nMarkiere es mit ✕!"
+    },
+    "step10": {
+      "title": "Lila Dame setzen",
+      "desc": "Schließe Spalte 1 und die angrenzenden Felder aus,\ndann bleibt im lila Bereich nur (3,2) übrig!\nTippe doppelt, um die lila Dame zu setzen."
+    },
+    "step11": {
+      "title": "Die letzte Dame!",
+      "desc": "Stehen drei Damen, bleibt im grünen Bereich\nnur (2,0) übrig. Tippe doppelt,\num das Rätsel zu lösen! 🎉"
+    },
+    "introSub": "Setze 4 Damen auf ein 4×4-Brett, ohne die Regeln zu brechen.",
+    "learnRules": "Regeln ansehen →",
+    "skip": "Überspringen",
+    "tryIt": "Ausprobieren →"
+  },
+  "game": {
+    "exit": "Beenden",
+    "changeCrown": "Krone wechseln",
+    "sfxOff": "Ton ausschalten",
+    "sfxOn": "Ton einschalten",
+    "heart": "Herz",
+    "lostHeart": "Verlorenes Herz",
+    "doubleRuleColor": "2 Damen<br/>pro Farbe",
+    "doubleRuleRowCol": "2 Damen pro<br/>Zeile & Spalte",
+    "doubleRuleTouch": "Damen dürfen<br/>sich nicht berühren",
+    "restart": "Neustart",
+    "restartAria": "Neustart",
+    "memoAria": "Notizmodus",
+    "memoOn": "Notizen an",
+    "memo": "Notizen",
+    "hintAria": "Kronen-Tipp",
+    "hintUsed": "Benutzt",
+    "hintMemo": "Notizmodus: blasse Markierungen, damit du frei überlegen kannst",
+    "hintDefault": "Tippen: ✕ · Doppeltippen: Dame · Ziehen: ✕ markieren",
+    "adDismissed": "Sieh dir die ganze Werbung an, um diese Funktion zu nutzen."
+  },
+  "ad": {
+    "readyTitle": "Werbung bereit",
+    "noCoinsTitle": "Nicht genug Münzen",
+    "readyDesc": "Tippe unten auf den Button, um die Werbung zu starten.",
+    "noCoinsDesc": "Deine Münzen: {{coins}} / Benötigt: 50<br/>Sieh dir eine Werbung an, um gratis eine Krone zu setzen.",
+    "start": "Werbung starten",
+    "loading": "Werbung lädt …",
+    "watch": "Werbung ansehen",
+    "cancel": "Abbrechen"
+  },
+  "result": {
+    "cleared": "Geschafft!",
+    "puzzlePower": "⚡ Rätselkraft +1",
+    "nextLevel": "Nächstes Level",
+    "homeAria": "Crown Quest Startseite",
+    "retryAria": "Nochmal versuchen",
+    "failHead": "Knapp daneben!",
+    "failNote": "Du hast eine Krone aufs falsche Feld gesetzt und ein Herz verloren",
+    "retry": "Nochmal"
+  },
+  "home": {
+    "metaTitle": "Queens Rätsel kostenlos online - Crown Quest | Puzzle Garden",
+    "metaDesc": "Queens-Rätsel kostenlos online spielen: In jedem farbigen Bereich genau eine Dame, keine in derselben Zeile oder Spalte. Crown Quest: 1000 Stufen im Browser.",
+    "homeAria": "Puzzle Garden Startseite",
+    "startNextAria": "Nächste Stufe starten",
+    "double": "Double",
+    "tutorial": "Tutorial",
+    "allDone": "Alles geschafft!",
+    "freshSub": "Lerne zuerst die Regeln",
+    "allDoneSub": "Du hast alle Stufen geschafft",
+    "twoCrowns": " · je 2 Kronen",
+    "loading": "Lädt …",
+    "start": "Start",
+    "play": "Spielen",
+    "cleared": "Geschafft",
+    "whatIs": "Was ist Crown Quest?",
+    "intro": "Crown Quest ist ein Logikrätsel, bei dem in jedem <strong>farbigen Bereich, jeder Zeile und jeder Spalte</strong> des Bretts genau eine Krone stehen muss. Keine zwei Kronen dürfen sich berühren, auch nicht diagonal, und alle Bedingungen müssen gleichzeitig erfüllt sein. Mit jedem Level werden die Bretter größer und die Platzierungen kniffliger!",
+    "rule1": {
+      "label": "Regel 1",
+      "title": "Eine Dame pro Farbe",
+      "desc": "Setze in jeden farbigen Bereich genau eine Dame."
+    },
+    "rule2": {
+      "label": "Regel 2",
+      "title": "Eine Dame pro Zeile & Spalte",
+      "desc": "Auch in jeder Zeile und jeder Spalte darf nur eine Dame stehen."
+    },
+    "rule3": {
+      "label": "Regel 3",
+      "title": "Damen dürfen sich nicht berühren",
+      "desc": "Keine zwei Damen dürfen sich berühren. Das gilt waagerecht, senkrecht und diagonal."
+    }
+  },
+  "shop": {
+    "title": "Kronen-Shop",
+    "close": "Schließen",
+    "wallet": "Deine Münzen",
+    "free": "Gratis",
+    "selectedAria": "Ausgerüstete Krone",
+    "selectAria": "Krone wählen",
+    "unlockAria": "Für {{cost}} Münzen freischalten",
+    "equipped": "Aktiv",
+    "select": "Wählen",
+    "unlockTitle": "Freischalten",
+    "confirm": "{{cost}} Münzen ausgeben?",
+    "cancel": "Abbrechen",
+    "unlock": "Freischalten"
+  }
+}

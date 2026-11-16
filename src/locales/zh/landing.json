@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "title": "益智花園 - 免費線上益智遊戲：數獨、拼圖、找不同、皇后謎題",
+    "description": "益智花園提供免費線上益智遊戲：數獨、拼圖、皇后邏輯謎題與找不同（大家來找碴）。不用下載、不用註冊，用手機或電腦打開網頁就能玩。"
+  },
+  "toast": {
+    "welcome": "歡迎！",
+    "signedOut": "你已登出。",
+    "linkCopied": "已複製連結。",
+    "profileUpdated": "個人檔案已更新。"
+  },
+  "share": {
+    "textWithPower": "我的解謎力是 {{power}}！一起來益智花園訓練大腦吧 🧩",
+    "text": "在益智花園，用好玩的謎題喚醒你的大腦 🧩"
+  },
+  "profile": {
+    "avatarAlt": "個人檔案",
+    "puzzlePower": "解謎力：",
+    "rank": "排名："
+  },
+  "header": {
+    "shop": "商店",
+    "guide": "玩法說明",
+    "invite": "邀請朋友",
+    "installMobile": "加入主畫面",
+    "installDesktop": "加入桌面",
+    "logout": "登出",
+    "login": "登入"
+  },
+  "daily": {
+    "badgeDone": "完成",
+    "badgeToday": "今天",
+    "dateLabel": "{{month}}月{{day}}日",
+    "done": "今天完成了！",
+    "play": "挑戰今日謎題",
+    "monthProgress": "本月已完成 <green>{{cleared}}</green> / {{total}}"
+  },
+  "kakao": {
+    "copyPrompt": "請複製下方網址：",
+    "title": "請改用 Safari 登入",
+    "body": "基於安全政策，KakaoTalk 內建瀏覽器<br/><strong>不支援 Google 登入。</strong><br/><br/>請複製下方連結，貼到 Safari 的網址列，<br/>就能正常登入了。",
+    "copied": "✅ 已複製！",
+    "copy": "🔗 複製連結",
+    "close": "關閉"
+  },
+  "seo": {
+    "summary": "喚醒大腦的免費益智遊戲合集",
+    "intro": "益智花園是一個隨時隨地都能玩的<strong>免費腦力益智遊戲</strong>網站。數獨、找不同（SnapSpot）、皇后謎題與拼圖，不用安裝，直接用瀏覽器就能玩。",
+    "sudoku": {
+      "title": "🔢 數獨",
+      "body": "在 9×9 方格中填入 1 到 9 的經典邏輯謎題。從適合新手的簡單難度，到給高手的高難度關卡一應俱全。每天持續挑戰，有助於提升專注力與邏輯思考能力。"
+    },
+    "wordSort": {
+      "title": "🃏 Word Stack",
+      "body": "拖曳卡片，把同主題的單字分在一起的<strong>單字卡片遊戲</strong>。有各種主題的關卡，能自然地增進詞彙量與聯想力。"
+    },
+    "queens": {
+      "title": "👑 Crown Quest",
+      "body": "在每個色塊中剛好放入一個皇后的<strong>邏輯擺放謎題</strong>。同一橫列、直行與斜線上的皇后不能重疊，也不能相鄰。規則簡單，卻需要深度思考，能體會到西洋棋謎題的樂趣。"
+    },
+    "crossMath": {
+      "title": "➕ Crossum",
+      "body": "像填字遊戲一樣，把數字方塊填入橫向與直向交錯算式空格的<strong>算數謎題</strong>。同一個數字會同時出現在橫式與直式中，決定一格之後，相連的格子就會連鎖解開。重點不在困難的心算，而在<strong>找出該從哪一格開始解的推理</strong>，能同時培養四則運算的感覺與邏輯力。"
+    },
+    "benefits": {
+      "title": "玩益智遊戲的好處",
+      "body": "益智遊戲不只是娛樂，對<strong>大腦健康</strong>也有實質的幫助。研究已證實它能提升專注力、增強短期記憶並紓解壓力。益智花園的遊戲經過設計，即使只有短短幾分鐘，也能有效刺激大腦。"
+    }
+  },
+  "footer": {
+    "copyright": "Copyright © ToMixSoft. All Rights Reserved",
+    "bizNumber": "營利事業登記號碼 574-14-01507",
+    "mailOrder": "通訊販售申報號碼 2024-Seoul Gwanak-1874",
+    "ceo": "代表人：Dokyun Kim",
+    "address": "49-11 Nakseongdaeyeok 8-gil, Gwanak-gu, Seoul 08799, Republic of Korea",
+    "supportLabel": "客服：",
+    "supportLink": "聯絡我們",
+    "termsHeading": "ToMixSoft 條款",
+    "termsService": "服務條款",
+    "termsPrivacy": "隱私權政策",
+    "termsFinance": "電子金融交易條款"
+  }
+}

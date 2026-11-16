@@ -1,0 +1,70 @@
+{
+  "seo": {
+    "title": "每日謎題 - 每天一題全新謎題 | 益智花園",
+    "description": "每天一題全新謎題，過關即可獲得 100 金幣與 10 點解謎力。"
+  },
+  "back": "返回",
+  "close": "關閉",
+  "dateLabel": "{{month}}月{{day}}日",
+  "monthTitle": "{{year}}年{{month}}月",
+  "progress": "已完成 <green>{{cleared}}</green> / {{total}}",
+  "weekdays": {
+    "sun": "日",
+    "mon": "一",
+    "tue": "二",
+    "wed": "三",
+    "thu": "四",
+    "fri": "五",
+    "sat": "六"
+  },
+  "reward": {
+    "header": "{{month}}月全數通關獎勵",
+    "claimed": " · 已領取",
+    "avatarAlt": "每月獎勵頭像",
+    "plusAvatar": " + 專屬頭像",
+    "plusFrame": " + 專屬邊框",
+    "plusCardBack": " + 卡背",
+    "plusTitle": " + 稱號",
+    "exclusiveAvatar": "專屬頭像",
+    "plusFrameShort": " + 邊框",
+    "exclusiveCardBack": "專屬卡背",
+    "titleChip": "「{{title}}」稱號"
+  },
+  "today": {
+    "done": "今日謎題完成！",
+    "play": "挑戰今日謎題",
+    "nextTomorrow": "明天會開放新題目",
+    "rewardHint": "過關可得 🪙 {{coin}} + ⚡ 解謎力 {{pp}}"
+  },
+  "nav": {
+    "prevMonth": "上個月",
+    "nextMonth": "下個月"
+  },
+  "day": {
+    "unlockHint": "花 🪙 {{cost}} 解鎖",
+    "missedHint": "過去的日子無法再挑戰"
+  },
+  "legend": {
+    "cleared": "已完成",
+    "today": "今天",
+    "missed": "錯過"
+  },
+  "footnote": "每天午夜 0 點會開放新題目。<br/>本月錯過的題目，可以花 🪙 {{cost}} 解鎖來玩。<br/>換月之後，上個月剩下的題目就無法再開啟了。",
+  "unlock": {
+    "title": "解鎖 {{date}} 的題目",
+    "body": "花費 🪙 {{cost}} 就能挑戰這一天的謎題。<br/>過關後一樣可以獲得完整獎勵。",
+    "owned": "持有 🪙 {{coins}}",
+    "notEnough": "金幣不足",
+    "cancel": "取消",
+    "confirm": "花 🪙 {{cost}} 解鎖"
+  },
+  "push": {
+    "ask": "🔔 明天開放新謎題時，要通知你嗎？",
+    "accept": "開啟通知",
+    "working": "設定中…",
+    "later": "以後再說",
+    "done": "🔔 已開啟通知，明天早上會提醒你！",
+    "denied": "通知目前是關閉的，之後可以到瀏覽器設定中開啟。",
+    "error": "無法開啟通知，請稍後再試。"
+  }
+}

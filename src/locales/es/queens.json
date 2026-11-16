@@ -1,0 +1,182 @@
+{
+  "grade": {
+    "common": "Común",
+    "rare": "Raro",
+    "epic": "Épico",
+    "legendary": "Legendario"
+  },
+  "nav": {
+    "prev": "Atrás",
+    "prevArrow": "← Atrás",
+    "next": "Siguiente →",
+    "start": "Empezar →"
+  },
+  "double": {
+    "step0": {
+      "title": "¡Bienvenido al modo Doble!",
+      "desc": "¡El doble de reinas en este nivel!\nRepasemos las reglas."
+    },
+    "step1": {
+      "label": "Regla 1 / 3",
+      "title": "2 reinas por color",
+      "desc": "Coloca exactamente 2 reinas\nen cada región de color."
+    },
+    "step2": {
+      "label": "Regla 2 / 3",
+      "title": "2 reinas por fila y columna",
+      "desc": "Cada fila y cada columna\ntambién deben tener exactamente 2 reinas."
+    },
+    "step3": {
+      "label": "Regla 3 / 3",
+      "title": "Las reinas no pueden tocarse",
+      "desc": "Dos reinas no pueden tocarse,\nni siquiera en diagonal."
+    }
+  },
+  "tutorial": {
+    "step0": {
+      "title": "¡Bienvenido a Crown Quest!",
+      "desc": "Coloca 4 reinas en un tablero de 4×4 sin romper las reglas.\nVamos a verlas una por una."
+    },
+    "step1": {
+      "label": "Regla 1 / 4",
+      "title": "Una reina por color",
+      "desc": "El tablero está dividido en 4 regiones de color.\nColoca exactamente una reina en cada región."
+    },
+    "step2": {
+      "label": "Regla 2 / 4",
+      "title": "Una reina por fila",
+      "desc": "Cada fila solo puede tener una reina.\n¡Dos o más en una fila rompen la regla!"
+    },
+    "step3": {
+      "label": "Regla 3 / 4",
+      "title": "Una reina por columna",
+      "desc": "Cada columna también solo puede tener una reina."
+    },
+    "step4": {
+      "label": "Regla 4 / 4",
+      "title": "Las reinas no pueden tocarse",
+      "desc": "¡Dos reinas no pueden tocarse!\nIncluso en diagonal."
+    },
+    "step5": {
+      "title": "Práctica: marca ✕",
+      "desc": "Toca para marcar ✕ las casillas donde no puede ir una reina.\n¡Toca la casilla brillante!"
+    },
+    "step6": {
+      "title": "Práctica: coloca una reina",
+      "desc": "Toca dos veces rápido para colocar una reina.\n¡Coloca la reina naranja en la casilla brillante!"
+    },
+    "step7": {
+      "title": "Eliminación por fila",
+      "desc": "La reina naranja está en la fila 0.\nNinguna otra reina puede ir en esa fila,\n¡así que marca ✕ la casilla azul (0,3)!"
+    },
+    "step8": {
+      "title": "Coloca la reina azul",
+      "desc": "Descartada la fila 0, ¡solo queda (1,3)\nen la región azul!\nToca dos veces para colocar la reina azul."
+    },
+    "step9": {
+      "title": "Eliminación por contacto",
+      "desc": "(2,2) toca la reina azul (1,3)\nen diagonal, así que queda descartada.\n¡Márcala con ✕!"
+    },
+    "step10": {
+      "title": "Coloca la reina morada",
+      "desc": "Descarta la columna 1 y las casillas que se tocan,\n¡y solo queda (3,2) en la región morada!\nToca dos veces para colocar la reina morada."
+    },
+    "step11": {
+      "title": "¡Última reina!",
+      "desc": "Con tres reinas colocadas, solo queda (2,0)\nen la región verde. ¡Toca dos veces\npara terminar el puzzle! 🎉"
+    },
+    "introSub": "Coloca 4 reinas en un tablero de 4×4 sin romper las reglas.",
+    "learnRules": "Ver las reglas →",
+    "skip": "Saltar",
+    "tryIt": "Probar →"
+  },
+  "game": {
+    "exit": "Salir",
+    "changeCrown": "Cambiar corona",
+    "sfxOff": "Silenciar sonido",
+    "sfxOn": "Activar sonido",
+    "heart": "Corazón",
+    "lostHeart": "Corazón perdido",
+    "doubleRuleColor": "2 reinas<br/>por color",
+    "doubleRuleRowCol": "2 reinas por<br/>fila y columna",
+    "doubleRuleTouch": "Las reinas no<br/>pueden tocarse",
+    "restart": "Reiniciar",
+    "restartAria": "Reiniciar",
+    "memoAria": "Modo notas",
+    "memoOn": "Notas activadas",
+    "memo": "Notas",
+    "hintAria": "Pista de corona",
+    "hintUsed": "Usada",
+    "hintMemo": "Modo notas: marcas tenues para pensar con libertad",
+    "hintDefault": "Toca ✕ · Toca dos veces para la reina · Arrastra para marcar ✕",
+    "adDismissed": "Mira el anuncio completo para usar esta función."
+  },
+  "ad": {
+    "readyTitle": "Anuncio listo",
+    "noCoinsTitle": "No tienes suficientes monedas",
+    "readyDesc": "Toca el botón de abajo para iniciar el anuncio.",
+    "noCoinsDesc": "Tus monedas: {{coins}} / Necesarias: 50<br/>Mira un anuncio para colocar una corona gratis.",
+    "start": "Iniciar anuncio",
+    "loading": "Cargando anuncio...",
+    "watch": "Ver anuncio",
+    "cancel": "Cancelar"
+  },
+  "result": {
+    "cleared": "¡Completado!",
+    "puzzlePower": "⚡ Poder de puzles +1",
+    "nextLevel": "Siguiente nivel",
+    "homeAria": "Inicio de Crown Quest",
+    "retryAria": "Reintentar",
+    "failHead": "¡Casi!",
+    "failNote": "Pusiste una corona en una casilla equivocada y perdiste un corazón",
+    "retry": "Reintentar"
+  },
+  "home": {
+    "metaTitle": "Juego de las reinas online gratis - Crown Quest | Puzzle Garden",
+    "metaDesc": "Juega gratis al puzzle de reinas online: coloca una reina en cada región de color sin que se toquen. Crown Quest tiene 1000 niveles, sin descargas.",
+    "homeAria": "Inicio de Puzzle Garden",
+    "startNextAria": "Empezar la siguiente fase",
+    "double": "Doble",
+    "tutorial": "Tutorial",
+    "allDone": "¡Todo completado!",
+    "freshSub": "Aprende primero las reglas",
+    "allDoneSub": "Has completado todas las fases",
+    "twoCrowns": " · 2 coronas cada una",
+    "loading": "Cargando...",
+    "start": "Empezar",
+    "play": "Jugar",
+    "cleared": "Completado",
+    "whatIs": "¿Qué es Crown Quest?",
+    "intro": "Crown Quest es un puzzle de lógica en el que se coloca exactamente una corona en cada <strong>región de color, fila y columna</strong> del tablero. Dos coronas no pueden tocarse, ni siquiera en diagonal, y todas las condiciones deben cumplirse a la vez. A medida que subes de nivel, ¡los tableros crecen y las colocaciones se complican!",
+    "rule1": {
+      "label": "Regla 1",
+      "title": "Una reina por color",
+      "desc": "Coloca exactamente una reina en cada región de color."
+    },
+    "rule2": {
+      "label": "Regla 2",
+      "title": "Una reina por fila y columna",
+      "desc": "Cada fila y cada columna también solo pueden tener una reina."
+    },
+    "rule3": {
+      "label": "Regla 3",
+      "title": "Las reinas no pueden tocarse",
+      "desc": "Dos reinas no pueden tocarse. Eso incluye los vecinos en horizontal, vertical y diagonal."
+    }
+  },
+  "shop": {
+    "title": "Tienda de coronas",
+    "close": "Cerrar",
+    "wallet": "Tus monedas",
+    "free": "Gratis",
+    "selectedAria": "Corona equipada",
+    "selectAria": "Elegir corona",
+    "unlockAria": "Desbloquear por {{cost}} monedas",
+    "equipped": "Equipada",
+    "select": "Elegir",
+    "unlockTitle": "Desbloquear",
+    "confirm": "¿Gastar {{cost}} monedas?",
+    "cancel": "Cancelar",
+    "unlock": "Desbloquear"
+  }
+}

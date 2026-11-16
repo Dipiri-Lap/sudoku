@@ -1,0 +1,48 @@
+{
+  "brand": "益智花園",
+  "games": {
+    "sudoku": {
+      "name": "數獨"
+    },
+    "queens": {
+      "name": "Crown Quest"
+    },
+    "jigsaw": {
+      "name": "Tiny Pieces"
+    },
+    "snapspot": {
+      "name": "SnapSpot"
+    },
+    "wordSort": {
+      "name": "Word Stack"
+    },
+    "crossMath": {
+      "name": "Crossum"
+    },
+    "arrowPuzzle": {
+      "name": "Arroway"
+    },
+    "daily": {
+      "name": "每日謎題"
+    }
+  },
+  "difficulty": {
+    "veryEasy": "超簡單",
+    "easy": "簡單",
+    "beginner": "入門",
+    "medium": "普通",
+    "hard": "困難",
+    "expert": "專家",
+    "master": "大師"
+  },
+  "app": {
+    "initializing": "載入中..."
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "switchLabel": "語言",
+    "dismiss": "關閉"
+  }
+}

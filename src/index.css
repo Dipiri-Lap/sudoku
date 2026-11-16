@@ -36,12 +36,17 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-main);
   display: flex;
   justify-content: center;
   overflow-x: hidden;
+}
+
+/* 번체 중국어판: 일본어 시스템 글꼴(Hiragino·Yu Gothic·Meiryo)이 한자를 일본식 자형으로 그리지 않게 번체 글꼴을 앞에 둔다. */
+html:lang(zh-Hant) body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
 }
 
 #root {

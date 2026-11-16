@@ -5,7 +5,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Check, Lock, X } from 'lucide-react';
 import { useDailyPuzzle, isUnlockableDate, DAILY_UNLOCK_COST, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '../../../context/DailyPuzzleContext';
 import { loadMonth, hasMonth, getDailyPuzzle, todayKey, toDateKey, dailyGameOf, type DailyPuzzle } from '../data/loader';
-import { isDailyGameAvailable, localeHref } from '../../../i18n/locale';
+import { isDailyGameAvailable, localeHref, intlLocale } from '../../../i18n/locale';
 import { challengeTitle, challengeCondition } from '../../../common/utils/localizedData';
 import CoinDisplay from '../../../common/components/CoinDisplay';
 import { useCoins } from '../../../context/CoinContext';
@@ -38,7 +38,7 @@ type DayState =
 
 const DailyPuzzleCalendar: React.FC = () => {
     const navigate = useNavigate();
-    const { t, i18n } = useTranslation('daily');
+    const { t } = useTranslation('daily');
     const { t: tc } = useTranslation('common');
     const { clearedDates, unlockedDates, unlockDaily } = useDailyPuzzle();
     const { coins } = useCoins();
@@ -73,10 +73,11 @@ const DailyPuzzleCalendar: React.FC = () => {
     const puzzleDates = useMemo(() => new Set(puzzles.map(p => p.date)), [puzzles]);
     const [year, month] = monthKey.split('-').map(Number);
 
-    // 날짜 표기는 언어마다 달라서 월 이름(영어)도 같이 넘긴다. ko/ja 는 숫자만 쓴다.
+    // 날짜 표기는 언어마다 달라서 월 이름도 같이 넘긴다(쓸지는 언어별 json 이 정한다. ko/ja 는 숫자만 쓴다).
+    // 로케일은 i18n.language('pt', 'zh') 가 아니라 intlLocale(pt-BR, zh-TW ...).
     const monthNameOf = (y: number, m: number, style: 'long' | 'short'): string => {
         try {
-            return new Intl.DateTimeFormat(i18n.language, { month: style, timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 1)));
+            return new Intl.DateTimeFormat(intlLocale, { month: style, timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 1)));
         } catch {
             return String(m);
         }

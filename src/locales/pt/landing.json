@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "title": "Puzzle Garden - Jogos de Quebra-Cabeça Grátis: Sudoku e Mais",
+    "description": "Jogue online grátis no navegador: sudoku, quebra-cabeça, jogo de lógica Queens e jogo dos 7 erros. Sem baixar nada e sem cadastro, no celular ou no PC."
+  },
+  "toast": {
+    "welcome": "Bem-vindo!",
+    "signedOut": "Você saiu da conta.",
+    "linkCopied": "Link copiado!",
+    "profileUpdated": "Perfil atualizado."
+  },
+  "share": {
+    "textWithPower": "Meu Poder puzzle é {{power}}! Venha treinar o cérebro comigo no Puzzle Garden 🧩",
+    "text": "Acorde o cérebro com quebra-cabeças divertidos no Puzzle Garden 🧩"
+  },
+  "profile": {
+    "avatarAlt": "Perfil",
+    "puzzlePower": "Poder puzzle:",
+    "rank": "Ranking:"
+  },
+  "header": {
+    "shop": "Loja",
+    "guide": "Como jogar",
+    "invite": "Convidar amigos",
+    "installMobile": "Adicionar à tela inicial",
+    "installDesktop": "Adicionar à área de trabalho",
+    "logout": "Sair",
+    "login": "Entrar"
+  },
+  "daily": {
+    "badgeDone": "FEITO",
+    "badgeToday": "HOJE",
+    "dateLabel": "{{day}}/{{month}}",
+    "done": "Missão de hoje cumprida!",
+    "play": "Jogar o quebra-cabeça de hoje",
+    "monthProgress": "Neste mês: <green>{{cleared}}</green> / {{total}} resolvidos"
+  },
+  "kakao": {
+    "copyPrompt": "Copie este link:",
+    "title": "Entre pelo Safari",
+    "body": "Por segurança, o navegador interno do KakaoTalk<br/><strong>não aceita login com o Google.</strong><br/><br/>Copie o link abaixo e cole no Safari<br/>para entrar normalmente.",
+    "copied": "✅ Copiado!",
+    "copy": "🔗 Copiar link",
+    "close": "Fechar"
+  },
+  "seo": {
+    "summary": "Jogos de quebra-cabeça grátis para despertar o cérebro",
+    "intro": "O Puzzle Garden reúne <strong>jogos de raciocínio grátis</strong> para jogar a qualquer hora e em qualquer lugar. Sudoku, jogo dos 7 erros (SnapSpot), Queens e quebra-cabeças de montar: sem instalar nada, é só abrir no navegador e jogar.",
+    "sudoku": {
+      "title": "🔢 Sudoku",
+      "body": "O clássico jogo de lógica: preencha uma grade 9×9 com os números de 1 a 9. De partidas tranquilas para iniciantes a fases difíceis para experts, sempre há um novo desafio. Jogar sudoku todo dia é ótimo para a concentração e o raciocínio lógico."
+    },
+    "wordSort": {
+      "title": "🃏 Word Stack",
+      "body": "Um <strong>jogo de cartas de palavras</strong> em que você arrasta as cartas para agrupar as palavras por tema."
+    },
+    "queens": {
+      "title": "👑 Crown Quest",
+      "body": "Um <strong>quebra-cabeça de lógica</strong>: coloque exatamente uma rainha em cada região colorida, uma por linha e por coluna, sem que duas se toquem, nem na diagonal. Regras simples, raciocínio surpreendentemente profundo."
+    },
+    "crossMath": {
+      "title": "➕ Crossum",
+      "body": "Uma <strong>cruzadinha de matemática</strong> em que você preenche os espaços das contas cruzadas com peças numeradas."
+    },
+    "benefits": {
+      "title": "Por que quebra-cabeças fazem bem",
+      "body": "Quebra-cabeças são mais do que diversão: são um treino de verdade para o <strong>cérebro</strong>. Estudos associam esses jogos a mais concentração, memória de curto prazo mais afiada e menos estresse. Os jogos do Puzzle Garden dão ao seu cérebro um estímulo rápido e eficaz, mesmo em poucos minutos livres."
+    }
+  },
+  "footer": {
+    "copyright": "Copyright © ToMixSoft. All Rights Reserved",
+    "bizNumber": "Nº de registro empresarial 574-14-01507",
+    "mailOrder": "Nº de registro de venda por correspondência 2024-Seoul Gwanak-1874",
+    "ceo": "CEO: Dokyun Kim",
+    "address": "49-11 Nakseongdaeyeok 8-gil, Gwanak-gu, Seoul 08799, Republic of Korea",
+    "supportLabel": "Suporte:",
+    "supportLink": "Fale conosco",
+    "termsHeading": "Termos da ToMixSoft",
+    "termsService": "Termos de Serviço",
+    "termsPrivacy": "Política de Privacidade",
+    "termsFinance": "Termos de Transações Financeiras Eletrônicas"
+  }
+}

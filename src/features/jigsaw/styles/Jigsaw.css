@@ -10,7 +10,7 @@
     min-height: 100dvh;
     overflow: hidden;
     color: #fff;
-    font-family: 'Black Han Sans', 'Pretendard', "M PLUS Rounded 1c", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+    font-family: 'Black Han Sans', "Arial Black", 'Lilita One', 'Pretendard', "M PLUS Rounded 1c", "Chiron GoRound TC", system-ui, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     background: var(--bg);
     transition: background-color 0.45s ease;
     user-select: none;
@@ -98,7 +98,7 @@
     flex-direction: column;
     align-items: center;
     margin: 8px 0 26px;
-    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     font-weight: 400;
     line-height: 0.88;
     text-shadow: 0 6px 0 var(--flat);
@@ -163,7 +163,7 @@
     place-items: center;
 }
 .jg-card-mystery span {
-    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     font-size: 8.5rem;
     line-height: 1;
     color: #fff;
@@ -460,7 +460,7 @@
     pointer-events: none;
 }
 .jg-callout span {
-    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     color: #fff;
     line-height: 1;
     letter-spacing: 0.04em;
@@ -561,7 +561,7 @@
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.14);
     color: #fff;
-    font-family: 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+    font-family: 'Black Han Sans', "Arial Black", 'Lilita One', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     font-size: 1.05rem;
     outline: none;
 }
@@ -638,7 +638,7 @@
     inset: 0;
     display: grid;
     place-items: center;
-    font-family: 'Lilita One', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+    font-family: 'Lilita One', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     font-size: 2.2rem;
     text-shadow: 0 4px 0 var(--flat);
 }
@@ -842,7 +842,7 @@
     border-radius: 99px;
     background: rgba(255, 255, 255, 0.92);
     color: var(--deep);
-    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     font-size: 1rem;
     letter-spacing: 0.12em;
     box-shadow: 0 3px 0 var(--flat);
@@ -959,7 +959,7 @@
     padding: 6px 12px 4px;
     border-radius: 12px;
     border: 3px solid #fff;
-    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif;
+    font-family: 'Lilita One', 'Black Han Sans', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     font-size: 1.35rem;
     letter-spacing: 0.04em;
     color: #fff;
@@ -1003,7 +1003,7 @@
     font-weight: 700;
     font-size: 0.82rem;
 }
-.jg-win-collect b { font-family: 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; font-weight: 400; font-size: 1rem; }
+.jg-win-collect b { font-family: 'Black Han Sans', "Arial Black", 'Lilita One', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; font-weight: 400; font-size: 1rem; }
 .jg-win-collect .jg-fstar { display: inline-block; }
 .jg-share-hint { margin: 12px 0 0; font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 0.8rem; opacity: 0.9; text-align: center; }
 .jg-win .jg-win-actions { margin-top: 14px; }

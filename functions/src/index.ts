@@ -762,7 +762,7 @@ export const syncMyPuzzlePower = onCall(async (request) => {
 //  - 매시 정각(UTC)에 돌면서, 토큰에 저장된 시간대(tz)로 그 사용자의 로컬 시각을 본다.
 //  - 로컬 아침 8시: 오늘(로컬 날짜) 아직 안 푼 사람에게 "오늘의 퍼즐이 열렸어요"
 //  - 로컬 밤 9시: 연속 기록이 있는데 오늘 아직 안 푼 사람에게만 "기록이 끊겨요"
-//  - 문구는 토큰의 lang(ko/en/ja)으로 쓴다.
+//  - 문구는 토큰의 lang(ko/en/ja/de/es/fr/pt/zh)으로 쓴다.
 // ─────────────────────────────────────────────────────────────
 export const dailyPuzzlePushHourly = onSchedule(
   { schedule: "0 * * * *", timeZone: "Etc/UTC", timeoutSeconds: 540, memory: "512MiB" },

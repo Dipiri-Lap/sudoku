@@ -1,0 +1,182 @@
+{
+  "grade": {
+    "common": "普通",
+    "rare": "稀有",
+    "epic": "史詩",
+    "legendary": "傳說"
+  },
+  "nav": {
+    "prev": "上一步",
+    "prevArrow": "← 上一步",
+    "next": "下一步 →",
+    "start": "開始 →"
+  },
+  "double": {
+    "step0": {
+      "title": "歡迎來到雙倍模式！",
+      "desc": "這一關的皇后加倍了！\n一起來看看規則吧。"
+    },
+    "step1": {
+      "label": "規則 1 / 3",
+      "title": "每個色塊 2 個皇后",
+      "desc": "每個色塊內要剛好\n放入 2 個皇后。"
+    },
+    "step2": {
+      "label": "規則 2 / 3",
+      "title": "每列與每行各 2 個皇后",
+      "desc": "每一橫列和每一直行，\n也都要剛好有 2 個皇后。"
+    },
+    "step3": {
+      "label": "規則 3 / 3",
+      "title": "皇后不能相鄰",
+      "desc": "皇后之間不能互相接觸，\n橫向、直向與斜對角都包含在內。"
+    }
+  },
+  "tutorial": {
+    "step0": {
+      "title": "歡迎來到皇后謎題！",
+      "desc": "在 4×4 的盤面上，正確放入 4 個皇后。\n我們一條一條來看規則。"
+    },
+    "step1": {
+      "label": "規則 1 / 4",
+      "title": "每個色塊一個皇后",
+      "desc": "盤面分成 4 個顏色的色塊。\n每個色塊內只能放剛好一個皇后。"
+    },
+    "step2": {
+      "label": "規則 2 / 4",
+      "title": "每一列一個皇后",
+      "desc": "同一橫列只能有一個皇后。\n同一列有兩個以上就違規了！"
+    },
+    "step3": {
+      "label": "規則 3 / 4",
+      "title": "每一行一個皇后",
+      "desc": "同一直行也只能有一個皇后。"
+    },
+    "step4": {
+      "label": "規則 4 / 4",
+      "title": "皇后不能相鄰",
+      "desc": "皇后之間不能互相接觸！\n橫向、直向，斜對角也包含在內。"
+    },
+    "step5": {
+      "title": "練習：標記 ✕",
+      "desc": "點一下就會標上 ✕，記下皇后不能放的格子。\n點點看發光的格子吧！"
+    },
+    "step6": {
+      "title": "練習：放置皇后",
+      "desc": "快速連點兩下就能放下皇后。\n把橘色皇后放到發光的格子吧！"
+    },
+    "step7": {
+      "title": "排除整列",
+      "desc": "橘色皇后放在第 0 列。\n同一列不能再放皇后，\n所以請在藍色格子 (0,3) 標上 ✕！"
+    },
+    "step8": {
+      "title": "放置藍色皇后",
+      "desc": "排除第 0 列後，藍色色塊\n只剩 (1,3) 可以放！\n連點兩下放下藍色皇后。"
+    },
+    "step9": {
+      "title": "排除相鄰格",
+      "desc": "(2,2) 與藍色皇后 (1,3)\n斜對角相鄰，所以不能放。\n標上 ✕ 吧！"
+    },
+    "step10": {
+      "title": "放置紫色皇后",
+      "desc": "排除第 1 行與相鄰格子後，\n紫色色塊只剩 (3,2)！\n連點兩下放下紫色皇后。"
+    },
+    "step11": {
+      "title": "最後一個皇后！",
+      "desc": "三個皇后放好後，綠色色塊\n只剩 (2,0)。連點兩下，\n完成這個謎題吧！🎉"
+    },
+    "introSub": "在 4×4 的盤面上，正確放入 4 個皇后。",
+    "learnRules": "看看規則 →",
+    "skip": "略過",
+    "tryIt": "親自試試 →"
+  },
+  "game": {
+    "exit": "離開",
+    "changeCrown": "更換皇冠",
+    "sfxOff": "關閉音效",
+    "sfxOn": "開啟音效",
+    "heart": "愛心",
+    "lostHeart": "失去的愛心",
+    "doubleRuleColor": "每個色塊<br/>2 個皇后",
+    "doubleRuleRowCol": "每列每行<br/>2 個皇后",
+    "doubleRuleTouch": "皇后不能<br/>相鄰",
+    "restart": "重來",
+    "restartAria": "重新開始",
+    "memoAria": "筆記模式",
+    "memoOn": "筆記已開",
+    "memo": "筆記",
+    "hintAria": "皇冠提示",
+    "hintUsed": "已使用",
+    "hintMemo": "筆記模式：標記會變淡，放心盡情推理",
+    "hintDefault": "點一下 ✕ · 連點兩下皇冠 · 拖曳連續標 ✕",
+    "adDismissed": "要看完廣告才能使用這個功能。"
+  },
+  "ad": {
+    "readyTitle": "廣告已準備好",
+    "noCoinsTitle": "金幣不足",
+    "readyDesc": "點下方按鈕開始播放廣告。",
+    "noCoinsDesc": "持有金幣：{{coins}} / 需要：50<br/>觀看廣告就能免費放置皇冠。",
+    "start": "開始播放廣告",
+    "loading": "廣告載入中...",
+    "watch": "觀看廣告",
+    "cancel": "取消"
+  },
+  "result": {
+    "cleared": "過關！",
+    "puzzlePower": "⚡ 解謎力 +1",
+    "nextLevel": "下一關",
+    "homeAria": "Crown Quest 首頁",
+    "retryAria": "重玩",
+    "failHead": "好可惜！",
+    "failNote": "把皇冠放在錯誤的格子，失去了愛心",
+    "retry": "重玩"
+  },
+  "home": {
+    "metaTitle": "皇后邏輯謎題線上玩 - Crown Quest | 益智花園",
+    "metaDesc": "免費線上玩皇后邏輯謎題 Crown Quest：每個色塊放入一個皇后，且彼此不能相鄰。共 1000 個關卡，不用下載就能玩。",
+    "homeAria": "益智花園首頁",
+    "startNextAria": "開始下一關",
+    "double": "雙倍",
+    "tutorial": "新手教學",
+    "allDone": "全部完成！",
+    "freshSub": "從規則開始慢慢學",
+    "allDoneSub": "你已通關所有關卡",
+    "twoCrowns": " · 每處 2 個皇冠",
+    "loading": "載入中...",
+    "start": "開始",
+    "play": "開始遊玩",
+    "cleared": "已通關",
+    "whatIs": "什麼是 Crown Quest？",
+    "intro": "Crown Quest 是在盤面的每個<strong>色塊、橫列與直行</strong>中，剛好放入一個皇冠的邏輯謎題。皇冠之間連斜對角也不能相鄰，而且所有條件必須同時成立。等級越高，盤面越大，擺放也越有挑戰性！",
+    "rule1": {
+      "label": "規則 1",
+      "title": "每個色塊一個皇后",
+      "desc": "每個色塊內只能放剛好一個皇后。"
+    },
+    "rule2": {
+      "label": "規則 2",
+      "title": "每列每行一個皇后",
+      "desc": "同一橫列與同一直行，也都只能有一個皇后。"
+    },
+    "rule3": {
+      "label": "規則 3",
+      "title": "皇后不能相鄰",
+      "desc": "皇后之間不能互相接觸，橫向、直向與斜對角都包含在內。"
+    }
+  },
+  "shop": {
+    "title": "皇冠商店",
+    "close": "關閉",
+    "wallet": "持有金幣",
+    "free": "免費",
+    "selectedAria": "使用中的皇冠",
+    "selectAria": "選擇皇冠",
+    "unlockAria": "花 {{cost}} 金幣解鎖",
+    "equipped": "使用中",
+    "select": "選擇",
+    "unlockTitle": "解鎖",
+    "confirm": "要花費 {{cost}} 金幣嗎？",
+    "cancel": "取消",
+    "unlock": "解鎖"
+  }
+}

@@ -3,13 +3,13 @@ import { Timestamp, type DocumentReference, type DocumentSnapshot, type Firestor
 import {
   EVENING_LOCAL_HOUR, MORNING_LOCAL_HOUR, buildEveningMessage, buildMorningMessage, dailyLinkFor,
   eveningQueryHour, isValidTimeZone, localDateKey, morningHourUtc, normalizeLang, normalizeTimeZone,
-  slotDecision, DEFAULT_LANG, DEFAULT_TZ, type PushLang, type PushMessage,
+  slotDecision, DEFAULT_TZ, type PushLang, type PushMessage,
 } from "./dailyPush";
 
 /**
  * 오늘의 퍼즐 웹 푸시 발송 (사용자 로컬 시각 기준, 매시 정각 실행).
  *  - 토큰: users/{uid}/pushTokens/{token}
- *      { token, tz: IANA 시간대, lang: 'ko'|'en'|'ja', pushHourUtc: 로컬 아침 8시가 되는 UTC 시(0~23), updatedAt, userAgent }
+ *      { token, tz: IANA 시간대, lang: 'ko'|'en'|'ja'|'de'|'es'|'fr'|'pt'|'zh', pushHourUtc: 로컬 아침 8시가 되는 UTC 시(0~23), updatedAt, userAgent }
  *    클라이언트가 알림을 허용하거나 앱을 열 때 저장한다(src/services/pushNotification.ts).
  *  - 매시 정각(UTC 시 h)에
  *      아침: pushHourUtc == h 인 토큰만 조회 (collectionGroup + 단일 필드 색인)
@@ -55,7 +55,7 @@ export function tokenDefaultsPatch(
   const patch: Record<string, unknown> = {};
   const tz = isValidTimeZone(data.tz) ? data.tz : DEFAULT_TZ;
   if (data.tz !== tz) patch.tz = tz;
-  if (normalizeLang(data.lang) !== data.lang) patch.lang = DEFAULT_LANG;
+  if (normalizeLang(data.lang) !== data.lang) patch.lang = normalizeLang(data.lang); // 없으면 ko, 모르는 값이면 en
   if (typeof data.pushHourUtc !== "number" || data.tz !== tz) patch.pushHourUtc = morningHourUtc(tz, now);
   return Object.keys(patch).length ? patch : null;
 }

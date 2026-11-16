@@ -1,0 +1,70 @@
+{
+  "seo": {
+    "title": "Quebra-cabeça diário - Um novo desafio todo dia | Puzzle Garden",
+    "description": "Um quebra-cabeça novo todos os dias. Resolva para ganhar 100 moedas e 10 de Poder puzzle."
+  },
+  "back": "Voltar",
+  "close": "Fechar",
+  "dateLabel": "{{day}} {{monthShort}}",
+  "monthTitle": "{{monthName}} de {{year}}",
+  "progress": "<green>{{cleared}}</green> / {{total}} resolvidos",
+  "weekdays": {
+    "sun": "D",
+    "mon": "S",
+    "tue": "T",
+    "wed": "Q",
+    "thu": "Q",
+    "fri": "S",
+    "sat": "S"
+  },
+  "reward": {
+    "header": "Recompensa por completar {{monthName}}",
+    "claimed": " · Resgatada",
+    "avatarAlt": "Avatar da recompensa mensal",
+    "plusAvatar": " + avatar exclusivo",
+    "plusFrame": " + moldura exclusiva",
+    "plusCardBack": " + verso de carta",
+    "plusTitle": " + título",
+    "exclusiveAvatar": "Avatar exclusivo",
+    "plusFrameShort": " + moldura",
+    "exclusiveCardBack": "Verso de carta exclusivo",
+    "titleChip": "Título {{title}}"
+  },
+  "today": {
+    "done": "Quebra-cabeça de hoje concluído!",
+    "play": "Jogar o quebra-cabeça de hoje",
+    "nextTomorrow": "Um novo quebra-cabeça abre amanhã",
+    "rewardHint": "Resolva e ganhe 🪙 {{coin}} + ⚡ {{pp}} de Poder puzzle"
+  },
+  "nav": {
+    "prevMonth": "Mês anterior",
+    "nextMonth": "Próximo mês"
+  },
+  "day": {
+    "unlockHint": "Desbloqueie por 🪙 {{cost}}",
+    "missedHint": "Dias passados não podem ser jogados"
+  },
+  "legend": {
+    "cleared": "Resolvido",
+    "today": "Hoje",
+    "missed": "Perdido"
+  },
+  "footnote": "Um novo quebra-cabeça abre todo dia à meia-noite.<br/>Perdeu um dia deste mês? Desbloqueie por 🪙 {{cost}}.<br/>Quando o mês acaba, os quebra-cabeças restantes ficam bloqueados.",
+  "unlock": {
+    "title": "Desbloquear {{date}}",
+    "body": "Gaste 🪙 {{cost}} para jogar o quebra-cabeça deste dia.<br/>Você ainda recebe a recompensa completa ao resolver.",
+    "owned": "Você tem 🪙 {{coins}}",
+    "notEnough": "Moedas insuficientes",
+    "cancel": "Cancelar",
+    "confirm": "Desbloquear 🪙 {{cost}}"
+  },
+  "push": {
+    "ask": "🔔 Quer um aviso quando o quebra-cabeça de amanhã abrir?",
+    "accept": "Avisar",
+    "working": "Configurando…",
+    "later": "Depois",
+    "done": "🔔 Notificações ativadas. Até amanhã de manhã!",
+    "denied": "As notificações estão desativadas. Você pode ativá-las depois nas configurações do navegador.",
+    "error": "Não foi possível ativar as notificações. Tente novamente em instantes."
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "modeSelect": {
+    "seoTitle": "找不同遊戲線上玩 - 大家來找碴 SnapSpot | 益智花園",
+    "seoDescription": "免費線上玩找不同遊戲（大家來找碴）：比對兩張照片，點出所有不同之處。有三種模式、超過 750 個關卡，不用下載也不用註冊。",
+    "miniOriginal": "原圖",
+    "miniModified": "修改圖",
+    "miniHeartLeft": "剩 1 顆愛心",
+    "stageAlt": "關卡",
+    "arcadeAlt": "街機",
+    "loading": "載入中...",
+    "continueStage": "繼續第 {{n}}/{{max}} 關",
+    "startStage": "開始第 1/{{max}} 關",
+    "aboutTitle": "什麼是 SnapSpot 找不同？",
+    "aboutBody": "SnapSpot 是把兩張照片並排比對，找出所有<strong>隱藏差異</strong>的找不同（大家來找碴）遊戲。有超過 750 個關卡與街機計時挑戰模式，盡情鍛鍊你的專注力與觀察力吧！",
+    "tips": {
+      "compare": {
+        "label": "基本",
+        "title": "比對兩張照片",
+        "desc": "把原圖和修改圖並排比較，找出不一樣的地方。顏色、大小、位置等細微差異都藏在裡面。"
+      },
+      "tap": {
+        "label": "操作",
+        "title": "點一下確認答案",
+        "desc": "點擊你覺得不一樣的地方，馬上就能知道答對了沒。答對的話會出現標記。"
+      },
+      "zoom": {
+        "label": "縮放",
+        "title": "雙指縮放放大",
+        "desc": "看不清楚的地方，可以用雙指縮放或滑鼠滾輪放大，最多 3 倍，仔細觀察。"
+      },
+      "stage": {
+        "label": "關卡",
+        "title": "珍惜你的愛心",
+        "desc": "在關卡模式中，每點錯一次就會失去一顆愛心。愛心歸零就遊戲結束！請小心點擊。"
+      }
+    }
+  },
+  "game": {
+    "seoTitle": "SnapSpot 找不同 - 益智花園",
+    "seoDescription": "比對兩張照片，找出不一樣的地方。來測試你的眼力吧！",
+    "loading": "載入中...",
+    "alertAdDismissed": "要看完廣告才能使用提示。",
+    "alertNoAd": "目前沒有可播放的廣告，請稍後再試。",
+    "soundSettings": "音效設定",
+    "markerShop": "標記商店",
+    "altOriginal": "原圖",
+    "altModified": "修改圖",
+    "modeSelect": "選擇模式",
+    "win": {
+      "title": "全部找到了！",
+      "body_other": "你找到了全部 {{count}} 處差異。",
+      "puzzlePower": "解謎力 +1",
+      "nextStage": "下一關"
+    },
+    "over": {
+      "title": "遊戲結束",
+      "body": "愛心用完了。",
+      "retry": "再挑戰一次"
+    },
+    "hint": {
+      "title": "金幣不足",
+      "adPrompt": "觀看廣告即可使用一次提示",
+      "adUsed": "這一局已經看過廣告了",
+      "balance": "持有 {{coins}}🪙 · 需要 {{cost}}🪙",
+      "cancel": "取消",
+      "adLoading": "載入中…",
+      "watchAd": "觀看廣告",
+      "ok": "確定"
+    }
+  },
+  "settings": {
+    "title": "音效設定",
+    "sfx": "音效"
+  },
+  "markerShop": {
+    "title": "標記商店",
+    "balance": "持有金幣",
+    "applied": "使用中",
+    "select": "選擇",
+    "free": "免費",
+    "unlock": "解鎖",
+    "confirmSpend": "要花費 {{cost}} 金幣嗎？",
+    "cancel": "取消",
+    "ok": "確定",
+    "designs": {
+      "circle": "圓圈",
+      "check": "勾勾",
+      "star": "星星",
+      "thumbs": "大拇指",
+      "dart": "飛鏢",
+      "hundred": "100 分",
+      "gem": "寶石",
+      "smile": "笑臉",
+      "magnify": "放大鏡",
+      "pin": "圖釘",
+      "dizzy": "閃亮星",
+      "target": "靶心",
+      "clover": "幸運草",
+      "frog": "青蛙",
+      "cherry": "櫻花",
+      "cactus": "仙人掌",
+      "hue": "色相環",
+      "robot": "機器人",
+      "lightning": "閃電",
+      "sparkle": "閃耀",
+      "bulb": "燈泡",
+      "paw": "腳掌印",
+      "butterfly": "蝴蝶",
+      "cat": "貓咪",
+      "fox": "狐狸",
+      "panda": "熊貓",
+      "bomb": "炸彈",
+      "heart": "愛心",
+      "magic": "魔法",
+      "eyes": "眼睛",
+      "crown": "皇冠",
+      "rainbow": "彩虹",
+      "portal": "傳送門",
+      "arc": "電弧",
+      "matrix": "駭客矩陣"
+    }
+  }
+}

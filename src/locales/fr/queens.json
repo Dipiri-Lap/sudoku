@@ -1,0 +1,182 @@
+{
+  "grade": {
+    "common": "Commun",
+    "rare": "Rare",
+    "epic": "Épique",
+    "legendary": "Légendaire"
+  },
+  "nav": {
+    "prev": "Retour",
+    "prevArrow": "← Retour",
+    "next": "Suivant →",
+    "start": "Commencer →"
+  },
+  "double": {
+    "step0": {
+      "title": "Bienvenue en mode Double !",
+      "desc": "Deux fois plus de reines à ce niveau !\nVoyons les règles."
+    },
+    "step1": {
+      "label": "Règle 1 / 3",
+      "title": "2 reines par couleur",
+      "desc": "Placez exactement 2 reines\ndans chaque région colorée."
+    },
+    "step2": {
+      "label": "Règle 2 / 3",
+      "title": "2 reines par ligne et colonne",
+      "desc": "Chaque ligne et chaque colonne\ndoit aussi avoir exactement 2 reines."
+    },
+    "step3": {
+      "label": "Règle 3 / 3",
+      "title": "Les reines ne se touchent pas",
+      "desc": "Deux reines ne peuvent pas se toucher,\ny compris en diagonale."
+    }
+  },
+  "tutorial": {
+    "step0": {
+      "title": "Bienvenue dans Queens !",
+      "desc": "Placez 4 reines sur une grille de 4×4 en respectant les règles.\nVoyons-les une par une."
+    },
+    "step1": {
+      "label": "Règle 1 / 4",
+      "title": "Une reine par couleur",
+      "desc": "La grille est divisée en 4 régions colorées.\nPlacez exactement une reine dans chaque région."
+    },
+    "step2": {
+      "label": "Règle 2 / 4",
+      "title": "Une reine par ligne",
+      "desc": "Chaque ligne ne peut contenir qu'une reine.\nDeux reines ou plus sur une ligne, c'est interdit !"
+    },
+    "step3": {
+      "label": "Règle 3 / 4",
+      "title": "Une reine par colonne",
+      "desc": "Chaque colonne ne peut contenir qu'une reine, elle aussi."
+    },
+    "step4": {
+      "label": "Règle 4 / 4",
+      "title": "Les reines ne se touchent pas",
+      "desc": "Deux reines ne peuvent pas se toucher !\nEn diagonale non plus."
+    },
+    "step5": {
+      "title": "Entraînement : marquer ✕",
+      "desc": "Touchez pour marquer ✕ les cases où une reine ne peut pas aller.\nTouchez la case qui brille !"
+    },
+    "step6": {
+      "title": "Entraînement : placer une reine",
+      "desc": "Touchez deux fois rapidement pour placer une reine.\nPlacez la reine orange sur la case qui brille !"
+    },
+    "step7": {
+      "title": "Élimination par ligne",
+      "desc": "La reine orange est sur la ligne 0.\nAucune autre reine ne peut y aller :\nmarquez ✕ la case bleue (0,3) !"
+    },
+    "step8": {
+      "title": "Placer la reine bleue",
+      "desc": "Une fois la ligne 0 exclue, il ne reste que (1,3)\ndans la région bleue !\nTouchez deux fois pour placer la reine bleue."
+    },
+    "step9": {
+      "title": "Élimination par contact",
+      "desc": "(2,2) touche la reine bleue (1,3)\nen diagonale : impossible.\nMarquez-la ✕ !"
+    },
+    "step10": {
+      "title": "Placer la reine violette",
+      "desc": "Sans la colonne 1 ni les cases voisines,\nil ne reste que (3,2) dans la région violette !\nTouchez deux fois pour placer la reine violette."
+    },
+    "step11": {
+      "title": "Dernière reine !",
+      "desc": "Avec trois reines en place, il ne reste que (2,0)\ndans la région verte. Touchez deux fois\npour terminer le puzzle ! 🎉"
+    },
+    "introSub": "Placez 4 reines sur une grille de 4×4 en respectant les règles.",
+    "learnRules": "Voir les règles →",
+    "skip": "Passer",
+    "tryIt": "À vous de jouer →"
+  },
+  "game": {
+    "exit": "Quitter",
+    "changeCrown": "Changer de couronne",
+    "sfxOff": "Couper le son",
+    "sfxOn": "Activer le son",
+    "heart": "Cœur",
+    "lostHeart": "Cœur perdu",
+    "doubleRuleColor": "2 reines<br/>par couleur",
+    "doubleRuleRowCol": "2 reines par<br/>ligne et colonne",
+    "doubleRuleTouch": "Reines sans<br/>contact",
+    "restart": "Recommencer",
+    "restartAria": "Recommencer",
+    "memoAria": "Mode notes",
+    "memoOn": "Notes activées",
+    "memo": "Notes",
+    "hintAria": "Indice couronne",
+    "hintUsed": "Utilisé",
+    "hintMemo": "Mode notes : marques discrètes, réfléchissez à votre aise",
+    "hintDefault": "Toucher ✕ · Double-toucher reine · Glisser pour ✕",
+    "adDismissed": "Regardez la pub en entier pour utiliser cette fonction."
+  },
+  "ad": {
+    "readyTitle": "Pub prête",
+    "noCoinsTitle": "Pas assez de pièces",
+    "readyDesc": "Touchez le bouton ci-dessous pour lancer la pub.",
+    "noCoinsDesc": "Vos pièces : {{coins}} / Requis : 50<br/>Regardez une pub pour placer une couronne gratuitement.",
+    "start": "Lancer la pub",
+    "loading": "Chargement de la pub...",
+    "watch": "Voir la pub",
+    "cancel": "Annuler"
+  },
+  "result": {
+    "cleared": "Réussi !",
+    "puzzlePower": "⚡ Puissance puzzle +1",
+    "nextLevel": "Niveau suivant",
+    "homeAria": "Accueil Crown Quest",
+    "retryAria": "Réessayer",
+    "failHead": "Presque !",
+    "failNote": "Vous avez placé une couronne sur une mauvaise case et perdu un cœur",
+    "retry": "Réessayer"
+  },
+  "home": {
+    "metaTitle": "Casse-tête Queens gratuit - Crown Quest | Puzzle Garden",
+    "metaDesc": "Jouez gratuitement au casse-tête des reines (Queens) : une reine par région colorée, sans qu'elles se touchent. Crown Quest propose 1000 niveaux en ligne.",
+    "homeAria": "Accueil Puzzle Garden",
+    "startNextAria": "Lancer le niveau suivant",
+    "double": "Double",
+    "tutorial": "Tutoriel",
+    "allDone": "Tout réussi !",
+    "freshSub": "D'abord, les règles",
+    "allDoneSub": "Vous avez réussi tous les niveaux",
+    "twoCrowns": " · 2 couronnes chacun",
+    "loading": "Chargement...",
+    "start": "Commencer",
+    "play": "Jouer",
+    "cleared": "Réussi",
+    "whatIs": "Qu'est-ce que Crown Quest ?",
+    "intro": "Crown Quest est un jeu de logique où l'on place exactement une couronne dans chaque <strong>région colorée, ligne et colonne</strong> de la grille. Deux couronnes ne peuvent pas se toucher, même en diagonale, et toutes les conditions doivent être respectées en même temps. Plus vous avancez, plus les grilles grandissent et plus les placements se corsent !",
+    "rule1": {
+      "label": "Règle 1",
+      "title": "Une reine par couleur",
+      "desc": "Placez exactement une reine dans chaque région colorée."
+    },
+    "rule2": {
+      "label": "Règle 2",
+      "title": "Une reine par ligne et colonne",
+      "desc": "Chaque ligne et chaque colonne ne peut contenir qu'une reine, elle aussi."
+    },
+    "rule3": {
+      "label": "Règle 3",
+      "title": "Les reines ne se touchent pas",
+      "desc": "Deux reines ne peuvent pas se toucher, ni horizontalement, ni verticalement, ni en diagonale."
+    }
+  },
+  "shop": {
+    "title": "Boutique de couronnes",
+    "close": "Fermer",
+    "wallet": "Vos pièces",
+    "free": "Gratuit",
+    "selectedAria": "Couronne équipée",
+    "selectAria": "Choisir la couronne",
+    "unlockAria": "Débloquer pour {{cost}} pièces",
+    "equipped": "Équipée",
+    "select": "Choisir",
+    "unlockTitle": "Débloquer",
+    "confirm": "Dépenser {{cost}} pièces ?",
+    "cancel": "Annuler",
+    "unlock": "Débloquer"
+  }
+}

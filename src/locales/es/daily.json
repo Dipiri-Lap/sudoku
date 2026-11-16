@@ -1,0 +1,70 @@
+{
+  "seo": {
+    "title": "Puzzle del día - Un puzzle nuevo cada día | Puzzle Garden",
+    "description": "Un puzzle nuevo cada día. Complétalo y gana 100 monedas y 10 de Poder de puzles."
+  },
+  "back": "Atrás",
+  "close": "Cerrar",
+  "dateLabel": "{{day}} {{monthShort}}",
+  "monthTitle": "{{monthName}} {{year}}",
+  "progress": "<green>{{cleared}}</green> / {{total}} completados",
+  "weekdays": {
+    "sun": "D",
+    "mon": "L",
+    "tue": "M",
+    "wed": "X",
+    "thu": "J",
+    "fri": "V",
+    "sat": "S"
+  },
+  "reward": {
+    "header": "Recompensa por completar {{monthName}}",
+    "claimed": " · Reclamada",
+    "avatarAlt": "Avatar de la recompensa mensual",
+    "plusAvatar": " + avatar exclusivo",
+    "plusFrame": " + marco exclusivo",
+    "plusCardBack": " + reverso de carta",
+    "plusTitle": " + título",
+    "exclusiveAvatar": "Avatar exclusivo",
+    "plusFrameShort": " + marco",
+    "exclusiveCardBack": "Reverso de carta exclusivo",
+    "titleChip": "Título «{{title}}»"
+  },
+  "today": {
+    "done": "¡Puzzle de hoy completado!",
+    "play": "Jugar el puzzle de hoy",
+    "nextTomorrow": "Mañana se abre un puzzle nuevo",
+    "rewardHint": "Complétalo y gana 🪙 {{coin}} + ⚡ {{pp}} de Poder de puzles"
+  },
+  "nav": {
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente"
+  },
+  "day": {
+    "unlockHint": "Desbloquear por 🪙 {{cost}}",
+    "missedHint": "Los días pasados no se pueden repetir"
+  },
+  "legend": {
+    "cleared": "Completado",
+    "today": "Hoy",
+    "missed": "Perdido"
+  },
+  "footnote": "Cada día a medianoche se abre un puzzle nuevo.<br/>¿Te perdiste un día de este mes? Desbloquéalo por 🪙 {{cost}}.<br/>Cuando termina el mes, los puzzles que quedan siguen bloqueados.",
+  "unlock": {
+    "title": "Desbloquear {{date}}",
+    "body": "Gasta 🪙 {{cost}} para jugar el puzzle de este día.<br/>Al completarlo, recibes la recompensa completa.",
+    "owned": "Tienes 🪙 {{coins}}",
+    "notEnough": "No tienes suficientes monedas",
+    "cancel": "Cancelar",
+    "confirm": "Desbloquear 🪙 {{cost}}"
+  },
+  "push": {
+    "ask": "🔔 ¿Quieres que te avisemos cuando se abra el puzzle de mañana?",
+    "accept": "Avisarme",
+    "working": "Configurando…",
+    "later": "Más tarde",
+    "done": "🔔 Notificaciones activadas. ¡Hasta mañana por la mañana!",
+    "denied": "Las notificaciones están desactivadas. Puedes activarlas más tarde en los ajustes del navegador.",
+    "error": "No se pudieron activar las notificaciones. Inténtalo de nuevo en un rato."
+  }
+}

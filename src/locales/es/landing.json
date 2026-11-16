@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "title": "Puzzle Garden - Juegos de puzzles online gratis: sudoku y más",
+    "description": "Juega gratis a juegos de puzzles online en tu navegador: sudoku, rompecabezas, juego de las reinas y encuentra las diferencias. Sin descargas ni registro."
+  },
+  "toast": {
+    "welcome": "¡Bienvenido!",
+    "signedOut": "Has cerrado sesión.",
+    "linkCopied": "¡Enlace copiado!",
+    "profileUpdated": "Perfil actualizado."
+  },
+  "share": {
+    "textWithPower": "¡Mi Poder de puzles es {{power}}! Ven a entrenar tu mente conmigo en Puzzle Garden 🧩",
+    "text": "Despierta tu mente con puzzles divertidos en Puzzle Garden 🧩"
+  },
+  "profile": {
+    "avatarAlt": "Perfil",
+    "puzzlePower": "Poder de puzles:",
+    "rank": "Rango:"
+  },
+  "header": {
+    "shop": "Tienda",
+    "guide": "Cómo jugar",
+    "invite": "Invitar amigos",
+    "installMobile": "Añadir a inicio",
+    "installDesktop": "Añadir al escritorio",
+    "logout": "Cerrar sesión",
+    "login": "Entrar"
+  },
+  "daily": {
+    "badgeDone": "HECHO",
+    "badgeToday": "HOY",
+    "dateLabel": "{{day}}/{{month}}",
+    "done": "¡Completado por hoy!",
+    "play": "Jugar el puzzle de hoy",
+    "monthProgress": "Este mes: <green>{{cleared}}</green> / {{total}} resueltos"
+  },
+  "kakao": {
+    "copyPrompt": "Copia este enlace:",
+    "title": "Inicia sesión desde Safari",
+    "body": "Por seguridad, el navegador integrado de KakaoTalk<br/><strong>no admite el inicio de sesión con Google.</strong><br/><br/>Copia el enlace de abajo y pégalo en Safari<br/>para iniciar sesión con normalidad.",
+    "copied": "✅ ¡Copiado!",
+    "copy": "🔗 Copiar enlace",
+    "close": "Cerrar"
+  },
+  "seo": {
+    "summary": "Juegos de puzzles gratis para despertar tu mente",
+    "intro": "Puzzle Garden es una colección de <strong>juegos de puzzles gratis</strong> para entrenar la mente en cualquier momento y lugar. Sudoku, encuentra las diferencias (SnapSpot), juego de las reinas y rompecabezas: sin instalar nada, juega directamente en tu navegador.",
+    "sudoku": {
+      "title": "🔢 Sudoku",
+      "body": "El clásico puzzle de lógica: rellena una cuadrícula de 9×9 con los números del 1 al 9. Desde tableros suaves para principiantes hasta fases difíciles para expertos, siempre hay un nuevo reto. Jugar al sudoku a diario es genial para la concentración y el razonamiento lógico."
+    },
+    "wordSort": {
+      "title": "🃏 Word Stack",
+      "body": "Un <strong>juego de cartas con palabras</strong> en el que arrastras las cartas para agrupar las palabras por tema."
+    },
+    "queens": {
+      "title": "👑 Crown Quest",
+      "body": "Un <strong>puzzle lógico de colocación</strong>: coloca exactamente una reina en cada región de color, una por fila y por columna, sin que dos reinas se toquen, ni siquiera en diagonal. Reglas simples, pensamiento sorprendentemente profundo."
+    },
+    "crossMath": {
+      "title": "➕ Crossum",
+      "body": "Un <strong>crucigrama de números</strong> en el que rellenas los huecos de operaciones cruzadas con fichas numéricas."
+    },
+    "benefits": {
+      "title": "Por qué los puzzles son buenos para ti",
+      "body": "Los puzzles son mucho más que diversión: son un verdadero ejercicio para el <strong>cerebro</strong>. Se asocian con mejor concentración, una memoria a corto plazo más ágil y menos estrés. Los juegos de Puzzle Garden están pensados para darle a tu mente un impulso rápido y eficaz, incluso en unos pocos minutos libres."
+    }
+  },
+  "footer": {
+    "copyright": "Copyright © ToMixSoft. Todos los derechos reservados",
+    "bizNumber": "N.º de registro de empresa 574-14-01507",
+    "mailOrder": "N.º de registro de venta por correspondencia 2024-Seoul Gwanak-1874",
+    "ceo": "Director general: Dokyun Kim",
+    "address": "49-11 Nakseongdaeyeok 8-gil, Gwanak-gu, Seoul 08799, Republic of Korea",
+    "supportLabel": "Soporte:",
+    "supportLink": "Contáctanos",
+    "termsHeading": "Términos de ToMixSoft",
+    "termsService": "Términos del servicio",
+    "termsPrivacy": "Política de privacidad",
+    "termsFinance": "Términos de transacciones financieras electrónicas"
+  }
+}

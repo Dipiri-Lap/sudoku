@@ -4,18 +4,25 @@
 <head>
   <meta charset="UTF-8" />
   <script>
-    // 홈(/)에서만 언어 자동 전환: 저장된 선택(lang_pref: ko/en/ja)이 있으면 그대로, 없으면 브라우저 언어로
-    // 일본어 → /ja/, 한국어 → 그대로, 그 외 → /en/. 게임 주소로 직접 온 경우와 검색 봇은 건드리지 않는다.
-    // 키 이름은 src/i18n/locale.ts 의 LANG_PREF_KEY 와 같아야 한다.
+    // 홈(/)에서만 언어 자동 전환: 저장된 선택(lang_pref: ko/en/ja/de/es/fr/pt/zh)이 있으면 그대로(ko = 여기 머묾),
+    // 없으면 브라우저 언어로(src/i18n/locale.ts 의 browserLangToSupported 와 같은 규칙):
+    // ko → 그대로, ja/de/es/fr/pt → /<lang>/, 번체 중국어(zh-TW·HK·MO·Hant) → /zh/, 그 외(간체 포함) → /en/.
+    // 게임 주소로 직접 온 경우와 검색 봇은 건드리지 않는다. 키 이름은 locale.ts 의 LANG_PREF_KEY 와 같아야 한다.
     (function () {
       try {
         if (location.pathname !== '/') return;
         if (/bot|crawl|spider|slurp|yeti|daum|headless|lighthouse/i.test(navigator.userAgent || '')) return;
+        var langs = ' ko en ja de es fr pt zh ';
         var pref = null;
         try { pref = localStorage.getItem('lang_pref'); } catch (e) { /* 저장소 차단 */ }
-        var nav = navigator.language || 'ko';
-        var lang = pref || (/^ko/i.test(nav) ? 'ko' : /^ja/i.test(nav) ? 'ja' : 'en');
-        if (lang === 'en' || lang === 'ja') location.replace('/' + lang + '/' + location.search + location.hash);
+        var lang = pref && langs.indexOf(' ' + pref + ' ') >= 0 ? pref : null;
+        if (!lang) {
+          var nav = (navigator.language || 'ko').toLowerCase().replace(/_/g, '-');
+          var p = nav.split('-')[0];
+          lang = p === 'zh' ? (/^zh-(tw|hk|mo|hant)(-|$)/.test(nav) ? 'zh' : 'en')
+            : langs.indexOf(' ' + p + ' ') >= 0 ? p : 'en';
+        }
+        if (lang !== 'ko') location.replace('/' + lang + '/' + location.search + location.hash);
       } catch (e) { /* 실패하면 한국어 그대로 */ }
     })();
   </script>

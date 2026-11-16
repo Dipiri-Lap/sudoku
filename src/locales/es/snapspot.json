@@ -1,0 +1,125 @@
+{
+  "modeSelect": {
+    "seoTitle": "Encontrar las diferencias gratis - Juego SnapSpot | Puzzle Garden",
+    "seoDescription": "Juega gratis a encontrar las diferencias online: compara dos fotos y toca cada diferencia en los modos Normal, Contrarreloj y Arcade, con más de 750 niveles.",
+    "miniOriginal": "Original",
+    "miniModified": "Editada",
+    "miniHeartLeft": "Queda 1 corazón",
+    "stageAlt": "Fases",
+    "arcadeAlt": "Arcade",
+    "loading": "Cargando...",
+    "continueStage": "Continuar fase {{n}}/{{max}}",
+    "startStage": "Empezar fase 1/{{max}}",
+    "aboutTitle": "¿Qué es SnapSpot?",
+    "aboutBody": "SnapSpot es un juego de encontrar las diferencias: compara dos fotos una junto a la otra y descubre todas las <strong>diferencias ocultas</strong>. Con más de 750 fases y un modo Arcade contrarreloj, es una forma estupenda de afinar tu concentración y tu ojo para el detalle.",
+    "tips": {
+      "compare": {
+        "label": "Básico",
+        "title": "Compara dos fotos",
+        "desc": "Mira la foto original y la editada una junto a la otra y busca qué es distinto. Hay cambios sutiles de color, tamaño o posición escondidos ahí."
+      },
+      "tap": {
+        "label": "Controles",
+        "title": "Toca para comprobar",
+        "desc": "Toca (o haz clic) donde creas que está la diferencia para comprobarlo al instante. Si aciertas, queda una marca."
+      },
+      "zoom": {
+        "label": "Zoom",
+        "title": "Pellizca para ampliar",
+        "desc": "¿No lo ves? Pellizca o usa la rueda del ratón para ampliar hasta 3x."
+      },
+      "stage": {
+        "label": "Fases",
+        "title": "Cuida tus corazones",
+        "desc": "En el modo Fases, cada toque equivocado cuesta un corazón. Si los pierdes todos, se acaba la partida, así que toca con cuidado."
+      }
+    }
+  },
+  "game": {
+    "seoTitle": "SnapSpot, encuentra las diferencias - Puzzle Garden",
+    "seoDescription": "Compara dos fotos y encuentra las diferencias. ¡Pon a prueba tu vista!",
+    "loading": "Cargando...",
+    "alertAdDismissed": "Mira el anuncio completo para usar una pista.",
+    "alertNoAd": "No hay ningún anuncio disponible ahora. Inténtalo más tarde.",
+    "soundSettings": "Ajustes de sonido",
+    "markerShop": "Tienda de marcadores",
+    "altOriginal": "Original",
+    "altModified": "Editada",
+    "modeSelect": "Modos",
+    "win": {
+      "title": "¡Las encontraste todas!",
+      "body_one": "Encontraste {{count}} diferencia.",
+      "body_many": "Encontraste las {{count}} diferencias.",
+      "body_other": "Encontraste las {{count}} diferencias.",
+      "puzzlePower": "Poder de puzles +1",
+      "nextStage": "Siguiente fase"
+    },
+    "over": {
+      "title": "Fin de la partida",
+      "body": "Te quedaste sin corazones.",
+      "retry": "Reintentar"
+    },
+    "hint": {
+      "title": "No tienes suficientes monedas",
+      "adPrompt": "Mira un anuncio para usar una pista",
+      "adUsed": "Ya has visto un anuncio en esta ronda",
+      "balance": "Tienes {{coins}}🪙 · Necesitas {{cost}}🪙",
+      "cancel": "Cancelar",
+      "adLoading": "Cargando…",
+      "watchAd": "Ver anuncio",
+      "ok": "OK"
+    }
+  },
+  "settings": {
+    "title": "Ajustes de sonido",
+    "sfx": "Efectos de sonido"
+  },
+  "markerShop": {
+    "title": "Tienda de marcadores",
+    "balance": "Tus monedas",
+    "applied": "Equipado",
+    "select": "Equipar",
+    "free": "Gratis",
+    "unlock": "Desbloquear",
+    "confirmSpend": "¿Gastar {{cost}} monedas?",
+    "cancel": "Cancelar",
+    "ok": "OK",
+    "designs": {
+      "circle": "Círculo",
+      "check": "Check",
+      "star": "Estrella",
+      "thumbs": "Pulgar arriba",
+      "dart": "Dardo",
+      "hundred": "100",
+      "gem": "Gema",
+      "smile": "Carita sonriente",
+      "magnify": "Lupa",
+      "pin": "Chincheta",
+      "dizzy": "Estrella mareada",
+      "target": "Diana",
+      "clover": "Trébol",
+      "frog": "Rana",
+      "cherry": "Flor de cerezo",
+      "cactus": "Cactus",
+      "hue": "Círculo cromático",
+      "robot": "Robot",
+      "lightning": "Rayo",
+      "sparkle": "Destello",
+      "bulb": "Bombilla",
+      "paw": "Huella",
+      "butterfly": "Mariposa",
+      "cat": "Gato",
+      "fox": "Zorro",
+      "panda": "Panda",
+      "bomb": "Bomba",
+      "heart": "Corazón",
+      "magic": "Varita mágica",
+      "eyes": "Ojos",
+      "crown": "Corona",
+      "rainbow": "Arcoíris",
+      "portal": "Portal",
+      "arc": "Arco eléctrico",
+      "matrix": "Matrix"
+    }
+  }
+}

@@ -6,27 +6,37 @@
  * 서버에서는 토큰에 저장된 IANA 시간대(tz)로 그 사용자의 "오늘"을 계산한다.
  */
 
-export type PushLang = "ko" | "en" | "ja";
-export const PUSH_LANGS: readonly PushLang[] = ["ko", "en", "ja"];
+/** src/i18n/locale.ts 의 LANGS 와 맞출 것 */
+export type PushLang = "ko" | "en" | "ja" | "de" | "es" | "fr" | "pt" | "zh";
+export const PUSH_LANGS: readonly PushLang[] = ["ko", "en", "ja", "de", "es", "fr", "pt", "zh"];
 export const DEFAULT_TZ = "Asia/Seoul";
+/** lang 필드가 없는 예전 토큰(전부 한국어판 사용자)에 쓰는 언어 */
 export const DEFAULT_LANG: PushLang = "ko";
+/** lang 이 있지만 지원하지 않는 값일 때 쓰는 언어(해외판 사용자로 본다) */
+export const FALLBACK_INTL_LANG: PushLang = "en";
 
 /** 사용자 로컬 시각으로 이 시(時)에 보낸다. */
 export const MORNING_LOCAL_HOUR = 8;
 export const EVENING_LOCAL_HOUR = 21;
 
 /**
- * 월간 전체 클리어 보상이 있는 달과 칭호. src/data/daily-challenges.json(+ locales/{en,ja}/modals.json 의
- * challengeTitles.daily_YYYY-MM) 과 맞춰야 한다. 번역이 없는 언어는 한국어 칭호를 쓴다.
+ * 월간 전체 클리어 보상이 있는 달과 칭호. src/data/daily-challenges.json(+ locales/<lang>/modals.json 의
+ * challengeTitles.daily_YYYY-MM) 과 맞춰야 한다. 번역이 없는 언어는 영어 칭호, 영어도 없으면 한국어 칭호를 쓴다.
  */
 export const MONTH_REWARDS: Record<string, Partial<Record<PushLang, string>> & { ko: string }> = {
-  "2026-10": { ko: "스도쿠 좀비", en: "Sudoku Zombie", ja: "数独ゾンビ" },
-  "2026-11": { ko: "단어 박사", en: "Word Scholar", ja: "ことば博士" },
+  "2026-10": {
+    ko: "스도쿠 좀비", en: "Sudoku Zombie", ja: "数独ゾンビ",
+    de: "Sudoku-Zombie", es: "Zombi del sudoku", fr: "Zombie du sudoku", pt: "Zumbi do Sudoku", zh: "數獨殭屍",
+  },
+  "2026-11": {
+    ko: "단어 박사", en: "Word Scholar", ja: "ことば博士",
+    de: "Wortgelehrter", es: "Erudito de las palabras", fr: "Érudit des mots", pt: "Mestre das Palavras", zh: "文字學者",
+  },
 };
 
 /**
  * 달마다 데일리 게임. src/features/daily/data/months.ts 의 DAILY_MONTHS 와 맞춰야 한다.
- * 해외판(en/ja) 사용자는 그 달 게임이 INTL_GAMES 에 있을 때만 알림을 받는다(워드스택 달은 해외판에서 닫혀 있다).
+ * 해외판(ko 외 모든 언어) 사용자는 그 달 게임이 INTL_GAMES 에 있을 때만 알림을 받는다(워드스택 달은 해외판에서 닫혀 있다).
  */
 export const MONTH_GAMES: Record<string, string> = {
   "2026-09": "sudoku",
@@ -57,8 +67,10 @@ export function normalizeTimeZone(tz: unknown): string {
   return isValidTimeZone(tz) ? tz : DEFAULT_TZ;
 }
 
+/** 토큰의 lang → 지원 언어. 없으면(예전 토큰) 한국어, 모르는 값이면 영어. */
 export function normalizeLang(lang: unknown): PushLang {
-  return PUSH_LANGS.includes(lang as PushLang) ? (lang as PushLang) : DEFAULT_LANG;
+  if (PUSH_LANGS.includes(lang as PushLang)) return lang as PushLang;
+  return lang === undefined || lang === null || lang === "" ? DEFAULT_LANG : FALLBACK_INTL_LANG;
 }
 
 const partsCache = new Map<string, Intl.DateTimeFormat>();
@@ -178,7 +190,7 @@ export function monthProgress(clearedDates: Iterable<string>, today: string, lan
   const month = today.slice(0, 7);
   const titles = MONTH_REWARDS[month];
   if (!titles) return null;
-  const title = titles[lang] ?? titles.ko;
+  const title = titles[lang] ?? titles.en ?? titles.ko;
   const total = daysInMonth(month);
   let cleared = 0;
   for (const d of clearedDates) if (d.startsWith(month)) cleared += 1;
@@ -196,6 +208,15 @@ export function isDailyOpenFor(lang: PushLang, today: string): boolean {
 // ─── 문구 ────────────────────────────────────────────────────────────────────
 
 const MONTH_NAMES_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTH_NAMES_DE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const MONTH_NAMES_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const MONTH_NAMES_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const MONTH_NAMES_PT = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+/** 프랑스어 "~월의": 모음으로 시작하는 달(avril, août, octobre)은 d'avril, 나머지는 de mai. */
+const frOfMonth = (m: number): string => {
+  const name = MONTH_NAMES_FR[m - 1];
+  return /^[aeiou]/.test(name) ? `d'${name}` : `de ${name}`;
+};
 
 const TEMPLATES: Record<PushLang, {
   morningTitle: string;
@@ -229,6 +250,68 @@ const TEMPLATES: Record<PushLang, {
     morningDefault: "今日も1問解いてみませんか？",
     eveningTitle: "⏰ 連続記録が途切れそうです",
     eveningBody: (s) => `今日解かないと${s}日連続の記録が途切れます`,
+  },
+  de: {
+    morningTitle: "🧩 Das heutige Rätsel ist da!",
+    morningReward: (m, title, n) =>
+      `Nur noch ${n} Rätsel bis zur ${MONTH_NAMES_DE[m - 1]}-Belohnung (${title})`, // Rätsel: Singular = Plural
+    morningStreak: (s) => (s === 1 ? "Du hast eine Serie von 1 Tag" : `Du hast eine Serie von ${s} Tagen`),
+    morningDefault: "Bereit für das heutige Rätsel?",
+    eveningTitle: "⏰ Deine Serie reißt gleich ab",
+    eveningBody: (s) =>
+      s === 1
+        ? "Löse das heutige Rätsel, damit deine Serie von 1 Tag hält"
+        : `Löse das heutige Rätsel, damit deine Serie von ${s} Tagen hält`,
+  },
+  es: {
+    morningTitle: "🧩 ¡Ya está aquí el puzle de hoy!",
+    morningReward: (m, title, n) =>
+      n === 1
+        ? `Te falta 1 puzle para la recompensa de ${MONTH_NAMES_ES[m - 1]} (${title})`
+        : `Te faltan ${n} puzles para la recompensa de ${MONTH_NAMES_ES[m - 1]} (${title})`,
+    morningStreak: (s) => (s === 1 ? "Llevas una racha de 1 día" : `Llevas una racha de ${s} días`),
+    morningDefault: "¿Te animas con el puzle de hoy?",
+    eveningTitle: "⏰ Tu racha está a punto de romperse",
+    eveningBody: (s) =>
+      s === 1
+        ? "Resuelve el puzle de hoy para mantener tu racha de 1 día"
+        : `Resuelve el puzle de hoy para mantener tu racha de ${s} días`,
+  },
+  fr: {
+    morningTitle: "🧩 Le puzzle du jour est arrivé !",
+    morningReward: (m, title, n) =>
+      n === 1
+        ? `Plus qu'un puzzle avant la récompense ${frOfMonth(m)} (${title})`
+        : `Plus que ${n} puzzles avant la récompense ${frOfMonth(m)} (${title})`,
+    morningStreak: (s) => (s === 1 ? "Votre série en est à 1 jour" : `Votre série en est à ${s} jours`),
+    morningDefault: "Prêt pour le puzzle du jour ?",
+    eveningTitle: "⏰ Votre série va bientôt s'arrêter",
+    eveningBody: (s) =>
+      s === 1
+        ? "Résolvez le puzzle du jour pour garder votre série de 1 jour"
+        : `Résolvez le puzzle du jour pour garder votre série de ${s} jours`,
+  },
+  pt: {
+    morningTitle: "🧩 O quebra-cabeça de hoje chegou!",
+    morningReward: (m, title, n) =>
+      n === 1
+        ? `Falta 1 quebra-cabeça para a recompensa de ${MONTH_NAMES_PT[m - 1]} (${title})`
+        : `Faltam ${n} quebra-cabeças para a recompensa de ${MONTH_NAMES_PT[m - 1]} (${title})`,
+    morningStreak: (s) => (s === 1 ? "Você está com uma sequência de 1 dia" : `Você está com uma sequência de ${s} dias`),
+    morningDefault: "Bora resolver o quebra-cabeça de hoje?",
+    eveningTitle: "⏰ Sua sequência está quase acabando",
+    eveningBody: (s) =>
+      s === 1
+        ? "Resolva o quebra-cabeça de hoje para manter sua sequência de 1 dia"
+        : `Resolva o quebra-cabeça de hoje para manter sua sequência de ${s} dias`,
+  },
+  zh: {
+    morningTitle: "🧩 今日謎題來囉！",
+    morningReward: (m, title, n) => `再解 ${n} 題就能拿到 ${m} 月全破獎勵（${title}）`,
+    morningStreak: (s) => `你已經連續挑戰 ${s} 天了`,
+    morningDefault: "今天也來解一題吧？",
+    eveningTitle: "⏰ 連續紀錄快要中斷了",
+    eveningBody: (s) => `今天不解題的話，${s} 天的連續紀錄就會中斷`,
   },
 };
 

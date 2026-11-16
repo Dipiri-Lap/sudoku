@@ -1,0 +1,125 @@
+{
+  "modeSelect": {
+    "seoTitle": "Jeu des différences gratuit en ligne - SnapSpot | Puzzle Garden",
+    "seoDescription": "Jouez gratuitement au jeu des différences : comparez deux photos et trouvez chaque différence en modes Normal, Contre-la-montre et Arcade. 750+ niveaux.",
+    "miniOriginal": "Original",
+    "miniModified": "Modifié",
+    "miniHeartLeft": "1 cœur restant",
+    "stageAlt": "Niveaux",
+    "arcadeAlt": "Arcade",
+    "loading": "Chargement...",
+    "continueStage": "Reprendre le niveau {{n}}/{{max}}",
+    "startStage": "Commencer le niveau 1/{{max}}",
+    "aboutTitle": "Qu'est-ce que SnapSpot ?",
+    "aboutBody": "SnapSpot est un jeu des différences : comparez deux photos côte à côte et trouvez chaque <strong>différence cachée</strong>. Avec plus de 750 niveaux et un mode Arcade contre-la-montre, c'est idéal pour aiguiser votre concentration et votre sens de l'observation !",
+    "tips": {
+      "compare": {
+        "label": "Bases",
+        "title": "Comparez les deux photos",
+        "desc": "Regardez la photo originale et la photo modifiée côte à côte pour repérer ce qui change. De subtiles différences de couleur, de taille ou de position s'y cachent."
+      },
+      "tap": {
+        "label": "Commandes",
+        "title": "Touchez pour vérifier",
+        "desc": "Touchez (ou cliquez) l'endroit où vous pensez qu'il y a une différence pour la vérifier aussitôt. Une bonne réponse laisse un marqueur."
+      },
+      "zoom": {
+        "label": "Zoom",
+        "title": "Pincez pour zoomer",
+        "desc": "Vous ne voyez rien ? Pincez l'écran ou utilisez la molette de la souris pour zoomer jusqu'à 3x."
+      },
+      "stage": {
+        "label": "Niveaux",
+        "title": "Gardez vos cœurs",
+        "desc": "En mode Normal, chaque mauvaise réponse coûte un cœur. Si vous les perdez tous, c'est fini : touchez avec soin !"
+      }
+    }
+  },
+  "game": {
+    "seoTitle": "SnapSpot, jeu des différences - Puzzle Garden",
+    "seoDescription": "Comparez deux photos et trouvez les différences. Testez votre sens de l'observation !",
+    "loading": "Chargement...",
+    "alertAdDismissed": "Regardez la pub en entier pour utiliser un indice.",
+    "alertNoAd": "Aucune pub disponible pour le moment. Réessayez plus tard.",
+    "soundSettings": "Réglages du son",
+    "markerShop": "Boutique de marqueurs",
+    "altOriginal": "Original",
+    "altModified": "Modifié",
+    "modeSelect": "Modes",
+    "win": {
+      "title": "Vous les avez toutes trouvées !",
+      "body_one": "Vous avez trouvé {{count}} différence.",
+      "body_many": "Vous avez trouvé les {{count}} différences.",
+      "body_other": "Vous avez trouvé les {{count}} différences.",
+      "puzzlePower": "Puissance puzzle +1",
+      "nextStage": "Niveau suivant"
+    },
+    "over": {
+      "title": "Partie terminée",
+      "body": "Vous n'avez plus de cœurs.",
+      "retry": "Réessayer"
+    },
+    "hint": {
+      "title": "Pas assez de pièces",
+      "adPrompt": "Regardez une pub pour utiliser un indice",
+      "adUsed": "Vous avez déjà regardé une pub pendant cette partie",
+      "balance": "Vous avez {{coins}}🪙 · Il faut {{cost}}🪙",
+      "cancel": "Annuler",
+      "adLoading": "Chargement…",
+      "watchAd": "Voir la pub",
+      "ok": "OK"
+    }
+  },
+  "settings": {
+    "title": "Réglages du son",
+    "sfx": "Effets sonores"
+  },
+  "markerShop": {
+    "title": "Boutique de marqueurs",
+    "balance": "Vos pièces",
+    "applied": "Équipé",
+    "select": "Équiper",
+    "free": "Gratuit",
+    "unlock": "Débloquer",
+    "confirmSpend": "Dépenser {{cost}} pièces ?",
+    "cancel": "Annuler",
+    "ok": "OK",
+    "designs": {
+      "circle": "Cercle",
+      "check": "Coche",
+      "star": "Étoile",
+      "thumbs": "Pouce levé",
+      "dart": "Fléchette",
+      "hundred": "100",
+      "gem": "Gemme",
+      "smile": "Smiley",
+      "magnify": "Loupe",
+      "pin": "Épingle",
+      "dizzy": "Étoile étourdie",
+      "target": "Cible",
+      "clover": "Trèfle",
+      "frog": "Grenouille",
+      "cherry": "Cerisier en fleurs",
+      "cactus": "Cactus",
+      "hue": "Cercle chromatique",
+      "robot": "Robot",
+      "lightning": "Éclair",
+      "sparkle": "Étincelle",
+      "bulb": "Ampoule",
+      "paw": "Patte",
+      "butterfly": "Papillon",
+      "cat": "Chat",
+      "fox": "Renard",
+      "panda": "Panda",
+      "bomb": "Bombe",
+      "heart": "Cœur",
+      "magic": "Baguette magique",
+      "eyes": "Yeux",
+      "crown": "Couronne",
+      "rainbow": "Arc-en-ciel",
+      "portal": "Portail",
+      "arc": "Arc électrique",
+      "matrix": "Matrix"
+    }
+  }
+}

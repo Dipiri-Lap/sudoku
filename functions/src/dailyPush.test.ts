@@ -92,8 +92,11 @@ describe('사용자 시간대', () => {
   it('잘못된 시간대·언어는 기본값', () => {
     expect(normalizeTimeZone('Not/AZone')).toBe('Asia/Seoul');
     expect(normalizeTimeZone(undefined)).toBe('Asia/Seoul');
-    expect(normalizeLang('fr')).toBe('ko');
+    expect(normalizeLang(undefined)).toBe('ko'); // 예전 토큰(언어 필드 없음)은 한국어판 사용자
+    expect(normalizeLang('')).toBe('ko');
+    expect(normalizeLang('it')).toBe('en'); // 모르는 언어는 영어
     expect(normalizeLang('ja')).toBe('ja');
+    for (const l of ['de', 'es', 'fr', 'pt', 'zh']) expect(normalizeLang(l)).toBe(l);
   });
   it('아침 8시가 되는 UTC 시 (pushHourUtc)', () => {
     const winter = new Date('2026-11-16T12:00:00Z');
@@ -124,6 +127,8 @@ describe('사용자 시간대', () => {
     expect(tokenDefaultsPatch({ token: 'x' }, now)).toEqual({ tz: 'Asia/Seoul', lang: 'ko', pushHourUtc: 23 });
     expect(tokenDefaultsPatch({ token: 'x', tz: 'America/Los_Angeles', lang: 'en', pushHourUtc: 16 }, now)).toBeNull();
     expect(tokenDefaultsPatch({ token: 'x', tz: 'America/Los_Angeles', lang: 'en' }, now)).toEqual({ pushHourUtc: 16 });
+    expect(tokenDefaultsPatch({ token: 'x', tz: 'Europe/Berlin', lang: 'de', pushHourUtc: 7 }, now)).toBeNull();
+    expect(tokenDefaultsPatch({ token: 'x', tz: 'Europe/Rome', lang: 'it', pushHourUtc: 7 }, now)).toEqual({ lang: 'en' });
   });
 });
 
@@ -159,5 +164,38 @@ describe('언어별 문구', () => {
     expect(dailyLinkFor('ko')).toBe('/daily');
     expect(dailyLinkFor('en')).toBe('/en/daily');
     expect(dailyLinkFor('ja')).toBe('/ja/daily');
+    expect(dailyLinkFor('zh')).toBe('/zh/daily');
+  });
+  it('새 언어(de/es/fr/pt/zh) 아침·저녁 문구', () => {
+    const two = ['2026-10-04', '2026-10-05'];
+    expect(buildMorningMessage(two, '2026-10-06', 'de')).toEqual({ title: '🧩 Das heutige Rätsel ist da!', body: 'Du hast eine Serie von 2 Tagen' });
+    expect(buildMorningMessage([], '2026-10-06', 'es')?.body).toBe('¿Te animas con el puzle de hoy?');
+    expect(buildMorningMessage(['2026-10-05'], '2026-10-06', 'fr')?.body).toBe('Votre série en est à 1 jour');
+    expect(buildMorningMessage(two, '2026-10-06', 'pt')?.body).toBe('Você está com uma sequência de 2 dias');
+    expect(buildMorningMessage(two, '2026-10-06', 'zh')).toEqual({ title: '🧩 今日謎題來囉！', body: '你已經連續挑戰 2 天了' });
+
+    const three = ['2026-10-25', '2026-10-26', '2026-10-27'];
+    expect(buildEveningMessage(three, '2026-10-28', 'de')?.body).toBe('Löse das heutige Rätsel, damit deine Serie von 3 Tagen hält');
+    expect(buildEveningMessage(['2026-10-27'], '2026-10-28', 'es')?.body).toBe('Resuelve el puzle de hoy para mantener tu racha de 1 día');
+    expect(buildEveningMessage(three, '2026-10-28', 'fr')?.body).toBe('Résolvez le puzzle du jour pour garder votre série de 3 jours');
+    expect(buildEveningMessage(three, '2026-10-28', 'pt')?.body).toBe('Resolva o quebra-cabeça de hoje para manter sua sequência de 3 dias');
+    expect(buildEveningMessage(three, '2026-10-28', 'zh')?.body).toBe('今天不解題的話，3 天的連續紀錄就會中斷');
+  });
+  it('새 언어 월간 보상 문구와 칭호', () => {
+    const cleared = Array.from({ length: 28 }, (_, i) => `2026-10-${String(i + 1).padStart(2, '0')}`);
+    expect(buildMorningMessage(cleared, '2026-10-29', 'de')?.body).toBe('Nur noch 3 Rätsel bis zur Oktober-Belohnung (Sudoku-Zombie)');
+    expect(buildMorningMessage(cleared, '2026-10-29', 'es')?.body).toBe('Te faltan 3 puzles para la recompensa de octubre (Zombi del sudoku)');
+    expect(buildMorningMessage(cleared, '2026-10-29', 'fr')?.body).toBe("Plus que 3 puzzles avant la récompense d'octobre (Zombie du sudoku)");
+    expect(buildMorningMessage(cleared, '2026-10-29', 'pt')?.body).toBe('Faltam 3 quebra-cabeças para a recompensa de outubro (Zumbi do Sudoku)');
+    expect(buildMorningMessage(cleared, '2026-10-29', 'zh')?.body).toBe('再解 3 題就能拿到 10 月全破獎勵（數獨殭屍）');
+    const almost = Array.from({ length: 30 }, (_, i) => `2026-10-${String(i + 1).padStart(2, '0')}`);
+    expect(buildMorningMessage(almost, '2026-10-31', 'fr')?.body).toBe("Plus qu'un puzzle avant la récompense d'octobre (Zombie du sudoku)");
+    expect(buildMorningMessage(almost, '2026-10-31', 'es')?.body).toBe('Te falta 1 puzle para la recompensa de octubre (Zombi del sudoku)');
+  });
+  it('새 언어도 해외판 공개 규칙을 따른다', () => {
+    for (const l of ['de', 'es', 'fr', 'pt', 'zh'] as const) {
+      expect(isDailyOpenFor(l, '2026-10-16')).toBe(true);
+      expect(isDailyOpenFor(l, '2026-11-16')).toBe(false);
+    }
   });
 });

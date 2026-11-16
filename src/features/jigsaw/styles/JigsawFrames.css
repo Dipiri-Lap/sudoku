@@ -427,7 +427,7 @@
 }
 .jg-shop-confirm .box .jg-frame.mini { width: 130px; }
 .jg-shop-confirm p { margin: 14px 0; font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 0.9rem; line-height: 1.6; }
-.jg-shop-confirm p b { font-family: 'Black Han Sans', "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; font-weight: 400; font-size: 1.15rem; }
+.jg-shop-confirm p b { font-family: 'Black Han Sans', "Arial Black", 'Lilita One', "M PLUS Rounded 1c", "Chiron GoRound TC", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; font-weight: 400; font-size: 1.15rem; }
 .jg-shop-confirm p img { width: 15px; height: 15px; vertical-align: -2px; }
 .jg-shop-confirm .row { display: flex; gap: 8px; width: 100%; }
 .jg-shop-confirm .row button { flex: 1; height: 44px; border-radius: 12px; font-size: 1rem; }

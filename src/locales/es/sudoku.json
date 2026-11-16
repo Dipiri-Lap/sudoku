@@ -1,0 +1,141 @@
+{
+  "controls": {
+    "adDismissed": "Mira el anuncio completo para usar una pista.",
+    "noAd": "No hay ningún anuncio disponible ahora. Inténtalo más tarde.",
+    "hintTitle": "Usar pista",
+    "noCoinsTitle": "No tienes suficientes monedas",
+    "hintDescConfirm": "Elige una casilla para rellenar",
+    "hintDescAd": "Mira un anuncio para usar una pista",
+    "hintDescUsed": "Ya has visto un anuncio en esta partida",
+    "owned": "Tienes",
+    "cost": "Coste",
+    "cancel": "Cancelar",
+    "pickCell": "Elige una casilla",
+    "loading": "Cargando…",
+    "watchAd": "Ver anuncio",
+    "ok": "OK",
+    "free": "Gratis",
+    "pickGuide": "Elige una casilla para rellenar"
+  },
+  "tutorial": {
+    "title": "Cómo jugar",
+    "body": "Rellena los huecos sin repetir ningún número en una <row>fila</row>, una <col>columna</col> o un <box>cuadro de {{size}}</box>.",
+    "ok": "OK"
+  },
+  "theme": {
+    "names": {
+      "default": "Clásico",
+      "dark": "Oscuro",
+      "paper": "Papel",
+      "gameboy": "Game Boy",
+      "chalkboard": "Pizarra",
+      "blossom": "Flor de cerezo",
+      "ocean": "Océano",
+      "mocha": "Moca",
+      "dusk": "Crepúsculo",
+      "mintchoco": "Menta y chocolate",
+      "newspaper": "Periódico",
+      "blueprint": "Plano",
+      "terminal": "Terminal",
+      "watercolor": "Acuarela",
+      "hanji": "Hanji",
+      "space": "Espacio",
+      "notepad": "Bloc de notas",
+      "highlighter": "Resaltador"
+    },
+    "grades": {
+      "free": "Gratis",
+      "common": "Común",
+      "rare": "Raro",
+      "epic": "Épico"
+    }
+  },
+  "themeModal": {
+    "title": "🎨 Tienda de temas",
+    "coins": "Tus monedas",
+    "applied": "Aplicado",
+    "select": "Elegir",
+    "free": "Gratis",
+    "unlockTitle": "Desbloquear tema",
+    "confirmSpend": "¿Gastar {{cost}} monedas?",
+    "cancel": "Cancelar",
+    "ok": "OK"
+  },
+  "difficulty": {
+    "title": "Elige la dificultad",
+    "myBest": "Mi mejor: {{time}}",
+    "worldBest": "N.º 1: {{time}}"
+  },
+  "game": {
+    "levelLocked": "¡Todavía no has llegado a este nivel! (Actual: nivel {{level}})",
+    "nicknameChanged": "Apodo actualizado.",
+    "changeTheme": "Cambiar tema",
+    "dailyDate": "{{day}}/{{month}}",
+    "beginnerLevel": "Principiante {{level}}",
+    "paused": "En pausa",
+    "resume": "Reanudar",
+    "mistakes_one": "Has cometido {{count}} error",
+    "mistakes_many": "Has cometido {{count}} errores",
+    "mistakes_other": "Has cometido {{count}} errores",
+    "back": "Atrás",
+    "retry": "Reintentar 🔄",
+    "dailyComplete": "📅 ¡Puzzle del día completado!",
+    "congrats": "🎉 ¡Felicidades!",
+    "newRecord": "¡Nuevo récord!",
+    "timeLabel": "Tiempo: ",
+    "puzzlePower": "⚡ Poder de puzles +{{n}}",
+    "monthComplete": "¡Mes completado! Título «{{title}}»",
+    "rewardAvatar": " · 🖼 Avatar desbloqueado",
+    "rewardFrame": " · 🔲 Marco desbloqueado",
+    "rewardCardBack": " · 🃏 Reverso de carta desbloqueado",
+    "nickname": "Apodo",
+    "change": "Cambiar",
+    "toCalendar": "Calendario",
+    "nextLevel": "Siguiente nivel",
+    "nextStage": "Siguiente fase",
+    "doneHome": "Volver al inicio",
+    "ok": "OK"
+  },
+  "modeSelect": {
+    "altBeginner": "Modo Principiante",
+    "altStage": "Modo Fases",
+    "altBig": "Modo Tamaño grande",
+    "altTimeAttack": "Modo Contrarreloj",
+    "restart": "Empezar de nuevo",
+    "start": "Empezar nivel {{level}}/{{max}}",
+    "continue": "Continuar nivel {{level}}/{{max}}",
+    "play": "Jugar",
+    "seo": {
+      "title": "Sudoku gratis online - Juega al sudoku clásico | Puzzle Garden",
+      "description": "Juega al sudoku gratis online en tu navegador: puzles clásicos de 9×9, de principiante a difícil, con notas, pistas y modo contrarreloj. Sin descargas.",
+      "appName": "Sudoku - Puzzle Garden",
+      "currency": "USD",
+      "summary": "¿Qué es el sudoku? - Sudoku gratis online",
+      "h2": "Cómo se juega al sudoku",
+      "h3": "Elegir una dificultad",
+      "h4": "El sudoku como entrenamiento mental",
+      "p1": "El <strong>sudoku</strong> es un puzzle de lógica en el que se rellena una cuadrícula de 9×9 con números. Cada fila, cada columna y cada cuadro de 3×3 debe contener los números del 1 al 9 una sola vez. No hacen falta matemáticas, solo lógica y concentración, y por eso es uno de los <strong>juegos mentales</strong> más queridos del mundo.",
+      "p2": "Toca una casilla vacía e introduce un número del 1 al 9 que encaje. Un número que ya aparece en la misma fila, columna o cuadro no se puede repetir. Si te atascas, la función de pistas puede ayudarte. Si estás empezando, prueba el <strong>sudoku para principiantes</strong> o una <strong>dificultad fácil</strong>.",
+      "p3": "<strong>Principiante · Fácil</strong>: para quien empieza con el sudoku. Se dan muchas pistas.<br/><strong>Normal</strong>: pruébalo cuando ya conozcas las reglas básicas. Hace falta algo de deducción lógica.<br/><strong>Difícil · Contrarreloj</strong>: un reto de velocidad en el que terminas dentro de un límite de tiempo. Pensado para expertos.",
+      "p4": "El sudoku es ideal para mejorar la <strong>concentración, el razonamiento lógico y la memoria a corto plazo</strong>. Algunos estudios sugieren que resolver puzles de 10 a 15 minutos al día puede ayudar a mantener la mente ágil. Dale a tu cerebro un entrenamiento diario con el sudoku gratis online de Puzzle Garden.",
+      "faq": {
+        "q1": {
+          "q": "¿Qué es el sudoku?",
+          "a": "El sudoku es un puzzle de lógica en el que se rellena una cuadrícula de 9×9 con los números del 1 al 9. Ningún número puede repetirse en una fila, columna o cuadro de 3×3. Es un juego mental basado en la lógica pura, no en las matemáticas."
+        },
+        "q2": {
+          "q": "¿Es gratis jugar al sudoku?",
+          "a": "Sí, el sudoku de Puzzle Garden es totalmente gratuito. Puedes empezar a jugar enseguida sin registrarte, con dificultades que van de principiante a difícil."
+        },
+        "q3": {
+          "q": "¿Con qué dificultad debería empezar un principiante?",
+          "a": "Si estás empezando, te recomendamos el modo Principiante. La dificultad sube paso a paso para que ganes práctica poco a poco. Cuando te sientas cómodo, prueba el modo Contrarreloj."
+        },
+        "q4": {
+          "q": "¿Es bueno el sudoku para el cerebro?",
+          "a": "Sí. El sudoku ayuda a mejorar la concentración, el razonamiento lógico y la memoria a corto plazo. Se cree que resolver puzles de 10 a 15 minutos al día ayuda a mantener la mente ágil."
+        }
+      }
+    }
+  }
+}
