@@ -22,10 +22,10 @@
     "shop": "Tienda",
     "guide": "Cómo jugar",
     "invite": "Invitar amigos",
-    "installMobile": "Añadir a inicio",
+    "installMobile": "Añadir a pantalla de inicio",
     "installDesktop": "Añadir al escritorio",
     "logout": "Cerrar sesión",
-    "login": "Entrar"
+    "login": "Iniciar sesión"
   },
   "daily": {
     "badgeDone": "HECHO",
@@ -78,6 +78,6 @@
     "termsHeading": "Términos de ToMixSoft",
     "termsService": "Términos del servicio",
     "termsPrivacy": "Política de privacidad",
-    "termsFinance": "Términos de transacciones financieras electrónicas"
+    "termsFinance": "Términos de las transacciones financieras electrónicas"
   }
 }

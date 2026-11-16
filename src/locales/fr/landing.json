@@ -10,7 +10,7 @@
     "profileUpdated": "Profil mis à jour."
   },
   "share": {
-    "textWithPower": "Ma puissance puzzle : {{power}} ! Venez vous entraîner le cerveau avec moi sur Puzzle Garden 🧩",
+    "textWithPower": "Ma puissance puzzle : {{power}} ! Venez entraîner votre cerveau avec moi sur Puzzle Garden 🧩",
     "text": "Réveillez votre cerveau avec de chouettes puzzles sur Puzzle Garden 🧩"
   },
   "profile": {
@@ -25,7 +25,7 @@
     "installMobile": "Ajouter à l'écran d'accueil",
     "installDesktop": "Ajouter au bureau",
     "logout": "Se déconnecter",
-    "login": "Connexion"
+    "login": "Se connecter"
   },
   "daily": {
     "badgeDone": "FAIT",

@@ -175,7 +175,7 @@
       "international": {
         "title": "7. Utilisateurs hors de Corée",
         "i1": "Vos informations sont traitées en République de Corée et aux États-Unis (Google Firebase).",
-        "i2": "Utilisateurs de l'EEE et du Royaume-Uni : nous traitons les données personnelles pour fournir le Service que vous demandez, pour notre intérêt légitime à l'exploiter et à l'améliorer et, pour les publicités personnalisées, sur la base de votre consentement. Vous avez le droit d'accéder à vos données, de les rectifier, de les supprimer, d'en limiter le traitement ou de vous y opposer, à la portabilité de vos données, de retirer votre consentement à tout moment et d'introduire une réclamation auprès de l'autorité locale de protection des données.",
+        "i2": "Utilisateurs de l'EEE et du Royaume-Uni : nous traitons les données personnelles pour fournir le Service que vous demandez, sur la base de notre intérêt légitime à l'exploiter et à l'améliorer et, pour les publicités personnalisées, sur la base de votre consentement. Vous avez le droit d'accéder à vos données, de les rectifier, de les supprimer, d'en limiter le traitement ou de vous y opposer, à la portabilité de vos données, de retirer votre consentement à tout moment et d'introduire une réclamation auprès de l'autorité locale de protection des données.",
         "i3": "Utilisateurs californiens : vous pouvez demander à savoir quelles données personnelles nous détenons, à les rectifier ou à les supprimer, et vous pouvez refuser l'utilisation de vos informations à des fins de publicité ciblée en utilisant les options ci-dessus. Nous ne vendons pas de données personnelles contre de l'argent.",
         "i4": "Le Service ne s'adresse pas aux enfants de moins de 13 ans, et nous ne collectons pas sciemment leurs données personnelles."
       },
@@ -196,7 +196,7 @@
     "nStages": "Terminer {{n}} niveaux",
     "hardNStages": "Terminer {{n}} niveaux en mode Difficile",
     "starsN": "Récolter {{n}} étoiles",
-    "dailyMonth": "Terminer tous les puzzles du jour de {{month}}"
+    "dailyMonth": "Terminer tous les puzzles du jour ({{month}})"
   },
   "frameNames": {
     "yellow": "Jaune",
@@ -287,7 +287,7 @@
     "ss_1": "Première trouvaille",
     "ss_10": "Yeux perçants",
     "ss_30": "Yeux de hibou",
-    "ss_50": "Observateur affûté",
+    "ss_50": "Fin observateur",
     "ss_100": "Yeux d'aigle",
     "ss_200": "Regard perçant",
     "ss_300": "Yeux de léopard",
@@ -321,7 +321,7 @@
     "jigsaw_stage_500": "Directeur de musée",
     "jigsaw_stage_700": "Voyageur dans les tableaux",
     "jigsaw_stage_1000": "Mille images",
-    "jigsaw_stars_10": "Scintille, petite étoile",
+    "jigsaw_stars_10": "Brille, petite étoile",
     "jigsaw_stars_30": "Cueilleur d'étoiles",
     "jigsaw_stars_75": "Collectionneur de lumière stellaire",
     "jigsaw_stars_150": "Balade galactique",

@@ -8,7 +8,7 @@
     "hintDescAd": "Mira un anuncio para usar una pista",
     "hintDescUsed": "Ya has visto un anuncio en esta partida",
     "owned": "Tienes",
-    "cost": "Coste",
+    "cost": "Precio",
     "cancel": "Cancelar",
     "pickCell": "Elige una casilla",
     "loading": "Cargando…",
@@ -63,7 +63,7 @@
   },
   "difficulty": {
     "title": "Elige la dificultad",
-    "myBest": "Mi mejor: {{time}}",
+    "myBest": "Mi récord: {{time}}",
     "worldBest": "N.º 1: {{time}}"
   },
   "game": {
@@ -107,7 +107,7 @@
     "play": "Jugar",
     "seo": {
       "title": "Sudoku gratis online - Juega al sudoku clásico | Puzzle Garden",
-      "description": "Juega al sudoku gratis online en tu navegador: puzles clásicos de 9×9, de principiante a difícil, con notas, pistas y modo contrarreloj. Sin descargas.",
+      "description": "Juega al sudoku gratis online en tu navegador: puzzles clásicos de 9×9, de principiante a difícil, con notas, pistas y modo contrarreloj. Sin descargas.",
       "appName": "Sudoku - Puzzle Garden",
       "currency": "USD",
       "summary": "¿Qué es el sudoku? - Sudoku gratis online",

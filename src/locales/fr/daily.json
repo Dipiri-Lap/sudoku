@@ -18,7 +18,7 @@
     "sat": "S"
   },
   "reward": {
-    "header": "Récompense {{monthName}} : tout réussir",
+    "header": "Récompense : tout {{monthName}} réussi",
     "claimed": " · Obtenue",
     "avatarAlt": "Avatar de la récompense mensuelle",
     "plusAvatar": " + avatar exclusif",
@@ -49,7 +49,7 @@
     "today": "Aujourd'hui",
     "missed": "Manqué"
   },
-  "footnote": "Un nouveau puzzle s'ouvre chaque jour à minuit.<br/>Un jour manqué ce mois-ci ? Débloquez-le pour 🪙 {{cost}}.<br/>Une fois le mois terminé, les puzzles restants restent verrouillés.",
+  "footnote": "Un nouveau puzzle s'ouvre chaque jour à minuit.<br/>Un jour manqué ce mois-ci ? Débloquez-le pour 🪙 {{cost}}.<br/>Une fois le mois terminé, les puzzles non joués restent verrouillés.",
   "unlock": {
     "title": "Débloquer le {{date}}",
     "body": "Dépensez 🪙 {{cost}} pour jouer au puzzle de ce jour.<br/>Vous recevez la récompense complète en le réussissant.",

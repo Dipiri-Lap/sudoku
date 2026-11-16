@@ -12,7 +12,7 @@ export default {
   home: {
     title: 'Puzzle Garden - Jeux de puzzle gratuits en ligne : sudoku et plus',
     description: 'Jouez gratuitement en ligne à des jeux de puzzle : sudoku, puzzle d\'images, casse-tête Queens et jeu des différences. Sans téléchargement ni inscription.',
-    keywords: 'jeux de puzzle gratuits, jeux de réflexion en ligne, sudoku gratuit en ligne, puzzle en ligne gratuit, jeu des différences, jeu de logique, casse-tête, jeux de cerveau',
+    keywords: 'jeux de puzzle gratuits, jeux de réflexion en ligne, sudoku gratuit en ligne, puzzle en ligne gratuit, jeu des différences, jeu de logique, casse-tête, jeux pour le cerveau',
     siteDescription: 'Jeux de puzzle gratuits dans votre navigateur : sudoku, puzzle d\'images, casse-tête Queens et jeu des différences.',
     itemListName: 'Les jeux de Puzzle Garden',
     games: {
@@ -26,7 +26,7 @@ export default {
     blocks: [
       {
         h3: 'Les jeux disponibles',
-        p: '[[sudoku|Sudoku]] est le grand classique des chiffres, avec plusieurs niveaux de difficulté et un mode contre-la-montre. [[queens|Crown Quest]] est un jeu de logique dans le style de Queens : une reine par région colorée. [[jigsaw|Tiny Pieces]] est un puzzle d\'images apaisant aux illustrations mignonnes. [[snapspot|SnapSpot]] est un jeu des différences de plus de 750 niveaux.',
+        p: '[[sudoku|Sudoku]] est le grand classique des grilles de chiffres, avec plusieurs niveaux de difficulté et un mode contre-la-montre. [[queens|Crown Quest]] est un jeu de logique dans le style de Queens : une reine par région colorée. [[jigsaw|Tiny Pieces]] est un puzzle d\'images apaisant aux illustrations mignonnes. [[snapspot|SnapSpot]] est un jeu des différences de plus de 750 niveaux.',
       },
       {
         h3: 'Gratuit, simple et rapide à prendre en main',
@@ -55,7 +55,7 @@ export default {
           lead: 'Le <strong>sudoku</strong> se joue sur une grille de 9×9 cases : chaque ligne, chaque colonne et chaque bloc de 3×3 doit contenir les chiffres de 1 à 9, une seule fois. Pas besoin de calcul, seulement de la patience et de la logique, ce qui en fait l\'un des <strong>jeux de réflexion</strong> les plus populaires au monde.',
           blocks: [
             { h3: 'Comment jouer au sudoku', p: 'Touchez une case vide et saisissez un chiffre de 1 à 9. Un chiffre ne peut pas se répéter dans la même ligne, la même colonne ou le même bloc. Si vous débutez, choisissez le niveau <strong>débutant</strong> ou <strong>facile</strong> et servez-vous des notes pour garder en tête les candidats possibles. Cherchez les cases où un seul chiffre convient, remplissez-les, et poursuivez : chaque nouveau chiffre réduit les possibilités du reste de la grille.' },
-            { h3: 'Niveaux de difficulté et modes de jeu', p: 'Choisissez entre des grilles débutant, facile, normal et difficile. Les petites grilles à partir de 6×6 offrent une initiation en douceur, les grandes grilles jusqu\'à 16×16 proposent un long défi, et le mode contre-la-montre vous fait jouer contre la montre.' },
+            { h3: 'Niveaux de difficulté et modes de jeu', p: 'Choisissez entre des grilles débutant, facile, moyen et difficile. Les petites grilles à partir de 6×6 offrent une initiation en douceur, les grandes grilles jusqu\'à 16×16 proposent un long défi, et le mode contre-la-montre ajoute la pression du chrono.' },
             { h3: 'Une petite gymnastique mentale', p: 'Le sudoku entraîne la <strong>concentration, le raisonnement logique et la mémoire à court terme</strong>. Une grille ou deux par jour deviennent vite une habitude agréable, et le jeu est gratuit, sans téléchargement ni inscription.' },
           ],
         },
@@ -113,13 +113,13 @@ export default {
     snapspot: {
       name: 'SnapSpot (jeu des différences)',
       title: 'Jeu des différences gratuit en ligne - SnapSpot | Puzzle Garden',
-      description: 'Jouez gratuitement au jeu des différences : comparez deux photos et trouvez chaque différence en modes Normal, Contre-la-montre et Arcade. 750+ niveaux.',
+      description: 'Jouez gratuitement au jeu des différences : comparez deux photos et trouvez chaque différence en modes Normal, Contre-la-montre et Arcade. Plus de 750 niveaux.',
       keywords: 'jeu des différences, trouver les différences, jeu des 7 erreurs, jeu des différences gratuit, jeu des différences en ligne, jeu d\'observation, snapspot',
       faq: [
         ['Qu\'est-ce que SnapSpot ?', 'SnapSpot est un jeu des différences. Deux photos sont affichées côte à côte et vous touchez les endroits où elles ne sont pas identiques.'],
         ['Peut-on jouer gratuitement au jeu des différences ?', 'Oui, SnapSpot est entièrement gratuit. Vous jouez dans votre navigateur, sans téléchargement ni inscription.'],
         ['Quels sont les modes de jeu ?', 'Le mode Normal vous fait avancer niveau après niveau, le mode Contre-la-montre vous impose un temps limité, et le mode Arcade enchaîne les niveaux sans interruption. Plus de 750 niveaux sont disponibles.'],
-        ['Des astuces pour trouver les différences ?', 'Divisez chaque photo en quatre quarts et comparez-les un à un pour en rater moins. Ne vous limitez pas aux changements de couleur ou de taille : un petit objet qui apparaît ou disparaît est une différence très courante.'],
+        ['Des astuces pour trouver les différences ?', 'Divisez chaque photo en quatre zones et comparez-les une à une pour en rater moins. Ne vous limitez pas aux changements de couleur ou de taille : un petit objet qui apparaît ou disparaît est une différence très courante.'],
         ['Le jeu des différences est-il bon pour le cerveau ?', 'Il sollicite l\'attention visuelle, le sens du détail et la mémoire visuelle, puisqu\'il faut comparer deux images. C\'est un moyen rapide d\'aiguiser sa concentration.'],
       ],
       sections: [
@@ -128,7 +128,7 @@ export default {
           lead: '<strong>SnapSpot</strong> est un <strong>jeu des différences</strong> : deux photos semblent identiques et il faut repérer ce qui a changé. Les règles sont si simples qu\'on joue tout de suite, et les différences se font de plus en plus sournoises au fil des niveaux.',
           blocks: [
             { h3: 'Comment jouer', p: 'Passez d\'une photo à l\'autre et, dès que vous repérez une différence, touchez ou cliquez à cet endroit. Trouvez-les toutes pour réussir le niveau.' },
-            { h3: 'Trois modes de jeu', p: 'Le mode <strong>Normal</strong> vous fait avancer niveau par niveau, le mode <strong>Contre-la-montre</strong> vous demande de trouver les différences avant la fin du temps imparti, et le mode <strong>Arcade</strong> enchaîne les niveaux sans pause.' },
+            { h3: 'Trois modes de jeu', p: 'Le mode <strong>Normal</strong> vous fait avancer niveau par niveau, le mode <strong>Contre-la-montre</strong> vous demande de trouver les différences avant la fin du temps imparti, et le mode <strong>Arcade</strong> enchaîne les niveaux sans pause. Plus de 750 niveaux vous attendent.' },
             { h3: 'Entraînez votre regard', p: 'Le jeu des différences développe l\'<strong>attention visuelle et le sens du détail</strong>. Comparer deux images mobilise aussi votre mémoire visuelle : une bonne façon d\'aiguiser votre concentration en quelques minutes.' },
           ],
         },

@@ -55,7 +55,7 @@
     "step4": {
       "label": "Regra 4 / 4",
       "title": "Rainhas não podem se tocar",
-      "desc": "Duas rainhas não podem se tocar!\nIsso vale para as diagonais."
+      "desc": "Duas rainhas não podem se tocar!\nIsso vale também para as diagonais."
     },
     "step5": {
       "title": "Prática: marcar ✕",
@@ -79,7 +79,7 @@
     },
     "step10": {
       "title": "Coloque a rainha roxa",
-      "desc": "Descarte a coluna 1 e as células que se tocam,\ne só sobra (3,2) na região roxa!\nToque duas vezes para colocar a rainha roxa."
+      "desc": "Descarte a coluna 1 e as células vizinhas às rainhas,\ne só sobra (3,2) na região roxa!\nToque duas vezes para colocar a rainha roxa."
     },
     "step11": {
       "title": "Última rainha!",
@@ -108,7 +108,7 @@
     "hintAria": "Dica de coroa",
     "hintUsed": "Usada",
     "hintMemo": "Modo anotações: marcas discretas, para pensar à vontade",
-    "hintDefault": "Toque ✕ · Toque duplo na rainha · Arraste para marcar ✕",
+    "hintDefault": "Toque: ✕ · Toque duplo: rainha · Arraste para marcar ✕",
     "adDismissed": "Assista ao anúncio inteiro para usar este recurso."
   },
   "ad": {

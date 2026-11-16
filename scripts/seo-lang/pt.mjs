@@ -69,7 +69,7 @@ export default {
         ['Como resolver um quebra-cabeça Queens?', 'Trabalhe por eliminação. Marque as células em que uma rainha não pode ficar; quando uma região colorida tiver só uma célula possível, a rainha dela está ali. Cada rainha colocada elimina o resto da sua linha, da sua coluna e das células vizinhas, o que revela a próxima pista.'],
         ['O Crown Quest é grátis?', 'Sim, é totalmente grátis. Você joga no navegador, sem baixar nada e sem cadastro. São 1000 fases e o seu progresso é salvo automaticamente.'],
         ['É diferente do problema das N rainhas do xadrez?', 'É parecido, mas não igual. O problema clássico das N rainhas só pede que as rainhas não se ataquem, enquanto aqui cada região colorida também deve ter exatamente uma rainha, o que leva a uma única solução correta. As rainhas só precisam evitar tocar nas vizinhas, então você não precisa acompanhar longas diagonais do xadrez.'],
-        ['Preciso ser bom de matemática?', 'Não. Não há nenhuma conta. É um jogo de lógica pura com apenas três regras, e as primeiras fases começam em grades pequenas antes de crescer.'],
+        ['Preciso ser bom de matemática?', 'Não. Não há nenhuma conta. É um jogo de lógica pura com apenas três regras, e as primeiras fases usam grades pequenas, que vão crescendo depois.'],
       ],
       sections: [
         {

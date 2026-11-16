@@ -77,7 +77,7 @@
       "puzzlePower": "Poder puzzle {{n}}"
     },
     "unlock": "Desbloquear",
-    "unlockFrameTitle": "Desbloquear moldura {{name}}",
+    "unlockFrameTitle": "Desbloquear moldura: {{name}}",
     "unlockPrefix": "Gastar ",
     "unlockSuffix": " para desbloquear?",
     "notEnoughCoins": "Moedas insuficientes (você tem {{coins}})",
@@ -151,14 +151,14 @@
       },
       "purpose": {
         "title": "2. Finalidades da Coleta e do Uso",
-        "i1": "Identificar membros e prestar o Serviço",
+        "i1": "Identificar os usuários e prestar o Serviço",
         "i2": "Salvar o progresso do jogo e gerenciar os rankings",
         "i3": "Atender dúvidas e reclamações dos clientes",
         "i4": "Melhorar o Serviço e desenvolver novos serviços"
       },
       "retention": {
         "title": "3. Prazo de Retenção e Uso",
-        "i1": "Mantidas até que você cancele seu cadastro e destruídas imediatamente após o cancelamento.",
+        "i1": "As informações são mantidas até que você cancele seu cadastro e são destruídas imediatamente após o cancelamento.",
         "i2": "Quando a legislação aplicável exigir a retenção, as informações são mantidas pelo período exigido."
       },
       "thirdParty": {
@@ -176,14 +176,14 @@
         "title": "6. Cookies e Publicidade",
         "i1": "Usamos o Google AdSense para exibir anúncios. O Google e seus parceiros usam cookies e tecnologias semelhantes para exibir anúncios com base nas suas visitas anteriores a este e a outros sites.",
         "i2": "Você pode desativar os anúncios personalizados nas Configurações de anúncios do Google (adssettings.google.com). Saiba mais sobre como o Google usa informações em policies.google.com/technologies/ads.",
-        "i3": "Usamos o Google Analytics para Firebase para entender como o Serviço é usado, como as páginas visualizadas e as ações realizadas no jogo.",
+        "i3": "Usamos o Google Analytics para Firebase para entender como o Serviço é usado, por exemplo, as páginas visualizadas e as ações realizadas no jogo.",
         "i4": "Quando exigido por lei, por exemplo no EEE, no Reino Unido e na Suíça, pedimos o seu consentimento antes de usar cookies para anúncios personalizados. Você pode mudar sua escolha a qualquer momento."
       },
       "international": {
         "title": "7. Usuários de Fora da Coreia",
         "i1": "Suas informações são tratadas na República da Coreia e nos Estados Unidos (Google Firebase).",
-        "i2": "Usuários do EEE e do Reino Unido: tratamos informações pessoais para prestar o Serviço que você solicita, para nosso interesse legítimo em operar e melhorar o Serviço e, no caso de anúncios personalizados, com base no seu consentimento. Você tem o direito de acessar, corrigir, excluir, restringir ou se opor ao tratamento dos seus dados, à portabilidade dos dados, de retirar o consentimento a qualquer momento e de reclamar à autoridade de proteção de dados do seu país.",
-        "i3": "Usuários da Califórnia: você pode solicitar saber, corrigir ou excluir suas informações pessoais e pode optar por não ter suas informações usadas para publicidade direcionada, usando as opções acima. Não vendemos informações pessoais por dinheiro.",
+        "i2": "Usuários do EEE e do Reino Unido: tratamos informações pessoais para prestar o Serviço que você solicita, com base em nosso interesse legítimo em operar e melhorar o Serviço e, no caso de anúncios personalizados, com base no seu consentimento. Você tem o direito de acessar, corrigir e excluir seus dados, de restringir o tratamento ou de se opor a ele, à portabilidade dos dados, de retirar o consentimento a qualquer momento e de apresentar reclamação à autoridade de proteção de dados do seu país.",
+        "i3": "Usuários da Califórnia: você pode pedir para saber quais informações pessoais temos sobre você, corrigi-las ou excluí-las, e pode recusar o uso das suas informações para publicidade direcionada por meio das opções acima. Não vendemos informações pessoais em troca de dinheiro.",
         "i4": "O Serviço não é direcionado a crianças menores de 13 anos, e não coletamos conscientemente informações pessoais delas."
       },
       "rights": {
@@ -208,7 +208,7 @@
     "stage_200": "Olhar Intuitivo",
     "stage_300": "Especialista em Sudoku",
     "stage_400": "Mestre do Sudoku",
-    "stage_500": "Maníaco por Sudoku",
+    "stage_500": "Fanático por Sudoku",
     "stage_1000": "Rei do Sudoku",
     "word_st_1": "Iniciante no Word Stack",
     "word_st_10": "Aprendiz do Word Stack",

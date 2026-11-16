@@ -35,7 +35,7 @@
       "dusk": "Entardecer",
       "mintchoco": "Menta com chocolate",
       "newspaper": "Jornal",
-      "blueprint": "Planta",
+      "blueprint": "Planta baixa",
       "terminal": "Terminal",
       "watercolor": "Aquarela",
       "hanji": "Hanji",
@@ -116,7 +116,7 @@
       "h4": "Sudoku como treino para o cérebro",
       "p1": "O <strong>sudoku</strong> é um jogo de lógica em que você preenche uma grade 9×9 com números. Cada linha, cada coluna e cada quadrado 3×3 deve conter os números de 1 a 9 uma única vez. Não precisa de matemática, só de raciocínio e concentração, e por isso é amado no mundo todo como <strong>jogo de raciocínio</strong>.",
       "p2": "Toque em uma célula vazia e digite um número de 1 a 9 que se encaixe. Um número que já aparece na mesma linha, coluna ou quadrado não pode ser usado de novo. Se travar, o recurso de dica ajuda. Se você está começando, escolha o <strong>sudoku para iniciantes</strong> ou um <strong>nível fácil</strong>.",
-      "p3": "<strong>Iniciante · Fácil</strong> - para quem está começando no sudoku. Muitas pistas são dadas.<br/><strong>Médio</strong> - experimente quando já souber as regras básicas. Exige um pouco de dedução lógica.<br/><strong>Difícil · Contra o Tempo</strong> - um desafio de velocidade em que você termina dentro de um limite de tempo. Feito para experts.",
+      "p3": "<strong>Iniciante · Fácil</strong> - para quem está começando no sudoku. Vários números já vêm preenchidos.<br/><strong>Médio</strong> - experimente quando já souber as regras básicas. Exige um pouco de dedução lógica.<br/><strong>Difícil · Contra o Tempo</strong> - um desafio de velocidade: termine antes que o tempo acabe. Feito para experts.",
       "p4": "O sudoku é ótimo para melhorar a <strong>concentração, o raciocínio lógico e a memória de curto prazo</strong>. Estudos sugerem que resolver de 10 a 15 minutos por dia pode ajudar a manter a mente afiada. Dê ao seu cérebro um treino diário com o sudoku grátis online do Puzzle Garden.",
       "faq": {
         "q1": {

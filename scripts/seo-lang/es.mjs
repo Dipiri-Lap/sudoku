@@ -16,11 +16,11 @@ export default {
     games: {
       sudoku: 'Sudoku clásico de 9×9 con varios niveles de dificultad y modo contrarreloj. Gratis y sin registro.',
       queens: 'Coloca una reina en cada región de color sin que se toquen entre sí. Un acertijo lógico con 1000 niveles.',
-      jigsaw: 'Arrastra e intercambia las piezas para recomponer imágenes adorables y versiones en miniatura de pinturas famosas.',
+      jigsaw: 'Arrastra e intercambia las piezas para recomponer imágenes adorables y versiones tiernas de pinturas famosas.',
       snapspot: 'Compara dos fotos y toca todas las diferencias. Modos Normal, Contrarreloj y Arcade.',
     },
     h2: 'Puzzle Garden: juegos de puzzles online gratis',
-    lead: '<strong>Puzzle Garden</strong> es una colección de <strong>juegos de puzzles online gratis</strong> que funcionan directamente en el navegador. No hay nada que instalar ni cuenta que crear: abre un juego y empieza a jugar en segundos desde el móvil, la tableta o el ordenador.',
+    lead: '<strong>Puzzle Garden</strong> es una colección de <strong>juegos de puzzles online gratis</strong> que funcionan directamente en el navegador. No hay nada que instalar ni cuenta que crear: abre un juego y empieza a jugar en segundos desde el teléfono, la tableta o el PC.',
     blocks: [
       {
         h3: 'Juegos disponibles',
@@ -37,11 +37,11 @@ export default {
     sudoku: {
       name: 'Sudoku',
       title: 'Sudoku gratis online - Juega al sudoku clásico | Puzzle Garden',
-      description: 'Juega al sudoku gratis online en tu navegador: puzles clásicos de 9×9, de principiante a difícil, con notas, pistas y modo contrarreloj. Sin descargas.',
+      description: 'Juega al sudoku gratis online en tu navegador: puzzles clásicos de 9×9, de principiante a difícil, con notas, pistas y modo contrarreloj. Sin descargas.',
       keywords: 'sudoku gratis, jugar sudoku online, sudoku online, sudoku fácil, sudoku difícil, sudoku para principiantes, cómo se juega al sudoku, reglas del sudoku',
       faq: [
         ['¿Qué es el sudoku?', 'El sudoku es un puzzle de lógica que se juega en una cuadrícula de 9×9. Hay que rellenar todas las casillas con dígitos del 1 al 9 de modo que cada fila, cada columna y cada cuadro de 3×3 contenga todos los dígitos una sola vez. No hace falta saber matemáticas: se resuelve solo con lógica.'],
-        ['¿Puedo jugar al sudoku online gratis?', 'Sí. El sudoku de Puzzle Garden es totalmente gratuito. Se juega directamente en el navegador, sin descargas ni registro, desde puzles para principiantes hasta niveles difíciles.'],
+        ['¿Puedo jugar al sudoku online gratis?', 'Sí. El sudoku de Puzzle Garden es totalmente gratuito. Se juega directamente en el navegador, sin descargas ni registro, desde puzzles para principiantes hasta niveles difíciles.'],
         ['¿Con qué nivel debería empezar un principiante?', 'Lo mejor es empezar por el nivel principiante o fácil. La dificultad sube poco a poco, así que puedes ganar práctica de forma gradual. Cuando te sientas cómodo, prueba el modo contrarreloj para un reto extra.'],
         ['¿Cuáles son las reglas del sudoku y cómo se resuelve?', 'Se colocan los dígitos del 1 al 9 en las casillas vacías sin repetir ninguno en una misma fila, columna o cuadro de 3×3 delimitado con línea gruesa. Conviene empezar por las casillas donde solo cabe un dígito. Cada número que colocas descarta candidatos en las casillas vecinas y facilita la siguiente.'],
         ['¿Hay cuadrículas distintas a la de 9×9?', 'Sí. Además de la cuadrícula clásica de 9×9, hay cuadrículas más pequeñas para principiantes desde 6×6 y otras más grandes de hasta 16×16, así como un modo contrarreloj. Durante la partida puedes usar notas y pistas.'],
@@ -49,12 +49,12 @@ export default {
       ],
       sections: [
         {
-          h2: 'Sudoku gratis online: puzles clásicos en tu navegador',
+          h2: 'Sudoku gratis online: puzzles clásicos en tu navegador',
           lead: 'El <strong>sudoku</strong> es un puzzle de lógica que se juega en una cuadrícula de 9×9. Cada fila, cada columna y cada cuadro de 3×3 debe contener los dígitos del 1 al 9 una sola vez. No necesitas matemáticas, solo paciencia y lógica, y por eso es uno de los <strong>juegos mentales</strong> más populares del mundo.',
           blocks: [
-            { h3: 'Cómo se juega al sudoku', p: 'Toca una casilla vacía e introduce un dígito del 1 al 9. Un dígito no puede repetirse en la misma fila, columna o cuadro. Si empiezas ahora, elige el nivel <strong>principiante</strong> o <strong>fácil</strong> y usa las notas para apuntar los candidatos. Busca casillas donde solo encaje un dígito, rellénalas y sigue adelante: cada número nuevo reduce las opciones del resto de la cuadrícula.' },
-            { h3: 'Niveles de dificultad y modos', p: 'Puedes elegir puzles de nivel principiante, fácil, normal y difícil. Las cuadrículas pequeñas desde 6×6 son una introducción suave, las más grandes de hasta 16×16 ofrecen un reto largo y el modo contrarreloj te permite competir contra el tiempo.' },
-            { h3: 'Un entrenamiento mental rápido', p: 'El sudoku entrena la <strong>concentración, el razonamiento lógico y la memoria a corto plazo</strong>. Uno o dos puzles al día son un hábito fácil, y es gratis, sin descargas ni registro.' },
+            { h3: 'Cómo se juega al sudoku', p: 'Toca una casilla vacía e introduce un dígito del 1 al 9. Un dígito no puede repetirse en la misma fila, columna o cuadro. Si estás empezando, elige el nivel <strong>principiante</strong> o <strong>fácil</strong> y usa las notas para apuntar los candidatos. Busca casillas donde solo encaje un dígito, rellénalas y sigue adelante: cada número nuevo reduce las opciones del resto de la cuadrícula.' },
+            { h3: 'Niveles de dificultad y modos', p: 'Puedes elegir puzzles de nivel principiante, fácil, normal y difícil. Las cuadrículas pequeñas desde 6×6 son una introducción suave, las más grandes de hasta 16×16 ofrecen un reto largo y el modo contrarreloj te permite competir contra el tiempo.' },
+            { h3: 'Un entrenamiento mental rápido', p: 'El sudoku entrena la <strong>concentración, el razonamiento lógico y la memoria a corto plazo</strong>. Uno o dos puzzles al día son un hábito fácil, y es gratis, sin descargas ni registro.' },
           ],
         },
       ],
@@ -74,7 +74,7 @@ export default {
       ],
       sections: [
         {
-          h2: 'Crown Quest: un juego de las reinas gratis y de lógica',
+          h2: 'Crown Quest: juego de lógica de las reinas gratis',
           lead: '<strong>Crown Quest</strong> es un <strong>puzzle de reinas</strong>: un juego de lógica en el que se coloca una reina (👑) en cada región de color de una cuadrícula. No hay cálculos y bastan tres reglas para jugar, así que ofrece un tipo de deducción distinto al del sudoku.',
           blocks: [
             { h3: 'Las tres reglas', p: '<strong>1.</strong> Cada región de color contiene exactamente una reina. <strong>2.</strong> Cada fila y cada columna contiene exactamente una reina. <strong>3.</strong> Dos reinas no pueden tocarse, tampoco en <strong>diagonal</strong>.' },
@@ -88,7 +88,7 @@ export default {
     jigsaw: {
       name: 'Tiny Pieces (rompecabezas)',
       title: 'Rompecabezas online gratis - Puzzle Tiny Pieces | Puzzle Garden',
-      description: 'Juega gratis a rompecabezas online: intercambia las piezas para recomponer imágenes adorables y versiones en miniatura de pinturas famosas. Sin descargas.',
+      description: 'Juega gratis a rompecabezas online: intercambia las piezas para recomponer imágenes adorables y versiones tiernas de pinturas famosas. Sin descargas.',
       keywords: 'rompecabezas online gratis, puzzle online gratis, jugar puzzles online, puzzle de imágenes, rompecabezas para jugar, tiny pieces, juego relajante',
       faq: [
         ['¿Qué es Tiny Pieces?', 'Tiny Pieces es un rompecabezas en el que se arrastran las piezas mezcladas de una imagen y se intercambian para reconstruir la original. Cuando dos piezas que encajan quedan juntas, se unen y se mueven como un solo grupo.'],

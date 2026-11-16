@@ -31,7 +31,7 @@
       "stage": {
         "label": "Stufe",
         "title": "Spar deine Herzen",
-        "desc": "Im Stufen-Modus kostet jeder falsche Tipp ein Herz. Sind alle weg, ist das Spiel vorbei, also tippe mit Bedacht!"
+        "desc": "Im Stufen-Modus kostet dich jedes falsche Antippen ein Herz. Sind alle weg, ist das Spiel vorbei, also tippe mit Bedacht!"
       }
     }
   },
@@ -48,7 +48,7 @@
     "modeSelect": "Modi",
     "win": {
       "title": "Alle gefunden!",
-      "body_one": "Du hast den {{count}} Unterschied gefunden.",
+      "body_one": "Du hast {{count}} Unterschied gefunden.",
       "body_other": "Du hast alle {{count}} Unterschiede gefunden.",
       "puzzlePower": "Rätselkraft +1",
       "nextStage": "Nächste Stufe"
@@ -94,7 +94,7 @@
       "smile": "Smiley",
       "magnify": "Lupe",
       "pin": "Stecknadel",
-      "dizzy": "Schwindelstern",
+      "dizzy": "Funkelstern",
       "target": "Zielscheibe",
       "clover": "Kleeblatt",
       "frog": "Frosch",
@@ -103,7 +103,7 @@
       "hue": "Farbkreis",
       "robot": "Roboter",
       "lightning": "Blitz",
-      "sparkle": "Funkeln",
+      "sparkle": "Glitzer",
       "bulb": "Glühbirne",
       "paw": "Pfotenabdruck",
       "butterfly": "Schmetterling",

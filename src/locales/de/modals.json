@@ -89,7 +89,7 @@
     },
     "exclusiveAvatar": "Exklusiver Avatar",
     "exclusiveCardBack": "Exklusive Kartenrückseite",
-    "rewardCondition": "So bekommst du ihn: {{condition}}",
+    "rewardCondition": "Bedingung: {{condition}}",
     "frameOnAvatar": "Wird auf deinem aktuellen Avatar angezeigt",
     "rewardDone": "Erhalten",
     "rewardReady": "Jetzt abholbereit",
@@ -142,7 +142,7 @@
       }
     },
     "privacy": {
-      "intro": "ToMixSoft (das „Unternehmen“) legt Wert auf die personenbezogenen Daten der Nutzer und hält die geltenden Gesetze ein, darunter das koreanische Gesetz zum Schutz personenbezogener Daten (Personal Information Protection Act).",
+      "intro": "ToMixSoft (das „Unternehmen“) legt großen Wert auf den Schutz der personenbezogenen Daten der Nutzer und hält die geltenden Gesetze ein, darunter das koreanische Gesetz zum Schutz personenbezogener Daten (Personal Information Protection Act).",
       "collect": {
         "title": "1. Von uns erhobene personenbezogene Daten",
         "i1": "Bei Anmeldung über ein soziales Konto: E-Mail-Adresse, Profilfoto und Spitzname (von deinem Google-/Apple-Konto bereitgestellte Daten)",
@@ -182,7 +182,7 @@
         "title": "7. Nutzer außerhalb Koreas",
         "i1": "Deine Daten werden in der Republik Korea und in den USA (Google Firebase) verarbeitet.",
         "i2": "Nutzer im EWR und im Vereinigten Königreich: Wir verarbeiten personenbezogene Daten, um den von dir gewünschten Dienst bereitzustellen, aufgrund unseres berechtigten Interesses am Betrieb und an der Verbesserung des Dienstes und, bei personalisierter Werbung, auf Grundlage deiner Einwilligung. Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Widerspruch gegen die Verarbeitung deiner Daten, das Recht auf Datenübertragbarkeit, das Recht, deine Einwilligung jederzeit zu widerrufen, und das Recht, dich bei deiner örtlichen Datenschutzbehörde zu beschweren.",
-        "i3": "Nutzer in Kalifornien: Du kannst verlangen, zu erfahren, zu berichtigen oder zu löschen, welche personenbezogenen Daten wir über dich haben, und der Nutzung deiner Daten für zielgerichtete Werbung über die oben genannten Optionen widersprechen (Opt-out). Wir verkaufen personenbezogene Daten nicht gegen Geld.",
+        "i3": "Nutzer in Kalifornien: Du kannst Auskunft darüber verlangen, welche personenbezogenen Daten wir über dich gespeichert haben, und deren Berichtigung oder Löschung verlangen. Außerdem kannst du der Nutzung deiner Daten für zielgerichtete Werbung über die oben genannten Optionen widersprechen (Opt-out). Wir verkaufen personenbezogene Daten nicht gegen Geld.",
         "i4": "Der Dienst richtet sich nicht an Kinder unter 13 Jahren, und wir erheben wissentlich keine personenbezogenen Daten von ihnen."
       },
       "rights": {
@@ -217,8 +217,8 @@
     "stage_400": "Sudoku-Meister",
     "stage_500": "Sudoku-Fanatiker",
     "stage_1000": "Sudoku-König",
-    "word_st_1": "Wortstapel-Starter",
-    "word_st_10": "Wortstapel-Anfänger",
+    "word_st_1": "Word-Stack-Starter",
+    "word_st_10": "Word-Stack-Anfänger",
     "word_st_25": "Sortier-Grundlagen",
     "word_st_50": "Wortsammler",
     "word_st_75": "Vokabelforscher",
@@ -231,7 +231,7 @@
     "word_hard_50": "Schärfegrad 1",
     "word_hard_100": "Schärfe-Junkie",
     "word_hard_150": "Schwer-Fan",
-    "word_hard_200": "Wortstapel-Liebhaber",
+    "word_hard_200": "Word-Stack-Liebhaber",
     "cq_1": "Erste Krone",
     "cq_10": "Ritter des Reiches",
     "cq_25": "Burgherr",

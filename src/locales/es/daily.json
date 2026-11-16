@@ -49,7 +49,7 @@
     "today": "Hoy",
     "missed": "Perdido"
   },
-  "footnote": "Cada día a medianoche se abre un puzzle nuevo.<br/>¿Te perdiste un día de este mes? Desbloquéalo por 🪙 {{cost}}.<br/>Cuando termina el mes, los puzzles que quedan siguen bloqueados.",
+  "footnote": "Cada día a medianoche se abre un puzzle nuevo.<br/>¿Te perdiste un día de este mes? Desbloquéalo por 🪙 {{cost}}.<br/>Cuando termina el mes, los puzzles que no jugaste quedan bloqueados.",
   "unlock": {
     "title": "Desbloquear {{date}}",
     "body": "Gasta 🪙 {{cost}} para jugar el puzzle de este día.<br/>Al completarlo, recibes la recompensa completa.",

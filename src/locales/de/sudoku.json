@@ -19,7 +19,7 @@
   },
   "tutorial": {
     "title": "So wird gespielt",
-    "body": "Fülle die Lücken so, dass sich keine Zahl in einer <row>Zeile</row>, <col>Spalte</col> oder einem <box>{{size}}-Block</box> wiederholt.",
+    "body": "Fülle die leeren Felder so, dass sich keine Zahl in einer <row>Zeile</row>, <col>Spalte</col> oder einem <box>{{size}}-Block</box> wiederholt.",
     "ok": "OK"
   },
   "theme": {
@@ -29,7 +29,7 @@
       "paper": "Papier",
       "gameboy": "Game Boy",
       "chalkboard": "Kreidetafel",
-      "blossom": "Blüte",
+      "blossom": "Kirschblüte",
       "ocean": "Ozean",
       "mocha": "Mokka",
       "dusk": "Dämmerung",
@@ -71,7 +71,7 @@
     "nicknameChanged": "Spitzname geändert.",
     "changeTheme": "Theme wechseln",
     "dailyDate": "{{day}}.{{month}}.",
-    "beginnerLevel": "Anfänger {{level}}",
+    "beginnerLevel": "Einsteiger {{level}}",
     "paused": "Pausiert",
     "resume": "Weiter",
     "mistakes_one": "Du hast {{count}} Fehler gemacht",
@@ -86,7 +86,7 @@
     "monthComplete": "Monat geschafft! Titel: {{title}}",
     "rewardAvatar": " · 🖼 Avatar freigeschaltet",
     "rewardFrame": " · 🔲 Rahmen freigeschaltet",
-    "rewardCardBack": " · 🃏 Kartenrücken freigeschaltet",
+    "rewardCardBack": " · 🃏 Kartenrückseite freigeschaltet",
     "nickname": "Spitzname",
     "change": "Ändern",
     "toCalendar": "Kalender",

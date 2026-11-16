@@ -67,7 +67,7 @@
     "worldBest": "第1名：{{time}}"
   },
   "game": {
-    "levelLocked": "你還沒有到達這個等級！（目前挑戰中：Level {{level}}）",
+    "levelLocked": "你還沒玩到這一關！（目前挑戰中：Level {{level}}）",
     "nicknameChanged": "暱稱已變更。",
     "changeTheme": "更換佈景",
     "dailyDate": "{{month}}月{{day}}日",
@@ -89,7 +89,7 @@
     "nickname": "暱稱",
     "change": "變更",
     "toCalendar": "回到日曆",
-    "nextLevel": "下一個等級",
+    "nextLevel": "下一關",
     "nextStage": "下一關",
     "doneHome": "完成！回首頁",
     "ok": "確定"

@@ -18,16 +18,16 @@
     "sat": "S"
   },
   "reward": {
-    "header": "Belohnung für {{monthName}} komplett",
+    "header": "Belohnung: alle Rätsel im {{monthName}}",
     "claimed": " · Abgeholt",
     "avatarAlt": "Avatar der Monatsbelohnung",
     "plusAvatar": " + exklusiver Avatar",
     "plusFrame": " + exklusiver Rahmen",
-    "plusCardBack": " + Kartenrücken",
+    "plusCardBack": " + Kartenrückseite",
     "plusTitle": " + Titel",
     "exclusiveAvatar": "Exklusiver Avatar",
     "plusFrameShort": " + Rahmen",
-    "exclusiveCardBack": "Exklusiver Kartenrücken",
+    "exclusiveCardBack": "Exklusive Kartenrückseite",
     "titleChip": "Titel: {{title}}"
   },
   "today": {

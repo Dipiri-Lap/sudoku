@@ -79,7 +79,7 @@
     },
     "step10": {
       "title": "Coloca la reina morada",
-      "desc": "Descarta la columna 1 y las casillas que se tocan,\n¡y solo queda (3,2) en la región morada!\nToca dos veces para colocar la reina morada."
+      "desc": "Descarta la columna 1 y las casillas vecinas,\n¡y solo queda (3,2) en la región morada!\nToca dos veces para colocar la reina morada."
     },
     "step11": {
       "title": "¡Última reina!",
@@ -161,7 +161,7 @@
     "rule3": {
       "label": "Regla 3",
       "title": "Las reinas no pueden tocarse",
-      "desc": "Dos reinas no pueden tocarse. Eso incluye los vecinos en horizontal, vertical y diagonal."
+      "desc": "Dos reinas no pueden tocarse: ni en horizontal, ni en vertical, ni en diagonal."
     }
   },
   "shop": {

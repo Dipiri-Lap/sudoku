@@ -6,7 +6,7 @@ export default {
 
   ui: {
     moreGames: 'Weitere Rätsel- und Denkspiele',
-    homeLink: 'Puzzle Garden Startseite',
+    homeLink: 'Startseite von Puzzle Garden',
   },
 
   home: {
@@ -65,7 +65,7 @@ export default {
     queens: {
       name: 'Crown Quest (Queens-Rätsel)',
       title: 'Queens Rätsel kostenlos online - Crown Quest | Puzzle Garden',
-      description: 'Queens-Rätsel kostenlos online spielen: In jedem farbigen Bereich genau eine Dame, keine in derselben Zeile oder Spalte. Crown Quest: 1000 Stufen im Browser.',
+      description: 'Queens-Rätsel kostenlos online spielen: In jedem farbigen Bereich genau eine Dame, keine zwei in einer Zeile oder Spalte. Crown Quest: 1000 Stufen im Browser.',
       keywords: 'Queens Rätsel, Queens Spiel, Queens Rätsel online, Damen-Rätsel, Crown Quest, Logikrätsel online, Logikrätsel kostenlos, Queens Logikspiel',
       faq: [
         ['Was ist Crown Quest (das Queens-Rätsel)?', 'Crown Quest ist ein Logikrätsel im Queens-Stil auf einem Gitter, das in farbige Bereiche unterteilt ist. In jedem farbigen Bereich steht genau eine Dame, ebenso in jeder Zeile und jeder Spalte. Keine zwei Damen dürfen sich berühren, auch nicht diagonal.'],
@@ -96,7 +96,7 @@ export default {
         ['Was ist Tiny Pieces?', 'Tiny Pieces ist ein Puzzlespiel, bei dem durcheinandergewürfelte Bildteile gezogen und getauscht werden, bis das Originalbild wieder stimmt. Passen zwei Teile nebeneinander zusammen, rasten sie ein und bewegen sich als Gruppe.'],
         ['Wie spielt man das Online-Puzzle?', 'Zuerst die Vorschau am Anfang ansehen, dann ein Teil auf die gewünschte Stelle ziehen. Es tauscht den Platz mit dem Teil, das dort liegt. Verbundene Gruppen bewegen sich gemeinsam, am besten also mit den Randteilen oder auffälligen Bildstellen anfangen.'],
         ['Ist Tiny Pieces kostenlos?', 'Ja, völlig kostenlos. Gespielt wird online im Browser, ohne Download und ohne Anmeldung, und der Fortschritt wird automatisch gespeichert.'],
-        ['Welche Bilder gibt es?', 'Es gibt niedliche Tiere, Städte und Speisen. Alle 10 Stufen wartet eine Spezialstufe mit einer niedlichen Neuinterpretation eines berühmten Gemäldes, etwa die Mona Lisa, die Große Welle vor Kanagawa oder das Mädchen mit dem Perlenohrgehänge.'],
+        ['Welche Bilder gibt es?', 'Es gibt niedliche Tiere, Städte und Speisen. Alle 10 Stufen wartet eine Spezialstufe mit einer niedlichen Neuinterpretation eines berühmten Gemäldes, etwa die Mona Lisa, die Große Welle vor Kanagawa oder das Mädchen mit dem Perlenohrring.'],
       ],
       sections: [
         {
@@ -118,9 +118,9 @@ export default {
       faq: [
         ['Was ist SnapSpot?', 'SnapSpot ist ein Fehlersuchbild-Spiel. Zwei Fotos liegen nebeneinander, und die Stellen, an denen sie sich unterscheiden, werden angetippt.'],
         ['Kann man ein Fehlersuchbild kostenlos spielen?', 'Ja, SnapSpot ist komplett kostenlos. Gespielt wird im Browser, ohne Download und ohne Anmeldung.'],
-        ['Welche Spielmodi gibt es?', 'Im Normal-Modus werden die Stufen nacheinander gelöst, im Zeitrennen-Modus läuft die Zeit gegen einen, und der Arcade-Modus liefert fortlaufend neue Stufen. Insgesamt stehen über 750 Stufen bereit.'],
+        ['Welche Spielmodi gibt es?', 'Im Normal-Modus werden die Stufen nacheinander gelöst, im Zeitrennen-Modus spielt man gegen die Uhr, und der Arcade-Modus liefert fortlaufend neue Stufen. Insgesamt stehen über 750 Stufen bereit.'],
         ['Gibt es Tipps, um die Unterschiede zu finden?', 'Jedes Foto gedanklich in vier Viertel teilen und diese nacheinander vergleichen, so wird weniger übersehen. Nicht nur auf Farb- und Größenänderungen achten: Kleine Gegenstände, die verschwinden oder auftauchen, sind häufige Unterschiede.'],
-        ['Ist Unterschiede finden gut fürs Gehirn?', 'Beim Vergleichen zweier Bilder werden visuelle Aufmerksamkeit, Blick fürs Detail und das visuelle Gedächtnis gefordert. Es ist eine schnelle Möglichkeit, die Konzentration zu schärfen.'],
+        ['Sind Fehlersuchbilder gut fürs Gehirn?', 'Beim Vergleichen zweier Bilder werden visuelle Aufmerksamkeit, Blick fürs Detail und das visuelle Gedächtnis gefordert. Es ist eine schnelle Möglichkeit, die Konzentration zu schärfen.'],
       ],
       sections: [
         {

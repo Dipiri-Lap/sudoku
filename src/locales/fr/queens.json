@@ -59,7 +59,7 @@
     },
     "step5": {
       "title": "Entraînement : marquer ✕",
-      "desc": "Touchez pour marquer ✕ les cases où une reine ne peut pas aller.\nTouchez la case qui brille !"
+      "desc": "Touchez pour marquer d'un ✕ les cases où une reine ne peut pas aller.\nTouchez la case qui brille !"
     },
     "step6": {
       "title": "Entraînement : placer une reine",
@@ -67,7 +67,7 @@
     },
     "step7": {
       "title": "Élimination par ligne",
-      "desc": "La reine orange est sur la ligne 0.\nAucune autre reine ne peut y aller :\nmarquez ✕ la case bleue (0,3) !"
+      "desc": "La reine orange est sur la ligne 0.\nAucune autre reine ne peut y aller :\nmarquez d'un ✕ la case bleue (0,3) !"
     },
     "step8": {
       "title": "Placer la reine bleue",
@@ -75,7 +75,7 @@
     },
     "step9": {
       "title": "Élimination par contact",
-      "desc": "(2,2) touche la reine bleue (1,3)\nen diagonale : impossible.\nMarquez-la ✕ !"
+      "desc": "(2,2) touche la reine bleue (1,3)\nen diagonale : impossible.\nMarquez-la d'un ✕ !"
     },
     "step10": {
       "title": "Placer la reine violette",
