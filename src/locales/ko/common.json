@@ -1,0 +1,34 @@
+{
+  "brand": "퍼즐 가든",
+  "games": {
+    "sudoku": { "name": "스도쿠" },
+    "queens": { "name": "크라운 퀘스트" },
+    "jigsaw": { "name": "Tiny Pieces" },
+    "snapspot": { "name": "스냅스팟" },
+    "wordSort": { "name": "워드스택" },
+    "crossMath": { "name": "크로썸" },
+    "arrowPuzzle": { "name": "애로우웨이" },
+    "daily": { "name": "오늘의 퍼즐" }
+  },
+  "difficulty": {
+    "veryEasy": "아주 쉬움",
+    "easy": "쉬움",
+    "beginner": "초급",
+    "medium": "보통",
+    "hard": "어려움",
+    "expert": "전문가",
+    "master": "마스터"
+  },
+  "app": {
+    "initializing": "데이터 초기화 중..."
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "switchLabel": "언어 선택",
+    "enBanner": "English version available →",
+    "jaBanner": "日本語版はこちら →",
+    "dismiss": "닫기"
+  }
+}

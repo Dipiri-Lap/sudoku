@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { X as XIcon, ChevronLeft, RotateCcw, Pencil, Volume2, VolumeX, Home, Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useTranslation, Trans } from 'react-i18next';
+import i18n from '../../../i18n';
 import levelsData from '../data/levels.json';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
 import { useCoins } from '../../../context/CoinContext';
@@ -58,87 +60,87 @@ const TUTORIAL_STEPS: TutStep[] = [
   // ── 0: Intro ──────────────────────────────────────────────────
   {
     highlight: { type: 'none' },
-    title: '퀸즈에 오신 것을 환영합니다!',
-    desc: '4×4 보드에 퀸 4개를 올바르게 배치하는 퍼즐이에요.\n지금부터 규칙을 하나씩 알아볼게요.',
+    title: i18n.t('queens:tutorial.step0.title'),
+    desc: i18n.t('queens:tutorial.step0.desc'),
     interactive: false,
   },
   // ── 1–4: Rule explanations ─────────────────────────────────────
   {
     highlight: { type: 'color', colorIdx: 0 },
-    label: '규칙 1 / 4',
-    title: '각 색상에 퀸 하나',
-    desc: '보드는 4가지 색상 영역으로 나뉘어 있어요.\n각 색상 영역에 퀸을 딱 하나씩만 배치해야 합니다.',
+    label: i18n.t('queens:tutorial.step1.label'),
+    title: i18n.t('queens:tutorial.step1.title'),
+    desc: i18n.t('queens:tutorial.step1.desc'),
     interactive: false,
   },
   {
     highlight: { type: 'row', row: 1 },
-    label: '규칙 2 / 4',
-    title: '한 행에 퀸 하나',
-    desc: '같은 가로줄(행)에는 퀸이 하나만 있어야 해요.\n같은 행에 퀸이 2개 이상이면 규칙 위반!',
+    label: i18n.t('queens:tutorial.step2.label'),
+    title: i18n.t('queens:tutorial.step2.title'),
+    desc: i18n.t('queens:tutorial.step2.desc'),
     interactive: false,
   },
   {
     highlight: { type: 'col', col: 1 },
-    label: '규칙 3 / 4',
-    title: '한 열에 퀸 하나',
-    desc: '같은 세로줄(열)에도 퀸이 하나만 있어야 해요.',
+    label: i18n.t('queens:tutorial.step3.label'),
+    title: i18n.t('queens:tutorial.step3.title'),
+    desc: i18n.t('queens:tutorial.step3.desc'),
     interactive: false,
   },
   {
     highlight: { type: 'adjacent', row: 1, col: 2 },
-    label: '규칙 4 / 4',
-    title: '퀸끼리 인접 불가',
-    desc: '퀸끼리는 서로 닿을 수 없어요!\n가로·세로는 물론 대각선도 포함이에요.',
+    label: i18n.t('queens:tutorial.step4.label'),
+    title: i18n.t('queens:tutorial.step4.title'),
+    desc: i18n.t('queens:tutorial.step4.desc'),
     interactive: false,
     ghostQueen: { row: 1, col: 2 },
   },
   // ── 5: Practice — X mark ──────────────────────────────────────
   {
     highlight: { type: 'cell', row: 0, col: 0 },
-    title: '✕ 메모하기 연습',
-    desc: '탭하면 ✕를 표시해서 퀸이 올 수 없는 칸을 메모해요.\n빛나는 칸을 탭해보세요!',
+    title: i18n.t('queens:tutorial.step5.title'),
+    desc: i18n.t('queens:tutorial.step5.desc'),
     interactive: true,
   },
   // ── 6: Practice — place orange queen ──────────────────────────
   {
     highlight: { type: 'cell', row: 0, col: 1 },
-    title: '퀸 배치하기 연습',
-    desc: '빠르게 두 번 탭하면 퀸을 놓을 수 있어요.\n빛나는 칸에 주황색 퀸을 놓아보세요!',
+    title: i18n.t('queens:tutorial.step6.title'),
+    desc: i18n.t('queens:tutorial.step6.desc'),
     interactive: true,
   },
   // ── 7: Analyze — mark blue cell (row elimination) ─────────────
   {
     highlight: { type: 'cell', row: 0, col: 3 },
-    title: '행(row) 제거',
-    desc: '주황 퀸이 0행에 놓였어요.\n같은 행에는 퀸을 놓을 수 없으니\n파란 칸 (0,3)에 ✕ 표시해보세요!',
+    title: i18n.t('queens:tutorial.step7.title'),
+    desc: i18n.t('queens:tutorial.step7.desc'),
     interactive: true,
   },
   // ── 8: Analyze — place blue queen ─────────────────────────────
   {
     highlight: { type: 'cell', row: 1, col: 3 },
-    title: '파란색 퀸 배치',
-    desc: '0행 제거 후 파란 영역을 분석하면\n(1,3)만 가능해요!\n두 번 탭해서 파란색 퀸을 놓아보세요.',
+    title: i18n.t('queens:tutorial.step8.title'),
+    desc: i18n.t('queens:tutorial.step8.desc'),
     interactive: true,
   },
   // ── 9: Analyze — mark purple cell (adjacency elimination) ─────
   {
     highlight: { type: 'cell', row: 2, col: 2 },
-    title: '인접 제거',
-    desc: '(2,2)는 파란 퀸 (1,3)과\n대각선으로 인접해서 불가능해요.\n✕ 표시해보세요!',
+    title: i18n.t('queens:tutorial.step9.title'),
+    desc: i18n.t('queens:tutorial.step9.desc'),
     interactive: true,
   },
   // ── 10: Analyze — place purple queen ──────────────────────────
   {
     highlight: { type: 'cell', row: 3, col: 2 },
-    title: '보라색 퀸 배치',
-    desc: '1열·인접 칸을 제외하면\n보라 영역엔 (3,2)만 남아요!\n두 번 탭해서 보라색 퀸을 놓아보세요.',
+    title: i18n.t('queens:tutorial.step10.title'),
+    desc: i18n.t('queens:tutorial.step10.desc'),
     interactive: true,
   },
   // ── 11: Last queen — green ─────────────────────────────────────
   {
     highlight: { type: 'cell', row: 2, col: 0 },
-    title: '마지막 퀸!',
-    desc: '세 퀸이 배치되면 초록 영역에서\n(2,0)만 남아요. 두 번 탭해서\n퍼즐을 완성해보세요! 🎉',
+    title: i18n.t('queens:tutorial.step11.title'),
+    desc: i18n.t('queens:tutorial.step11.desc'),
     interactive: true,
   },
 ];
@@ -246,6 +248,8 @@ const QueensGame: React.FC = () => {
   const { queensProgress, saveQueensProgress } = useQueensProgress();
   const { coins, spendCoins, addCoins } = useCoins();
   const { selectedIcon } = useQueensIcon();
+  const { t } = useTranslation('queens');
+  const { t: tc } = useTranslation('common');
   const hasAwardedCoins = useRef(false);
   const [showIconShop, setShowIconShop] = useState(false);
   const [sfxEnabled, setSfxEnabled] = useState(() => localStorage.getItem('queens_sfx') !== 'false');
@@ -574,7 +578,7 @@ const QueensGame: React.FC = () => {
       beforeAd: () => { setAdWatching(true); setPendingShowAd(null); },
       afterAd: () => { setAdWatching(false); },
       adViewed: proceed,
-      adDismissed: () => { alert('광고를 끝까지 시청해야 기능을 사용할 수 있어요.'); },
+      adDismissed: () => { alert(i18n.t('queens:game.adDismissed')); },
       adBreakDone: () => { setAdWatching(false); },
     });
   }, [adWatching, placeHintQueen]);
@@ -749,7 +753,7 @@ const QueensGame: React.FC = () => {
       {isWrongFlash && <div className="queens-error-flash" />}
       <header className="qq-top">
         <div className="qq-top-left">
-          <button className="qq-ghost-btn" onClick={() => navigate('/queens')} aria-label="나가기">
+          <button className="qq-ghost-btn" onClick={() => navigate('/queens')} aria-label={t('game.exit')}>
             <ChevronLeft size={32} strokeWidth={3.2} />
           </button>
           <div className="qq-level">
@@ -759,16 +763,16 @@ const QueensGame: React.FC = () => {
         </div>
         <div className="qq-top-right">
           <div className="qq-top-btns">
-            <button className="qq-top-btn crown" onClick={() => setShowIconShop(true)} aria-label="왕관 바꾸기">
+            <button className="qq-top-btn crown" onClick={() => setShowIconShop(true)} aria-label={t('game.changeCrown')}>
               <img src={getIconUrl(selectedIcon.id)} alt="" />
             </button>
-            <button className={`qq-top-btn${sfxEnabled ? '' : ' off'}`} onClick={toggleSfx} aria-label={sfxEnabled ? '효과음 끄기' : '효과음 켜기'}>
+            <button className={`qq-top-btn${sfxEnabled ? '' : ' off'}`} onClick={toggleSfx} aria-label={sfxEnabled ? t('game.sfxOff') : t('game.sfxOn')}>
               {sfxEnabled ? <Volume2 size={18} strokeWidth={2.6} /> : <VolumeX size={18} strokeWidth={2.6} />}
             </button>
           </div>
           <div className="qq-status">
             {Array.from({ length: MAX_HEARTS }, (_, i) => (
-              <span key={i} className={`qq-heart ${i < hearts ? 'alive' : 'dead'}`} aria-label={i < hearts ? '하트' : '잃은 하트'}>♥</span>
+              <span key={i} className={`qq-heart ${i < hearts ? 'alive' : 'dead'}`} aria-label={i < hearts ? t('game.heart') : t('game.lostHeart')}>♥</span>
             ))}
             <span className="qq-count">
               <b key={placed.length}>{placed.length}</b>/{n * k}
@@ -847,15 +851,15 @@ const QueensGame: React.FC = () => {
         <div className="queens-double-rules">
           <div className="queens-double-rule">
             <span className="queens-double-rule-icon">🎨</span>
-            <span className="queens-double-rule-label">색상당<br />퀸 2개</span>
+            <span className="queens-double-rule-label"><Trans t={t} i18nKey="game.doubleRuleColor" /></span>
           </div>
           <div className="queens-double-rule">
             <span className="queens-double-rule-icon">⊞</span>
-            <span className="queens-double-rule-label">행 &amp; 열당<br />퀸 2개</span>
+            <span className="queens-double-rule-label"><Trans t={t} i18nKey="game.doubleRuleRowCol" /></span>
           </div>
           <div className="queens-double-rule">
             <span className="queens-double-rule-icon">🚫</span>
-            <span className="queens-double-rule-label">퀸은 당을<br />수 없음</span>
+            <span className="queens-double-rule-label"><Trans t={t} i18nKey="game.doubleRuleTouch" /></span>
           </div>
         </div>
       )}
@@ -863,33 +867,33 @@ const QueensGame: React.FC = () => {
       {!isTutorial && (
         <>
           <div className="qq-controls">
-            <button className="qq-round item" onClick={handleReset} disabled={won || gameOver} aria-label="다시 시작">
+            <button className="qq-round item" onClick={handleReset} disabled={won || gameOver} aria-label={t('game.restartAria')}>
               <RotateCcw size={22} strokeWidth={2.8} />
-              <span className="qq-cost free">재시작</span>
+              <span className="qq-cost free">{t('game.restart')}</span>
             </button>
             <button
               className={`qq-round big item${isMemoMode ? ' pressed' : ''}`}
               onClick={() => setIsMemoMode(m => !m)}
               aria-pressed={isMemoMode}
-              aria-label="메모 모드"
+              aria-label={t('game.memoAria')}
             >
               <Pencil size={30} strokeWidth={2.8} />
-              <span className={`qq-cost free${isMemoMode ? ' on' : ''}`}>{isMemoMode ? '메모 켜짐' : '메모'}</span>
+              <span className={`qq-cost free${isMemoMode ? ' on' : ''}`}>{isMemoMode ? t('game.memoOn') : t('game.memo')}</span>
             </button>
             <button
               className="qq-round item"
               onClick={handleQueenHint}
               disabled={queenHintUsed || won || gameOver}
-              aria-label="왕관 힌트"
+              aria-label={t('game.hintAria')}
             >
               <img className="qq-round-crown" src={getIconUrl(selectedIcon.id)} alt="" />
               {queenHintUsed
-                ? <span className="qq-cost free">사용함</span>
+                ? <span className="qq-cost free">{t('game.hintUsed')}</span>
                 : <span className="qq-cost"><img src="/coin_Icon.png" alt="" />50</span>}
             </button>
           </div>
           <p className="qq-hint">
-            {isMemoMode ? '메모 모드: 연하게 표시돼서 마음껏 추리해요' : '탭 ✕ · 두 번 탭 왕관 · 드래그로 ✕ 여러 칸'}
+            {isMemoMode ? t('game.hintMemo') : t('game.hintDefault')}
           </p>
           <div className="qq-coins-left">
             <img src="/coin_Icon.png" alt="" />
@@ -903,13 +907,13 @@ const QueensGame: React.FC = () => {
         <div className="tut-intro-overlay">
           <div className="tut-intro-card">
             <div className="tut-intro-crown">👑</div>
-            <h1 className="tut-intro-title">크라운 퀘스트</h1>
-            <p className="tut-intro-sub">4×4 보드에 퀸 4개를 올바르게 배치하는 퍼즐이에요.</p>
+            <h1 className="tut-intro-title">{tc('games.queens.name')}</h1>
+            <p className="tut-intro-sub">{t('tutorial.introSub')}</p>
             <button className="tut-start-btn" onClick={() => setTutorialStep(1)}>
-              규칙 알아보기 →
+              {t('tutorial.learnRules')}
             </button>
             <button className="tut-skip-link" onClick={() => setTutorialStep(null)}>
-              건너뛰기
+              {t('tutorial.skip')}
             </button>
           </div>
         </div>
@@ -937,13 +941,13 @@ const QueensGame: React.FC = () => {
               className="tut-nav-btn tut-prev"
               onClick={() => setTutorialStep(ts => Math.max(0, (ts ?? 1) - 1))}
             >
-              ← 이전
+              {t('nav.prevArrow')}
             </button>
             <button
               className="tut-nav-btn tut-next"
               onClick={() => setTutorialStep(ts => (ts ?? 4) + 1)}
             >
-              {tutorialStep === 4 ? '직접 해보기 →' : '다음 →'}
+              {tutorialStep === 4 ? t('tutorial.tryIt') : t('nav.next')}
             </button>
           </div>
         </div>
@@ -976,18 +980,18 @@ const QueensGame: React.FC = () => {
         <div className="queens-ad-overlay" onClick={() => { setShowAdModal(false); setPendingShowAd(null); }}>
           <div className="queens-ad-modal" onClick={e => e.stopPropagation()}>
             <div className="queens-ad-icon">💰</div>
-            <div className="queens-ad-title">{pendingShowAd ? '광고 준비됨' : '코인이 부족해요'}</div>
+            <div className="queens-ad-title">{pendingShowAd ? t('ad.readyTitle') : t('ad.noCoinsTitle')}</div>
             <div className="queens-ad-desc">
               {pendingShowAd
-                ? '아래 버튼을 눌러 광고를 시작하세요.'
-                : <>보유 코인: {coins} / 필요: 50<br />광고를 시청하고 무료로 왕관을 배치하세요.</>
+                ? t('ad.readyDesc')
+                : <Trans t={t} i18nKey="ad.noCoinsDesc" values={{ coins }} />
               }
             </div>
             {pendingShowAd
-              ? <button className="queens-ad-btn-primary" onClick={() => { pendingShowAd(); setPendingShowAd(null); }}>광고 시작하기</button>
-              : <button className="queens-ad-btn-primary" onClick={handleWatchAd}>{adWatching ? '광고 로딩 중...' : '광고 보기'}</button>
+              ? <button className="queens-ad-btn-primary" onClick={() => { pendingShowAd(); setPendingShowAd(null); }}>{t('ad.start')}</button>
+              : <button className="queens-ad-btn-primary" onClick={handleWatchAd}>{adWatching ? t('ad.loading') : t('ad.watch')}</button>
             }
-            <button className="queens-ad-btn-secondary" onClick={() => { setShowAdModal(false); setPendingShowAd(null); }}>취소</button>
+            <button className="queens-ad-btn-secondary" onClick={() => { setShowAdModal(false); setPendingShowAd(null); }}>{t('ad.cancel')}</button>
           </div>
         </div>
       )}
@@ -1008,27 +1012,27 @@ const QueensGame: React.FC = () => {
           <div className="qq-win-rays" aria-hidden />
           <div className="qq-win-inner">
             <span className="qq-win-stage">{isTutorial ? 'TUTORIAL' : k === 2 ? `DOUBLE ${level.id}` : `LEVEL ${level.id}`}</span>
-            <span className="qq-win-head">클리어!</span>
+            <span className="qq-win-head">{t('result.cleared')}</span>
             <div className="qq-win-crown">
               <img src={getIconUrl(selectedIcon.id)} alt="" />
             </div>
             {!isTutorial && (
               <div className="qq-win-rewards">
                 <span className="qq-chip"><img src="/coin_Icon.png" alt="" />+10</span>
-                <span className="qq-chip" style={{ animationDelay: '0.12s' }}>⚡ 퍼즐력 +1</span>
+                <span className="qq-chip" style={{ animationDelay: '0.12s' }}>{t('result.puzzlePower')}</span>
               </div>
             )}
             {levelIdx < LEVELS.length - 1 && (
               <button className="qq-play-btn" onClick={handleNextLevel}>
                 <Play size={26} strokeWidth={0} fill="currentColor" />
-                다음 레벨
+                {t('result.nextLevel')}
               </button>
             )}
             <div className="qq-win-actions">
-              <button className="qq-round" onClick={() => navigate('/queens')} aria-label="크라운 퀘스트 홈">
+              <button className="qq-round" onClick={() => navigate('/queens')} aria-label={t('result.homeAria')}>
                 <Home size={24} strokeWidth={2.8} />
               </button>
-              <button className="qq-round" onClick={handleReset} aria-label="다시 하기">
+              <button className="qq-round" onClick={handleReset} aria-label={t('result.retryAria')}>
                 <RotateCcw size={24} strokeWidth={2.8} />
               </button>
             </div>
@@ -1040,15 +1044,15 @@ const QueensGame: React.FC = () => {
         <div className="qq-win fail">
           <div className="qq-win-inner">
             <span className="qq-win-stage">{k === 2 ? `DOUBLE ${level.id}` : `LEVEL ${level.id}`}</span>
-            <span className="qq-win-head">아쉬워요!</span>
+            <span className="qq-win-head">{t('result.failHead')}</span>
             <div className="qq-win-heart">♥</div>
-            <p className="qq-win-note">틀린 칸에 왕관을 놓아서 하트를 잃었어요</p>
+            <p className="qq-win-note">{t('result.failNote')}</p>
             <button className="qq-play-btn" onClick={handleReset}>
               <RotateCcw size={24} strokeWidth={3} />
-              다시 하기
+              {t('result.retry')}
             </button>
             <div className="qq-win-actions">
-              <button className="qq-round" onClick={() => navigate('/queens')} aria-label="크라운 퀘스트 홈">
+              <button className="qq-round" onClick={() => navigate('/queens')} aria-label={t('result.homeAria')}>
                 <Home size={24} strokeWidth={2.8} />
               </button>
             </div>

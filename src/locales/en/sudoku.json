@@ -1,0 +1,140 @@
+{
+  "controls": {
+    "adDismissed": "Watch the full ad to use a hint.",
+    "noAd": "No ad is available right now. Please try again later.",
+    "hintTitle": "Use Hint",
+    "noCoinsTitle": "Not enough coins",
+    "hintDescConfirm": "Pick a cell to fill in",
+    "hintDescAd": "Watch an ad to use one hint",
+    "hintDescUsed": "You've already watched an ad this game",
+    "owned": "You have",
+    "cost": "Cost",
+    "cancel": "Cancel",
+    "pickCell": "Pick a cell",
+    "loading": "Loading…",
+    "watchAd": "Watch Ad",
+    "ok": "OK",
+    "free": "Free",
+    "pickGuide": "Pick a cell to fill"
+  },
+  "tutorial": {
+    "title": "How to Play",
+    "body": "Fill in the blanks so no number repeats in any <row>row</row>, <col>column</col>, or <box>{{size}} box</box>.",
+    "ok": "OK"
+  },
+  "theme": {
+    "names": {
+      "default": "Classic",
+      "dark": "Dark",
+      "paper": "Paper",
+      "gameboy": "Game Boy",
+      "chalkboard": "Chalkboard",
+      "blossom": "Blossom",
+      "ocean": "Ocean",
+      "mocha": "Mocha",
+      "dusk": "Dusk",
+      "mintchoco": "Mint Choco",
+      "newspaper": "Newspaper",
+      "blueprint": "Blueprint",
+      "terminal": "Terminal",
+      "watercolor": "Watercolor",
+      "hanji": "Hanji",
+      "space": "Space",
+      "notepad": "Notepad",
+      "highlighter": "Highlighter"
+    },
+    "grades": {
+      "free": "Free",
+      "common": "Common",
+      "rare": "Rare",
+      "epic": "Epic"
+    }
+  },
+  "themeModal": {
+    "title": "🎨 Theme Shop",
+    "coins": "Your coins",
+    "applied": "Applied",
+    "select": "Select",
+    "free": "Free",
+    "unlockTitle": "Unlock Theme",
+    "confirmSpend": "Spend {{cost}} coins?",
+    "cancel": "Cancel",
+    "ok": "OK"
+  },
+  "difficulty": {
+    "title": "Select Difficulty",
+    "myBest": "My best: {{time}}",
+    "worldBest": "No.1: {{time}}"
+  },
+  "game": {
+    "levelLocked": "You haven't reached this level yet! (Current: Level {{level}})",
+    "nicknameChanged": "Nickname updated.",
+    "changeTheme": "Change theme",
+    "dailyDate": "{{month}}/{{day}}",
+    "beginnerLevel": "Beginner {{level}}",
+    "paused": "Paused",
+    "resume": "Resume",
+    "mistakes_one": "You made {{count}} mistake",
+    "mistakes_other": "You made {{count}} mistakes",
+    "back": "Back",
+    "retry": "Try Again 🔄",
+    "dailyComplete": "📅 Daily Puzzle Complete!",
+    "congrats": "🎉 Congratulations!",
+    "newRecord": "New record!",
+    "timeLabel": "Time: ",
+    "puzzlePower": "⚡ Puzzle Power +{{n}}",
+    "monthComplete": "Month complete! {{title}} title",
+    "rewardAvatar": " · 🖼 Avatar unlocked",
+    "rewardFrame": " · 🔲 Frame unlocked",
+    "rewardCardBack": " · 🃏 Card back unlocked",
+    "nickname": "Nickname",
+    "change": "Change",
+    "toCalendar": "Calendar",
+    "nextLevel": "Next Level",
+    "nextStage": "Next Stage",
+    "doneHome": "Back to Home",
+    "ok": "OK"
+  },
+  "modeSelect": {
+    "altBeginner": "Beginner mode",
+    "altStage": "Stage mode",
+    "altBig": "Big Size mode",
+    "altTimeAttack": "Time Attack mode",
+    "restart": "Start over",
+    "start": "Start Level {{level}}/{{max}}",
+    "continue": "Continue Level {{level}}/{{max}}",
+    "play": "Play",
+    "seo": {
+      "title": "Free Online Sudoku Game - Puzzle Garden",
+      "description": "The classic brain puzzle: fill a 9×9 grid with the numbers 1-9! Play free Sudoku in a range of difficulties, from easy to hard.",
+      "appName": "Sudoku - Puzzle Garden",
+      "currency": "USD",
+      "summary": "What is Sudoku? - Free Online Sudoku Game",
+      "h2": "How to Play Sudoku",
+      "h3": "Choosing a Difficulty",
+      "h4": "Sudoku as Brain Training",
+      "p1": "<strong>Sudoku</strong> is a logic puzzle where you fill a 9×9 grid with numbers. Each row, column, and 3×3 box must contain the numbers 1 through 9 exactly once. No math skills needed - just pure logic and focus, which is why it's loved around the world as a <strong>brain puzzle game</strong>.",
+      "p2": "Tap an empty cell and enter a number from 1 to 9 that fits. A number that already appears in the same row, column, or box can't be used again. If you get stuck, the hint feature can help. If you're new, start with <strong>Beginner Sudoku</strong> or an <strong>easy difficulty</strong>.",
+      "p3": "<strong>Beginner · Easy</strong> - for people new to Sudoku. Plenty of clues are given.<br/><strong>Medium</strong> - try it once you know the basic rules. Some logical deduction is required.<br/><strong>Hard · Time Attack</strong> - a speed challenge where you finish within a time limit. Made for experts.",
+      "p4": "Sudoku is great for improving <strong>focus, logical thinking, and short-term memory</strong>. Studies suggest that solving for 10-15 minutes a day may help keep your mind sharp. Give your brain a daily workout with free online Sudoku on Puzzle Garden.",
+      "faq": {
+        "q1": {
+          "q": "What is Sudoku?",
+          "a": "Sudoku is a logic puzzle where you fill a 9×9 grid with the numbers 1 through 9. No number can appear twice in any row, column, or 3×3 box. It's a brain game that relies on pure logic, not math."
+        },
+        "q2": {
+          "q": "Is Sudoku free to play?",
+          "a": "Yes, Sudoku on Puzzle Garden is completely free. You can start playing right away without signing up, with difficulties ranging from beginner to hard."
+        },
+        "q3": {
+          "q": "Which difficulty should a beginner start with?",
+          "a": "If you're new, we recommend Beginner mode. The difficulty rises step by step so you can build your skills gradually. Once you're comfortable, try Time Attack mode."
+        },
+        "q4": {
+          "q": "Is Sudoku good for the brain?",
+          "a": "Yes. Sudoku helps improve focus, logical thinking, and short-term memory. Solving for 10-15 minutes a day is thought to help keep your mind sharp."
+        }
+      }
+    }
+  }
+}

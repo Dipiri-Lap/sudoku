@@ -18,8 +18,13 @@ import { useDailyPuzzle, DAILY_REWARD_COIN, DAILY_REWARD_PUZZLE_POWER } from '..
 import { getDailyPuzzle, todayKey } from '../../daily/data/loader';
 import DailyPushPrompt from '../../daily/components/DailyPushPrompt';
 import { CalendarDays } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
+import { localeHref } from '../../../i18n/locale';
 
 const SudokuGame: React.FC = () => {
+    const { t } = useTranslation('sudoku');
+    const { t: tc } = useTranslation('common');
     const { state, dispatch } = useGame();
     const navigate = useNavigate();
     const location = useLocation();
@@ -263,7 +268,7 @@ const SudokuGame: React.FC = () => {
         if (location.pathname.includes('/big') && level !== null) {
             if (level !== state.currentLevel || state.gameMode !== 'BigSize') {
                 if (level > bigProgress) {
-                    alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${bigProgress})`);
+                    alert(i18n.t('sudoku:game.levelLocked', { level: bigProgress }));
                     navigate('/sudoku/big?level=' + bigProgress, { replace: true });
                     return;
                 }
@@ -275,7 +280,7 @@ const SudokuGame: React.FC = () => {
         if (mode === 'stage' && level !== null && level !== state.currentLevel) {
             // Progression Guard: Prevent skipping levels via URL
             if (level > stageProgress) {
-                alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${stageProgress})`);
+                alert(i18n.t('sudoku:game.levelLocked', { level: stageProgress }));
                 navigate('/sudoku/stage?mode=stage&level=' + stageProgress, { replace: true });
                 return;
             }
@@ -288,7 +293,7 @@ const SudokuGame: React.FC = () => {
             if (mode === 'stage' && level !== null) {
                 // Progression Guard for initial load as well
                 if (level > stageProgress) {
-                    alert(`아직 도달하지 못한 레벨입니다! (현재 도전 중: Level ${stageProgress})`);
+                    alert(i18n.t('sudoku:game.levelLocked', { level: stageProgress }));
                     navigate('/sudoku/stage?mode=stage&level=' + stageProgress, { replace: true });
                     return;
                 }
@@ -327,7 +332,7 @@ const SudokuGame: React.FC = () => {
     const handleNicknameUpdate = async () => {
         if (auth.currentUser && inputNickname.trim()) {
             await updateProfileInfo(auth.currentUser.uid, { nickname: inputNickname });
-            alert('닉네임이 변경되었습니다.');
+            alert(t('game.nicknameChanged'));
         }
     };
 
@@ -345,7 +350,7 @@ const SudokuGame: React.FC = () => {
                         </div> */}
                     </div>
                     <div className="game-nav-right">
-                        <button className="nav-icon-btn" onClick={() => setShowThemeModal(true)} title="테마 변경">
+                        <button className="nav-icon-btn" onClick={() => setShowThemeModal(true)} title={t('game.changeTheme')}>
                             <Palette size={18} />
                         </button>
                     </div>
@@ -356,11 +361,11 @@ const SudokuGame: React.FC = () => {
                         {state.gameMode === 'Daily' ? (
                             <div className="level-badge">
                                 <CalendarDays size={13} style={{ verticalAlign: '-2px', marginRight: '4px' }} />
-                                {state.currentDate && `${Number(state.currentDate.slice(5, 7))}월 ${Number(state.currentDate.slice(8))}일`}
+                                {state.currentDate && t('game.dailyDate', { month: Number(state.currentDate.slice(5, 7)), day: Number(state.currentDate.slice(8)) })}
                             </div>
                         ) : (state.gameMode === 'Stage' || state.gameMode === 'Beginner' || state.gameMode === 'BigSize') ? (
                             <div className="level-badge">
-                                {state.gameMode === 'Beginner' ? `입문 ${state.currentLevel}` : `Level ${state.currentLevel}`}
+                                {state.gameMode === 'Beginner' ? t('game.beginnerLevel', { level: state.currentLevel }) : `Level ${state.currentLevel}`}
                                 {state.gameMode === 'Beginner' && state.boardSize === 6 && (
                                     <span style={{ fontSize: '0.65rem', marginLeft: '4px', opacity: 0.8 }}>6×6</span>
                                 )}
@@ -370,11 +375,11 @@ const SudokuGame: React.FC = () => {
                             </div>
                         ) : (
                             <select className="difficulty-select" value={state.difficulty} onChange={handleDifficultyChange}>
-                                <option value="Easy">쉬움</option>
-                                <option value="Medium">보통</option>
-                                <option value="Hard">어려움</option>
-                                <option value="Expert">전문가</option>
-                                <option value="Master">마스터</option>
+                                <option value="Easy">{tc('difficulty.easy')}</option>
+                                <option value="Medium">{tc('difficulty.medium')}</option>
+                                <option value="Hard">{tc('difficulty.hard')}</option>
+                                <option value="Expert">{tc('difficulty.expert')}</option>
+                                <option value="Master">{tc('difficulty.master')}</option>
                             </select>
                         )}
                     </div>
@@ -409,9 +414,9 @@ const SudokuGame: React.FC = () => {
                 {state.isPaused && (
                     <div className="modal-overlay">
                         <div className="modal-content">
-                            <h2>일시정지됨</h2>
+                            <h2>{t('game.paused')}</h2>
                             <button className="primary-btn" onClick={() => dispatch({ type: 'TOGGLE_PAUSE' })}>
-                                계속하기
+                                {t('game.resume')}
                             </button>
                         </div>
                     </div>
@@ -430,11 +435,11 @@ const SudokuGame: React.FC = () => {
                     <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>💀</div>
                     <h2 style={{ fontSize: '2.2rem', color: '#e74c3c', marginBottom: '0.5rem', fontWeight: 'bold', letterSpacing: '2px' }}>GAME OVER</h2>
                     <div style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>
-                        실수를 {state.mistakes}번 하셨습니다
+                        {t('game.mistakes', { count: state.mistakes })}
                     </div>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                         <a
-                            href={state.gameMode === 'Daily' ? '/daily' : state.gameMode === 'TimeAttack' ? '/sudoku/time-attack' : '/sudoku'}
+                            href={localeHref(state.gameMode === 'Daily' ? '/daily' : state.gameMode === 'TimeAttack' ? '/sudoku/time-attack' : '/sudoku')}
                             style={{
                                 padding: '0.75rem 1.8rem', fontSize: '1rem', borderRadius: '30px',
                                 border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)',
@@ -442,16 +447,16 @@ const SudokuGame: React.FC = () => {
                                 textDecoration: 'none', display: 'inline-block'
                             }}
                         >
-                            뒤로
+                            {t('game.back')}
                         </a>
                         <a
-                            href={state.gameMode === 'Daily'
+                            href={localeHref(state.gameMode === 'Daily'
                                 ? `/daily/play?date=${state.currentDate}`
                                 : state.gameMode === 'BigSize'
                                 ? `/sudoku/big?level=${state.currentLevel}`
                                 : state.gameMode === 'Stage'
                                     ? `/sudoku/stage?mode=stage&level=${state.currentLevel}`
-                                    : `/sudoku/time-attack/play?difficulty=${state.difficulty}`}
+                                    : `/sudoku/time-attack/play?difficulty=${state.difficulty}`)}
                             style={{
                                 padding: '0.75rem 2.2rem', fontSize: '1rem', borderRadius: '30px',
                                 border: 'none', background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
@@ -460,7 +465,7 @@ const SudokuGame: React.FC = () => {
                                 textDecoration: 'none', display: 'inline-block'
                             }}
                         >
-                            다시 시도 🔄
+                            {t('game.retry')}
                         </a>
                     </div>
                 </div>
@@ -471,18 +476,18 @@ const SudokuGame: React.FC = () => {
                     <div className="modal-content animate-fade-in">
                         {/* Header */}
                         <div className="modal-header">
-                            <h2>{state.gameMode === 'Daily' ? '📅 오늘의 퍼즐 완료!' : '🎉 축하합니다!'}</h2>
+                            <h2>{state.gameMode === 'Daily' ? t('game.dailyComplete') : t('game.congrats')}</h2>
                         </div>
                         {/* Body */}
                         <div className="modal-body">
                             {isNewRecord && (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#fbbf24' }}>
                                     <Trophy size={40} fill="currentColor" />
-                                    <span style={{ fontWeight: 700, fontSize: '0.95rem', marginTop: '0.3rem', color: '#fbbf24' }}>새로운 기록 달성!</span>
+                                    <span style={{ fontWeight: 700, fontSize: '0.95rem', marginTop: '0.3rem', color: '#fbbf24' }}>{t('game.newRecord')}</span>
                                 </div>
                             )}
                             <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 600 }}>
-                                소요 시간: <span style={{ color: '#e2e8f0' }}>{formatTime(state.timer)}</span>
+                                {t('game.timeLabel')}<span style={{ color: '#e2e8f0' }}>{formatTime(state.timer)}</span>
                             </div>
                             {state.gameMode === 'Daily' && (
                                 <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
@@ -490,15 +495,15 @@ const SudokuGame: React.FC = () => {
                                         🪙 +{DAILY_REWARD_COIN}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
-                                        ⚡ 퍼즐력 +{DAILY_REWARD_PUZZLE_POWER}
+                                        {t('game.puzzlePower', { n: DAILY_REWARD_PUZZLE_POWER })}
                                     </div>
                                 </div>
                             )}
                             {state.gameMode === 'Daily' && monthReward && (
                                 <div style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '1px solid #f59e0b', borderRadius: 14, padding: '0.6rem 0.9rem', textAlign: 'center', color: '#92400e', fontWeight: 800, fontSize: '0.9rem', lineHeight: 1.5 }}>
-                                    한 달 완성! {monthReward.title} 칭호<br />
+                                    {t('game.monthComplete', { title: monthReward.title })}<br />
                                     <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>
-                                        🪙 +{monthReward.reward.coin}{monthReward.reward.avatar ? ' · 🖼 아바타 획득' : ''}{monthReward.reward.frame ? ' · 🔲 테두리 획득' : ''}{monthReward.reward.cardBack ? ' · 🃏 카드 뒷면 획득' : ''}
+                                        🪙 +{monthReward.reward.coin}{monthReward.reward.avatar ? t('game.rewardAvatar') : ''}{monthReward.reward.frame ? t('game.rewardFrame') : ''}{monthReward.reward.cardBack ? t('game.rewardCardBack') : ''}
                                     </span>
                                 </div>
                             )}
@@ -509,14 +514,14 @@ const SudokuGame: React.FC = () => {
                                         🪙 +10
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
-                                        ⚡ 퍼즐력 +1
+                                        {t('game.puzzlePower', { n: 1 })}
                                     </div>
                                 </div>
                             )}
                             {state.gameMode === 'TimeAttack' && isNewRecord && (
                                 <div style={{ width: '100%' }}>
                                     <div style={{ fontSize: '0.85rem', marginBottom: '0.4rem', display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                                        <span>닉네임</span>
+                                        <span>{t('game.nickname')}</span>
                                         <span style={{ color: inputNickname.length > 10 ? '#ef4444' : '#94a3b8' }}>{inputNickname.length}/10</span>
                                     </div>
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -528,7 +533,7 @@ const SudokuGame: React.FC = () => {
                                             style={{ flex: 1, padding: '0.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#1e293b' }}
                                         />
                                         <button onClick={handleNicknameUpdate} style={{ padding: '0.5rem 0.9rem', borderRadius: '8px', border: 'none', background: '#64748b', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
-                                            변경
+                                            {t('game.change')}
                                         </button>
                                     </div>
                                 </div>
@@ -536,7 +541,7 @@ const SudokuGame: React.FC = () => {
                         </div>
                         {/* Footer */}
                         <div className="modal-footer" style={{ flexDirection: 'row', gap: '0.5rem' }}>
-                            <a href={state.gameMode === 'Daily' ? '/' : '/sudoku'} className="modal-home-btn" style={{ textDecoration: 'none' }}>
+                            <a href={localeHref(state.gameMode === 'Daily' ? '/' : '/sudoku')} className="modal-home-btn" style={{ textDecoration: 'none' }}>
                                 <House size={22} />
                             </a>
                             {state.gameMode === 'Daily' ? (
@@ -545,7 +550,7 @@ const SudokuGame: React.FC = () => {
                                     className="primary-btn bonus-btn"
                                     style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
                                 >
-                                    <CalendarDays size={20} /> 캘린더로
+                                    <CalendarDays size={20} /> {t('game.toCalendar')}
                                 </button>
                             ) : state.gameMode === 'BigSize' ? (
                                 state.currentLevel !== null && state.currentLevel < 200 ? (
@@ -554,11 +559,11 @@ const SudokuGame: React.FC = () => {
                                         className="primary-btn bonus-btn"
                                         style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
                                     >
-                                        다음 레벨로 <ArrowRight size={20} />
+                                        {t('game.nextLevel')} <ArrowRight size={20} />
                                     </button>
                                 ) : (
                                     <button onClick={() => navigate('/sudoku')} className="primary-btn" style={{ textAlign: 'center', flex: 1 }}>
-                                        완료! 홈으로
+                                        {t('game.doneHome')}
                                     </button>
                                 )
                             ) : state.gameMode === 'Stage' ? (
@@ -567,7 +572,7 @@ const SudokuGame: React.FC = () => {
                                     className="primary-btn bonus-btn"
                                     style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
                                 >
-                                    다음 레벨로 <ArrowRight size={20} />
+                                    {t('game.nextLevel')} <ArrowRight size={20} />
                                 </button>
                             ) : state.gameMode === 'Beginner' ? (
                                 state.currentLevel !== null && state.currentLevel < 5 ? (
@@ -576,16 +581,16 @@ const SudokuGame: React.FC = () => {
                                         className="primary-btn bonus-btn"
                                         style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1 }}
                                     >
-                                        다음 스테이지 <ArrowRight size={20} />
+                                        {t('game.nextStage')} <ArrowRight size={20} />
                                     </button>
                                 ) : (
                                     <button onClick={() => navigate('/sudoku')} className="primary-btn" style={{ textAlign: 'center', flex: 1 }}>
-                                        완료! 홈으로
+                                        {t('game.doneHome')}
                                     </button>
                                 )
                             ) : (
                                 <button onClick={() => navigate('/sudoku/time-attack')} className="primary-btn" style={{ textAlign: 'center', flex: 1 }}>
-                                    확인
+                                    {t('game.ok')}
                                 </button>
                             )}
                         </div>

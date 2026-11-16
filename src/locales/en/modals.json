@@ -1,0 +1,241 @@
+{
+  "coinShop": {
+    "title": "Coin Shop",
+    "owned": "My Coins",
+    "starterDiscount": "55% OFF",
+    "buyTitle": "Buy Coins",
+    "freeTitle": "Free Coins",
+    "watchAdTitle": "Watch an ad, get 🪙 50",
+    "nextAdIn": "Next ad in {{time}}",
+    "availableNow": "Available now",
+    "loading": "Loading...",
+    "watchAd": "Watch ad",
+    "watch": "Watch",
+    "close": "Close",
+    "toast": {
+      "earned": "🪙 You got 50 coins!",
+      "earnedDev": "🪙 You got 50 coins! (dev mode)",
+      "adDismissed": "Watch the whole ad to earn coins.",
+      "noAd": "No ad is available right now. Please try again in a moment.",
+      "paymentCancelled": "Payment was cancelled.",
+      "granted": "🪙 {{coins}} coins added!",
+      "verifyError": "Something went wrong while verifying the payment. Please try again in a moment."
+    }
+  },
+  "login": {
+    "title": "What changes when you sign in?",
+    "close": "Close",
+    "guest": "Guest",
+    "guestSaveLocal": "Saved on this device only",
+    "guestDataLoss": "Data lost if you delete the app",
+    "guestRankAnon": "Anonymous on rankings",
+    "login": "Signed in",
+    "loginSync": "Sync across devices",
+    "loginBackup": "Safe data backup",
+    "loginRankNamed": "Your name on rankings",
+    "migration": "🎮 We'll move your existing progress to your account!",
+    "signingIn": "Signing in...",
+    "google": "Sign in with Google",
+    "continueGuest": "Continue as guest",
+    "popupBlocked": "The pop-up was blocked. Please allow pop-ups in your browser and try again.",
+    "failed": "Sign-in failed. Please try again."
+  },
+  "rewardToast": {
+    "coins": "🪙 +{{n}} coins"
+  },
+  "profile": {
+    "title": "Profile",
+    "nickname": "Nickname",
+    "tabs": {
+      "avatar": "Avatar",
+      "frame": "Frame",
+      "ranking": "Ranking",
+      "challenge": "Challenges"
+    },
+    "chooseAvatar": "Choose avatar",
+    "chooseFrame": "Choose frame",
+    "puzzlePower": "Puzzle Power",
+    "rewardKind": {
+      "avatar": "Avatar",
+      "frame": "Frame",
+      "cardBack": "Card back"
+    },
+    "rewardPreview": "{{kind}} preview",
+    "challenge": {
+      "inUse": "In use",
+      "setTitle": "Set title",
+      "puzzlePowerPlus": "Puzzle Power +{{n}}",
+      "coinPlus": "Coins +{{n}}",
+      "claim": "Claim"
+    },
+    "ranking": {
+      "myRank": "My rank",
+      "top100": "Top 100",
+      "players_one": "{{count}} player",
+      "players_other": "{{count}} players",
+      "loading": "Loading...",
+      "me": "(you)",
+      "puzzlePower": "Puzzle Power {{n}}"
+    },
+    "unlock": "Unlock",
+    "unlockFrameTitle": "Unlock {{name}} frame",
+    "unlockPrefix": "Spend ",
+    "unlockSuffix": " to unlock?",
+    "notEnoughCoins": "Not enough coins (you have {{coins}})",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "close": "Close",
+    "alert": {
+      "notEnoughCoins": "Not enough coins!",
+      "unlockError": "Something went wrong while unlocking. Please try again."
+    },
+    "exclusiveAvatar": "Exclusive avatar",
+    "exclusiveCardBack": "Exclusive card back",
+    "rewardCondition": "Earn it by: {{condition}}",
+    "frameOnAvatar": "Shown on your current avatar",
+    "rewardDone": "Earned",
+    "rewardReady": "Ready to claim now",
+    "rewardProgress": "Progress {{current}} / {{target}}"
+  },
+  "terms": {
+    "ok": "OK",
+    "contactLink": "Contact support",
+    "effective": "Effective date: January 1, 2024",
+    "title": {
+      "service": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "finance": "Electronic Financial Transactions Terms"
+    },
+    "service": {
+      "purpose": {
+        "title": "Article 1 (Purpose)",
+        "body": "These Terms set out the rights, obligations, and responsibilities between ToMixSoft (the \"Company\") and users in connection with the use of Puzzle Garden (puzzles.tmhub.co.kr, the \"Service\") operated by the Company."
+      },
+      "definitions": {
+        "title": "Article 2 (Definitions)",
+        "i1": "\"Service\" means all web-based puzzle game services provided by the Company.",
+        "i2": "\"User\" means a person who agrees to these Terms and uses the Service.",
+        "i3": "\"Coins\" means the virtual currency used within the Service."
+      },
+      "changes": {
+        "title": "Article 3 (Effect and Amendment of the Terms)",
+        "i1": "These Terms take effect when they are posted on the Service.",
+        "i2": "The Company may amend these Terms to the extent permitted by applicable laws, and will give prior notice of any amendment."
+      },
+      "use": {
+        "title": "Article 4 (Use of the Service)",
+        "i1": "The Service is provided 24 hours a day, 7 days a week in principle, but may be temporarily suspended for reasons such as maintenance.",
+        "i2": "Users must comply with applicable laws, these Terms, and the usage guidelines and notices of the Service."
+      },
+      "refund": {
+        "title": "Article 5 (Coin Purchases and Refunds)",
+        "i1": "Coins can be purchased through the payment methods available in the Service.",
+        "i2": "Purchased coins that are unused may be refunded upon request within 7 days of purchase, in accordance with the Act on the Consumer Protection in Electronic Commerce.",
+        "i3": "Coins that have been used are not refundable.",
+        "i4": "Refund inquiries: <contact/> (070-8984-4679)"
+      },
+      "liability": {
+        "title": "Article 5 (Limitation of Liability)",
+        "i1": "The Company is not liable if it is unable to provide the Service due to natural disasters, force majeure, or similar causes.",
+        "i2": "The Company is not liable for any disruption in use of the Service caused by the user."
+      },
+      "disputes": {
+        "title": "Article 6 (Dispute Resolution)",
+        "body": "Any dispute arising in connection with the use of the Service shall be subject to the jurisdiction of the Seoul Central District Court."
+      }
+    },
+    "privacy": {
+      "intro": "ToMixSoft (the \"Company\") values users' personal information and complies with applicable laws, including the Personal Information Protection Act of Korea.",
+      "collect": {
+        "title": "1. Personal Information We Collect",
+        "i1": "When you use social sign-in: email address, profile photo, and nickname (information provided by your Google/Apple account)",
+        "i2": "Collected automatically when you use the Service: device information, IP address, and gameplay records"
+      },
+      "purpose": {
+        "title": "2. Purposes of Collection and Use",
+        "i1": "Identifying members and providing the Service",
+        "i2": "Saving game progress and managing rankings",
+        "i3": "Handling customer inquiries and complaints",
+        "i4": "Improving the Service and developing new services"
+      },
+      "retention": {
+        "title": "3. Retention and Use Period",
+        "i1": "Retained until you withdraw your membership, and destroyed immediately after withdrawal.",
+        "i2": "Where retention is required by applicable laws, the information is kept for the period required."
+      },
+      "thirdParty": {
+        "title": "4. Disclosure to Third Parties",
+        "body": "As a rule, the Company does not provide users' personal information to outside parties, except where the user has consented or where required by law."
+      },
+      "outsourcing": {
+        "title": "5. Outsourcing of Personal Information Processing",
+        "intro": "To provide the Service smoothly, the Company outsources personal information processing as follows.",
+        "colVendor": "Processor",
+        "colTask": "Outsourced task",
+        "firebaseTask": "Database and authentication services (located in the United States)",
+        "portoneName": "Korea PortOne Co., Ltd.",
+        "portoneTask": "Payment integration services"
+      },
+      "cookies": {
+        "title": "6. Cookies and Advertising",
+        "i1": "We use Google AdSense to show ads. Google and its partners use cookies and similar technologies to show ads based on your previous visits to this and other websites.",
+        "i2": "You can turn off personalized ads in Google Ads Settings (adssettings.google.com). Learn more about how Google uses information at policies.google.com/technologies/ads.",
+        "i3": "We use Google Analytics for Firebase to understand how the Service is used, such as which pages are viewed and which in-game actions are taken.",
+        "i4": "Where required by law, for example in the EEA, the UK and Switzerland, we ask for your consent before using cookies for personalized ads. You can change your choice at any time."
+      },
+      "international": {
+        "title": "7. Users Outside Korea",
+        "i1": "Your information is processed in the Republic of Korea and in the United States (Google Firebase).",
+        "i2": "EEA and UK users: we process personal information to provide the Service you request, for our legitimate interest in running and improving it, and, for personalized ads, on the basis of your consent. You have the right to access, correct, delete, restrict or object to the processing of your data, to data portability, to withdraw consent at any time, and to complain to your local data protection authority.",
+        "i3": "California users: you may ask to know, correct or delete your personal information, and you may opt out of the use of your information for targeted advertising using the options above. We do not sell personal information for money.",
+        "i4": "The Service is not directed to children under 13, and we do not knowingly collect their personal information."
+      },
+      "rights": {
+        "title": "8. Your Rights",
+        "body": "You may request access to, correction of, deletion of, or suspension of processing of your personal information at any time. Please contact us via <contact/> (070-8984-4679)."
+      },
+      "officer": {
+        "title": "9. Personal Information Protection Officer",
+        "name": "Name: Dokyun Kim",
+        "contact": "Contact: <contact/> (070-8984-4679)"
+      }
+    },
+    "finance": {
+      "purpose": {
+        "title": "Article 1 (Purpose)",
+        "body": "These Terms set out the rights and obligations between ToMixSoft (the \"Company\") and users in connection with the electronic financial transaction services (such as coin purchases) provided by the Company."
+      },
+      "kinds": {
+        "title": "Article 2 (Types of Electronic Financial Transaction Services)",
+        "i1": "Payment for coin purchases (credit card, simple payment, etc.)"
+      },
+      "confirm": {
+        "title": "Article 3 (Confirmation of Transactions)",
+        "i1": "The Company provides a transaction history so that users can confirm the details of electronic financial transactions.",
+        "i2": "After a transaction is completed, users can check the transaction details by email or through an in-service notification."
+      },
+      "errors": {
+        "title": "Article 4 (Correction of Errors)",
+        "i1": "If an error occurs while processing an electronic financial transaction, the user may immediately ask the Company to correct it.",
+        "i2": "As soon as the Company becomes aware of an error, it will investigate and notify the user of the result."
+      },
+      "refund": {
+        "title": "Article 5 (Refunds and Cancellations)",
+        "i1": "A full refund may be requested within 7 days of purchase if the coins are unused.",
+        "i2": "For partially used coins, the remaining portion, excluding the amount used, may be refunded.",
+        "i3": "Refund requests: <contact/> (070-8984-4679)"
+      },
+      "liability": {
+        "title": "Article 6 (Responsibility of the Company)",
+        "i1": "The Company exercises the care of a prudent manager so that electronic financial transactions are processed safely.",
+        "i2": "The Company is liable for damages that occur through no fault of the user."
+      },
+      "complaints": {
+        "title": "Article 7 (Dispute and Complaint Handling)",
+        "intro": "For disputes or complaints related to electronic financial transactions, please contact the following.",
+        "center": "Customer center: <contact/> (070-8984-4679)",
+        "fss": "Financial Supervisory Service dispute mediation: 1332"
+      }
+    }
+  }
+}

@@ -153,13 +153,13 @@ export const routes = [
     path: 'queens',
     name: '크라운 퀘스트',
     title: '퀸즈 퍼즐 - 크라운 퀘스트 무료 게임 | 퍼즐 가든',
-    description: '퀸즈 퍼즐(퀸 배치 논리 퍼즐) 무료 게임. 색깔 영역마다 퀸을 하나씩, 행·열이 겹치지 않게 배치하세요. 크라운 퀘스트 600개 스테이지를 설치 없이 즐길 수 있습니다.',
+    description: '퀸즈 퍼즐(퀸 배치 논리 퍼즐) 무료 게임. 색깔 영역마다 퀸을 하나씩, 행·열이 겹치지 않게 배치하세요. 크라운 퀘스트 1000개 스테이지를 설치 없이 즐길 수 있습니다.',
     priority: '0.9',
     changefreq: 'monthly',
     faqPairs: [
       ['크라운 퀘스트(퀸즈)는 어떤 게임인가요?', '크라운 퀘스트는 색깔로 나뉜 격자에 퀸(👑)을 배치하는 논리 퍼즐입니다. 각 색상 영역에 퀸이 정확히 하나, 각 가로줄과 세로줄에도 퀸이 하나씩만 들어가야 하며, 퀸끼리는 대각선을 포함해 서로 맞닿을 수 없습니다.'],
       ['퀸즈 퍼즐은 어떻게 푸나요?', '퀸을 놓을 수 없는 칸부터 지워 나가는 것이 기본입니다. 어떤 색상 영역에 남은 후보 칸이 하나뿐이면 그곳이 퀸의 자리입니다. 퀸을 하나 확정하면 같은 행·열과 인접 칸이 모두 제외되어 다음 단서가 이어집니다.'],
-      ['크라운 퀘스트는 무료인가요?', '네, 완전 무료입니다. 설치나 회원가입 없이 브라우저에서 바로 플레이할 수 있고 600개의 스테이지를 제공합니다.'],
+      ['크라운 퀘스트는 무료인가요?', '네, 완전 무료입니다. 설치나 회원가입 없이 브라우저에서 바로 플레이할 수 있고 1000개의 스테이지를 제공합니다.'],
       ['퀸즈 퍼즐은 체스의 퀸 퍼즐과 다른가요?', '체스의 N-퀸 문제와 비슷하지만, 색깔 영역마다 퀸이 하나씩 들어가야 한다는 규칙이 더해져 정답이 하나로 정해집니다. 대각선으로 닿지만 않으면 되므로 체스 퀸의 긴 대각선 이동 규칙은 신경 쓰지 않아도 됩니다.'],
       ['수학을 못해도 할 수 있나요?', '네. 숫자 계산이 전혀 없는 순수 논리 퍼즐입니다. 규칙 세 가지만 알면 되고, 첫 스테이지는 작은 격자로 시작해 차근차근 커집니다.'],
     ],
@@ -171,7 +171,7 @@ export const routes = [
         <p style="${S.p}"><strong>①</strong> 각 색상 영역에 퀸은 정확히 하나. <strong>②</strong> 같은 가로줄(행)과 세로줄(열)에도 퀸은 하나씩만. <strong>③</strong> 퀸끼리는 서로 닿을 수 없으며 가로·세로는 물론 <strong>대각선으로도 인접할 수 없습니다</strong>.</p>
         <h3 style="${S.h3}">푸는 요령</h3>
         <p style="${S.p}">퀸을 놓을 <strong>수 없는</strong> 칸부터 지워 나가는 것이 정석입니다. 어떤 색상 영역에 후보 칸이 하나만 남으면 그 자리가 퀸입니다. 퀸을 하나 확정할 때마다 같은 행·열과 주변 칸이 무더기로 제외되면서 다음 단서가 드러납니다.</p>
-        <h3 style="${S.h3}">600 스테이지 무료</h3>
+        <h3 style="${S.h3}">1000 스테이지 무료</h3>
         <p style="${S.pLast}">작은 격자로 시작해 점점 넓어지며, 진행 상황은 자동 저장됩니다. <strong>공간 추론과 소거법 사고</strong>를 훈련하기 좋은 두뇌 퍼즐입니다.</p>
       </section>`,
   },
@@ -254,17 +254,504 @@ export const routes = [
   ogImage: `${BASE_URL}/images/og/${r.path}.jpg`,
   lastmod: r.path === 'daily' ? undefined : '2026-10-01',
   canonical: `${BASE_URL}/${r.path}`,
+  lang: 'ko',
   breadcrumbSchema: breadcrumb(r.name, r.path),
   softwareSchema: software(r.name),
   faqSchema: r.faqPairs ? faq(r.faqPairs) : null,
 }));
 
+/**
+ * 게임 설명(/guide) 페이지 — 내용은 src/features/guide/data/games.ts 가 원본이다.
+ * 여기서는 메타태그·sitemap 용 정보만 둔다 (본문은 클라이언트에서 렌더).
+ */
+const GUIDE_PAGES = [
+  ['', '게임 설명', '게임 설명 - 퍼즐 가든 모든 게임 하는 법 | 퍼즐 가든', '워드스택, 스냅스팟, Tiny Pieces, 크라운 퀘스트, 스도쿠, 애로우웨이, 크로썸까지 퍼즐 가든 모든 게임의 규칙과 공략을 자세히 알려드려요.'],
+  ['word-sort', '워드스택', '워드스택 하는 법 - 규칙·공략 총정리 | 퍼즐 가든', '워드스택: 카테고리 카드를 슬롯에 열고 같은 종류의 단어를 모으는 카드 분류 퍼즐. 규칙, 남은 횟수, 하드 모드, 순서 레벨, 공략 팁을 자세히 설명합니다.'],
+  ['snapspot', '스냅스팟', '스냅스팟 하는 법 - 틀린그림찾기 규칙·공략 | 퍼즐 가든', '스냅스팟: 두 사진 속 달라진 곳을 찾는 틀린그림찾기. 하트, 확대, 힌트 사용법과 공략 팁을 자세히 설명합니다.'],
+  ['jigsaw', 'Tiny Pieces', 'Tiny Pieces 하는 법 - 직소 퍼즐 규칙·공략 | 퍼즐 가든', 'Tiny Pieces: 조각을 끌어 맞추는 직소 퍼즐. 그룹 이동, 별 평가, 아이템 사용법과 공략 팁을 자세히 설명합니다.'],
+  ['queens', '크라운 퀘스트', '크라운 퀘스트 하는 법 - 규칙·공략 총정리 | 퍼즐 가든', '크라운 퀘스트: 색 구역마다 왕관 하나를 서로 닿지 않게 배치하는 논리 퍼즐. 규칙, 조작법, 더블 레벨, 공략 팁을 설명합니다.'],
+  ['sudoku', '스도쿠', '스도쿠 하는 법 - 모드·규칙·공략 총정리 | 퍼즐 가든', '스도쿠: 입문자 6×6부터 빅 사이즈 16×16, 타임어택까지. 규칙, 모드별 특징, 메모·힌트 사용법과 공략 팁을 설명합니다.'],
+  ['arrow-puzzle', '애로우웨이', '애로우웨이 하는 법 - 규칙·공략 총정리 | 퍼즐 가든', '애로우웨이: 얽힌 화살을 길이 열린 순서대로 빼내는 퍼즐. 하트, 별 평가, 순서 찾는 요령을 자세히 설명합니다.'],
+  ['cross-math', '크로썸', '크로썸 하는 법 - 수식 퍼즐 규칙·공략 | 퍼즐 가든', '크로썸: 가로세로 수식의 빈칸을 숫자 타일로 채우는 계산 퍼즐. 규칙, 조작법, 난이도 구간, 공략 팁을 설명합니다.'],
+].map(([id, name, title, description]) => {
+  const path = id ? `guide/${id}` : 'guide';
+  return {
+    path,
+    name,
+    title,
+    description,
+    priority: id ? '0.7' : '0.8',
+    changefreq: 'monthly',
+    lastmod: '2026-11-05',
+    ogImage: `${BASE_URL}/images/og/${id || 'home'}.jpg`,
+    canonical: `${BASE_URL}/${path}`,
+    lang: 'ko',
+    breadcrumbSchema: breadcrumb(name, path),
+    softwareSchema: null,
+    faqSchema: null,
+  };
+});
+routes.push(...GUIDE_PAGES);
+
 /** 홈 공유 이미지 */
 export const HOME_OG_IMAGE = `${BASE_URL}/images/og/home.jpg`;
 
+/* ------------------------------------------------------------------ *
+ * English (phase 1): /en/ 접두 경로. 홈 + 스도쿠·퀸즈·직소·스냅스팟만.
+ * 한국어 문구의 직역이 아니라 영어 검색 의도(free online sudoku, queens
+ * puzzle, jigsaw puzzle online free, spot the difference game)에 맞춘 카피.
+ * 사실관계(스테이지 수, 모드 등)는 한국어 항목에서 확인된 것만 쓴다.
+ * ------------------------------------------------------------------ */
+
+/** 영어 BreadcrumbList — 루트는 /en/ */
+const breadcrumbEn = (name, slug) => JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Puzzle Garden', item: `${BASE_URL}/en/` },
+    { '@type': 'ListItem', position: 2, name, item: `${BASE_URL}/en/${slug}` },
+  ],
+});
+
+/** 영어 SoftwareApplication — 무료 웹 게임. 영어권 기준 USD, price 0 */
+const softwareEn = (name) => JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: `${name} - Puzzle Garden`,
+  applicationCategory: 'GameApplication',
+  operatingSystem: 'Web Browser',
+  inLanguage: 'en',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+});
+
+/** 영어 홈의 WebSite + ItemList (index.html 의 한국어 JSON-LD 를 대체) */
+const homeSchemasEn = () => [
+  JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Puzzle Garden',
+    url: `${BASE_URL}/en/`,
+    description: 'Free online puzzle games in your browser: Sudoku, jigsaw puzzles, Queens logic puzzles and spot the difference.',
+    inLanguage: 'en',
+  }),
+  JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Puzzle Garden games',
+    itemListElement: [
+      ['Sudoku', 'Classic 9×9 Sudoku with several difficulty levels and a time attack mode. Free to play.', 'sudoku'],
+      ['Crown Quest (Queens Puzzle)', 'Place one queen in every colored region so that no two queens touch. A pure logic puzzle with 1000 stages.', 'queens'],
+      ['Tiny Pieces (Jigsaw Puzzle)', 'Drag and swap scattered pieces to rebuild cute pictures and tiny takes on famous paintings.', 'jigsaw'],
+      ['SnapSpot (Spot the Difference)', 'Compare two photos and tap every difference. Normal, time attack and arcade modes.', 'snapspot'],
+    ].map(([name, description, slug], i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'VideoGame',
+        name,
+        description,
+        url: `${BASE_URL}/en/${slug}`,
+        genre: 'Puzzle',
+        gamePlatform: 'Browser',
+        inLanguage: 'en',
+        isAccessibleForFree: true,
+      },
+    })),
+  }),
+];
+
+const enRoutes = [
+  {
+    path: 'en',
+    slug: '',
+    name: 'Puzzle Garden',
+    title: 'Puzzle Garden - Free Online Puzzle Games: Sudoku, Jigsaw & More',
+    description: 'Play free online puzzle games in your browser: Sudoku, jigsaw puzzles, Queens logic puzzles and spot the difference. No download, no sign-up.',
+    keywords: 'free online puzzle games, online sudoku, free sudoku, jigsaw puzzle online, queens puzzle, spot the difference game, logic puzzles, brain games',
+    priority: '1.0',
+    changefreq: 'daily',
+    ogImage: `${BASE_URL}/images/og/home.jpg`,
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">Puzzle Garden — free online puzzle games</h2>
+        <p style="${S.lead}"><strong>Puzzle Garden</strong> is a collection of free <strong>online puzzle games</strong> that run right in your browser. There is nothing to install and no account to create, so you can open a puzzle and start playing in seconds on your phone, tablet or computer.</p>
+        <h3 style="${S.h3}">Games you can play</h3>
+        <p style="${S.p}"><a href="${BASE_URL}/en/sudoku"><strong>Sudoku</strong></a> is the classic 9×9 number-placement puzzle, with several difficulty levels and a time attack mode. <a href="${BASE_URL}/en/queens"><strong>Crown Quest</strong></a> is a Queens-style logic puzzle where you place one queen in every colored region. <a href="${BASE_URL}/en/jigsaw"><strong>Tiny Pieces</strong></a> is a relaxing jigsaw puzzle with cute pictures. <a href="${BASE_URL}/en/snapspot"><strong>SnapSpot</strong></a> is a spot the difference game with more than 750 stages.</p>
+        <h3 style="${S.h3}">Free, simple, and quick to pick up</h3>
+        <p style="${S.pLast}">Every game is free to play and works without sign-up. Short rounds make Puzzle Garden easy to fit into a coffee break, and each game starts gently and gets harder as you improve.</p>
+      </section>`,
+  },
+  {
+    path: 'en/sudoku',
+    slug: 'sudoku',
+    name: 'Sudoku',
+    title: 'Free Online Sudoku - Play Classic Sudoku Puzzles | Puzzle Garden',
+    description: 'Play free online Sudoku in your browser: classic 9×9 puzzles from beginner to hard, with notes, hints and a time attack mode. No download or sign-up.',
+    keywords: 'free online sudoku, sudoku online, play sudoku, sudoku puzzles, easy sudoku, hard sudoku, how to play sudoku, sudoku rules',
+    priority: '0.9',
+    changefreq: 'monthly',
+    ogImage: `${BASE_URL}/images/og/sudoku.jpg`,
+    faqPairs: [
+      ['What is Sudoku?', 'Sudoku is a logic puzzle played on a 9×9 grid. Fill every cell with a digit from 1 to 9 so that each row, each column and each 3×3 box contains every digit exactly once. No math is involved; it is solved purely by logic.'],
+      ['Can I play Sudoku online for free?', 'Yes. Sudoku on Puzzle Garden is completely free. You can play right in your browser with no download and no sign-up, from beginner puzzles up to hard ones.'],
+      ['Which difficulty should a beginner start with?', 'Start with the beginner or easy level. Difficulty rises step by step, so you can build skill gradually. Once you feel comfortable, try the time attack mode for an extra challenge.'],
+      ['What are the rules of Sudoku and how do I solve it?', 'Place digits 1 to 9 in the empty cells without repeating a digit in any row, column or bold-outlined 3×3 box. Begin with cells that have only one possible digit. Each digit you place removes candidates from neighboring cells, which makes the next cell easier.'],
+      ['Are there Sudoku grids other than 9×9?', 'Yes. Besides the classic 9×9 grid there are smaller beginner grids starting at 6×6 and bigger grids up to 16×16, plus a time attack mode. Notes and hints are available while you play.'],
+      ['Is Sudoku good for your brain?', 'Sudoku exercises focus, logical thinking and short-term memory. Many people enjoy it as a short daily mental workout.'],
+    ],
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">Free online Sudoku — classic puzzles in your browser</h2>
+        <p style="${S.lead}"><strong>Sudoku</strong> is a logic puzzle played on a 9×9 grid. Every row, every column and every 3×3 box must contain the digits 1 to 9 exactly once. You do not need any math; patience and careful logic are all it takes, which is why it is one of the world's most popular <strong>brain games</strong>.</p>
+        <h3 style="${S.h3}">How to play Sudoku</h3>
+        <p style="${S.p}">Tap an empty cell and enter a digit from 1 to 9. A digit cannot repeat in the same row, column or box. If you are new to the game, begin with the <strong>beginner</strong> or <strong>easy</strong> level and use notes to keep track of candidates. Look for cells where only one digit fits, fill them in, and keep going: each new digit narrows down the rest of the grid.</p>
+        <h3 style="${S.h3}">Difficulty levels and modes</h3>
+        <p style="${S.p}">Choose from beginner, easy, normal and hard puzzles. Smaller grids starting at 6×6 make a gentle introduction, bigger grids up to 16×16 offer a long challenge, and the time attack mode lets you race the clock.</p>
+        <h3 style="${S.h3}">A quick mental workout</h3>
+        <p style="${S.pLast}">Sudoku trains <strong>concentration, logical thinking and short-term memory</strong>. A puzzle or two a day is an easy habit, and it is free to play with no download or sign-up.</p>
+      </section>`,
+  },
+  {
+    path: 'en/queens',
+    slug: 'queens',
+    name: 'Crown Quest (Queens Puzzle)',
+    title: 'Queens Puzzle - Free Online Crown Quest Logic Game | Puzzle Garden',
+    description: 'Play the Queens puzzle free online. Place one queen in every colored region with none in the same row or column or touching. Crown Quest has 1000 free stages, no download needed.',
+    keywords: 'queens puzzle, queens game, queens puzzle online, free queens puzzle, crown quest, logic puzzle online, queens logic puzzle',
+    priority: '0.9',
+    changefreq: 'monthly',
+    ogImage: `${BASE_URL}/images/og/queens.jpg`,
+    faqPairs: [
+      ['What is Crown Quest (the Queens puzzle)?', 'Crown Quest is a Queens-style logic puzzle played on a grid divided into colored regions. Place exactly one queen in each colored region and exactly one in every row and every column. No two queens may touch, including diagonally.'],
+      ['How do you solve a Queens puzzle?', 'Work by elimination. Cross out cells where a queen cannot go; when a colored region has only one candidate cell left, that cell must hold its queen. Every queen you place rules out the rest of its row and column and all its neighbors, which reveals the next clue.'],
+      ['Is Crown Quest free to play?', 'Yes, it is completely free. You can play in your browser with no download and no sign-up, there are 1000 stages, and your progress is saved automatically.'],
+      ['Is this different from the chess N-Queens puzzle?', 'It is a close relative. The classic N-Queens problem only asks for queens that do not attack each other, while here each colored region must also hold exactly one queen, which leads to a single correct solution. Queens only need to avoid touching their neighbors, so you do not have to track long chess diagonals.'],
+      ['Do I need to be good at math?', 'No. There is no arithmetic at all. It is a pure logic puzzle with just three rules, and the first stages start on small grids before growing larger.'],
+    ],
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">Crown Quest — a free Queens logic puzzle</h2>
+        <p style="${S.lead}"><strong>Crown Quest</strong> is a <strong>Queens puzzle</strong>: a logic game where you place one queen (👑) in every colored region of a grid. There is no arithmetic, and just three rules are enough to play, so it offers a different flavor of deduction from Sudoku.</p>
+        <h3 style="${S.h3}">The three rules</h3>
+        <p style="${S.p}"><strong>1.</strong> Each colored region contains exactly one queen. <strong>2.</strong> Each row and each column contains exactly one queen. <strong>3.</strong> No two queens may touch, and that includes <strong>diagonally</strong>.</p>
+        <h3 style="${S.h3}">How to solve it</h3>
+        <p style="${S.p}">Start by crossing out cells where a queen <strong>cannot</strong> go. When a colored region is down to a single candidate cell, that is where its queen belongs. Each confirmed queen eliminates its whole row, column and surrounding cells, and the next clue appears.</p>
+        <h3 style="${S.h3}">1000 free stages</h3>
+        <p style="${S.pLast}">Stages begin on small grids and grow larger, and your progress saves automatically. Crown Quest is a good way to practice <strong>spatial reasoning and process-of-elimination thinking</strong>, with no download or sign-up.</p>
+      </section>`,
+  },
+  {
+    path: 'en/jigsaw',
+    slug: 'jigsaw',
+    name: 'Tiny Pieces (Jigsaw Puzzle)',
+    title: 'Jigsaw Puzzle Online Free - Tiny Pieces | Puzzle Garden',
+    description: 'Play jigsaw puzzles online for free. Swap scattered pieces to rebuild cute pictures and tiny takes on famous paintings. Tiny Pieces runs in your browser.',
+    keywords: 'jigsaw puzzle online free, online jigsaw puzzles, free jigsaw puzzles, picture puzzle game, tiny pieces, relaxing puzzle game',
+    priority: '0.9',
+    changefreq: 'weekly',
+    ogImage: `${BASE_URL}/images/og/jigsaw.jpg`,
+    faqPairs: [
+      ['What is Tiny Pieces?', 'Tiny Pieces is a jigsaw puzzle game where you drag shuffled picture pieces and swap them to rebuild the original image. When matching pieces end up side by side, they snap together and move as one group.'],
+      ['How do I play the jigsaw puzzle?', 'Study the preview picture shown at the start, then drag a piece onto the spot where you want it. It swaps places with the piece already there. Joined groups move together, so begin with the edges or distinctive parts of the picture.'],
+      ['Is Tiny Pieces free?', 'Yes, it is completely free. You can play online in your browser with no download and no sign-up, and your progress is saved automatically.'],
+      ['What pictures will I see?', 'You will find cute animals, towns and food, and every 10 stages there is a special stage with a cute re-imagining of a famous painting such as the Mona Lisa, The Great Wave or Girl with a Pearl Earring.'],
+    ],
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">Tiny Pieces — free online jigsaw puzzle</h2>
+        <p style="${S.lead}"><strong>Tiny Pieces</strong> is a relaxing <strong>jigsaw puzzle</strong> you can play online for free. Move scattered <strong>picture pieces</strong> into place to rebuild a cute, colorful image, no download needed.</p>
+        <h3 style="${S.h3}">How to play</h3>
+        <p style="${S.p}">Drag a piece to another spot and the two pieces trade places. When the right pieces end up next to each other they <strong>snap together automatically</strong> and move as one. Finish with fewer moves to earn more stars.</p>
+        <h3 style="${S.h3}">Famous paintings, reimagined</h3>
+        <p style="${S.pLast}">Every 10 stages brings a special puzzle based on a famous painting, such as the <strong>Mona Lisa, The Great Wave and Starry Night</strong>, redrawn in a cute style. You can also collect board frames and characters to decorate your game.</p>
+      </section>`,
+  },
+  {
+    path: 'en/snapspot',
+    slug: 'snapspot',
+    name: 'SnapSpot (Spot the Difference)',
+    title: 'Spot the Difference Game - Free Online SnapSpot | Puzzle Garden',
+    description: 'Play a free spot the difference game online. Compare two photos and tap every difference in Normal, Time Attack and Arcade modes, with 750+ stages to play.',
+    keywords: 'spot the difference game, spot the difference online, find the differences, free spot the difference, picture difference game, snapspot',
+    priority: '0.9',
+    changefreq: 'weekly',
+    ogImage: `${BASE_URL}/images/og/snapspot.jpg`,
+    faqPairs: [
+      ['What is SnapSpot?', 'SnapSpot is a spot the difference game. Two photos sit side by side, and you tap the spots where they differ.'],
+      ['Can I play spot the difference for free?', 'Yes, SnapSpot is completely free. You can play it in your browser with no download and no sign-up.'],
+      ['What game modes are there?', 'There is a Normal mode where you work through stages one by one, a Time Attack mode where you race a time limit, and an Arcade mode that keeps the stages coming. More than 750 stages are available.'],
+      ['Any tips for finding the differences?', 'Split each photo into four quadrants and compare them one at a time so you miss fewer spots. Look beyond changes in color and size: small objects that disappear or appear are common differences.'],
+      ['Is spot the difference good for your brain?', 'It exercises visual attention, attention to detail and visual memory as you compare two images. It is a quick way to sharpen your focus.'],
+    ],
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">SnapSpot — free spot the difference game</h2>
+        <p style="${S.lead}"><strong>SnapSpot</strong> is a <strong>spot the difference</strong> game: two photos look nearly identical, and your job is to find what has changed. The rules are simple enough to start right away, and the differences get sneakier as you move up through the stages.</p>
+        <h3 style="${S.h3}">How to play</h3>
+        <p style="${S.p}">Look back and forth between the two photos, and when you notice a difference, tap or click that spot. Find them all to clear the stage.</p>
+        <h3 style="${S.h3}">Three game modes</h3>
+        <p style="${S.p}"><strong>Normal</strong> takes you through the stages one at a time, <strong>Time Attack</strong> challenges you to find differences before the clock runs out, and <strong>Arcade</strong> keeps the stages flowing without a break. More than 750 stages are ready to play.</p>
+        <h3 style="${S.h3}">Train your eye</h3>
+        <p style="${S.pLast}">Spot the difference builds <strong>visual attention and eye for detail</strong>. Comparing two images in your head also works your visual memory, making it a good way to sharpen your focus in a few minutes.</p>
+      </section>`,
+  },
+].map(r => ({
+  ...r,
+  lang: 'en',
+  lastmod: r.path === 'en' ? undefined : '2026-11-16',
+  canonical: r.path === 'en' ? `${BASE_URL}/en/` : `${BASE_URL}/${r.path}`,
+  breadcrumbSchema: r.path === 'en' ? null : breadcrumbEn(r.name, r.slug),
+  softwareSchema: r.path === 'en' ? null : softwareEn(r.name),
+  faqSchema: r.faqPairs ? faq(r.faqPairs) : null,
+  extraSchemas: r.path === 'en' ? homeSchemasEn() : [],
+}));
+routes.push(...enRoutes);
+
+/* ------------------------------------------------------------------ *
+ * 日本語: /ja/ 接頭パス。ホーム + 数独・クイーンズ・ジグソー・スナップスポット。
+ * 韓国語の直訳ではなく日本語の検索意図(数独 ナンプレ 無料, クイーンズパズル,
+ * ジグソーパズル 無料 オンライン, 間違い探し 無料)に合わせたコピー。
+ * 事実関係(ステージ数・モード等)は韓国語/英語項目で確認できたものだけ使う。
+ * ------------------------------------------------------------------ */
+
+const breadcrumbJa = (name, slug) => JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'パズルガーデン', item: `${BASE_URL}/ja/` },
+    { '@type': 'ListItem', position: 2, name, item: `${BASE_URL}/ja/${slug}` },
+  ],
+});
+
+const softwareJa = (name) => JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: `${name} - パズルガーデン`,
+  applicationCategory: 'GameApplication',
+  operatingSystem: 'Web Browser',
+  inLanguage: 'ja',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+});
+
+const homeSchemasJa = () => [
+  JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'パズルガーデン',
+    url: `${BASE_URL}/ja/`,
+    description: '数独（ナンプレ）、ジグソーパズル、クイーンズパズル、間違い探しをブラウザで無料で遊べるオンラインパズルゲーム集。',
+    inLanguage: 'ja',
+  }),
+  JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'パズルガーデンのゲーム一覧',
+    itemListElement: [
+      ['数独（ナンプレ）', '定番の9×9数独を、複数の難易度とタイムアタックモードで楽しめます。無料で遊べます。', 'sudoku'],
+      ['クラウンクエスト（クイーンズパズル）', '色分けされた各エリアに女王を1つずつ配置し、どの女王も隣り合わないようにする論理パズル。全1000ステージ。', 'queens'],
+      ['タイニーピース（ジグソーパズル）', 'バラバラのピースをドラッグして入れ替え、かわいい絵や名画のミニチュア版を完成させるパズルです。', 'jigsaw'],
+      ['スナップスポット（間違い探し）', '2枚の写真を見比べて違いをタップ。ノーマル、タイムアタック、アーケードの3モードで遊べます。', 'snapspot'],
+    ].map(([name, description, slug], i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'VideoGame',
+        name,
+        description,
+        url: `${BASE_URL}/ja/${slug}`,
+        genre: 'Puzzle',
+        gamePlatform: 'Browser',
+        inLanguage: 'ja',
+        isAccessibleForFree: true,
+      },
+    })),
+  }),
+];
+
+const jaRoutes = [
+  {
+    path: 'ja',
+    slug: '',
+    name: 'パズルガーデン',
+    title: 'パズルガーデン - 無料パズルゲーム｜数独・ジグソー・間違い探し',
+    description: '数独（ナンプレ）、ジグソーパズル、クイーンズパズル、間違い探しをブラウザで無料プレイ。ダウンロードも会員登録も不要で、スマホでもパソコンでもすぐに遊べます。',
+    keywords: 'パズルゲーム 無料, オンライン パズル, 数独 無料, ナンプレ 無料, ジグソーパズル 無料, 間違い探し 無料, クイーンズパズル, 脳トレ ゲーム',
+    priority: '1.0',
+    changefreq: 'daily',
+    ogImage: `${BASE_URL}/images/og/home.jpg`,
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">パズルガーデン - 無料で遊べるオンラインパズルゲーム</h2>
+        <p style="${S.lead}"><strong>パズルガーデン</strong>は、ブラウザで遊べる無料の<strong>オンラインパズルゲーム</strong>集です。アプリのインストールや会員登録は不要。スマホ、タブレット、パソコンから、思い立ったらすぐに遊べます。</p>
+        <h3 style="${S.h3}">遊べるゲーム</h3>
+        <p style="${S.p}"><a href="${BASE_URL}/ja/sudoku"><strong>数独（ナンプレ）</strong></a>は定番の9×9ナンバープレースで、複数の難易度とタイムアタックモードを用意。<a href="${BASE_URL}/ja/queens"><strong>クラウンクエスト</strong></a>は、色分けされたエリアに女王を1つずつ置くクイーンズパズルです。<a href="${BASE_URL}/ja/jigsaw"><strong>タイニーピース</strong></a>はかわいい絵柄のジグソーパズル。<a href="${BASE_URL}/ja/snapspot"><strong>スナップスポット</strong></a>は750以上のステージがある間違い探しゲームです。</p>
+        <h3 style="${S.h3}">無料で、手軽に、気軽に</h3>
+        <p style="${S.pLast}">すべてのゲームが無料で、登録なしで遊べます。1回のプレイが短いので、休憩時間や通勤の合間の脳トレにもぴったり。最初はやさしく、上達するほど歯ごたえのある問題に挑戦できます。</p>
+      </section>`,
+  },
+  {
+    path: 'ja/sudoku',
+    slug: 'sudoku',
+    name: '数独（ナンプレ）',
+    title: '数独（ナンプレ）無料オンライン - ブラウザで遊べる数独｜パズルガーデン',
+    description: '数独（ナンプレ）を無料でオンラインプレイ。初級から上級までの9×9問題、メモ・ヒント機能、タイムアタックモードも。ダウンロード・登録不要でそのまま遊べます。',
+    keywords: '数独 無料, ナンプレ 無料, 数独 オンライン, ナンバープレース, 数独 初級, 数独 上級, 数独 解き方, 数独 ルール, 脳トレ',
+    priority: '0.9',
+    changefreq: 'monthly',
+    ogImage: `${BASE_URL}/images/og/sudoku.jpg`,
+    faqPairs: [
+      ['数独（ナンプレ）とは何ですか？', '数独は9×9のマスに1から9までの数字を入れる論理パズルです。縦の列、横の行、太線で囲まれた3×3のブロックのそれぞれに、1〜9の数字が1つずつ入るようにします。計算は不要で、論理的な推理だけで解けます。ナンプレ（ナンバープレース）とも呼ばれます。'],
+      ['数独は無料でオンラインプレイできますか？', 'はい、パズルガーデンの数独は完全無料です。ダウンロードや会員登録は不要で、ブラウザからそのまま初級から上級までの問題に挑戦できます。'],
+      ['初心者はどの難易度から始めればいいですか？', 'まずは初級かやさしいレベルがおすすめです。難易度は段階的に上がるので、少しずつ慣れていけます。慣れてきたらタイムアタックモードで、スピードにも挑戦してみてください。'],
+      ['数独のルールと解き方のコツを教えてください。', '空きマスに1〜9の数字を入れ、同じ数字が行・列・3×3ブロックで重複しないようにします。まずは入る数字が1つしかないマスから埋めましょう。数字を入れるたびに周りのマスの候補が減り、次のマスが見つけやすくなります。'],
+      ['9×9以外の盤面もありますか？', 'はい。定番の9×9のほか、6×6から始まる初心者向けの小さな盤面や、最大16×16の大きな盤面、タイムアタックモードがあります。プレイ中はメモとヒントも使えます。'],
+      ['数独は脳トレになりますか？', '数独は集中力、論理的思考力、短期記憶を使うパズルです。毎日の短い脳トレとして楽しんでいる人も多くいます。'],
+    ],
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">数独（ナンプレ）を無料でオンラインプレイ</h2>
+        <p style="${S.lead}"><strong>数独</strong>（<strong>ナンプレ</strong>／ナンバープレース）は、9×9のマスに数字を入れていく論理パズルです。どの行・列・3×3ブロックにも、1〜9の数字が1つずつ入るようにします。計算は必要なく、根気と推理力だけで解けるため、世界中で愛されている<strong>脳トレ</strong>パズルです。</p>
+        <h3 style="${S.h3}">数独の遊び方</h3>
+        <p style="${S.p}">空きマスをタップして、1〜9の数字を入力します。同じ行・列・ブロックに同じ数字は入れられません。初めての方は<strong>初級</strong>や<strong>やさしい</strong>レベルから始め、メモ機能で候補の数字を書き込みながら進めましょう。入る数字が1つに絞られるマスを見つけて埋めていくと、盤面全体が少しずつ解けていきます。</p>
+        <h3 style="${S.h3}">難易度とモード</h3>
+        <p style="${S.p}">初級、やさしい、ふつう、むずかしいの難易度から選べます。6×6の小さな盤面から始められるので入門にぴったり。最大16×16の大きな盤面でじっくり挑戦することも、タイムアタックモードでタイムを競うこともできます。</p>
+        <h3 style="${S.h3}">すきま時間の脳トレに</h3>
+        <p style="${S.pLast}">数独は<strong>集中力・論理的思考力・短期記憶</strong>を鍛えてくれます。1日1問でも続けやすく、ダウンロードも登録も不要の無料ゲームです。</p>
+      </section>`,
+  },
+  {
+    path: 'ja/queens',
+    slug: 'queens',
+    name: 'クラウンクエスト（クイーンズパズル）',
+    title: 'クイーンズパズル無料オンライン - クラウンクエスト｜パズルガーデン',
+    description: 'クイーンズパズルを無料でオンラインプレイ。色分けされた各エリアに女王を1つずつ置き、縦横斜めで隣り合わないようにする論理パズル。クラウンクエストは全1000ステージ。',
+    keywords: 'クイーンズ パズル, クイーンズパズル 無料, クイーンズ ゲーム, クラウンクエスト, 論理パズル 無料, 女王 パズル, 脳トレ ゲーム',
+    priority: '0.9',
+    changefreq: 'monthly',
+    ogImage: `${BASE_URL}/images/og/queens.jpg`,
+    faqPairs: [
+      ['クラウンクエスト（クイーンズパズル）とは何ですか？', 'クラウンクエストは、色分けされた盤面に女王（クイーン）を置いていく論理パズルです。各色のエリアに1つ、各行・各列にも1つずつ女王を置きます。女王同士は斜めを含め、隣り合ってはいけません。'],
+      ['クイーンズパズルの解き方のコツは？', '消去法で進めるのが基本です。女王を置けないマスにバツ印をつけ、あるエリアの候補が1マスだけになったら、そこが女王の位置になります。女王を置くとその行・列・周囲のマスが埋まるので、次のヒントが見えてきます。'],
+      ['クラウンクエストは無料で遊べますか？', 'はい、完全無料です。ブラウザからダウンロードや登録なしで遊べます。全1000ステージで、進行状況は自動で保存されます。'],
+      ['チェスのNクイーン問題とは違いますか？', '近い仲間ですが、少し違います。Nクイーン問題は女王同士が攻撃し合わない配置を求めますが、このパズルでは色分けされた各エリアにも女王を1つずつ置くため、正解が1つに定まります。また、女王は隣のマスに接しなければよく、遠くの斜め線を気にする必要はありません。'],
+      ['計算が苦手でも遊べますか？', 'はい。計算は一切ありません。ルールは3つだけの純粋な論理パズルです。最初のステージは小さな盤面から始まり、少しずつ大きくなっていきます。'],
+    ],
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">クラウンクエスト - 無料のクイーンズパズル</h2>
+        <p style="${S.lead}"><strong>クラウンクエスト</strong>は、色分けされた盤面の各エリアに女王（👑）を1つずつ置く<strong>クイーンズパズル</strong>です。計算は不要で、ルールは3つだけ。数独とはひと味違う推理の面白さが楽しめます。</p>
+        <h3 style="${S.h3}">3つのルール</h3>
+        <p style="${S.p}"><strong>1.</strong> 色分けされた各エリアに、女王をちょうど1つ置く。<strong>2.</strong> 各行・各列にも、女王をちょうど1つ置く。<strong>3.</strong> 女王同士は、<strong>斜めを含めて</strong>隣り合ってはいけない。</p>
+        <h3 style="${S.h3}">解き方のヒント</h3>
+        <p style="${S.p}">まず、女王を<strong>置けない</strong>マスにバツ印をつけていきましょう。あるエリアの候補が1マスだけになったら、そこが女王の場所です。女王が決まるたびにその行・列・周囲のマスが消え、次の手がかりが現れます。</p>
+        <h3 style="${S.h3}">全1000ステージを無料で</h3>
+        <p style="${S.pLast}">小さな盤面から始まり、少しずつ大きくなっていきます。進行状況は自動保存。<strong>空間認識力と消去法の思考力</strong>を鍛えるのにぴったりで、ダウンロードも登録も不要です。</p>
+      </section>`,
+  },
+  {
+    path: 'ja/jigsaw',
+    slug: 'jigsaw',
+    name: 'タイニーピース（ジグソーパズル）',
+    title: 'ジグソーパズル無料オンライン - タイニーピース｜パズルガーデン',
+    description: 'ジグソーパズルを無料でオンラインプレイ。バラバラのピースを入れ替えて、かわいい絵や名画のミニチュア版を完成させよう。タイニーピースはブラウザですぐ遊べます。',
+    keywords: 'ジグソーパズル 無料, ジグソーパズル オンライン, ジグソーパズル ゲーム, 絵合わせ パズル, タイニーピース, 癒し パズル',
+    priority: '0.9',
+    changefreq: 'weekly',
+    ogImage: `${BASE_URL}/images/og/jigsaw.jpg`,
+    faqPairs: [
+      ['タイニーピースとは何ですか？', 'タイニーピースは、バラバラになった絵のピースをドラッグして入れ替え、元の絵を完成させるジグソーパズルゲームです。正しいピース同士が隣り合うとくっついて、ひとまとまりで動かせるようになります。'],
+      ['ジグソーパズルの遊び方を教えてください。', '最初に表示される完成見本を確認して、ピースを置きたい場所にドラッグします。その場所にあったピースと入れ替わります。くっついたグループは一緒に動くので、端のピースや特徴的な部分から始めるのがおすすめです。'],
+      ['タイニーピースは無料ですか？', 'はい、完全無料です。ダウンロードや会員登録は不要で、ブラウザでそのまま遊べます。進行状況は自動で保存されます。'],
+      ['どんな絵柄がありますか？', 'かわいい動物、街並み、食べ物などの絵柄があります。10ステージごとに、モナ・リザ、神奈川沖浪裏、真珠の耳飾りの少女などの名画をかわいくアレンジした特別ステージが登場します。'],
+    ],
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">タイニーピース - 無料のオンラインジグソーパズル</h2>
+        <p style="${S.lead}"><strong>タイニーピース</strong>は、オンラインで無料で遊べる癒し系の<strong>ジグソーパズル</strong>です。バラバラになった<strong>絵のピース</strong>を動かして、かわいくてカラフルな絵を完成させましょう。ダウンロードは不要です。</p>
+        <h3 style="${S.h3}">遊び方</h3>
+        <p style="${S.p}">ピースをほかの場所にドラッグすると、2つのピースが入れ替わります。正しいピース同士が隣り合うと<strong>自動でくっつき</strong>、ひとまとまりで動かせます。少ない手数でクリアするほど、たくさんの星がもらえます。</p>
+        <h3 style="${S.h3}">名画をかわいく再現</h3>
+        <p style="${S.pLast}">10ステージごとに、<strong>モナ・リザ、神奈川沖浪裏、星月夜</strong>などの名画をかわいいタッチで描き直した特別なパズルが登場します。ボードのフレームやキャラクターを集めて、自分好みに飾ることもできます。</p>
+      </section>`,
+  },
+  {
+    path: 'ja/snapspot',
+    slug: 'snapspot',
+    name: 'スナップスポット（間違い探し）',
+    title: '間違い探しゲーム無料オンライン - スナップスポット｜パズルガーデン',
+    description: '間違い探しゲームを無料でオンラインプレイ。2枚の写真を見比べて違いをタップ。ノーマル・タイムアタック・アーケードの3モードで、750以上のステージが遊べます。',
+    keywords: '間違い探し 無料, 間違い探し ゲーム, 間違い探し オンライン, 間違い探し 写真, 脳トレ 間違い探し, スナップスポット',
+    priority: '0.9',
+    changefreq: 'weekly',
+    ogImage: `${BASE_URL}/images/og/snapspot.jpg`,
+    faqPairs: [
+      ['スナップスポットとは何ですか？', 'スナップスポットは間違い探しゲームです。2枚の写真が並んで表示されるので、違っている場所をタップして見つけます。'],
+      ['間違い探しは無料で遊べますか？', 'はい、スナップスポットは完全無料です。ダウンロードや会員登録は不要で、ブラウザからそのまま遊べます。'],
+      ['どんなゲームモードがありますか？', 'ステージを1つずつ進めるノーマルモード、制限時間内に挑戦するタイムアタックモード、ステージが途切れず続くアーケードモードがあります。ステージ数は750以上です。'],
+      ['間違いを見つけるコツはありますか？', '写真を4つの領域に分けて、1つずつ見比べると見落としが減ります。色や大きさの変化だけでなく、小さな物が消えていたり増えていたりするパターンもよくあります。'],
+      ['間違い探しは脳トレになりますか？', '2枚の画像を見比べることで、視覚的な注意力、観察力、視覚記憶を使います。短時間で集中力を鍛えるのにおすすめです。'],
+    ],
+    seoContent: `
+      <section style="${S.section}">
+        <h2 style="${S.h2}">スナップスポット - 無料の間違い探しゲーム</h2>
+        <p style="${S.lead}"><strong>スナップスポット</strong>は、ほぼ同じに見える2枚の写真から違いを見つける<strong>間違い探しゲーム</strong>です。ルールは簡単ですぐに始められ、ステージが進むほど違いは見つけにくくなっていきます。</p>
+        <h3 style="${S.h3}">遊び方</h3>
+        <p style="${S.p}">2枚の写真を見比べて、違いを見つけたらその場所をタップします。すべての違いを見つければステージクリアです。</p>
+        <h3 style="${S.h3}">3つのゲームモード</h3>
+        <p style="${S.p}"><strong>ノーマル</strong>はステージを1つずつ進むモード、<strong>タイムアタック</strong>は制限時間内に違いを見つけるモード、<strong>アーケード</strong>はステージが途切れず続くモードです。750以上のステージが遊べます。</p>
+        <h3 style="${S.h3}">観察力を鍛えよう</h3>
+        <p style="${S.pLast}">間違い探しは<strong>視覚的な注意力と観察力</strong>を鍛えます。2枚の画像を頭の中で見比べるので視覚記憶も使い、数分で集中力を高めたいときにぴったりです。</p>
+      </section>`,
+  },
+].map(r => ({
+  ...r,
+  lang: 'ja',
+  lastmod: r.path === 'ja' ? undefined : '2026-11-16',
+  canonical: r.path === 'ja' ? `${BASE_URL}/ja/` : `${BASE_URL}/${r.path}`,
+  breadcrumbSchema: r.path === 'ja' ? null : breadcrumbJa(r.name, r.slug),
+  softwareSchema: r.path === 'ja' ? null : softwareJa(r.name),
+  faqSchema: r.faqPairs ? faq(r.faqPairs) : null,
+  extraSchemas: r.path === 'ja' ? homeSchemasJa() : [],
+}));
+routes.push(...jaRoutes);
+
+/** 이 라우트의 ko/en/ja 쌍(hreflang) — 세 언어가 모두 있어야 한다. x-default 는 영어판 */
+export const alternates = (route) => {
+  const slug = route.lang === 'ko' ? route.path : route.slug;
+  const has = (lang, p) => routes.some(r => r.lang === lang && r.path === p);
+  const koExists = slug === '' || has('ko', slug);
+  if (!koExists || !has('en', slug ? `en/${slug}` : 'en') || !has('ja', slug ? `ja/${slug}` : 'ja')) return null;
+  const en = slug ? `${BASE_URL}/en/${slug}` : `${BASE_URL}/en/`;
+  const ja = slug ? `${BASE_URL}/ja/${slug}` : `${BASE_URL}/ja/`;
+  return [
+    { hreflang: 'ko', href: slug ? `${BASE_URL}/${slug}` : `${BASE_URL}/` },
+    { hreflang: 'en', href: en },
+    { hreflang: 'ja', href: ja },
+    { hreflang: 'x-default', href: en },
+  ];
+};
+
 /** noscript 본문 끝에 붙는 "다른 게임" 내부 링크 — 크롤러가 게임 사이를 오가게 한다 */
-export const relatedLinks = (currentPath) => `
+export const relatedLinks = (currentPath) => {
+  if (currentPath === 'ja' || currentPath.startsWith('ja/')) {
+    const others = routes.filter(r => r.lang === 'ja' && r.path !== 'ja' && r.path !== currentPath);
+    return `
+      <nav style="${S.section}">
+        <h3 style="${S.h3}">ほかのパズルゲーム</h3>
+        <p style="${S.pLast}">${others.map(r => `<a href="${BASE_URL}/${r.path}">${r.name}</a>`).join(' · ')}${others.length ? ' · ' : ''}<a href="${BASE_URL}/ja/">パズルガーデン トップ</a></p>
+      </nav>`;
+  }
+  if (currentPath === 'en' || currentPath.startsWith('en/')) {
+    const others = routes.filter(r => r.lang === 'en' && r.path !== 'en' && r.path !== currentPath);
+    return `
+      <nav style="${S.section}">
+        <h3 style="${S.h3}">More puzzle games</h3>
+        <p style="${S.pLast}">${others.map(r => `<a href="${BASE_URL}/${r.path}">${r.name}</a>`).join(' · ')}${others.length ? ' · ' : ''}<a href="${BASE_URL}/en/">Puzzle Garden home</a></p>
+      </nav>`;
+  }
+  return `
       <nav style="${S.section}">
         <h3 style="${S.h3}">다른 퍼즐 게임</h3>
-        <p style="${S.pLast}">${routes.filter(r => r.path !== currentPath).map(r => `<a href="${BASE_URL}/${r.path}">${r.name}</a>`).join(' · ')} · <a href="${BASE_URL}/">퍼즐 가든 홈</a></p>
+        <p style="${S.pLast}">${routes.filter(r => r.lang === 'ko' && r.path !== currentPath).map(r => `<a href="${BASE_URL}/${r.path}">${r.name}</a>`).join(' · ')} · <a href="${BASE_URL}/">퍼즐 가든 홈</a></p>
       </nav>`;
+};

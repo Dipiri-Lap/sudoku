@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useMatch } from 'react-router-dom';
+import { Routes, Route, Navigate, useMatch, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { isKo, isGameAvailable } from './i18n/locale';
+import LanguageVersionBanner from './common/components/LanguageVersionBanner';
 import { HelmetProvider } from 'react-helmet-async';
 import LandingPage from './common/components/LandingPage';
 import SudokuModeSelect from './features/sudoku/components/SudokuModeSelect';
@@ -27,6 +30,8 @@ import GardenMap from './features/garden/components/GardenMap';
 import JigsawGame from './features/jigsaw/components/JigsawGame';
 import DailyPuzzleCalendar from './features/daily/components/DailyPuzzleCalendar';
 import DailyPlay from './features/daily/components/DailyPlay';
+import GuideIndex from './features/guide/components/GuideIndex';
+import GuideDetail from './features/guide/components/GuideDetail';
 
 import AdminPage from './features/admin/AdminPage';
 import { WordSortProvider } from './features/word-sort/context/WordSortContext';
@@ -54,7 +59,28 @@ const AppContent: React.FC = () => {
   // 아래 게이트에서 영영 멈춘다. 진행도를 저장하게 되면 이 목록에서 빼야 한다.
   const standaloneJewel = useMatch('/jewel-kingdom');
   const standaloneNonogram = useMatch('/nonogram');
+  const standaloneGuide = useMatch('/guide/*');
+  const { pathname } = useLocation();
+  const { t } = useTranslation();
 
+  // 해외판(/en/..., /ja/...)은 INTL_AVAILABLE_GAMES 에 든 게임만 연다. 나머지는 그 언어 홈(/en/, /ja/)으로.
+  // 한국어는 이 분기를 타지 않는다.
+  if (!isKo) {
+    const firstSegment = pathname.split('/')[1] ?? '';
+    if (firstSegment !== '' && firstSegment !== 'queen' && !isGameAvailable(firstSegment)) {
+      return <Navigate to="/" replace />;
+    }
+  }
+
+  // 게임 설명은 정적 콘텐츠라 사용자 데이터 초기화를 기다릴 필요가 없다.
+  if (standaloneGuide) {
+    return (
+      <Routes>
+        <Route path="/guide" element={<GuideIndex />} />
+        <Route path="/guide/:gameId" element={<GuideDetail />} />
+      </Routes>
+    );
+  }
   if (standaloneJewel) return <JewelKingdomGame />;
   if (standaloneNonogram) return <NonogramGame />;
 
@@ -77,7 +103,7 @@ const AppContent: React.FC = () => {
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }} />
-        <p style={{ fontWeight: 600 }}>데이터 초기화 중...</p>
+        <p style={{ fontWeight: 600 }}>{t('app.initializing')}</p>
         <style>{`
           @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -228,6 +254,7 @@ const App: React.FC = () => {
         <UserInitProvider>
           <AppContent />
         </UserInitProvider>
+        <LanguageVersionBanner />
       </div>
     </HelmetProvider>
   );

@@ -7,28 +7,30 @@
 
 import { writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { routes, BASE_URL } from './seo-routes.mjs';
+import { routes, BASE_URL, alternates } from './seo-routes.mjs';
 
 const today = new Date().toISOString().slice(0, 10);
 
 const urls = [
-  { loc: `${BASE_URL}/`, changefreq: 'daily', priority: '1.0', lastmod: today },
+  { loc: `${BASE_URL}/`, changefreq: 'daily', priority: '1.0', lastmod: today, alts: alternates({ lang: 'ko', path: '' }) },
   ...routes.map(r => ({
     loc: r.canonical,
     changefreq: r.changefreq ?? 'monthly',
     priority: r.priority ?? '0.8',
     // 내용을 실제로 고친 날짜. 매일 바뀌는 오늘의 퍼즐만 빌드 날짜를 쓴다.
     lastmod: r.lastmod ?? today,
+    alts: alternates(r),
   })),
 ];
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls.map(u => `  <url>
     <loc>${u.loc}</loc>
     <lastmod>${u.lastmod}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
+    <priority>${u.priority}</priority>${(u.alts ?? []).map(a => `
+    <xhtml:link rel="alternate" hreflang="${a.hreflang}" href="${a.href}"/>`).join('')}
   </url>`).join('\n')}
 </urlset>
 `;

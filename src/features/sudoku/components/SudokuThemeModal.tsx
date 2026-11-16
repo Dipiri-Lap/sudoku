@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSudokuTheme, SUDOKU_THEMES, THEME_GRADE_CONFIG, type SudokuTheme, type ThemeGrade } from '../context/SudokuThemeContext';
 import { useCoins } from '../../../context/CoinContext';
 import { X, Lock, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const CoinImg = ({ size = 16 }: { size?: number }) => (
     <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />
@@ -37,6 +38,7 @@ const ThemePreview: React.FC<{ theme: SudokuTheme; size?: number }> = ({ theme, 
 interface Props { onClose: () => void; }
 
 const SudokuThemeModal: React.FC<Props> = ({ onClose }) => {
+    const { t: tr } = useTranslation('sudoku');
     const { selectedThemeId, hasUnlocked, unlockTheme, selectTheme } = useSudokuTheme();
     const { coins } = useCoins();
     const [confirmTheme, setConfirmTheme] = useState<SudokuTheme | null>(null);
@@ -76,7 +78,7 @@ const SudokuThemeModal: React.FC<Props> = ({ onClose }) => {
                     background: 'linear-gradient(135deg, rgba(59,107,145,0.2), rgba(168,85,247,0.15))',
                 }}>
                     <h2 style={{ margin: 0, color: 'white', fontSize: '1.15rem', fontWeight: 800 }}>
-                        🎨 테마 상점
+                        {tr('themeModal.title')}
                     </h2>
                     <button onClick={onClose} style={{
                         position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)',
@@ -93,7 +95,7 @@ const SudokuThemeModal: React.FC<Props> = ({ onClose }) => {
                         padding: '0.6rem 1rem', backgroundColor: 'rgba(255,255,255,0.05)',
                         borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
                     }}>
-                        <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>보유 코인</span>
+                        <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{tr('themeModal.coins')}</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <CoinImg size={16} />
                             <span style={{ color: '#fde047', fontWeight: 800, fontSize: '1rem' }}>{coins.toLocaleString()}</span>
@@ -175,7 +177,7 @@ const SudokuThemeModal: React.FC<Props> = ({ onClose }) => {
                                                     color: isSelected ? '#4ade80' : unlocked ? '#94a3b8' : canAfford ? '#fde047' : '#475569',
                                                     display: 'flex', alignItems: 'center', gap: '2px',
                                                 }}>
-                                                    {isSelected ? '적용됨' : unlocked ? '선택' : cfg.cost === 0 ? '무료' : <><CoinImg size={11} />{cfg.cost}</>}
+                                                    {isSelected ? tr('themeModal.applied') : unlocked ? tr('themeModal.select') : cfg.cost === 0 ? tr('themeModal.free') : <><CoinImg size={11} />{cfg.cost}</>}
                                                 </div>
                                             </div>
                                         );
@@ -199,24 +201,24 @@ const SudokuThemeModal: React.FC<Props> = ({ onClose }) => {
                         width: '240px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
                         border: '1px solid rgba(255,255,255,0.1)',
                     }}>
-                        <span style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>테마 잠금 해제</span>
+                        <span style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>{tr('themeModal.unlockTitle')}</span>
                         <ThemePreview theme={confirmTheme} size={80} />
                         <span style={{ color: 'white', fontWeight: 700, fontSize: '1.05rem' }}>{confirmTheme.name}</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'white', fontSize: '0.88rem', textAlign: 'center' }}>
                             <CoinImg size={16} />
-                            <span>{THEME_GRADE_CONFIG[confirmTheme.grade].cost} 코인을 사용하시겠습니까?</span>
+                            <span>{tr('themeModal.confirmSpend', { cost: THEME_GRADE_CONFIG[confirmTheme.grade].cost })}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '0.6rem', width: '100%' }}>
                             <button onClick={() => setConfirmTheme(null)} style={{
                                 flex: 1, padding: '0.6rem', borderRadius: '10px', border: 'none',
                                 backgroundColor: 'rgba(255,255,255,0.08)', color: '#94a3b8',
                                 fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem',
-                            }}>취소</button>
+                            }}>{tr('themeModal.cancel')}</button>
                             <button onClick={handleConfirm} style={{
                                 flex: 1, padding: '0.6rem', borderRadius: '10px', border: 'none',
                                 background: 'linear-gradient(135deg, #f6d365, #fda085)',
                                 color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem',
-                            }}>확인</button>
+                            }}>{tr('themeModal.ok')}</button>
                         </div>
                     </div>
                 </div>

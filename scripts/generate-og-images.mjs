@@ -21,6 +21,7 @@ const GAMES = [
   ['queens', 'crownquest'],
   ['arrow-puzzle', 'arrow-puzzle'],
   ['daily', 'daily'],
+  ['jigsaw', 'tinypieces'],
 ];
 
 const src = (dir) => `public/images/${dir}/title.webp`;
@@ -40,7 +41,7 @@ for (const [name, dir] of GAMES) {
 
 // 홈: 3×2 콜라주
 const CELL = 315;
-const home = GAMES.filter(([n]) => n !== 'daily');
+const home = GAMES.filter(([n]) => n !== 'daily' && n !== 'jigsaw'); // 3×2 콜라주는 기존 여섯 게임 유지
 const bg = await blurredBg(src('snapspot'));
 const tiles = await Promise.all(home.map(async ([, dir], i) => ({
   input: await sharp(src(dir)).resize(CELL, CELL).toBuffer(),

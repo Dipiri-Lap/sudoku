@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Edit2, Check, Lock, Star, ChevronDown, Palette } from 'lucide-react'; // Lock은 아바타 탭에서 사용
 const CoinImg = ({ size = 14 }: { size?: number }) => <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />;
 import { updateProfileInfo, getUserProfile, unlockAvatar, getTopRankings, getUserRank, updateActiveTitle, updateAvatarFrame, unlockFrame } from '../../services/rankingService';
@@ -42,19 +43,19 @@ export const getAvatarUrl = (seed: string) => {
 };
 
 /**
- * 게임 표시 이름. Record<GameKey, string> 이라 게임을 추가하면
+ * 게임 표시 이름(common 의 games.<id>.name). Record<GameKey, ...> 이라 게임을 추가하면
  * 여기에 안 넣었을 때 타입 에러로 잡힌다 (예전엔 else 로 흘러 워드스택으로 표시됐다).
  */
-const GAME_LABELS: Record<GameKey, string> = {
-    sudoku: '스도쿠',
-    'word-sort': '워드스택',
-    queens: '크라운 퀘스트',
-    snapspot: '스냅스팟',
-    crossum: '크로썸',
-    arrow: '애로우웨이',
-    jigsaw: 'Tiny Pieces',
-    daily: '오늘의 퍼즐',
-};
+const GAME_NAME_KEY = {
+    sudoku: 'games.sudoku.name',
+    'word-sort': 'games.wordSort.name',
+    queens: 'games.queens.name',
+    snapspot: 'games.snapspot.name',
+    crossum: 'games.crossMath.name',
+    arrow: 'games.arrowPuzzle.name',
+    jigsaw: 'games.jigsaw.name',
+    daily: 'games.daily.name',
+} as const satisfies Record<GameKey, string>;
 
 type RewardItem = { kind: 'avatar' | 'frame' | 'cardBack'; id: string };
 
@@ -65,7 +66,6 @@ const rewardItems = (c: Challenge): RewardItem[] => [
     ...(c.reward.cardBack ? [{ kind: 'cardBack' as const, id: c.reward.cardBack }] : []),
 ];
 
-const REWARD_KIND_LABEL: Record<RewardItem['kind'], string> = { avatar: '아바타', frame: '테두리', cardBack: '카드 뒷면' };
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
     uid,
@@ -76,6 +76,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     onActiveTitleChange,
     onAvatarFrameChange,
 }) => {
+    const { t } = useTranslation('modals');
+    const { t: tc } = useTranslation('common');
+    const gameLabel = (g: GameKey) => tc(GAME_NAME_KEY[g]);
+    const rewardKindLabel = (k: RewardItem['kind']) => t(`profile.rewardKind.${k}`);
     const { coins, spendCoins } = useCoins();
     const [nickname, setNickname] = useState(currentNickname);
     const [isEditing, setIsEditing] = useState(false);
@@ -296,7 +300,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         const cost = findFrame(id).price ?? 0;
         const success = await spendCoins(cost);
         if (!success) {
-            alert('코인이 부족합니다!');
+            alert(t('profile.alert.notEnoughCoins'));
             setPendingUnlockFrame(null);
             return;
         }
@@ -307,7 +311,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             await handleSetFrame(id);
         } catch (e) {
             console.error('Failed to unlock frame:', e);
-            alert('잠금 해제 중 오류가 발생했습니다.');
+            alert(t('profile.alert.unlockError'));
         }
     };
 
@@ -391,10 +395,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 onSaveSuccess(nickname.trim(), url);
             } catch (e) {
                 console.error('Failed to unlock avatar:', e);
-                alert('잠금 해제 중 오류가 발생했습니다.');
+                alert(t('profile.alert.unlockError'));
             }
         } else {
-            alert('코인이 부족합니다!');
+            alert(t('profile.alert.notEnoughCoins'));
             setPendingUnlockAvatar(null);
         }
     };
@@ -437,7 +441,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     position: 'relative',
                     flexShrink: 0
                 }}>
-                    <h2 style={{ margin: 0, color: 'white', fontSize: '1.2rem', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>프로필 설정</h2>
+                    <h2 style={{ margin: 0, color: 'white', fontSize: '1.2rem', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{t('profile.title')}</h2>
                     <button
                         onClick={onClose}
                         style={{
@@ -486,7 +490,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         </div>
 
                         <div style={{ flex: 1, position: 'relative' }}>
-                            <div style={{ color: '#e2e8f0', fontSize: '0.8rem', marginBottom: '4px', fontWeight: 'bold' }}>닉네임</div>
+                            <div style={{ color: '#e2e8f0', fontSize: '0.8rem', marginBottom: '4px', fontWeight: 'bold' }}>{t('profile.nickname')}</div>
                             {isEditing ? (
                                 <div style={{ display: 'flex', gap: '0.4rem' }}>
                                     <input
@@ -569,10 +573,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         flexShrink: 0
                     }}>
                         {([
-                            { key: 'avatar',    icon: <Edit2 size={14} />,  label: '아바타' },
-                            { key: 'frame',     icon: <Palette size={14} />, label: '테두리' },
-                            { key: 'ranking',   icon: <Trophy size={14} />, label: '랭킹' },
-                            { key: 'challenge', icon: <Star size={14} />,   label: '도전과제' },
+                            { key: 'avatar',    icon: <Edit2 size={14} />,  label: t('profile.tabs.avatar') },
+                            { key: 'frame',     icon: <Palette size={14} />, label: t('profile.tabs.frame') },
+                            { key: 'ranking',   icon: <Trophy size={14} />, label: t('profile.tabs.ranking') },
+                            { key: 'challenge', icon: <Star size={14} />,   label: t('profile.tabs.challenge') },
                         ] as const).map(({ key, icon, label }) => (
                             <button
                                 key={key}
@@ -623,7 +627,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 border: '1px solid rgba(255,255,255,0.1)',
                                 flexShrink: 0
                             }}>
-                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>보유 코인</span>
+                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{t('coinShop.owned')}</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     <CoinImg size={16} />
                                     <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
@@ -632,7 +636,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
                             {/* Avatar Grid - ONLY THIS AREA SCROLLS */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1, minHeight: 0 }}>
-                                <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold', flexShrink: 0 }}>아바타 선택</div>
+                                <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold', flexShrink: 0 }}>{t('profile.chooseAvatar')}</div>
                                 <div 
                                     ref={scrollRef}
                                     onMouseDown={handleMouseDown}
@@ -720,7 +724,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         </>
                     ) : activeTab === 'frame' ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1, minHeight: 0 }}>
-                            <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold', flexShrink: 0 }}>테두리 선택</div>
+                            <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold', flexShrink: 0 }}>{t('profile.chooseFrame')}</div>
                             <div style={{
                                 backgroundColor: '#475569',
                                 borderRadius: '16px',
@@ -799,7 +803,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 borderRadius: '12px',
                                 flexShrink: 0
                             }}>
-                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>퍼즐력</span>
+                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{t('profile.puzzlePower')}</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     <Star size={14} color="#f59e0b" fill="#f59e0b" />
                                     <span style={{ color: '#f59e0b', fontWeight: 'bold', fontSize: '1rem' }}>
@@ -845,7 +849,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                             >
                                                 <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: expandedGames.has(game) ? 'rotate(0deg)' : 'rotate(-90deg)', flexShrink: 0 }} />
                                                 <span style={{ fontSize: '0.72rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                                    {GAME_LABELS[game as GameKey] ?? game}
+                                                    {GAME_NAME_KEY[game as GameKey] ? gameLabel(game as GameKey) : game}
                                                     {game !== 'daily' && (
                                                         <span style={{ marginLeft: '5px', fontSize: '0.65rem', color: '#64748b' }}>
                                                             ({list.filter(c => challenges.isChallengeCompleted(c.id)).length}/{list.length})
@@ -947,7 +951,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                         <button
                                                                             key={item.kind + item.id}
                                                                             onClick={() => setRewardPreview({ challenge, item })}
-                                                                            title={`${REWARD_KIND_LABEL[item.kind]} 미리보기`}
+                                                                            title={t('profile.rewardPreview', { kind: rewardKindLabel(item.kind) })}
                                                                             style={{
                                                                                 position: 'relative', padding: '5px', border: 'none',
                                                                                 background: 'transparent', cursor: 'pointer',
@@ -968,7 +972,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                                 {completed ? <Check size={9} strokeWidth={4} /> : cleared ? '!' : <Lock size={8} strokeWidth={3} />}
                                                                             </span>
                                                                             <span style={{ fontSize: '0.55rem', color: completed ? '#86efac' : cleared ? '#fde047' : '#64748b', fontWeight: 'bold' }}>
-                                                                                {REWARD_KIND_LABEL[item.kind]}
+                                                                                {rewardKindLabel(item.kind)}
                                                                             </span>
                                                                         </button>
                                                                     ))}
@@ -1001,8 +1005,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                         }}
                                                                     >
                                                                         {activeTitle === challenge.id
-                                                                            ? <><span>🏷</span><span>사용 중</span></>
-                                                                            : <><Check size={12} color="#4ade80" strokeWidth={3} /><span style={{ color: '#4ade80' }}>칭호 설정</span></>
+                                                                            ? <><span>🏷</span><span>{t('profile.challenge.inUse')}</span></>
+                                                                            : <><Check size={12} color="#4ade80" strokeWidth={3} /><span style={{ color: '#4ade80' }}>{t('profile.challenge.setTitle')}</span></>
                                                                         }
                                                                     </button>
                                                                 </div>
@@ -1048,13 +1052,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                 >
                                                                     {challenge.reward.puzzle_power > 0 && (
                                                                         <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                            <Star size={10} fill="#fde047" color="#fde047" />퍼즐력 +{challenge.reward.puzzle_power}
+                                                                            <Star size={10} fill="#fde047" color="#fde047" />{t('profile.challenge.puzzlePowerPlus', { n: challenge.reward.puzzle_power })}
                                                                         </span>
                                                                     )}
                                                                     <span style={{ fontSize: '0.65rem', color: '#fde047', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                        <CoinImg size={10} />코인 +{challenge.reward.coin}
+                                                                        <CoinImg size={10} />{t('profile.challenge.coinPlus', { n: challenge.reward.coin })}
                                                                     </span>
-                                                                    <span style={{ fontSize: '0.58rem', color: '#fbbf24', marginTop: '1px', alignSelf: 'center' }}>보상받기</span>
+                                                                    <span style={{ fontSize: '0.58rem', color: '#fbbf24', marginTop: '1px', alignSelf: 'center' }}>{t('profile.challenge.claim')}</span>
                                                                 </button>
                                                             ) : (
                                                                 <div style={{
@@ -1071,10 +1075,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                     minWidth: '62px',
                                                                 }}>
                                                                     <span style={{ fontSize: '0.65rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                        <Star size={10} fill="#475569" color="#475569" />퍼즐력 +{challenge.reward.puzzle_power}
+                                                                        <Star size={10} fill="#475569" color="#475569" />{t('profile.challenge.puzzlePowerPlus', { n: challenge.reward.puzzle_power })}
                                                                     </span>
                                                                     <span style={{ fontSize: '0.65rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                        <CoinImg size={10} />코인 +{challenge.reward.coin}
+                                                                        <CoinImg size={10} />{t('profile.challenge.coinPlus', { n: challenge.reward.coin })}
                                                                     </span>
                                                                 </div>
                                                             )}
@@ -1111,7 +1115,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                     }}>
                                         <img src={selectedPhoto || '/assets/profiles/1.png'} alt="Me" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
-                                    <span style={{ fontSize: '0.9rem', color: 'white', fontWeight: 'bold' }}>나의 순위</span>
+                                    <span style={{ fontSize: '0.9rem', color: 'white', fontWeight: 'bold' }}>{t('profile.ranking.myRank')}</span>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
                                     <div style={{ fontSize: '1rem', color: '#3b82f6', fontWeight: '900' }}>#{userRank}</div>
@@ -1121,9 +1125,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             {/* Global Ranking - ONLY THIS AREA SCROLLS */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1, minHeight: 0 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                                    <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold' }}>Top 100 랭킹</div>
+                                    <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 'bold' }}>{t('profile.ranking.top100')}</div>
                                     <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Users size={12} /> {topRankings.length}명
+                                        <Users size={12} /> {t('profile.ranking.players', { count: topRankings.length })}
                                     </div>
                                 </div>
                                 <div 
@@ -1144,7 +1148,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                     }}
                                 >
                                     {isLoadingRankings ? (
-                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>불러오는 중...</div>
+                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>{t('profile.ranking.loading')}</div>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                             {(() => {
@@ -1243,7 +1247,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                 overflow: 'hidden'
                                                             }}>
                                                                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.nickname}</span>
-                                                                {isMe && <span style={{ fontSize: '0.7rem', color: '#3b82f6', flexShrink: 0 }}>(나)</span>}
+                                                                {isMe && <span style={{ fontSize: '0.7rem', color: '#3b82f6', flexShrink: 0 }}>{t('profile.ranking.me')}</span>}
                                                                 {user.activeTitle && CHALLENGE_MAP[user.activeTitle] && (
                                                                     <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#fde047', background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: '3px', padding: '0 4px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                                                                         {CHALLENGE_MAP[user.activeTitle].title}
@@ -1251,7 +1255,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                                                 )}
                                                             </div>
                                                             <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
-                                                                퍼즐력 {user.puzzlePower.toLocaleString()}
+                                                                {t('profile.ranking.puzzlePower', { n: user.puzzlePower.toLocaleString() })}
                                                             </div>
                                                         </div>
                                                         <div style={{ color: '#ef4444', fontWeight: '900', fontSize: '0.85rem' }}>
@@ -1290,27 +1294,28 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 overflow: 'hidden', margin: '0 auto 0.75rem',
                                 ...frameStyle(f.id, 4, '#334155', '0 4px 12px rgba(0,0,0,0.3)', 14)
                             }} />
-                            <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>{f.name} 테두리 해제</div>
+                            <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>{t('profile.unlockFrameTitle', { name: f.name })}</div>
                             <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)', marginBottom: '0.75rem', lineHeight: 1.8 }}>
+                                {t('profile.unlockPrefix')}
                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: '700', color: '#fde047' }}>
                                     <CoinImg size={15} />{cost}
-                                </span> 코인을 사용하여 해제 하시겠습니까?
+                                </span>{t('profile.unlockSuffix')}
                             </div>
                             {coins < cost && (
                                 <div style={{ fontSize: '0.78rem', color: '#ff6b6b', marginBottom: '0.6rem' }}>
-                                    코인 부족 (현재 {coins}개)
+                                    {t('profile.notEnoughCoins', { coins })}
                                 </div>
                             )}
                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                 <button
                                     onClick={() => setPendingUnlockFrame(null)}
                                     style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
-                                >취소</button>
+                                >{t('profile.cancel')}</button>
                                 <button
                                     onClick={handleConfirmUnlockFrame}
                                     disabled={coins < cost}
                                     style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= cost ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= cost ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
-                                >확인</button>
+                                >{t('profile.ok')}</button>
                             </div>
                         </div>
                     </div>
@@ -1324,7 +1329,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 const ready = !done && isReadyToClaim(pc);
                 const { current, target } = getProgress(pc);
                 const name = item.kind === 'frame' ? findFrame(item.id).name
-                    : item.kind === 'avatar' ? '전용 아바타' : '전용 카드 뒷면';
+                    : item.kind === 'avatar' ? t('profile.exclusiveAvatar') : t('profile.exclusiveCardBack');
                 return (
                     <div
                         onClick={() => setRewardPreview(null)}
@@ -1344,28 +1349,28 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                                 {renderRewardVisual(item, 104)}
                             </div>
                             <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'bold' }}>
-                                {GAME_LABELS[pc.game]} · {REWARD_KIND_LABEL[item.kind]}
+                                {gameLabel(pc.game)} · {rewardKindLabel(item.kind)}
                             </div>
                             <div style={{ fontWeight: 800, fontSize: '1.05rem', margin: '4px 0 8px' }}>{name}</div>
                             <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
                                 {pc.title}
                                 <br />
-                                {pc.condition} 시 획득
+                                {t('profile.rewardCondition', { condition: pc.condition })}
                             </div>
                             {item.kind === 'frame' && (
-                                <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '6px' }}>지금 내 아바타에 씌운 모습이에요</div>
+                                <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '6px' }}>{t('profile.frameOnAvatar')}</div>
                             )}
                             <div style={{
                                 marginTop: '0.9rem', padding: '0.45rem', borderRadius: '10px', fontSize: '0.78rem', fontWeight: 'bold',
                                 background: done ? 'rgba(34,197,94,0.18)' : ready ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.07)',
                                 color: done ? '#86efac' : ready ? '#fde047' : '#cbd5e1',
                             }}>
-                                {done ? '획득 완료' : ready ? '보상받기에서 바로 받을 수 있어요' : `진행 ${current} / ${target}`}
+                                {done ? t('profile.rewardDone') : ready ? t('profile.rewardReady') : t('profile.rewardProgress', { current, target })}
                             </div>
                             <button
                                 onClick={() => setRewardPreview(null)}
                                 style={{ marginTop: '0.8rem', padding: '0.45rem 1.4rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.85rem' }}
-                            >닫기</button>
+                            >{t('profile.close')}</button>
                         </div>
                     </div>
                 );
@@ -1388,27 +1393,28 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         }}>
                             <img src={getAvatarUrl(pendingUnlockAvatar)} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
-                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>잠금 해제</div>
+                        <div style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem' }}>{t('profile.unlock')}</div>
                         <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)', marginBottom: '0.75rem', lineHeight: 1.8 }}>
+                            {t('profile.unlockPrefix')}
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: '700', color: '#fde047' }}>
                                 <CoinImg size={15} />100
-                            </span> 코인을 사용하여 해제 하시겠습니까?
+                            </span>{t('profile.unlockSuffix')}
                         </div>
                         {coins < 100 && (
                             <div style={{ fontSize: '0.78rem', color: '#ff6b6b', marginBottom: '0.6rem' }}>
-                                코인 부족 (현재 {coins}개)
+                                {t('profile.notEnoughCoins', { coins })}
                             </div>
                         )}
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                             <button
                                 onClick={() => setPendingUnlockAvatar(null)}
                                 style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '0.9rem' }}
-                            >취소</button>
+                            >{t('profile.cancel')}</button>
                             <button
                                 onClick={handleConfirmUnlock}
                                 disabled={coins < 100}
                                 style={{ padding: '0.45rem 1.1rem', borderRadius: '8px', border: 'none', background: coins >= 100 ? 'linear-gradient(135deg, #f6d365, #fda085)' : 'rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: coins >= 100 ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}
-                            >확인</button>
+                            >{t('profile.ok')}</button>
                         </div>
                     </div>
                 </div>

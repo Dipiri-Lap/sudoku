@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { User } from 'firebase/auth';
 import { signInWithGoogle, hasGuestData } from '../../services/authService';
 
@@ -8,6 +9,7 @@ interface LoginModalProps {
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) => {
+    const { t } = useTranslation('modals');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const guestDataExists = hasGuestData();
@@ -20,11 +22,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) => {
             onSuccess(user);
         } catch (err: any) {
             if (err.code === 'auth/popup-blocked') {
-                setError('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해 주세요.');
+                setError(t('login.popupBlocked'));
             } else if (err.code === 'auth/popup-closed-by-user') {
                 setError(null);
             } else {
-                setError('로그인에 실패했습니다. 다시 시도해 주세요.');
+                setError(t('login.failed'));
             }
         } finally {
             setLoading(false);
@@ -34,43 +36,43 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) => {
     return (
         <div style={styles.overlay} onClick={onClose}>
             <div style={styles.modal} onClick={e => e.stopPropagation()}>
-                <button style={styles.closeBtn} onClick={onClose} aria-label="닫기">✕</button>
+                <button style={styles.closeBtn} onClick={onClose} aria-label={t('login.close')}>✕</button>
 
-                <h2 style={styles.title}>로그인하면 뭐가 달라요?</h2>
+                <h2 style={styles.title}>{t('login.title')}</h2>
 
                 <div style={styles.compareGrid}>
                     <div style={{ ...styles.compareCard, ...styles.guestCard }}>
-                        <div style={styles.cardLabel}>게스트</div>
+                        <div style={styles.cardLabel}>{t('login.guest')}</div>
                         <ul style={styles.featureList}>
                             <li style={styles.featureItem}>
                                 <span style={styles.iconBad}>✗</span>
-                                이 기기에서만 저장
+                                {t('login.guestSaveLocal')}
                             </li>
                             <li style={styles.featureItem}>
                                 <span style={styles.iconBad}>✗</span>
-                                앱 삭제 시 데이터 소실
+                                {t('login.guestDataLoss')}
                             </li>
                             <li style={styles.featureItem}>
                                 <span style={styles.iconBad}>✗</span>
-                                랭킹 익명 참여
+                                {t('login.guestRankAnon')}
                             </li>
                         </ul>
                     </div>
 
                     <div style={{ ...styles.compareCard, ...styles.loginCard }}>
-                        <div style={{ ...styles.cardLabel, ...styles.loginLabel }}>로그인</div>
+                        <div style={{ ...styles.cardLabel, ...styles.loginLabel }}>{t('login.login')}</div>
                         <ul style={styles.featureList}>
                             <li style={styles.featureItem}>
                                 <span style={styles.iconGood}>✓</span>
-                                기기 간 데이터 동기화
+                                {t('login.loginSync')}
                             </li>
                             <li style={styles.featureItem}>
                                 <span style={styles.iconGood}>✓</span>
-                                안전한 데이터 백업
+                                {t('login.loginBackup')}
                             </li>
                             <li style={styles.featureItem}>
                                 <span style={styles.iconGood}>✓</span>
-                                랭킹 실명 참여
+                                {t('login.loginRankNamed')}
                             </li>
                         </ul>
                     </div>
@@ -78,7 +80,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) => {
 
                 {guestDataExists && (
                     <div style={styles.migrationNotice}>
-                        🎮 기존 플레이 데이터를 계정에 옮겨드려요!
+                        {t('login.migration')}
                     </div>
                 )}
 
@@ -90,17 +92,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) => {
                     disabled={loading}
                 >
                     {loading ? (
-                        <span>로그인 중...</span>
+                        <span>{t('login.signingIn')}</span>
                     ) : (
                         <>
                             <GoogleIcon />
-                            Google로 로그인
+                            {t('login.google')}
                         </>
                     )}
                 </button>
 
                 <button style={styles.guestLink} onClick={onClose}>
-                    게스트로 계속하기
+                    {t('login.continueGuest')}
                 </button>
             </div>
         </div>

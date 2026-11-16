@@ -2,16 +2,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../../firebase';
+import i18n from '../../../i18n';
 import { useCoins } from '../../../context/CoinContext';
 
 export type Grade = 'common' | 'rare' | 'elite' | 'epic' | 'legendary';
 
 export const GRADES: Record<Grade, { label: string; color: string; price: number }> = {
-    common: { label: '일반', color: '#94a3b8', price: 100 },
-    rare: { label: '희귀', color: '#3b82f6', price: 200 },
-    elite: { label: '고급', color: '#10b981', price: 300 },
-    epic: { label: '영웅', color: '#a855f7', price: 500 },
-    legendary: { label: '전설', color: '#f59e0b', price: 800 },
+    common: { label: i18n.t('jigsaw:grades.common'), color: '#94a3b8', price: 100 },
+    rare: { label: i18n.t('jigsaw:grades.rare'), color: '#3b82f6', price: 200 },
+    elite: { label: i18n.t('jigsaw:grades.elite'), color: '#10b981', price: 300 },
+    epic: { label: i18n.t('jigsaw:grades.epic'), color: '#a855f7', price: 500 },
+    legendary: { label: i18n.t('jigsaw:grades.legendary'), color: '#f59e0b', price: 800 },
 };
 export const GRADE_ORDER: Grade[] = ['common', 'rare', 'elite', 'epic', 'legendary'];
 

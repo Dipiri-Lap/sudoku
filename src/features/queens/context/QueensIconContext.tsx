@@ -2,15 +2,16 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../../firebase';
+import i18n from '../../../i18n';
 import { useCoins } from '../../../context/CoinContext';
 
 export type IconGrade = 'common' | 'rare' | 'epic' | 'legendary';
 
 export const GRADE_CONFIG: Record<IconGrade, { label: string; color: string; cost: number }> = {
-    common:    { label: '일반',  color: '#94a3b8', cost: 0   },
-    rare:      { label: '희귀',  color: '#3b82f6', cost: 100 },
-    epic:      { label: '영웅',  color: '#a855f7', cost: 200 },
-    legendary: { label: '전설',  color: '#f59e0b', cost: 300 },
+    common:    { label: i18n.t('queens:grade.common'),  color: '#94a3b8', cost: 0   },
+    rare:      { label: i18n.t('queens:grade.rare'),  color: '#3b82f6', cost: 100 },
+    epic:      { label: i18n.t('queens:grade.epic'),  color: '#a855f7', cost: 200 },
+    legendary: { label: i18n.t('queens:grade.legendary'),  color: '#f59e0b', cost: 300 },
 };
 
 export interface QueensIconDesign {

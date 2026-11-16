@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { paidCoinsEnabled } from '../../i18n/locale';
 import { X, Play } from 'lucide-react';
 import * as PortOne from '@portone/browser-sdk/v2';
 import { httpsCallable } from 'firebase/functions';
@@ -36,6 +38,7 @@ interface CoinShopModalProps {
 
 
 const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => {
+    const { t } = useTranslation('modals');
     const { coins, addCoins, applyServerGrant } = useCoins();
     const [adCooldownLeft, setAdCooldownLeft] = useState(0);
     const [adWatching, setAdWatching] = useState(false);
@@ -87,7 +90,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                 localStorage.setItem(AD_STORAGE_KEY, String(Date.now()));
                 setAdCooldownLeft(AD_COOLDOWN_MS);
                 setAdWatching(false);
-                showToast('🪙 50 코인 획득! (개발 모드)');
+                showToast(t('coinShop.toast.earnedDev'));
             }, 1500);
             return;
         }
@@ -109,16 +112,16 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                 await addCoins(50);
                 localStorage.setItem(AD_STORAGE_KEY, String(Date.now()));
                 setAdCooldownLeft(AD_COOLDOWN_MS);
-                showToast('🪙 50 코인 획득!');
+                showToast(t('coinShop.toast.earned'));
             },
             adDismissed: () => {
-                showToast('광고를 끝까지 시청해야 코인을 받을 수 있어요.');
+                showToast(t('coinShop.toast.adDismissed'));
             },
             adBreakDone: (info: { status: string }) => {
                 setAdWatching(false);
                 setPendingShowAd(null);
                 if (info.status === 'noAdPreloaded') {
-                    showToast('현재 준비된 광고가 없습니다. 잠시 후 다시 시도해주세요.');
+                    showToast(t('coinShop.toast.noAd'));
                 }
             },
         });
@@ -149,7 +152,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
             });
 
             if (!response || response.code) {
-                showToast(response?.message || '결제가 취소되었습니다.');
+                showToast(response?.message || t('coinShop.toast.paymentCancelled'));
                 return;
             }
 
@@ -174,11 +177,11 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                     pack: pkg.amount === STARTER_PACK.amount ? 'starter' : `coin_${pkg.coins}`,
                 });
             }
-            showToast(`🪙 ${result.data.coins.toLocaleString()} 코인 지급 완료!`);
+            showToast(t('coinShop.toast.granted', { coins: result.data.coins.toLocaleString() }));
             onClose();
         } catch (e) {
             console.error('Payment error:', e);
-            showToast('결제 검증 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            showToast(t('coinShop.toast.verifyError'));
         } finally {
             setPurchasing(false);
         }
@@ -220,7 +223,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                     position: 'relative',
                     flexShrink: 0,
                 }}>
-                    <h2 style={{ margin: 0, color: 'white', fontSize: '1.2rem', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>코인 상점</h2>
+                    <h2 style={{ margin: 0, color: 'white', fontSize: '1.2rem', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{t('coinShop.title')}</h2>
                     <button
                         onClick={onClose}
                         style={{
@@ -245,7 +248,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                         borderRadius: '12px',
                         border: '1px solid rgba(255,255,255,0.1)',
                     }}>
-                        <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>보유 코인</span>
+                        <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{t('coinShop.owned')}</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <CoinImg size={16} />
                             <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '1rem' }}>{coins.toLocaleString()}</span>
@@ -253,7 +256,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                     </div>
 
                     {/* 스타터 팩 - 계정당 1회. 이미 샀으면 자리를 비운다 */}
-                    {starterPackUsed === false && (
+                    {paidCoinsEnabled && starterPackUsed === false && (
                         <button
                             onClick={() => handlePurchase(STARTER_PACK)}
                             disabled={purchasing}
@@ -304,12 +307,13 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                                     background: 'linear-gradient(to bottom, #ef4444, #b91c1c)',
                                     color: 'white', fontWeight: 800, fontSize: '3.4cqw',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.4)',
-                                }}>55% 할인</div>
+                                }}>{t('coinShop.starterDiscount')}</div>
                             </div>
                         </button>
                     )}
 
-                    {/* 코인 구매 */}
+                    {/* 코인 구매 (영어판에서는 숨김) */}
+                    {paidCoinsEnabled && (
                     <div style={{
                         flexShrink: 0,
                         padding: '1rem',
@@ -317,7 +321,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                         borderRadius: '12px',
                         border: '1px solid rgba(255,255,255,0.1)',
                     }}>
-                        <div style={{ color: '#e2e8f0', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.75rem' }}>코인 구매</div>
+                        <div style={{ color: '#e2e8f0', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.75rem' }}>{t('coinShop.buyTitle')}</div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
                             {COIN_PACKAGES.map(pkg => (
                                 <button
@@ -386,6 +390,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                             ))}
                         </div>
                     </div>
+                    )}
 
                     {/* 광고 보기 */}
                     <div style={{
@@ -395,14 +400,14 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                         borderRadius: '12px',
                         border: '1px solid rgba(255,255,255,0.1)',
                     }}>
-                        <div style={{ color: '#e2e8f0', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.75rem' }}>무료 코인</div>
+                        <div style={{ color: '#e2e8f0', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.75rem' }}>{t('coinShop.freeTitle')}</div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <div style={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>광고 보고 🪙 50 받기</div>
+                                <div style={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>{t('coinShop.watchAdTitle')}</div>
                                 <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '3px' }}>
                                     {adCooldownLeft > 0
-                                        ? `다음 광고까지 ${formatCooldown(adCooldownLeft)}`
-                                        : '지금 바로 받을 수 있어요'}
+                                        ? t('coinShop.nextAdIn', { time: formatCooldown(adCooldownLeft) })
+                                        : t('coinShop.availableNow')}
                                 </div>
                             </div>
                             <button
@@ -425,7 +430,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                                     transition: 'all 0.2s',
                                 }}
                             >
-                                {adWatching ? '로딩...' : pendingShowAd ? <><Play size={13} fill="white" /> 광고 시청</> : <><Play size={13} fill="white" /> 보기</>}
+                                {adWatching ? t('coinShop.loading') : pendingShowAd ? <><Play size={13} fill="white" /> {t('coinShop.watchAd')}</> : <><Play size={13} fill="white" /> {t('coinShop.watch')}</>}
                             </button>
                         </div>
                     </div>
@@ -446,7 +451,7 @@ const CoinShopModal: React.FC<CoinShopModalProps> = ({ onClose, showToast }) => 
                             boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                         }}
                     >
-                        닫기
+                        {t('coinShop.close')}
                     </button>
                 </div>
             </div>

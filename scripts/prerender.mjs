@@ -7,7 +7,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { routes, relatedLinks } from './seo-routes.mjs';
+import { routes, relatedLinks, alternates } from './seo-routes.mjs';
 
 const distDir = 'dist';
 
@@ -15,6 +15,22 @@ const indexHtml = readFileSync(join(distDir, 'index.html'), 'utf-8');
 
 for (const route of routes) {
   let html = indexHtml;
+  const isEn = route.lang === 'en';
+  const isJa = route.lang === 'ja';
+
+  // index.html 에 박혀 있는 홈용 hreflang 은 제거하고, 짝이 있는 페이지에만 아래에서 다시 넣는다
+  html = html.replace(/\n[ \t]*<link rel="alternate" hreflang="[^"]*" href="[^"]*"\s*\/>/g, '');
+
+  if (isEn || isJa) {
+    html = html.replace('<html lang="ko">', `<html lang="${route.lang}">`);
+    html = html.replace(/<meta property="og:locale" content=".*?"\s*\/>/, `<meta property="og:locale" content="${isJa ? 'ja_JP' : 'en_US'}" />`);
+    html = html.replace(/<meta property="og:site_name" content=".*?"\s*\/>/, `<meta property="og:site_name" content="${isJa ? 'パズルガーデン' : 'Puzzle Garden'}" />`);
+    if (route.keywords) {
+      html = html.replace(/<meta name="keywords" content=".*?"\s*\/>/, `<meta name="keywords" content="${route.keywords}" />`);
+    }
+    // index.html 의 한국어 WebSite/ItemList JSON-LD 는 영어/일본어 페이지에서 제거
+    html = html.replace(/\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/g, '');
+  }
 
   // title 교체
   html = html.replace(
@@ -33,6 +49,16 @@ for (const route of routes) {
     /<link rel="canonical" href=".*?"\s*\/>/,
     `<link rel="canonical" href="${route.canonical}" />`
   );
+
+  // hreflang (ko/en/ja 쌍이 있는 페이지만; x-default 는 영어판)
+  const alts = alternates(route);
+  if (alts) {
+    const tags = alts.map(a => `<link rel="alternate" hreflang="${a.hreflang}" href="${a.href}" />`).join('\n  ');
+    html = html.replace(
+      `<link rel="canonical" href="${route.canonical}" />`,
+      `<link rel="canonical" href="${route.canonical}" />\n  ${tags}`
+    );
+  }
 
   // og:url 교체
   html = html.replace(
@@ -81,6 +107,14 @@ for (const route of routes) {
     html = html.replace(
       '</head>',
       `<script type="application/ld+json">${route.faqSchema}</script>\n</head>`
+    );
+  }
+
+  // 추가 스키마 (영어 홈의 WebSite/ItemList)
+  for (const schema of route.extraSchemas ?? []) {
+    html = html.replace(
+      '</head>',
+      `<script type="application/ld+json">${schema}</script>\n</head>`
     );
   }
 

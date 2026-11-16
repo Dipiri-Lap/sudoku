@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import type { ParseKeys } from 'i18next';
 import {
   useSnapSpotMarker,
   markerDesigns,
@@ -30,6 +32,7 @@ function MarkerPreview({ markerId, size = 44 }: { markerId: string; size?: numbe
 interface Props { onClose: () => void; onPlayBtnSfx?: () => void; }
 
 const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => {
+  const { t } = useTranslation('snapspot');
   const { selectedMarkerId, hasUnlocked, unlockMarker, selectMarker } = useSnapSpotMarker();
   const { coins } = useCoins();
   const [confirmDesign, setConfirmDesign] = useState<MarkerDesign | null>(null);
@@ -75,7 +78,7 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => 
           background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(168,85,247,0.15))',
         }}>
           <h2 style={{ margin: 0, color: 'white', fontSize: '1.1rem', fontWeight: 800 }}>
-            🎨 마커 상점
+            🎨 {t('markerShop.title')}
           </h2>
           <button onClick={() => { onPlayBtnSfx?.(); onClose(); }} style={{
             position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)',
@@ -92,7 +95,7 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => 
             padding: '0.6rem 1rem', backgroundColor: 'rgba(255,255,255,0.05)',
             borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
           }}>
-            <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>보유 코인</span>
+            <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{t('markerShop.balance')}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <CoinImg size={16} />
               <span style={{ color: '#fde047', fontWeight: 800, fontSize: '1rem' }}>{coins.toLocaleString()}</span>
@@ -178,11 +181,11 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => 
                           display: 'flex', alignItems: 'center', gap: '2px',
                         }}>
                           {isSelected
-                            ? '적용됨'
+                            ? t('markerShop.applied')
                             : unlocked
-                              ? '선택'
+                              ? t('markerShop.select')
                               : cfg.cost === 0
-                                ? '무료'
+                                ? t('markerShop.free')
                                 : <><CoinImg size={11} />{cfg.cost}</>
                           }
                         </div>
@@ -208,7 +211,7 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => 
             width: '240px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
             border: '1px solid rgba(255,255,255,0.1)',
           }}>
-            <span style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>잠금 해제</span>
+            <span style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>{t('markerShop.unlock')}</span>
             <div style={{
               width: 72, height: 72,
               borderRadius: '50%',
@@ -218,23 +221,23 @@ const SnapSpotMarkerShopModal: React.FC<Props> = ({ onClose, onPlayBtnSfx }) => 
               <MarkerPreview markerId={confirmDesign.id} size={52} />
             </div>
             <span style={{ color: '#e2e8f0', fontWeight: 700, fontSize: '0.9rem' }}>
-              {confirmDesign.label}
+              {t(`markerShop.designs.${confirmDesign.id}` as ParseKeys<'snapspot'>)}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'white', fontSize: '0.88rem', textAlign: 'center' }}>
               <CoinImg size={16} />
-              <span>{MARKER_GRADE_CONFIG[confirmDesign.grade].cost} 코인을 사용하시겠습니까?</span>
+              <span>{t('markerShop.confirmSpend', { cost: MARKER_GRADE_CONFIG[confirmDesign.grade].cost })}</span>
             </div>
             <div style={{ display: 'flex', gap: '0.6rem', width: '100%' }}>
               <button onClick={() => { onPlayBtnSfx?.(); setConfirmDesign(null); }} style={{
                 flex: 1, padding: '0.6rem', borderRadius: '10px', border: 'none',
                 backgroundColor: 'rgba(255,255,255,0.08)', color: '#94a3b8',
                 fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem',
-              }}>취소</button>
+              }}>{t('markerShop.cancel')}</button>
               <button onClick={handleConfirmUnlock} style={{
                 flex: 1, padding: '0.6rem', borderRadius: '10px', border: 'none',
                 background: 'linear-gradient(135deg, #f6d365, #fda085)',
                 color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem',
-              }}>확인</button>
+              }}>{t('markerShop.ok')}</button>
             </div>
           </div>
         </div>

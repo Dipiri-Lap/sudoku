@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCoins } from '../../context/CoinContext';
 
 const CoinRewardToast: React.FC = () => {
+    const { t } = useTranslation('modals');
     const { pendingReward, clearPendingReward } = useCoins();
     const [visible, setVisible] = useState(false);
 
@@ -52,7 +54,7 @@ const CoinRewardToast: React.FC = () => {
                     pointerEvents: 'none',
                 }}
             >
-                🪙 +{pendingReward} 코인
+                {t('rewardToast.coins', { n: pendingReward })}
             </div>
         </>
     );

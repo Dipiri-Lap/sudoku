@@ -1,0 +1,34 @@
+{
+  "brand": "パズルガーデン",
+  "games": {
+    "sudoku": { "name": "数独" },
+    "queens": { "name": "クラウンクエスト" },
+    "jigsaw": { "name": "タイニーピース" },
+    "snapspot": { "name": "スナップスポット" },
+    "wordSort": { "name": "ワードスタック" },
+    "crossMath": { "name": "クロッサム" },
+    "arrowPuzzle": { "name": "アロウェイ" },
+    "daily": { "name": "今日のパズル" }
+  },
+  "difficulty": {
+    "veryEasy": "とてもやさしい",
+    "easy": "やさしい",
+    "beginner": "初級",
+    "medium": "ふつう",
+    "hard": "むずかしい",
+    "expert": "エキスパート",
+    "master": "マスター"
+  },
+  "app": {
+    "initializing": "読み込み中..."
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "switchLabel": "言語",
+    "enBanner": "English version available →",
+    "jaBanner": "日本語版はこちら →",
+    "dismiss": "閉じる"
+  }
+}

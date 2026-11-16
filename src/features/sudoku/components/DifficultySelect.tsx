@@ -4,17 +4,18 @@ import { getUserProfile, getGlobalBestTime } from '../../../services/rankingServ
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/SudokuContext';
 import { ChevronLeft, Trophy, Flame, Crown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const DIFFICULTIES = [/*'Easy', 'Medium', 'Hard',*/ 'Expert', /*'Master'*/] as const;
 type Difficulty = (typeof DIFFICULTIES)[number];
 
-const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-    // Easy: '쉬움',
-    // Medium: '보통',
-    // Hard: '어려움',
-    Expert: '전문가',
-    // Master: '마스터',
-};
+const DIFFICULTY_LABEL_KEYS = {
+    // Easy: 'easy',
+    // Medium: 'medium',
+    // Hard: 'hard',
+    Expert: 'expert',
+    // Master: 'master',
+} as const satisfies Record<Difficulty, string>;
 
 const DIFFICULTY_ICONS: Record<Difficulty, React.ReactNode> = {
     // Easy: <Smile size={40} />,
@@ -26,6 +27,8 @@ const DIFFICULTY_ICONS: Record<Difficulty, React.ReactNode> = {
 
 const DifficultySelect: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation('sudoku');
+    const { t: tc } = useTranslation('common');
     const { dispatch } = useGame();
 
     const [bestTimes, setBestTimes] = useState<Record<string, number>>({});
@@ -79,7 +82,7 @@ const DifficultySelect: React.FC = () => {
                 <button className="back-btn" onClick={() => navigate('/sudoku')}>
                     <ChevronLeft size={24} />
                 </button>
-                <h1>난이도 선택</h1>
+                <h1>{t('difficulty.title')}</h1>
             </header>
 
             <div className="game-grid">
@@ -100,15 +103,15 @@ const DifficultySelect: React.FC = () => {
                                 {DIFFICULTY_ICONS[diff]}
                             </div>
                             <div className="game-card-content">
-                                <h3 className="difficulty-name">{DIFFICULTY_LABELS[diff]}</h3>
+                                <h3 className="difficulty-name">{tc(`difficulty.${DIFFICULTY_LABEL_KEYS[diff]}`)}</h3>
                                 <div className="game-card-footer" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
                                     <span className="play-now" style={{ fontSize: '0.8rem' }}>
                                         <Trophy size={14} style={{ color: '#f1c40f' }} />
-                                        내 기록: {times.personal}
+                                        {t('difficulty.myBest', { time: times.personal })}
                                     </span>
                                     <span className="play-now" style={{ fontSize: '0.8rem', color: '#fbbf24' }}>
                                         <Crown size={14} fill="currentColor" />
-                                        1위: {times.global}
+                                        {t('difficulty.worldBest', { time: times.global })}
                                     </span>
                                 </div>
                             </div>

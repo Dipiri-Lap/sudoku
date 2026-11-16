@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
+import { localeHref } from '../../../i18n/locale';
 import { useGame } from '../context/SudokuContext';
 import { useSudokuProgress } from '../../../context/SudokuProgressContext';
 import { logEvent } from '../../../firebase';
@@ -34,6 +36,8 @@ const hoverOff = (e: React.MouseEvent<HTMLImageElement>) => {
 
 const SudokuModeSelect: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation('sudoku');
+    const { t: tc } = useTranslation('common');
 
     useEffect(() => {
         document.body.classList.add('landing-bg');
@@ -56,56 +60,41 @@ const SudokuModeSelect: React.FC = () => {
     return (
         <>
         <Helmet>
-            <title>스도쿠 무료 온라인 게임 - 퍼즐 가든</title>
-            <meta name="description" content="9×9 격자에 1~9 숫자를 채우는 클래식 두뇌 퍼즐! 쉬움부터 어려움까지 다양한 난이도의 스도쿠를 무료로 즐기세요." />
-            <link rel="canonical" href="https://puzzles.tmhub.co.kr/sudoku" />
-            <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"스도쿠","item":"https://puzzles.tmhub.co.kr/sudoku"}]}`}</script>
-            <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"SoftwareApplication","name":"스도쿠 - 퍼즐 가든","applicationCategory":"GameApplication","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}`}</script>
-            <script type="application/ld+json">{`{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "스도쿠란 무엇인가요?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "스도쿠(Sudoku)는 9×9 격자에 1부터 9까지의 숫자를 채우는 논리 퍼즐입니다. 각 가로줄, 세로줄, 3×3 박스 안에 같은 숫자가 두 번 들어갈 수 없습니다. 수학 실력이 아닌 순수한 논리력으로 푸는 두뇌 게임입니다."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "스도쿠는 무료로 즐길 수 있나요?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "네, 퍼즐 가든의 스도쿠는 완전 무료입니다. 회원가입 없이 바로 플레이할 수 있으며 초보부터 어려움까지 다양한 난이도를 제공합니다."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "스도쿠 초보자는 어떤 난이도부터 시작해야 하나요?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "처음이라면 '초보 스도쿠' 모드를 추천합니다. 단계별로 난이도가 올라가며 차근차근 실력을 쌓을 수 있습니다. 어느 정도 익숙해지면 타임어택 모드로 도전해보세요."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "스도쿠가 두뇌에 좋은가요?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "네. 스도쿠는 집중력, 논리적 사고력, 단기 기억력 향상에 효과적입니다. 하루 10~15분씩 꾸준히 풀면 인지 능력 유지와 치매 예방에도 도움이 된다고 알려져 있습니다."
-      }
-    }
-  ]
-}`}</script>
+            <title>{t('modeSelect.seo.title')}</title>
+            <meta name="description" content={t('modeSelect.seo.description')} />
+            <link rel="canonical" href={`https://puzzles.tmhub.co.kr${localeHref('/sudoku')}`} />
+            <script type="application/ld+json">{JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: tc('brand'), item: `https://puzzles.tmhub.co.kr${localeHref('/')}` },
+                    { '@type': 'ListItem', position: 2, name: tc('games.sudoku.name'), item: `https://puzzles.tmhub.co.kr${localeHref('/sudoku')}` },
+                ],
+            })}</script>
+            <script type="application/ld+json">{JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'SoftwareApplication',
+                name: t('modeSelect.seo.appName'),
+                applicationCategory: 'GameApplication',
+                operatingSystem: 'Web Browser',
+                offers: { '@type': 'Offer', price: '0', priceCurrency: t('modeSelect.seo.currency') },
+            })}</script>
+            <script type="application/ld+json">{JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'FAQPage',
+                mainEntity: (['q1', 'q2', 'q3', 'q4'] as const).map(k => ({
+                    '@type': 'Question',
+                    name: t(`modeSelect.seo.faq.${k}.q`),
+                    acceptedAnswer: { '@type': 'Answer', text: t(`modeSelect.seo.faq.${k}.a`) },
+                })),
+            })}</script>
         </Helmet>
         <div className="mode-select-page">
             <header className="mode-header">
                 <button className="back-btn" onClick={() => navigate('/')}>
                     <ChevronLeft size={24} />
                 </button>
-                <h1>스도쿠</h1>
+                <h1>{tc('games.sudoku.name')}</h1>
             </header>
 
             <div className="mode-grid">
@@ -113,7 +102,7 @@ const SudokuModeSelect: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                     <img
                         src="/images/sudoku/beginnerBtn.webp"
-                        alt="입문자 모드"
+                        alt={t('modeSelect.altBeginner')}
                         className="animate-fade-in"
                         style={btnStyle('0.1s')}
                         onClick={() => {
@@ -126,7 +115,7 @@ const SudokuModeSelect: React.FC = () => {
                         onMouseLeave={hoverOff}
                     />
                     <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
-                        {beginnerAllCleared ? '처음부터 하기' : beginnerProgress > 0 ? `Level ${beginnerProgress + 1}/${MAX_BEGINNER_LEVEL} 시작하기` : `Level 1/${MAX_BEGINNER_LEVEL} 시작하기`}
+                        {beginnerAllCleared ? t('modeSelect.restart') : beginnerProgress > 0 ? t('modeSelect.start', { level: beginnerProgress + 1, max: MAX_BEGINNER_LEVEL }) : t('modeSelect.start', { level: 1, max: MAX_BEGINNER_LEVEL })}
                     </span>
                 </div>
 
@@ -134,7 +123,7 @@ const SudokuModeSelect: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                     <img
                         src="/images/sudoku/stageBtn.webp"
-                        alt="스테이지 모드"
+                        alt={t('modeSelect.altStage')}
                         className="animate-fade-in"
                         style={btnStyle('0.2s')}
                         onClick={() => {
@@ -146,7 +135,7 @@ const SudokuModeSelect: React.FC = () => {
                         onMouseLeave={hoverOff}
                     />
                     <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
-                        {stageProgress > 1 ? `Level ${stageProgress}/${MAX_STAGE_LEVEL} 이어하기` : `Level 1/${MAX_STAGE_LEVEL} 시작하기`}
+                        {stageProgress > 1 ? t('modeSelect.continue', { level: stageProgress, max: MAX_STAGE_LEVEL }) : t('modeSelect.start', { level: 1, max: MAX_STAGE_LEVEL })}
                     </span>
                 </div>
 
@@ -154,7 +143,7 @@ const SudokuModeSelect: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                     <img
                         src="/images/sudoku/hardBtn.webp"
-                        alt="빅 사이즈 모드"
+                        alt={t('modeSelect.altBig')}
                         className="animate-fade-in"
                         style={btnStyle('0.3s')}
                         onClick={() => {
@@ -167,7 +156,7 @@ const SudokuModeSelect: React.FC = () => {
                         onMouseLeave={hoverOff}
                     />
                     <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>
-                        {bigProgress > 1 ? `Level ${bigProgress}/${MAX_BIG_LEVEL} 이어하기` : `Level 1/${MAX_BIG_LEVEL} 시작하기`}
+                        {bigProgress > 1 ? t('modeSelect.continue', { level: bigProgress, max: MAX_BIG_LEVEL }) : t('modeSelect.start', { level: 1, max: MAX_BIG_LEVEL })}
                     </span>
                 </div>
 
@@ -175,7 +164,7 @@ const SudokuModeSelect: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                     <img
                         src="/images/sudoku/timeattackBtn.webp"
-                        alt="타임어택 모드"
+                        alt={t('modeSelect.altTimeAttack')}
                         className="animate-fade-in"
                         style={btnStyle('0.4s')}
                         onClick={() => {
@@ -185,7 +174,7 @@ const SudokuModeSelect: React.FC = () => {
                         onMouseEnter={hoverOn}
                         onMouseLeave={hoverOff}
                     />
-                    <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>플레이</span>
+                    <span style={{ fontSize: '0.88rem', color: '#fda085', fontWeight: 700 }}>{t('modeSelect.play')}</span>
                 </div>
             </div>
 
@@ -219,34 +208,26 @@ const SudokuModeSelect: React.FC = () => {
                     userSelect: 'none',
                 }}>
                     <span style={{ fontSize: '0.75rem', color: '#888' }}>▶</span>
-                    스도쿠란? — 무료 온라인 스도쿠 게임
+                    {t('modeSelect.seo.summary')}
                 </summary>
                 <div style={{ marginTop: '1rem' }}>
                     <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>
-                        <strong>스도쿠(Sudoku)</strong>는 9×9 격자를 숫자로 채우는 논리 퍼즐 게임입니다.
-                        각 가로줄, 세로줄, 3×3 박스 안에 1부터 9까지 숫자가 한 번씩만 들어가야 합니다.
-                        수학 실력이 필요 없고 순수한 논리력과 집중력으로 풀 수 있어 전 세계적으로 사랑받는 <strong>두뇌 퍼즐 게임</strong>입니다.
+                        <Trans t={t} i18nKey="modeSelect.seo.p1" />
                     </p>
 
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>스도쿠 하는 법</h3>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>{t('modeSelect.seo.h2')}</h3>
                     <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                        빈 칸을 클릭하고 1~9 숫자 중 조건에 맞는 숫자를 입력합니다.
-                        같은 행·열·박스에 이미 있는 숫자는 다시 쓸 수 없습니다.
-                        힌트 기능을 활용하면 막힌 곳을 확인할 수 있습니다. 처음이라면 <strong>초보 스도쿠</strong> 또는 <strong>쉬운 난이도</strong>부터 시작해보세요.
+                        <Trans t={t} i18nKey="modeSelect.seo.p2" />
                     </p>
 
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>난이도 선택 가이드</h3>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>{t('modeSelect.seo.h3')}</h3>
                     <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                        <strong>입문 · 쉬움</strong> — 스도쿠를 처음 접하는 분들을 위한 단계. 힌트가 많이 제공됩니다.<br />
-                        <strong>보통</strong> — 기본 규칙을 익혔다면 도전. 논리적 추론이 필요합니다.<br />
-                        <strong>어려움 · 타임어택</strong> — 제한 시간 내에 완성하는 스피드 도전 모드. 고수를 위한 단계입니다.
+                        <Trans t={t} i18nKey="modeSelect.seo.p3" />
                     </p>
 
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>스도쿠의 두뇌 훈련 효과</h3>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>{t('modeSelect.seo.h4')}</h3>
                     <p style={{ fontSize: '0.9rem' }}>
-                        스도쿠는 <strong>집중력, 논리적 사고, 단기 기억력</strong> 향상에 효과적입니다.
-                        하루 10~15분씩 꾸준히 풀면 인지 능력 유지와 치매 예방에도 도움이 된다는 연구 결과가 있습니다.
-                        퍼즐 가든의 무료 온라인 스도쿠로 매일 두뇌를 자극해보세요.
+                        <Trans t={t} i18nKey="modeSelect.seo.p4" />
                     </p>
                 </div>
             </details>

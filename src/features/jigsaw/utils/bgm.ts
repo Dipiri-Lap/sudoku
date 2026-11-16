@@ -3,6 +3,8 @@
  * Each track = tempo + chord progression + bass + melody pattern + instrument voices.
  */
 
+import i18n from '../../../i18n';
+
 export interface BgmTrack {
     id: string;
     name: string;
@@ -37,8 +39,8 @@ const CHORD: Record<string, number[]> = {
 const TRACKS: TrackDef[] = [
     {
         id: 'stroll',
-        name: '햇살 산책',
-        desc: '통통 튀는 우쿨렐레 느낌',
+        name: i18n.t('jigsaw:bgm.stroll.name'),
+        desc: i18n.t('jigsaw:bgm.stroll.desc'),
         bpm: 112,
         chords: [[60, 'maj'], [67, 'maj'], [69, 'min'], [65, 'maj']],
         melody: [
@@ -51,8 +53,8 @@ const TRACKS: TrackDef[] = [
     },
     {
         id: 'chiptune',
-        name: '꼬마 모험',
-        desc: '귀여운 8비트 게임 음악',
+        name: i18n.t('jigsaw:bgm.chiptune.name'),
+        desc: i18n.t('jigsaw:bgm.chiptune.desc'),
         bpm: 128,
         chords: [[60, 'maj'], [57, 'min'], [65, 'maj'], [67, 'maj']],
         melody: [

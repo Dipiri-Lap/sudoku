@@ -3,6 +3,22 @@
 
 <head>
   <meta charset="UTF-8" />
+  <script>
+    // 홈(/)에서만 언어 자동 전환: 저장된 선택(lang_pref: ko/en/ja)이 있으면 그대로, 없으면 브라우저 언어로
+    // 일본어 → /ja/, 한국어 → 그대로, 그 외 → /en/. 게임 주소로 직접 온 경우와 검색 봇은 건드리지 않는다.
+    // 키 이름은 src/i18n/locale.ts 의 LANG_PREF_KEY 와 같아야 한다.
+    (function () {
+      try {
+        if (location.pathname !== '/') return;
+        if (/bot|crawl|spider|slurp|yeti|daum|headless|lighthouse/i.test(navigator.userAgent || '')) return;
+        var pref = null;
+        try { pref = localStorage.getItem('lang_pref'); } catch (e) { /* 저장소 차단 */ }
+        var nav = navigator.language || 'ko';
+        var lang = pref || (/^ko/i.test(nav) ? 'ko' : /^ja/i.test(nav) ? 'ja' : 'en');
+        if (lang === 'en' || lang === 'ja') location.replace('/' + lang + '/' + location.search + location.hash);
+      } catch (e) { /* 실패하면 한국어 그대로 */ }
+    })();
+  </script>
   <link rel="icon" type="image/png" href="/app_icon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -14,6 +30,10 @@
   <meta name="author" content="Puzzle Garden" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://puzzles.tmhub.co.kr/" />
+  <link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/" />
+  <link rel="alternate" hreflang="en" href="https://puzzles.tmhub.co.kr/en/" />
+  <link rel="alternate" hreflang="ja" href="https://puzzles.tmhub.co.kr/ja/" />
+  <link rel="alternate" hreflang="x-default" href="https://puzzles.tmhub.co.kr/en/" />
 
   <!-- Open Graph / Facebook / KakaoTalk -->
   <meta property="og:type" content="website" />

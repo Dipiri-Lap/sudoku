@@ -1,0 +1,182 @@
+{
+  "grade": {
+    "common": "Common",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary"
+  },
+  "nav": {
+    "prev": "Back",
+    "prevArrow": "← Back",
+    "next": "Next →",
+    "start": "Start →"
+  },
+  "double": {
+    "step0": {
+      "title": "Welcome to Double mode!",
+      "desc": "Twice the queens this level!\nLet's go over the rules."
+    },
+    "step1": {
+      "label": "Rule 1 / 3",
+      "title": "2 queens per color",
+      "desc": "Place exactly 2 queens\nin each colored region."
+    },
+    "step2": {
+      "label": "Rule 2 / 3",
+      "title": "2 queens per row & column",
+      "desc": "Every row and every column\nmust have exactly 2 queens too."
+    },
+    "step3": {
+      "label": "Rule 3 / 3",
+      "title": "Queens can't touch",
+      "desc": "No two queens can touch,\nincluding diagonally."
+    }
+  },
+  "tutorial": {
+    "step0": {
+      "title": "Welcome to Queens!",
+      "desc": "Place 4 queens on a 4×4 board without breaking the rules.\nLet's go over them one by one."
+    },
+    "step1": {
+      "label": "Rule 1 / 4",
+      "title": "One queen per color",
+      "desc": "The board is split into 4 colored regions.\nPlace exactly one queen in each region."
+    },
+    "step2": {
+      "label": "Rule 2 / 4",
+      "title": "One queen per row",
+      "desc": "Each row can hold only one queen.\nTwo or more in a row breaks the rule!"
+    },
+    "step3": {
+      "label": "Rule 3 / 4",
+      "title": "One queen per column",
+      "desc": "Each column can hold only one queen too."
+    },
+    "step4": {
+      "label": "Rule 4 / 4",
+      "title": "Queens can't touch",
+      "desc": "No two queens can touch!\nThat includes diagonals."
+    },
+    "step5": {
+      "title": "Practice: mark ✕",
+      "desc": "Tap to mark ✕ on cells where a queen can't go.\nTap the glowing cell!"
+    },
+    "step6": {
+      "title": "Practice: place a queen",
+      "desc": "Double-tap quickly to place a queen.\nPlace the orange queen on the glowing cell!"
+    },
+    "step7": {
+      "title": "Row elimination",
+      "desc": "The orange queen is in row 0.\nNo other queen can go in that row,\nso mark ✕ on the blue cell (0,3)!"
+    },
+    "step8": {
+      "title": "Place the blue queen",
+      "desc": "With row 0 ruled out, only (1,3)\nis left in the blue region!\nDouble-tap to place the blue queen."
+    },
+    "step9": {
+      "title": "Adjacent elimination",
+      "desc": "(2,2) touches the blue queen (1,3)\ndiagonally, so it's out.\nMark it with ✕!"
+    },
+    "step10": {
+      "title": "Place the purple queen",
+      "desc": "Rule out column 1 and the touching cells,\nand only (3,2) is left in the purple region!\nDouble-tap to place the purple queen."
+    },
+    "step11": {
+      "title": "Last queen!",
+      "desc": "Once three queens are down, only (2,0)\nis left in the green region. Double-tap\nto finish the puzzle! 🎉"
+    },
+    "introSub": "Place 4 queens on a 4×4 board without breaking the rules.",
+    "learnRules": "See the rules →",
+    "skip": "Skip",
+    "tryIt": "Try it →"
+  },
+  "game": {
+    "exit": "Exit",
+    "changeCrown": "Change crown",
+    "sfxOff": "Turn sound off",
+    "sfxOn": "Turn sound on",
+    "heart": "Heart",
+    "lostHeart": "Lost heart",
+    "doubleRuleColor": "2 queens<br/>per color",
+    "doubleRuleRowCol": "2 queens per<br/>row & column",
+    "doubleRuleTouch": "Queens can't<br/>touch",
+    "restart": "Restart",
+    "restartAria": "Restart",
+    "memoAria": "Notes mode",
+    "memoOn": "Notes on",
+    "memo": "Notes",
+    "hintAria": "Crown hint",
+    "hintUsed": "Used",
+    "hintMemo": "Notes mode: faint marks, so you can think freely",
+    "hintDefault": "Tap ✕ · Double-tap queen · Drag to mark ✕",
+    "adDismissed": "Watch the full ad to use this feature."
+  },
+  "ad": {
+    "readyTitle": "Ad ready",
+    "noCoinsTitle": "Not enough coins",
+    "readyDesc": "Tap the button below to start the ad.",
+    "noCoinsDesc": "Your coins: {{coins}} / Needed: 50<br/>Watch an ad to place a crown for free.",
+    "start": "Start ad",
+    "loading": "Loading ad...",
+    "watch": "Watch ad",
+    "cancel": "Cancel"
+  },
+  "result": {
+    "cleared": "Cleared!",
+    "puzzlePower": "⚡ Puzzle Power +1",
+    "nextLevel": "Next level",
+    "homeAria": "Crown Quest home",
+    "retryAria": "Retry",
+    "failHead": "So close!",
+    "failNote": "You placed a crown on a wrong cell and lost a heart",
+    "retry": "Retry"
+  },
+  "home": {
+    "metaTitle": "Crown Quest - Free Queens Puzzle Game | Puzzle Garden",
+    "metaDesc": "A logic puzzle: place one queen in each colored region, with no two in the same row or column. Play {{max}} stages for free.",
+    "homeAria": "Puzzle Garden home",
+    "startNextAria": "Start next stage",
+    "double": "Double",
+    "tutorial": "Tutorial",
+    "allDone": "All clear!",
+    "freshSub": "Learn the rules first",
+    "allDoneSub": "You cleared every stage",
+    "twoCrowns": " · 2 crowns each",
+    "loading": "Loading...",
+    "start": "Start",
+    "play": "Play",
+    "cleared": "Cleared",
+    "whatIs": "What is Crown Quest?",
+    "intro": "Crown Quest is a logic puzzle where you place exactly one crown in every <strong>colored region, row, and column</strong> of the board. No two crowns can touch, even diagonally, and every condition must hold at once. As you level up, the boards get bigger and the placements get trickier!",
+    "rule1": {
+      "label": "Rule 1",
+      "title": "One queen per color",
+      "desc": "Place exactly one queen in each colored region."
+    },
+    "rule2": {
+      "label": "Rule 2",
+      "title": "One queen per row & column",
+      "desc": "Each row and each column can hold only one queen too."
+    },
+    "rule3": {
+      "label": "Rule 3",
+      "title": "Queens can't touch",
+      "desc": "No two queens can touch. That includes horizontal, vertical, and diagonal neighbors."
+    }
+  },
+  "shop": {
+    "title": "Crown Shop",
+    "close": "Close",
+    "wallet": "Your coins",
+    "free": "Free",
+    "selectedAria": "Equipped crown",
+    "selectAria": "Select crown",
+    "unlockAria": "Unlock for {{cost}} coins",
+    "equipped": "Equipped",
+    "select": "Select",
+    "unlockTitle": "Unlock",
+    "confirm": "Spend {{cost}} coins?",
+    "cancel": "Cancel",
+    "unlock": "Unlock"
+  }
+}

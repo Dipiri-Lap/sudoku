@@ -1,0 +1,124 @@
+{
+  "modeSelect": {
+    "seoTitle": "SnapSpot Spot the Difference - Puzzle Garden",
+    "seoDescription": "Compare two photos and find what's different. Play Normal or Arcade mode and test your eyes!",
+    "miniOriginal": "Original",
+    "miniModified": "Edited",
+    "miniHeartLeft": "1 heart left",
+    "stageAlt": "Stage",
+    "arcadeAlt": "Arcade",
+    "loading": "Loading...",
+    "continueStage": "Continue Stage {{n}}/{{max}}",
+    "startStage": "Start Stage 1/{{max}}",
+    "aboutTitle": "What is SnapSpot?",
+    "aboutBody": "SnapSpot is a spot-the-difference game: compare two photos side by side and find every <strong>hidden difference</strong>. With 500+ stages and an Arcade time attack mode, it's a great way to sharpen your focus and eye for detail!",
+    "tips": {
+      "compare": {
+        "label": "Basics",
+        "title": "Compare two photos",
+        "desc": "Look at the original and the edited photo side by side and find what's different. Subtle changes in color, size or position are hiding in there."
+      },
+      "tap": {
+        "label": "Controls",
+        "title": "Tap to check",
+        "desc": "Tap (or click) where you think the difference is to check it instantly. A correct tap leaves a marker."
+      },
+      "zoom": {
+        "label": "Zoom",
+        "title": "Pinch to zoom",
+        "desc": "Can't see it? Pinch or scroll the mouse wheel to zoom in up to 3x."
+      },
+      "stage": {
+        "label": "Stage",
+        "title": "Save your hearts",
+        "desc": "In Stage mode, every wrong tap costs a heart. Lose them all and it's game over, so tap carefully!"
+      }
+    }
+  },
+  "game": {
+    "seoTitle": "SnapSpot Spot the Difference - Puzzle Garden",
+    "seoDescription": "Compare two photos and find the differences. Put your eyes to the test!",
+    "loading": "Loading...",
+    "alertAdDismissed": "Watch the whole ad to use a hint.",
+    "alertNoAd": "No ad is available right now. Please try again later.",
+    "soundSettings": "Sound settings",
+    "markerShop": "Marker shop",
+    "altOriginal": "Original",
+    "altModified": "Edited",
+    "modeSelect": "Modes",
+    "win": {
+      "title": "You found them all!",
+      "body_one": "You found the {{count}} difference.",
+      "body_other": "You found all {{count}} differences.",
+      "puzzlePower": "Puzzle Power +1",
+      "nextStage": "Next Stage"
+    },
+    "over": {
+      "title": "Game Over",
+      "body": "You ran out of hearts.",
+      "retry": "Try Again"
+    },
+    "hint": {
+      "title": "Not enough coins",
+      "adPrompt": "Watch an ad to use one hint",
+      "adUsed": "You've already watched an ad this round",
+      "balance": "You have {{coins}}🪙 · Need {{cost}}🪙",
+      "cancel": "Cancel",
+      "adLoading": "Loading…",
+      "watchAd": "Watch Ad",
+      "ok": "OK"
+    }
+  },
+  "settings": {
+    "title": "Sound settings",
+    "sfx": "Sound FX"
+  },
+  "markerShop": {
+    "title": "Marker Shop",
+    "balance": "Your coins",
+    "applied": "Equipped",
+    "select": "Equip",
+    "free": "Free",
+    "unlock": "Unlock",
+    "confirmSpend": "Spend {{cost}} coins?",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "designs": {
+      "circle": "Circle",
+      "check": "Check",
+      "star": "Star",
+      "thumbs": "Thumbs Up",
+      "dart": "Dart",
+      "hundred": "100",
+      "gem": "Gem",
+      "smile": "Smiley",
+      "magnify": "Magnifier",
+      "pin": "Pin",
+      "dizzy": "Dizzy Star",
+      "target": "Target",
+      "clover": "Clover",
+      "frog": "Frog",
+      "cherry": "Cherry Blossom",
+      "cactus": "Cactus",
+      "hue": "Color Wheel",
+      "robot": "Robot",
+      "lightning": "Lightning",
+      "sparkle": "Sparkle",
+      "bulb": "Light Bulb",
+      "paw": "Paw Print",
+      "butterfly": "Butterfly",
+      "cat": "Cat",
+      "fox": "Fox",
+      "panda": "Panda",
+      "bomb": "Bomb",
+      "heart": "Heart",
+      "magic": "Magic Wand",
+      "eyes": "Eyes",
+      "crown": "Crown",
+      "rainbow": "Rainbow",
+      "portal": "Portal",
+      "arc": "Electric Arc",
+      "matrix": "Matrix"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 
 interface Props {
     boardSize: 6 | 9;
@@ -31,6 +32,7 @@ const HL6 = { row: 2, col: 1, box: { r0: 0, r1: 1, c0: 3, c1: 5 } };
 const HL9 = { row: 4, col: 2, box: { r0: 0, r1: 2, c0: 6, c1: 8 } };
 
 const BeginnerTutorialModal: React.FC<Props> = ({ boardSize, onClose }) => {
+    const { t } = useTranslation('sudoku');
     const is6 = boardSize === 6;
     const board = is6 ? DEMO_BOARD_6 : DEMO_BOARD_9;
     const hl = is6 ? HL6 : HL9;
@@ -80,7 +82,7 @@ const BeginnerTutorialModal: React.FC<Props> = ({ boardSize, onClose }) => {
                     boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
                 }}
             >
-                <h2 style={{ margin: '0 0 1rem', fontSize: '1.3rem', fontWeight: 700 }}>플레이 방법</h2>
+                <h2 style={{ margin: '0 0 1rem', fontSize: '1.3rem', fontWeight: 700 }}>{t('tutorial.title')}</h2>
 
                 <div style={{
                     display: 'grid',
@@ -114,11 +116,16 @@ const BeginnerTutorialModal: React.FC<Props> = ({ boardSize, onClose }) => {
                 </div>
 
                 <p style={{ fontSize: '0.88rem', lineHeight: 1.7, margin: '0 0 1.25rem', color: '#444' }}>
-                    빈칸을 채우되 각{' '}
-                    <strong style={{ color: '#f4a200' }}>행</strong>이나{' '}
-                    <strong style={{ color: '#e53935' }}>열</strong>,{' '}
-                    <strong style={{ color: '#7c3aed' }}>{is6 ? '2×3' : '3×3'} 박스</strong>에{' '}
-                    <br />숫자가 중복되지 않게 하세요
+                    <Trans
+                        t={t}
+                        i18nKey="tutorial.body"
+                        values={{ size: is6 ? '2×3' : '3×3' }}
+                        components={{
+                            row: <strong style={{ color: '#f4a200' }} />,
+                            col: <strong style={{ color: '#e53935' }} />,
+                            box: <strong style={{ color: '#7c3aed' }} />,
+                        }}
+                    />
                 </p>
 
                 <button
@@ -126,7 +133,7 @@ const BeginnerTutorialModal: React.FC<Props> = ({ boardSize, onClose }) => {
                     style={{ width: '100%', fontSize: '1rem' }}
                     onClick={onClose}
                 >
-                    확인
+                    {t('tutorial.ok')}
                 </button>
             </div>
         </div>

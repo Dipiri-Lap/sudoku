@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useTranslation, Trans } from 'react-i18next';
+import i18n from '../../../i18n';
+import { localeHref, isEn } from '../../../i18n/locale';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Play } from 'lucide-react';
 import { useQueensProgress } from '../../../context/QueensProgressContext';
@@ -59,9 +62,9 @@ const rule3Cells: GridCell[][] = [
 ];
 
 const RULES = [
-  { label: '규칙 1', title: '색상당 퀸 하나', desc: '각 색상 영역에 퀸을 딱 하나씩만 배치해야 합니다.', visual: <MiniGrid cells={rule1Cells} n={4} /> },
-  { label: '규칙 2', title: '행 & 열에 퀸 하나', desc: '같은 가로줄(행)과 세로줄(열)에도 퀸이 하나씩만 있어야 해요.', visual: <MiniGrid cells={rule2Cells} n={4} /> },
-  { label: '규칙 3', title: '퀸끼리 인접 불가', desc: '퀸끼리는 서로 닿을 수 없어요. 가로·세로·대각선 모두 해당됩니다.', visual: <MiniGrid cells={rule3Cells} n={3} /> },
+  { label: i18n.t('queens:home.rule1.label'), title: i18n.t('queens:home.rule1.title'), desc: i18n.t('queens:home.rule1.desc'), visual: <MiniGrid cells={rule1Cells} n={4} /> },
+  { label: i18n.t('queens:home.rule2.label'), title: i18n.t('queens:home.rule2.title'), desc: i18n.t('queens:home.rule2.desc'), visual: <MiniGrid cells={rule2Cells} n={4} /> },
+  { label: i18n.t('queens:home.rule3.label'), title: i18n.t('queens:home.rule3.title'), desc: i18n.t('queens:home.rule3.desc'), visual: <MiniGrid cells={rule3Cells} n={3} /> },
 ];
 
 // ── Next-stage preview ────────────────────────────────────────────────────────
@@ -79,12 +82,16 @@ function BoardPreview({ level }: { level: LevelData }) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+const VISUALLY_HIDDEN: React.CSSProperties = { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' };
+
 const QueensModeSelect: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const { queensProgress, isSynced } = useQueensProgress();
   const { coins } = useCoins();
   const { selectedIcon } = useQueensIcon();
+  const { t } = useTranslation('queens');
+  const { t: tc } = useTranslation('common');
 
   const cleared = Math.max(0, Math.min(queensProgress, MAX_LEVEL));
   const isFresh = queensProgress <= 0;
@@ -95,16 +102,16 @@ const QueensModeSelect: React.FC = () => {
   return (
     <>
     <Helmet>
-      <title>크라운 퀘스트 - 퀸즈 퍼즐 무료 게임 | 퍼즐 가든</title>
-      <meta name="description" content={`색깔 영역마다 퀸을 하나씩, 행·열이 겹치지 않게 배치하는 논리 퍼즐. ${MAX_LEVEL}개 스테이지를 무료로 즐기세요.`} />
-      <link rel="canonical" href="https://puzzles.tmhub.co.kr/queens" />
-      <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"크라운 퀘스트","item":"https://puzzles.tmhub.co.kr/queens"}]}`}</script>
+      <title>{t('home.metaTitle')}</title>
+      <meta name="description" content={t('home.metaDesc', { max: MAX_LEVEL })} />
+      <link rel="canonical" href={`https://puzzles.tmhub.co.kr${localeHref('/queens')}`} />
+      <script type="application/ld+json">{JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: tc('brand'), item: `https://puzzles.tmhub.co.kr${localeHref('/')}` }, { '@type': 'ListItem', position: 2, name: tc('games.queens.name'), item: `https://puzzles.tmhub.co.kr${localeHref('/queens')}` }] })}</script>
     </Helmet>
     <div className="qh-root qq-home">
       <div className="qq-pattern" aria-hidden />
       <div className="qh-screen">
         <header className="qh-top">
-          <button className="qq-ghost-btn" onClick={() => navigate('/')} aria-label="퍼즐 가든 홈">
+          <button className="qq-ghost-btn" onClick={() => navigate('/')} aria-label={t('home.homeAria')}>
             <ChevronLeft size={32} strokeWidth={3.2} />
           </button>
           <div className="qh-coins">
@@ -116,30 +123,31 @@ const QueensModeSelect: React.FC = () => {
         <div className="qh-logo">
           <span className="l1">Crown</span>
           <span className="l2">Quest</span>
-          <h1>크라운 퀘스트</h1>
+          {/* 영어에선 로고 글자(Crown/Quest)와 같은 말이 반복되므로 h1은 화면에서만 숨긴다(SEO용 유지). 일본어는 한국어처럼 보여 준다(クラウンクエスト). */}
+          <h1 style={isEn ? VISUALLY_HIDDEN : undefined}>{tc('games.queens.name')}</h1>
         </div>
 
-        <button className="qh-card" onClick={() => { if (isSynced) navigate('/queens/play'); }} disabled={!isSynced} aria-label="다음 스테이지 시작">
+        <button className="qh-card" onClick={() => { if (isSynced) navigate('/queens/play'); }} disabled={!isSynced} aria-label={t('home.startNextAria')}>
           <BoardPreview level={next} />
           <img className="qh-card-crown" src={getIconUrl(selectedIcon.id)} alt="" />
-          {isDouble && <span className="qh-card-tag">더블</span>}
+          {isDouble && <span className="qh-card-tag">{t('home.double')}</span>}
         </button>
 
         <div className="qh-meta">
-          <span className="qh-big-no">{isFresh ? '튜토리얼' : allDone ? '완료!' : next.id}</span>
+          <span className="qh-big-no">{isFresh ? t('home.tutorial') : allDone ? t('home.allDone') : next.id}</span>
           <span className="qh-sub">
-            {isFresh ? '규칙부터 차근차근' : allDone ? '모든 스테이지를 깼어요' : `${next.size}×${next.size}${isDouble ? ' · 왕관 2개씩' : ''}`}
+            {isFresh ? t('home.freshSub') : allDone ? t('home.allDoneSub') : `${next.size}×${next.size}${isDouble ? t('home.twoCrowns') : ''}`}
           </span>
         </div>
 
         <button className="qq-play-btn" onClick={() => navigate('/queens/play')} disabled={!isSynced}>
-          {!isSynced ? '불러오는 중...' : <><Play size={26} strokeWidth={0} fill="currentColor" />{isFresh ? '시작하기' : '플레이'}</>}
+          {!isSynced ? t('home.loading') : <><Play size={26} strokeWidth={0} fill="currentColor" />{isFresh ? t('home.start') : t('home.play')}</>}
         </button>
 
         <div className="qh-progress">
           <b>{cleared}</b> / {MAX_LEVEL}
           <span className="sep" />
-          클리어
+          {t('home.cleared')}
         </div>
       </div>
 
@@ -147,13 +155,11 @@ const QueensModeSelect: React.FC = () => {
       <details className="qh-rules" onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}>
         <summary>
           <span className={`qh-caret${open ? ' open' : ''}`}>▶</span>
-          크라운 퀘스트 게임이란?
+          {t('home.whatIs')}
         </summary>
         <div className="qh-rules-body">
           <p className="qh-rules-intro">
-            크라운 퀘스트는 보드의 각 <strong>색상 영역·행·열</strong>에 왕관을 정확히 하나씩 배치하는 논리 퍼즐이에요.
-            왕관끼리는 대각선을 포함해 인접할 수 없으며, 모든 조건을 동시에 만족시켜야 합니다.
-            레벨이 올라갈수록 보드 크기가 커지고 배치 난이도가 높아져요!
+            <Trans t={t} i18nKey="home.intro" />
           </p>
           {RULES.map(rule => (
             <div key={rule.label} className="qh-rule">

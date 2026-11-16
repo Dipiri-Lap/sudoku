@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Play, Download, LogIn, LogOut, Share2, ShoppingBag } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
+import { isKo, currentLang, isGameAvailable, localeHref, localeAbsoluteUrl, paidCoinsEnabled } from '../../i18n/locale';
+import LanguageSwitcher from './LanguageSwitcher';
+import { Play, Download, LogIn, LogOut, Share2, ShoppingBag, BookOpen } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { useCrossumProgress } from '../../features/cross-math/stage/progress';
@@ -26,9 +29,25 @@ import { useWordSortHardProgress } from '../../context/WordSortHardProgressConte
 import { useSnapSpotProgress } from '../../context/SnapSpotProgressContext';
 import { frameStyle, frameClass } from '../data/avatarFrames';
 
+// SEO 섹션 게임 키 → 라우트 id (영어판 노출 여부 판단용)
+const SEO_GAME_ROUTE = { sudoku: 'sudoku', wordSort: 'word-sort', queens: 'queens', crossMath: 'cross-math' } as const;
+
 const PROFILE_CACHE_KEY = (uid: string) => `profile_cache_${uid}`;
 
+// 난이도 원문(데일리 데이터의 영문 값) → common.difficulty.* 키
+const DIFFICULTY_KEY = {
+    'Very Easy': 'veryEasy', Easy: 'easy', Beginner: 'beginner', Medium: 'medium',
+    Hard: 'hard', Expert: 'expert', Master: 'master',
+} as const;
+
+// 게임 카드 공통 스타일·호버. 카드는 기존처럼 전체 이동(<a>)이고, localeHref 로 영어판에서는 /en 아래에 머문다.
+const CARD_STYLE: React.CSSProperties = { textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' };
+const cardHoverIn = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; };
+const cardHoverOut = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; };
+
 const LandingPage: React.FC = () => {
+    const { t } = useTranslation('landing');
+    const { t: tc } = useTranslation('common');
     useEffect(() => {
         document.body.classList.add('landing-bg');
         return () => { document.body.classList.remove('landing-bg'); };
@@ -89,15 +108,13 @@ const LandingPage: React.FC = () => {
         [clearedDates, dailyToday]
     );
 
-    const DIFFICULTY_KO: Record<string, string> = {
-        'Very Easy': '아주 쉬움', Easy: '쉬움', Beginner: '초급', Medium: '보통',
-        Hard: '어려움', Expert: '전문가', Master: '마스터',
-    };
     const dailyTodayLabel = useMemo(() => {
-        const date = `${Number(dailyToday.slice(5, 7))}월 ${Number(dailyToday.slice(8))}일`;
+        const date = t('daily.dateLabel', { month: Number(dailyToday.slice(5, 7)), day: Number(dailyToday.slice(8)) });
         const puzzle = dailyMonth.find(p => p.date === dailyToday);
-        return puzzle ? `${date} · ${DIFFICULTY_KO[puzzle.difficulty] ?? puzzle.difficulty}` : date;
-    }, [dailyToday, dailyMonth]);
+        if (!puzzle) return date;
+        const key = DIFFICULTY_KEY[puzzle.difficulty as keyof typeof DIFFICULTY_KEY];
+        return `${date} · ${key ? tc(`difficulty.${key}`) : puzzle.difficulty}`;
+    }, [dailyToday, dailyMonth, t, tc]);
 
     // 오늘을 오른쪽 끝에 두고 최근 7일을 훑는다.
     const dailyLast7 = useMemo(() => {
@@ -173,12 +190,12 @@ const LandingPage: React.FC = () => {
     const handleLoginSuccess = () => {
         setShowLoginModal(false);
         // Nickname will be updated by onAuthStateChanged
-        showToast('환영합니다!');
+        showToast(t('toast.welcome'));
     };
 
     const handleSignOut = async () => {
         await signOut();
-        showToast('로그아웃 되었습니다.');
+        showToast(t('toast.signedOut'));
     };
 
     const isGuest = currentUser?.isAnonymous;
@@ -199,25 +216,26 @@ const LandingPage: React.FC = () => {
             setKakaoLinkCopied(true);
             setTimeout(() => setKakaoLinkCopied(false), 2500);
         } catch {
-            prompt('아래 주소를 복사하세요:', window.location.href);
+            prompt(t('kakao.copyPrompt'), window.location.href);
         }
     };
 
     const handleShare = async () => {
-        const url = window.location.origin;
+        // 한국어는 기존과 같은 origin, 해외판은 origin/en/ · origin/ja/
+        const url = !isKo ? localeAbsoluteUrl('/') : window.location.origin;
         const text = currentUser && !isGuest && puzzlePower > 0
-            ? `나는 퍼즐력 ${puzzlePower}! 퍼즐 가든에서 같이 두뇌 트레이닝 해요 🧩`
-            : '두뇌를 깨우는 즐거운 퍼즐의 세계, 퍼즐 가든 🧩';
+            ? t('share.textWithPower', { power: puzzlePower })
+            : t('share.text');
 
         if (navigator.share) {
             try {
-                await navigator.share({ title: '퍼즐 가든', text, url });
+                await navigator.share({ title: tc('brand'), text, url });
             } catch {
                 // 사용자가 취소한 경우 무시
             }
         } else {
             await navigator.clipboard.writeText(`${text} ${url}`);
-            showToast('링크가 복사되었습니다.');
+            showToast(t('toast.linkCopied'));
         }
     };
 
@@ -300,9 +318,9 @@ const LandingPage: React.FC = () => {
     return (
         <>
         <Helmet>
-            <title>퍼즐 가든 - 무료 스도쿠, 틀린그림찾기, 화살표 퍼즐 게임 모음</title>
-            <meta name="description" content="퍼즐 가든에서 무료로 즐기는 두뇌 퍼즐 게임 모음! 스도쿠, 틀린그림찾기(스냅스팟), 단어 맞추기(워드스택), 퀸즈 퍼즐(크라운 퀘스트), 숫자 수식 퍼즐(크로썸), 화살표 퍼즐(애로우웨이), 매일 새로 열리는 오늘의 퍼즐까지 설치 없이 바로 플레이하세요." />
-            <link rel="canonical" href="https://puzzles.tmhub.co.kr/" />
+            <title>{t('meta.title')}</title>
+            <meta name="description" content={t('meta.description')} />
+            <link rel="canonical" href={!isKo ? `https://puzzles.tmhub.co.kr/${currentLang}/` : 'https://puzzles.tmhub.co.kr/'} />
         </Helmet>
         <div className="landing-page">
             {/* Toast */}
@@ -358,7 +376,7 @@ const LandingPage: React.FC = () => {
                                 }}>
                                 <img
                                     src={getAvatarUrl(userPhoto || nickname || '1')}
-                                    alt="프로필"
+                                    alt={t('profile.avatarAlt')}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
@@ -398,13 +416,13 @@ const LandingPage: React.FC = () => {
                                     )}
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>퍼즐력 :</span>
+                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>{t('profile.puzzlePower')}</span>
                                     <span style={{ color: '#ef4444', fontSize: '0.95rem', fontWeight: 900, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
                                         {puzzlePower}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>랭크 :</span>
+                                    <span style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 500 }}>{t('profile.rank')}</span>
                                     <span style={{ color: '#3b82f6', fontSize: '0.9rem', fontWeight: 800 }}>
                                         {userRank}
                                     </span>
@@ -413,6 +431,8 @@ const LandingPage: React.FC = () => {
                         )}
                     </div>
 
+                    {/* 언어 토글 — 프로필 바 오른쪽 위, 아래 버튼 줄은 이미 꽉 차 있다 */}
+                    <LanguageSwitcher style={{ marginLeft: 'auto', alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.12)', boxShadow: 'none' }} />
                 </div>
 
                 {/* 코인 & 로그인/로그아웃 — 프로필 바 아래 오른쪽 */}
@@ -445,12 +465,27 @@ const LandingPage: React.FC = () => {
                         }}
                     >
                         <ShoppingBag size={14} />
-                        상점
+                        {t('header.shop')}
                     </button>
+                    {/* 게임 설명은 아직 한국어 전용이라 해외판에서는 숨긴다 */}
+                    {isKo && <a
+                        href="/guide"
+                        title={t('header.guide')}
+                        aria-label={t('header.guide')}
+                        style={{
+                            padding: '0.5rem', borderRadius: '50%',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            color: '#fff',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                    >
+                        <BookOpen size={16} />
+                    </a>}
                     {/* 공유/설치는 상점·로그아웃과 같은 성격(계정·설정)이라 한 줄로 모은다 */}
                     <button
                         onClick={handleShare}
-                        title="친구 초대하기"
+                        title={t('header.invite')}
                         style={{
                             padding: '0.5rem', borderRadius: '50%',
                             border: '1px solid rgba(255,255,255,0.1)',
@@ -466,7 +501,7 @@ const LandingPage: React.FC = () => {
                     {!isInstalled && (
                         <button
                             onClick={promptToInstall}
-                            title={isMobile ? '홈화면에 바로가기 만들기' : '바탕화면에 바로가기 만들기'}
+                            title={isMobile ? t('header.installMobile') : t('header.installDesktop')}
                             style={{
                                 padding: '0.5rem', borderRadius: '50%',
                                 border: 'none',
@@ -483,7 +518,7 @@ const LandingPage: React.FC = () => {
                     {currentUser && !isGuest ? (
                         <button
                             onClick={handleSignOut}
-                            title="로그아웃"
+                            title={t('header.logout')}
                             style={{
                                 padding: '0.5rem',
                                 borderRadius: '50%',
@@ -520,13 +555,13 @@ const LandingPage: React.FC = () => {
                             }}
                         >
                             <LogIn size={15} />
-                            로그인
+                            {t('header.login')}
                         </button>
                     )}
                 </div>
 
-                {/* 오늘의 퍼즐 - 랜딩에서 바로 도장판이 보여야 빈칸이 눈에 밟힌다 */}
-                <a
+                {/* 오늘의 퍼즐 - 랜딩에서 바로 도장판이 보여야 빈칸이 눈에 밟힌다 (영어판 미제공) */}
+                {isGameAvailable('daily') && <a
                     href="/daily"
                     className="animate-fade-in"
                     style={{
@@ -548,10 +583,10 @@ const LandingPage: React.FC = () => {
                             padding: '2px 6px', borderRadius: '999px',
                             boxShadow: dailyDone ? '0 2px 6px rgba(22,163,74,0.5)' : '0 2px 6px rgba(239,68,68,0.5)',
                             zIndex: 1,
-                        }}>{dailyDone ? '완료' : '오늘'}</div>
+                        }}>{dailyDone ? t('daily.badgeDone') : t('daily.badgeToday')}</div>
                         <img
                             src="/images/daily/title.webp"
-                            alt="오늘의 퍼즐"
+                            alt={tc('games.daily.name')}
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                         />
                     </div>
@@ -570,7 +605,7 @@ const LandingPage: React.FC = () => {
                             {dailyTodayLabel}
                         </div>
                         <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e293b' }}>
-                            {dailyDone ? '오늘 완료!' : '오늘의 퍼즐 풀기'}
+                            {dailyDone ? t('daily.done') : t('daily.play')}
                         </div>
 
                         {/* 최근 7일 도장 - 빈칸이 보여야 돌아올 이유가 생긴다 */}
@@ -592,17 +627,22 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>
-                            이번 달 <span style={{ color: '#16a34a', fontWeight: 800 }}>{dailyClearedThisMonth}</span>
-                            {' / '}{dailyTotalThisMonth} 완료
+                            <Trans
+                                t={t}
+                                i18nKey="daily.monthProgress"
+                                values={{ cleared: dailyClearedThisMonth, total: dailyTotalThisMonth }}
+                                components={{ green: <span style={{ color: '#16a34a', fontWeight: 800 }} /> }}
+                            />
                         </div>
                     </div>
-                </a>
+                </a>}
             </header>
 
             <div className="game-grid">
-                <a href="/snapspot" className="animate-fade-in" style={{ '--delay': '0.1s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                {isGameAvailable('snapspot') && (
+                <a href={localeHref("/snapspot")} className="animate-fade-in" style={{ ...CARD_STYLE, '--delay': '0.1s' } as React.CSSProperties}
+                    onMouseEnter={cardHoverIn}
+                    onMouseLeave={cardHoverOut}
                 >
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
@@ -612,12 +652,14 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(249,115,22,0.5)',
                         zIndex: 1,
                     }}>HOT</div>
-                    <img src="/images/snapspot/title.webp" alt="스냅스팟" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/snapspot/title.webp" alt={tc('games.snapspot.name')} style={{ width: '100%', display: 'block' }} />
                 </a>
+                )}
 
-                <a href="/jigsaw" className="animate-fade-in" style={{ '--delay': '0.2s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                {isGameAvailable('jigsaw') && (
+                <a href={localeHref("/jigsaw")} className="animate-fade-in" style={{ ...CARD_STYLE, '--delay': '0.2s' } as React.CSSProperties}
+                    onMouseEnter={cardHoverIn}
+                    onMouseLeave={cardHoverOut}
                 >
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
@@ -627,12 +669,14 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
                         zIndex: 1,
                     }}>NEW</div>
-                    <img src="/images/tinypieces/title.webp" alt="Tiny Pieces" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/tinypieces/title.webp" alt={tc('games.jigsaw.name')} style={{ width: '100%', display: 'block' }} />
                 </a>
+                )}
 
-                <a href="/word-sort" className="animate-fade-in" style={{ '--delay': '0.3s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                {isGameAvailable('word-sort') && (
+                <a href={localeHref("/word-sort")} className="animate-fade-in" style={{ ...CARD_STYLE, '--delay': '0.3s' } as React.CSSProperties}
+                    onMouseEnter={cardHoverIn}
+                    onMouseLeave={cardHoverOut}
                 >
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
@@ -642,12 +686,14 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(249,115,22,0.5)',
                         zIndex: 1,
                     }}>HOT</div>
-                    <img src="/images/wordstack/title.webp" alt="워드스택" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/wordstack/title.webp" alt={tc('games.wordSort.name')} style={{ width: '100%', display: 'block' }} />
                 </a>
+                )}
 
-                <a href="/queens" className="animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                {isGameAvailable('queens') && (
+                <a href={localeHref("/queens")} className="animate-fade-in" style={{ ...CARD_STYLE, '--delay': '0.4s' } as React.CSSProperties}
+                    onMouseEnter={cardHoverIn}
+                    onMouseLeave={cardHoverOut}
                 >
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
@@ -657,19 +703,23 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(123,108,240,0.5)',
                         zIndex: 1,
                     }}>UPDATE</div>
-                    <img src="/images/crownquest/title.webp" alt="크라운 퀘스트" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/crownquest/title.webp" alt={tc('games.queens.name')} style={{ width: '100%', display: 'block' }} />
                 </a>
+                )}
 
-                <a href="/sudoku" className="animate-fade-in" style={{ '--delay': '0.5s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as any}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                {isGameAvailable('sudoku') && (
+                <a href={localeHref("/sudoku")} className="animate-fade-in" style={{ ...CARD_STYLE, '--delay': '0.5s' } as React.CSSProperties}
+                    onMouseEnter={cardHoverIn}
+                    onMouseLeave={cardHoverOut}
                 >
-                    <img src="/images/sudoku/title.webp" alt="스도쿠" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/sudoku/title.webp" alt={tc('games.sudoku.name')} style={{ width: '100%', display: 'block' }} />
                 </a>
+                )}
 
-                <a href="/arrow-puzzle" className="animate-fade-in" style={{ '--delay': '0.38s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                {isGameAvailable('arrow-puzzle') && (
+                <a href={localeHref("/arrow-puzzle")} className="animate-fade-in" style={{ ...CARD_STYLE, '--delay': '0.38s' } as React.CSSProperties}
+                    onMouseEnter={cardHoverIn}
+                    onMouseLeave={cardHoverOut}
                 >
                     <div style={{
                         position: 'absolute', top: '10px', right: '10px',
@@ -679,10 +729,12 @@ const LandingPage: React.FC = () => {
                         boxShadow: '0 2px 6px rgba(239,68,68,0.5)',
                         zIndex: 1,
                     }}>NEW</div>
-                    <img src="/images/arrow-puzzle/title.webp" alt="애로우웨이" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/arrow-puzzle/title.webp" alt={tc('games.arrowPuzzle.name')} style={{ width: '100%', display: 'block' }} />
                 </a>
+                )}
 
-                {window.location.hostname === 'localhost' && (
+                {/* localhost 전용 개발 카드 — 한국어 전용 */}
+                {isKo && window.location.hostname === 'localhost' && (
                     <a href="/tile-match" className="game-card animate-fade-in" style={{ '--delay': '0.4s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             🧩
@@ -699,7 +751,7 @@ const LandingPage: React.FC = () => {
                     </a>
                 )}
 
-                {window.location.hostname === 'localhost' && (
+                {isKo && window.location.hostname === 'localhost' && (
                     <a href="/royal-match" className="game-card animate-fade-in" style={{ '--delay': '0.45s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             👑
@@ -716,7 +768,7 @@ const LandingPage: React.FC = () => {
                     </a>
                 )}
 
-                {window.location.hostname === 'localhost' && (
+                {isKo && window.location.hostname === 'localhost' && (
                     <a href="/nonogram" className="game-card animate-fade-in" style={{ '--delay': '0.48s', textDecoration: 'none', color: 'inherit' } as any}>
                         <div className="game-card-icon" style={{ fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifySelf: 'center' }}>
                             🔲
@@ -733,12 +785,14 @@ const LandingPage: React.FC = () => {
                     </a>
                 )}
 
-                <a href="/cross-math" className="animate-fade-in" style={{ '--delay': '0.6s', textDecoration: 'none', display: 'block', position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' } as React.CSSProperties}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 20px rgba(0,0,0,0.2)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                {isGameAvailable('cross-math') && (
+                <a href={localeHref("/cross-math")} className="animate-fade-in" style={{ ...CARD_STYLE, '--delay': '0.6s' } as React.CSSProperties}
+                    onMouseEnter={cardHoverIn}
+                    onMouseLeave={cardHoverOut}
                 >
-                    <img src="/images/crossum/title.webp" alt="크로썸" style={{ width: '100%', display: 'block' }} />
+                    <img src="/images/crossum/title.webp" alt={tc('games.crossMath.name')} style={{ width: '100%', display: 'block' }} />
                 </a>
+                )}
 
             </div>
 
@@ -778,13 +832,10 @@ const LandingPage: React.FC = () => {
                     }} onClick={e => e.stopPropagation()}>
                         <div style={{ fontSize: '2.5rem' }}>🌐</div>
                         <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>
-                            Safari에서 로그인해주세요
+                            {t('kakao.title')}
                         </h2>
                         <p style={{ margin: 0, color: '#555', fontSize: '0.88rem', lineHeight: 1.65 }}>
-                            카카오톡 내부 브라우저는 보안 정책상<br />
-                            <strong>구글 로그인을 지원하지 않아요.</strong><br /><br />
-                            아래 링크를 복사해 Safari 주소창에 붙여넣으면<br />
-                            정상적으로 로그인할 수 있어요.
+                            <Trans t={t} i18nKey="kakao.body" />
                         </p>
                         <div style={{
                             background: '#f5f5f5', borderRadius: '8px',
@@ -801,7 +852,7 @@ const LandingPage: React.FC = () => {
                                 cursor: 'pointer',
                             }}
                         >
-                            {kakaoLinkCopied ? '✅ 복사 완료!' : '🔗 링크 복사하기'}
+                            {kakaoLinkCopied ? t('kakao.copied') : t('kakao.copy')}
                         </button>
                         <button
                             onClick={() => setShowKakaoGuide(false)}
@@ -810,7 +861,7 @@ const LandingPage: React.FC = () => {
                                 fontSize: '0.85rem', cursor: 'pointer',
                             }}
                         >
-                            닫기
+                            {t('kakao.close')}
                         </button>
                     </div>
                 </div>
@@ -832,7 +883,7 @@ const LandingPage: React.FC = () => {
                             activeTitle,
                             avatarFrame,
                         }));
-                        showToast('프로필이 업데이트되었습니다.');
+                        showToast(t('toast.profileUpdated'));
                     }}
                     onActiveTitleChange={(titleId) => {
                         setActiveTitle(titleId);
@@ -866,45 +917,27 @@ const LandingPage: React.FC = () => {
                     userSelect: 'none',
                 }}>
                     <span style={{ fontSize: '0.75rem', color: '#888' }}>▶</span>
-                    두뇌를 깨우는 무료 퍼즐 게임 모음
+                    {t('seo.summary')}
                 </summary>
                 <div style={{ marginTop: '1rem' }}>
                     <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>
-                        퍼즐 가든은 언제 어디서나 즐길 수 있는 <strong>무료 두뇌 퍼즐 게임</strong> 사이트입니다.
-                        스도쿠, 워드스택, 틀린그림찾기(스냅스팟)까지 — 설치 없이 브라우저에서 바로 플레이하세요.
+                        <Trans t={t} i18nKey="seo.intro" />
                     </p>
 
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🔢 스도쿠</h3>
-                    <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                        9×9 격자에 1~9 숫자를 채우는 클래식 논리 퍼즐. 초보자를 위한 쉬운 난이도부터 고수를 위한 어려운 스테이지까지 제공합니다.
-                        매일 꾸준히 풀면 집중력과 논리적 사고력 향상에 도움이 됩니다.
-                    </p>
+                    {(['sudoku', 'wordSort', 'queens', 'crossMath'] as const)
+                        .filter(id => isGameAvailable(SEO_GAME_ROUTE[id]))
+                        .map(id => (
+                            <React.Fragment key={id}>
+                                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>{t(`seo.${id}.title`)}</h3>
+                                <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
+                                    <Trans t={t} i18nKey={`seo.${id}.body`} />
+                                </p>
+                            </React.Fragment>
+                        ))}
 
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>🃏 워드스택</h3>
-                    <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                        카드를 드래그해 같은 주제의 단어끼리 분류하는 <strong>단어 카드 게임</strong>.
-                        다양한 주제의 레벨이 준비되어 있어 어휘력과 연상 능력을 자연스럽게 키울 수 있습니다.
-                    </p>
-
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>👑 크라운 퀘스트</h3>
-                    <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                        색상으로 나뉜 영역마다 퀸을 정확히 하나씩 배치하는 <strong>논리 배치 퍼즐</strong>.
-                        같은 행·열·대각선에 퀸이 겹치지 않도록 규칙을 지키며 풀어야 합니다.
-                        간단한 규칙이지만 깊은 사고가 필요해 체스 퍼즐의 묘미를 느낄 수 있습니다.
-                    </p>
-
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>➕ 크로썸</h3>
-                    <p style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                        십자말풀이처럼 가로·세로로 얽힌 수식의 빈칸을 숫자 타일로 채우는 <strong>계산 퍼즐</strong>.
-                        한 숫자가 가로 식과 세로 식에 동시에 쓰이기 때문에, 한 칸을 정하면 이어진 칸들이 연쇄적으로 풀립니다.
-                        어려운 암산보다 <strong>어느 칸부터 풀 수 있는지 찾아내는 추리</strong>가 핵심이라 사칙연산 감각과 논리력을 함께 기를 수 있습니다.
-                    </p>
-
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>퍼즐 게임의 효과</h3>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#444', marginBottom: '0.5rem' }}>{t('seo.benefits.title')}</h3>
                     <p style={{ fontSize: '0.9rem' }}>
-                        퍼즐 게임은 단순한 오락을 넘어 <strong>뇌 건강</strong>에 실질적인 도움을 줍니다.
-                        집중력 강화, 단기 기억력 향상, 스트레스 해소 등 다양한 효과가 연구를 통해 확인되었습니다.
-                        퍼즐 가든의 게임들은 짧은 시간에도 두뇌를 효율적으로 자극할 수 있도록 설계되어 있습니다.
+                        <Trans t={t} i18nKey="seo.benefits.body" />
                     </p>
                 </div>
             </details>
@@ -919,7 +952,7 @@ const LandingPage: React.FC = () => {
             }}>
                 <div style={{ maxWidth: '720px', margin: '0 auto' }}>
                     <div style={{ fontWeight: 700, color: '#334155', marginBottom: '0.75rem', fontSize: '0.85rem' }}>
-                        Copyright © 투믹스소프트(ToMixSoft). All Rights Reserved
+                        {t('footer.copyright')}
                     </div>
                     <div style={{ 
                         color: '#64748b', 
@@ -929,25 +962,26 @@ const LandingPage: React.FC = () => {
                         wordBreak: 'keep-all',
                         letterSpacing: '-0.2px'
                     }}>
-                        <span style={{ whiteSpace: 'nowrap', marginRight: '4px' }}>사업자등록번호 574-14-01507 <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
-                        <span style={{ whiteSpace: 'nowrap', marginRight: '4px' }}>통신판매신고 제2024-서울관악-1874호 <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
-                        <span style={{ whiteSpace: 'nowrap' }}>대표: 김도균</span>
+                        <span style={{ whiteSpace: 'nowrap', marginRight: '4px' }}>{t('footer.bizNumber')} <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
+                        <span style={{ whiteSpace: 'nowrap', marginRight: '4px' }}>{t('footer.mailOrder')} <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
+                        <span style={{ whiteSpace: 'nowrap' }}>{t('footer.ceo')}</span>
                         <br/>
-                        <span style={{ wordBreak: 'keep-all', marginRight: '4px' }}>사업장 주소 (08799) 서울특별시 관악구 낙성대역8길 49-11, **호 <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
+                        <span style={{ wordBreak: 'keep-all', marginRight: '4px' }}>{t('footer.address')} <span style={{color:'#cbd5e1', margin:'0 2px'}}>|</span></span>
                         <span style={{ whiteSpace: 'nowrap' }}>
-                            고객센터: <a href="https://open.kakao.com/o/sd3A2bCi" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b', textDecoration: 'underline' }}>고객센터 문의하기</a> (070-8984-4679)
+                            {t('footer.supportLabel')} <a href="https://open.kakao.com/o/sd3A2bCi" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b', textDecoration: 'underline' }}>{t('footer.supportLink')}</a> (070-8984-4679)
                         </span>
                     </div>
                     
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#475569', fontWeight: 600, fontSize: '0.8rem', margin: '1rem 0', cursor: 'pointer' }}>
                         <span style={{ fontSize: '0.6rem' }}>▲</span> 
-                        투믹스소프트 기본약관
+                        {t('footer.termsHeading')}
                     </div>
 
                     <div style={{ display: 'flex', gap: '1.25rem', color: '#64748b', fontSize: '0.75rem', fontWeight: 500, flexWrap: 'wrap' }}>
-                        <span style={{ cursor: 'pointer' }} onClick={() => setTermsModal('service')}>서비스 이용약관</span>
-                        <span style={{ cursor: 'pointer', fontWeight: 700, color: '#334155' }} onClick={() => setTermsModal('privacy')}>개인정보 처리방침</span>
-                        <span style={{ cursor: 'pointer' }} onClick={() => setTermsModal('finance')}>전자금융거래 기본약관</span>
+                        <span style={{ cursor: 'pointer' }} onClick={() => setTermsModal('service')}>{t('footer.termsService')}</span>
+                        <span style={{ cursor: 'pointer', fontWeight: 700, color: '#334155' }} onClick={() => setTermsModal('privacy')}>{t('footer.termsPrivacy')}</span>
+                        {/* 전자금융거래 약관은 유료 결제가 있을 때만 의미가 있다 */}
+                        {paidCoinsEnabled && <span style={{ cursor: 'pointer' }} onClick={() => setTermsModal('finance')}>{t('footer.termsFinance')}</span>}
                     </div>
 
                     {import.meta.env.DEV && (

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueensIcon, queenIconDesigns, GRADE_CONFIG, getIconUrl, type QueensIconDesign, type IconGrade } from '../context/QueensIconContext';
 import { useCoins } from '../../../context/CoinContext';
 import { X, Lock, Check } from 'lucide-react';
@@ -14,6 +15,7 @@ interface Props { onClose: () => void; }
 const QueensIconShopModal: React.FC<Props> = ({ onClose }) => {
     const { selectedIconId, hasUnlocked, unlockIcon, selectIcon } = useQueensIcon();
     const { coins } = useCoins();
+    const { t } = useTranslation('queens');
     const [confirmDesign, setConfirmDesign] = useState<QueensIconDesign | null>(null);
 
     const handleAction = (design: QueensIconDesign) => {
@@ -35,14 +37,14 @@ const QueensIconShopModal: React.FC<Props> = ({ onClose }) => {
         <div className="qs-overlay" onClick={onClose}>
             <div className="qs-panel" onClick={e => e.stopPropagation()}>
                 <header className="qs-head">
-                    <h2>크라운 상점</h2>
-                    <button className="qs-close" onClick={onClose} aria-label="닫기">
+                    <h2>{t('shop.title')}</h2>
+                    <button className="qs-close" onClick={onClose} aria-label={t('shop.close')}>
                         <X size={22} strokeWidth={3} />
                     </button>
                 </header>
 
                 <div className="qs-wallet">
-                    <span>보유 코인</span>
+                    <span>{t('shop.wallet')}</span>
                     <b><CoinImg size={20} />{coins.toLocaleString()}</b>
                 </div>
 
@@ -53,7 +55,7 @@ const QueensIconShopModal: React.FC<Props> = ({ onClose }) => {
                         return (
                             <section key={grade}>
                                 <div className="qs-grade" style={{ '--grade': cfg.color } as React.CSSProperties}>
-                                    {cfg.cost === 0 ? '무료' : <><CoinImg size={16} />{cfg.cost}</>}
+                                    {cfg.cost === 0 ? t('shop.free') : <><CoinImg size={16} />{cfg.cost}</>}
                                 </div>
                                 <div className="qs-grid">
                                     {items.map(design => {
@@ -65,7 +67,7 @@ const QueensIconShopModal: React.FC<Props> = ({ onClose }) => {
                                                 key={design.id}
                                                 className={`qs-tile${isSelected ? ' selected' : ''}${unlocked ? '' : ' locked'}${!unlocked && !canAfford ? ' poor' : ''}`}
                                                 onClick={() => handleAction(design)}
-                                                aria-label={isSelected ? '적용 중인 왕관' : unlocked ? '왕관 선택' : `${cfg.cost}코인으로 잠금 해제`}
+                                                aria-label={isSelected ? t('shop.selectedAria') : unlocked ? t('shop.selectAria') : t('shop.unlockAria', { cost: cfg.cost })}
                                             >
                                                 <span className="qs-tile-img">
                                                     <img src={getIconUrl(design.id)} alt="" />
@@ -73,7 +75,7 @@ const QueensIconShopModal: React.FC<Props> = ({ onClose }) => {
                                                     {isSelected && <span className="qs-check"><Check size={11} strokeWidth={4} /></span>}
                                                 </span>
                                                 <span className="qs-tile-label">
-                                                    {isSelected ? '적용 중' : unlocked ? '선택' : cfg.cost === 0 ? '무료' : <><CoinImg size={12} />{cfg.cost}</>}
+                                                    {isSelected ? t('shop.equipped') : unlocked ? t('shop.select') : cfg.cost === 0 ? t('shop.free') : <><CoinImg size={12} />{cfg.cost}</>}
                                                 </span>
                                             </button>
                                         );
@@ -88,12 +90,12 @@ const QueensIconShopModal: React.FC<Props> = ({ onClose }) => {
             {confirmDesign && (
                 <div className="qs-confirm-scrim" onClick={e => { e.stopPropagation(); setConfirmDesign(null); }}>
                     <div className="qs-confirm" onClick={e => e.stopPropagation()}>
-                        <span className="qs-confirm-title">잠금 해제</span>
+                        <span className="qs-confirm-title">{t('shop.unlockTitle')}</span>
                         <img src={getIconUrl(confirmDesign.id)} alt="" />
-                        <p><CoinImg size={18} />{GRADE_CONFIG[confirmDesign.grade].cost}코인을 쓸까요?</p>
+                        <p><CoinImg size={18} />{t('shop.confirm', { cost: GRADE_CONFIG[confirmDesign.grade].cost })}</p>
                         <div className="qs-confirm-btns">
-                            <button className="qs-btn ghost" onClick={() => setConfirmDesign(null)}>취소</button>
-                            <button className="qs-btn gold" onClick={handleConfirmUnlock}>해제하기</button>
+                            <button className="qs-btn ghost" onClick={() => setConfirmDesign(null)}>{t('shop.cancel')}</button>
+                            <button className="qs-btn gold" onClick={handleConfirmUnlock}>{t('shop.unlock')}</button>
                         </div>
                     </div>
                 </div>

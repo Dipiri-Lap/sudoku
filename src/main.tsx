@@ -1,6 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+// i18n 을 가장 먼저 초기화한다(다른 모듈이 import 시점에 i18n.t 를 써도 되도록).
+import { routerBasename } from './i18n'
 import App from './App.tsx'
 import './index.css'
 
@@ -17,7 +19,7 @@ declare global {
 window.adConfig?.({ preloadAdBreaks: 'on' });
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename}>
       <App />
     </BrowserRouter>
   </StrictMode>,

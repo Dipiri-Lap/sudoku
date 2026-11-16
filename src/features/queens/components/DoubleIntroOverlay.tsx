@@ -1,3 +1,4 @@
+import i18n from '../../../i18n';
 import React from 'react';
 
 type Props = {
@@ -90,26 +91,26 @@ type StepConfig = {
 
 const STEPS: StepConfig[] = [
   {
-    title: '더블 모드에 오신 것을 환영합니다!',
-    desc: '이번 레벨은 퀸이 2배!\n규칙을 하나씩 알아볼게요.',
+    title: i18n.t('queens:double.step0.title'),
+    desc: i18n.t('queens:double.step0.desc'),
     visual: <div style={{ fontSize: '4rem', lineHeight: 1 }}>👑👑</div>,
   },
   {
-    label: '규칙 1 / 3',
-    title: '색상당 퀸 2개',
-    desc: '각 색상 영역에 퀸을 정확히\n2개씩 배치해야 합니다.',
+    label: i18n.t('queens:double.step1.label'),
+    title: i18n.t('queens:double.step1.title'),
+    desc: i18n.t('queens:double.step1.desc'),
     visual: <MiniGrid cells={step1Cells} n={4} />,
   },
   {
-    label: '규칙 2 / 3',
-    title: '행 & 열당 퀸 2개',
-    desc: '같은 가로줄(행)과 세로줄(열)에도\n퀸이 정확히 2개씩 있어야 해요.',
+    label: i18n.t('queens:double.step2.label'),
+    title: i18n.t('queens:double.step2.title'),
+    desc: i18n.t('queens:double.step2.desc'),
     visual: <MiniGrid cells={step2Cells} n={4} hlRow={1} />,
   },
   {
-    label: '규칙 3 / 3',
-    title: '퀸끼리 인접 불가',
-    desc: '퀸끼리는 서로 닿을 수 없어요.\n가로·세로·대각선 모두 포함이에요.',
+    label: i18n.t('queens:double.step3.label'),
+    title: i18n.t('queens:double.step3.title'),
+    desc: i18n.t('queens:double.step3.desc'),
     visual: <MiniGrid cells={step3Cells} n={3} />,
   },
 ];
@@ -148,12 +149,12 @@ const DoubleIntroOverlay: React.FC<Props> = ({ step, onNext, onPrev, onClose }) 
         {/* Navigation */}
         <div className="tut-rule-nav">
           {!isFirst && (
-            <button className="tut-nav-btn tut-prev" onClick={onPrev}>이전</button>
+            <button className="tut-nav-btn tut-prev" onClick={onPrev}>{i18n.t('queens:nav.prev')}</button>
           )}
           {isLast ? (
-            <button className="tut-nav-btn tut-next" style={{ flex: 1 }} onClick={onClose}>시작하기 →</button>
+            <button className="tut-nav-btn tut-next" style={{ flex: 1 }} onClick={onClose}>{i18n.t('queens:nav.start')}</button>
           ) : (
-            <button className="tut-nav-btn tut-next" style={{ flex: isFirst ? 1 : undefined }} onClick={onNext}>다음 →</button>
+            <button className="tut-nav-btn tut-next" style={{ flex: isFirst ? 1 : undefined }} onClick={onNext}>{i18n.t('queens:nav.next')}</button>
           )}
         </div>
       </div>

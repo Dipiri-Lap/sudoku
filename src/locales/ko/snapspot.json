@@ -1,0 +1,123 @@
+{
+  "modeSelect": {
+    "seoTitle": "스냅스팟 틀린그림찾기 - 퍼즐 가든",
+    "seoDescription": "두 사진을 비교해 다른 부분을 찾는 틀린그림찾기 게임. 노말·아케이드 모드로 즐기세요!",
+    "miniOriginal": "원본",
+    "miniModified": "수정본",
+    "miniHeartLeft": "하트 1개 남음",
+    "stageAlt": "스테이지",
+    "arcadeAlt": "아케이드",
+    "loading": "로딩 중...",
+    "continueStage": "Stage {{n}}/{{max}} 이어하기",
+    "startStage": "Stage 1/{{max}} 시작하기",
+    "aboutTitle": "스냅스팟 틀린그림찾기란?",
+    "aboutBody": "스냅스팟은 두 장의 사진을 나란히 비교해 <strong>숨겨진 차이점</strong>을 모두 찾아내는 틀린그림찾기 게임이에요. 500개 이상의 스테이지와 아케이드 타임어택 모드로 집중력과 관찰력을 마음껏 키워보세요!",
+    "tips": {
+      "compare": {
+        "label": "기본",
+        "title": "두 사진 비교하기",
+        "desc": "원본과 수정본을 나란히 비교하며 다른 부분을 찾아보세요. 색상·크기·위치 등 미묘한 차이가 숨어 있습니다."
+      },
+      "tap": {
+        "label": "조작",
+        "title": "탭해서 정답 체크",
+        "desc": "다른 부분이라 생각되는 곳을 탭(클릭)하면 즉시 정답 여부를 확인할 수 있어요. 정답이면 마커가 표시됩니다."
+      },
+      "zoom": {
+        "label": "확대",
+        "title": "핀치 줌으로 확대",
+        "desc": "잘 안 보이는 부분은 핀치 줌이나 마우스 스크롤로 최대 3배까지 확대해 자세히 살펴보세요."
+      },
+      "stage": {
+        "label": "스테이지",
+        "title": "하트를 아껴요",
+        "desc": "스테이지 모드에서는 틀릴 때마다 하트를 잃습니다. 하트가 0이 되면 게임 오버! 신중하게 탭하세요."
+      }
+    }
+  },
+  "game": {
+    "seoTitle": "스냅스팟 틀린그림찾기 - 퍼즐 가든",
+    "seoDescription": "두 사진을 비교해서 다른 부분을 찾는 틀린그림찾기 게임. 눈썰미를 테스트해보세요!",
+    "loading": "로딩 중...",
+    "alertAdDismissed": "광고를 끝까지 시청해야 힌트를 쓸 수 있어요.",
+    "alertNoAd": "현재 준비된 광고가 없습니다. 잠시 후 시도해주세요.",
+    "soundSettings": "사운드 설정",
+    "markerShop": "마커 상점",
+    "altOriginal": "원본",
+    "altModified": "변경본",
+    "modeSelect": "모드 선택",
+    "win": {
+      "title": "모두 찾았어요!",
+      "body_other": "{{count}}개 차이점을 모두 발견했습니다.",
+      "puzzlePower": "퍼즐력 +1",
+      "nextStage": "다음 스테이지"
+    },
+    "over": {
+      "title": "게임 오버",
+      "body": "하트를 모두 소진했습니다.",
+      "retry": "다시 도전"
+    },
+    "hint": {
+      "title": "코인이 부족해요",
+      "adPrompt": "광고를 시청하면 힌트를 한 번 쓸 수 있어요",
+      "adUsed": "이번 판에서는 광고를 이미 시청했습니다",
+      "balance": "보유 {{coins}}🪙 · 필요 {{cost}}🪙",
+      "cancel": "취소",
+      "adLoading": "로딩…",
+      "watchAd": "광고 시청",
+      "ok": "확인"
+    }
+  },
+  "settings": {
+    "title": "사운드 설정",
+    "sfx": "효과음"
+  },
+  "markerShop": {
+    "title": "마커 상점",
+    "balance": "보유 코인",
+    "applied": "적용됨",
+    "select": "선택",
+    "free": "무료",
+    "unlock": "잠금 해제",
+    "confirmSpend": "{{cost}} 코인을 사용하시겠습니까?",
+    "cancel": "취소",
+    "ok": "확인",
+    "designs": {
+      "circle": "서클",
+      "check": "체크",
+      "star": "별",
+      "thumbs": "엄지",
+      "dart": "다트",
+      "hundred": "100점",
+      "gem": "보석",
+      "smile": "스마일",
+      "magnify": "돋보기",
+      "pin": "핀",
+      "dizzy": "반짝별",
+      "target": "타겟",
+      "clover": "클로버",
+      "frog": "개구리",
+      "cherry": "벚꽃",
+      "cactus": "선인장",
+      "hue": "색상환",
+      "robot": "로봇",
+      "lightning": "번개",
+      "sparkle": "스파클",
+      "bulb": "전구",
+      "paw": "발바닥",
+      "butterfly": "나비",
+      "cat": "고양이",
+      "fox": "여우",
+      "panda": "판다",
+      "bomb": "폭탄",
+      "heart": "하트",
+      "magic": "매직",
+      "eyes": "눈",
+      "crown": "크라운",
+      "rainbow": "레인보우",
+      "portal": "포탈",
+      "arc": "전기장",
+      "matrix": "매트릭스"
+    }
+  }
+}

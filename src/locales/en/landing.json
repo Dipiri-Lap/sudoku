@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "title": "Puzzle Garden - Free Sudoku, Spot the Difference, Queens & Jigsaw Puzzles",
+    "description": "Free brain puzzles you can play right in your browser: Sudoku, Spot the Difference (SnapSpot), Queens logic puzzles (Crown Quest) and cozy jigsaws (Tiny Pieces). No download, no sign-up needed."
+  },
+  "toast": {
+    "welcome": "Welcome!",
+    "signedOut": "You're signed out.",
+    "linkCopied": "Link copied!",
+    "profileUpdated": "Profile updated."
+  },
+  "share": {
+    "textWithPower": "My Puzzle Power is {{power}}! Come train your brain with me on Puzzle Garden 🧩",
+    "text": "Wake up your brain with fun puzzles on Puzzle Garden 🧩"
+  },
+  "profile": {
+    "avatarAlt": "Profile",
+    "puzzlePower": "Puzzle Power:",
+    "rank": "Rank:"
+  },
+  "header": {
+    "shop": "Shop",
+    "guide": "How to play",
+    "invite": "Invite friends",
+    "installMobile": "Add to Home Screen",
+    "installDesktop": "Add to Desktop",
+    "logout": "Sign out",
+    "login": "Sign in"
+  },
+  "daily": {
+    "badgeDone": "DONE",
+    "badgeToday": "TODAY",
+    "dateLabel": "{{month}}/{{day}}",
+    "done": "Done for today!",
+    "play": "Play today's puzzle",
+    "monthProgress": "This month: <green>{{cleared}}</green> / {{total}} solved"
+  },
+  "kakao": {
+    "copyPrompt": "Copy this link:",
+    "title": "Please sign in with Safari",
+    "body": "For security reasons, the KakaoTalk in-app browser<br/><strong>doesn't support Google sign-in.</strong><br/><br/>Copy the link below and paste it into Safari<br/>to sign in normally.",
+    "copied": "✅ Copied!",
+    "copy": "🔗 Copy link",
+    "close": "Close"
+  },
+  "seo": {
+    "summary": "Free puzzle games to wake up your brain",
+    "intro": "Puzzle Garden is a collection of <strong>free brain puzzle games</strong> you can play anytime, anywhere. Sudoku, Spot the Difference (SnapSpot), Queens and jigsaws — no install, just play in your browser.",
+    "sudoku": {
+      "title": "🔢 Sudoku",
+      "body": "The classic logic puzzle: fill a 9×9 grid with the numbers 1 to 9. From gentle beginner boards to tough expert stages, there's always a next challenge. A daily Sudoku habit is great for focus and logical thinking."
+    },
+    "wordSort": {
+      "title": "🃏 Word Stack",
+      "body": "A <strong>word card game</strong> where you drag cards to group words by theme."
+    },
+    "queens": {
+      "title": "👑 Crown Quest",
+      "body": "A <strong>logic placement puzzle</strong>: place exactly one queen in each colored region, one per row and column, and no two queens touching — not even diagonally. Simple rules, surprisingly deep thinking."
+    },
+    "crossMath": {
+      "title": "➕ Crossum",
+      "body": "A <strong>math crossword</strong> where you fill blanks in intersecting equations with number tiles."
+    },
+    "benefits": {
+      "title": "Why puzzles are good for you",
+      "body": "Puzzles are more than just fun — they're a real workout for your <strong>brain</strong>. Studies link them to better focus, sharper short-term memory and less stress. Puzzle Garden's games are designed to give your brain a quick, effective boost, even in a few spare minutes."
+    }
+  },
+  "footer": {
+    "copyright": "Copyright © ToMixSoft. All Rights Reserved",
+    "bizNumber": "Business Registration No. 574-14-01507",
+    "mailOrder": "Mail-Order Business Registration No. 2024-Seoul Gwanak-1874",
+    "ceo": "CEO: Dokyun Kim",
+    "address": "49-11 Nakseongdaeyeok 8-gil, Gwanak-gu, Seoul 08799, Republic of Korea",
+    "supportLabel": "Support:",
+    "supportLink": "Contact us",
+    "termsHeading": "ToMixSoft Terms",
+    "termsService": "Terms of Service",
+    "termsPrivacy": "Privacy Policy",
+    "termsFinance": "Electronic Financial Transactions Terms"
+  }
+}

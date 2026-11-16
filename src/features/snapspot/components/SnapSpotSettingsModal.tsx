@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Volume2, Music } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   bgmVolume: number;
@@ -10,7 +11,9 @@ interface Props {
   onPlayBtnSfx?: () => void;
 }
 
-const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmChange, onSfxChange, onClose, onPlayBtnSfx }) => (
+const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmChange, onSfxChange, onClose, onPlayBtnSfx }) => {
+  const { t } = useTranslation('snapspot');
+  return (
   <div
     style={{
       position: 'fixed', inset: 0,
@@ -41,7 +44,7 @@ const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmCha
         <X size={22} />
       </button>
 
-      <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: 700 }}>사운드 설정</h2>
+      <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: 700 }}>{t('settings.title')}</h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* BGM */}
@@ -69,7 +72,7 @@ const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmCha
             <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Volume2 size={16} color="#84fab0" />
             </div>
-            <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>효과음</span>
+            <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{t('settings.sfx')}</span>
             <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', fontVariantNumeric: 'tabular-nums' }}>
               {Math.round(sfxVolume * 100)}%
             </span>
@@ -84,6 +87,7 @@ const SnapSpotSettingsModal: React.FC<Props> = ({ bgmVolume, sfxVolume, onBgmCha
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default SnapSpotSettingsModal;

@@ -2,11 +2,14 @@ import React, { useState, useCallback } from 'react';
 import { useGame } from '../context/SudokuContext';
 import { useCoins } from '../../../context/CoinContext';
 import { Undo2, Eraser, Pencil, Lightbulb, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
 
 /** 다른 게임(스냅스팟·크로썸·퀸즈)과 같은 값으로 맞춘다. */
 export const HINT_COST = 50;
 
 const Controls: React.FC = () => {
+    const { t } = useTranslation('sudoku');
     const { state, dispatch } = useGame();
     const { coins } = useCoins();
     // null=닫힘 / confirm=코인으로 사용 / ad=코인 부족, 광고 제안 / insufficient=광고도 이미 봄
@@ -70,11 +73,11 @@ const Controls: React.FC = () => {
             beforeAd: () => { setAdWatching(true); setPendingShowAd(null); },
             afterAd: () => { setAdWatching(false); },
             adViewed: proceed,
-            adDismissed: () => { alert('광고를 끝까지 시청해야 힌트를 쓸 수 있어요.'); },
+            adDismissed: () => { alert(i18n.t('sudoku:controls.adDismissed')); },
             adBreakDone: (info: { status: string }) => {
                 setAdWatching(false);
                 setPendingShowAd(null);
-                if (info.status === 'noAdPreloaded') alert('현재 준비된 광고가 없습니다. 잠시 후 시도해주세요.');
+                if (info.status === 'noAdPreloaded') alert(i18n.t('sudoku:controls.noAd'));
             },
         });
     }, [adWatching, dispatch]);
@@ -100,53 +103,53 @@ const Controls: React.FC = () => {
                             <Lightbulb size={32} strokeWidth={1.5} color="#f4c430" />
                         </div>
                         <h3 className="hint-modal-title">
-                            {hintPrompt === 'confirm' ? '힌트 사용' : '코인이 부족해요'}
+                            {hintPrompt === 'confirm' ? t('controls.hintTitle') : t('controls.noCoinsTitle')}
                         </h3>
                         <p className="hint-modal-desc">
                             {hintPrompt === 'confirm'
-                                ? '원하는 칸을 골라 채웁니다'
+                                ? t('controls.hintDescConfirm')
                                 : hintPrompt === 'ad'
-                                    ? '광고를 시청하면 힌트를 한 번 쓸 수 있어요'
-                                    : '이번 판에서는 광고를 이미 시청했습니다'}
+                                    ? t('controls.hintDescAd')
+                                    : t('controls.hintDescUsed')}
                         </p>
                     </div>
                     {/* Body */}
                     <div style={{ background: '#1e2d3d', margin: '0.75rem', borderRadius: '12px', width: 'calc(100% - 1.5rem)', boxSizing: 'border-box' }}>
                         <div className="hint-modal-coin-row" style={{ borderRadius: '12px 12px 0 0' }}>
-                            <span>보유</span>
+                            <span>{t('controls.owned')}</span>
                             <span className="hint-modal-coin-value">🪙 {coins}</span>
                         </div>
                         <div className="hint-modal-coin-row" style={{ borderRadius: '0 0 12px 12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                            <span>비용</span>
+                            <span>{t('controls.cost')}</span>
                             <span className="hint-modal-coin-value" style={{ color: coins >= HINT_COST ? '#f4c430' : 'rgba(255,255,255,0.3)' }}>🪙 {HINT_COST}</span>
                         </div>
                     </div>
                     <div className="hint-modal-btns">
                         {hintPrompt === 'confirm' && (
                             <>
-                                <button className="hint-modal-btn-cancel" onClick={() => setHintPrompt(null)}>취소</button>
+                                <button className="hint-modal-btn-cancel" onClick={() => setHintPrompt(null)}>{t('controls.cancel')}</button>
                                 <button
                                     className="hint-modal-btn-confirm"
                                     onClick={() => { setHintPrompt(null); dispatch({ type: 'SET_HINT_MODE', on: true }); }}
                                 >
-                                    칸 고르기
+                                    {t('controls.pickCell')}
                                 </button>
                             </>
                         )}
                         {hintPrompt === 'ad' && (
                             <>
-                                <button className="hint-modal-btn-cancel" onClick={() => setHintPrompt(null)} disabled={adWatching}>취소</button>
+                                <button className="hint-modal-btn-cancel" onClick={() => setHintPrompt(null)} disabled={adWatching}>{t('controls.cancel')}</button>
                                 <button
                                     className="hint-modal-btn-confirm"
                                     disabled={adWatching}
                                     onClick={() => (pendingShowAd ? pendingShowAd() : handleWatchAd())}
                                 >
-                                    {adWatching ? '로딩…' : '광고 시청'}
+                                    {adWatching ? t('controls.loading') : t('controls.watchAd')}
                                 </button>
                             </>
                         )}
                         {hintPrompt === 'insufficient' && (
-                            <button className="hint-modal-btn-confirm" onClick={() => setHintPrompt(null)}>확인</button>
+                            <button className="hint-modal-btn-confirm" onClick={() => setHintPrompt(null)}>{t('controls.ok')}</button>
                         )}
                     </div>
                 </div>
@@ -185,7 +188,7 @@ const Controls: React.FC = () => {
                                 ? <X size={32} strokeWidth={1.5} color="var(--brand-primary)" />
                                 : <Lightbulb size={32} strokeWidth={1.5} color={coins >= HINT_COST || state.hintCredit ? 'var(--brand-primary)' : '#bdc3c7'} />}
                             {!state.hintMode && (
-                                <span className="coin-badge">{state.hintCredit ? '무료' : `🪙${HINT_COST}`}</span>
+                                <span className="coin-badge">{state.hintCredit ? t('controls.free') : `🪙${HINT_COST}`}</span>
                             )}
                         </div>
                     </button>
@@ -193,7 +196,7 @@ const Controls: React.FC = () => {
             </div>
 
             {state.hintMode && (
-                <div className="hint-guide">채울 칸을 고르세요</div>
+                <div className="hint-guide">{t('controls.pickGuide')}</div>
             )}
 
             {/* Number Row(s) */}

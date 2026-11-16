@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
+import { localeHref } from '../../../i18n/locale';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, Heart, Search, Check, Palette, Settings } from 'lucide-react';
 import { useSnapSpotMarker, getMarkerContent } from '../context/SnapSpotMarkerContext';
@@ -82,6 +84,8 @@ interface Props {
 
 const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('snapspot');
+  const { t: tc } = useTranslation('common');
 
   // 게임 진입을 한 번만 기록한다(스테이지가 넘어갈 때마다 세면 게임별 비교가 망가진다).
   useEffect(() => {
@@ -631,14 +635,14 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       beforeAd: () => { setAdWatching(true); setPendingShowAd(null); },
       afterAd: () => { setAdWatching(false); },
       adViewed: proceed,
-      adDismissed: () => { alert('광고를 끝까지 시청해야 힌트를 쓸 수 있어요.'); },
+      adDismissed: () => { alert(t('game.alertAdDismissed')); },
       adBreakDone: (info: { status: string }) => {
         setAdWatching(false);
         setPendingShowAd(null);
-        if (info.status === 'noAdPreloaded') alert('현재 준비된 광고가 없습니다. 잠시 후 시도해주세요.');
+        if (info.status === 'noAdPreloaded') alert(t('game.alertNoAd'));
       },
     });
-  }, [adWatching, activateHint]);
+  }, [adWatching, activateHint, t]);
 
   const handleHint = useCallback(() => {
     if (hintIdx !== null) return;
@@ -680,7 +684,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
     [clampPan],
   );
 
-  if (!levelData) return <div className="snapspot-loading">로딩 중...</div>;
+  if (!levelData) return <div className="snapspot-loading">{t('game.loading')}</div>;
 
   const { imageID, differences } = levelData;
   const cdnBase = mode === 'arcade' ? ARCADE_CDN_BASE : CDN_BASE;
@@ -695,11 +699,25 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
   return (
     <>
     <Helmet>
-      <title>스냅스팟 틀린그림찾기 - 퍼즐 가든</title>
-      <meta name="description" content="두 사진을 비교해서 다른 부분을 찾는 틀린그림찾기 게임. 눈썰미를 테스트해보세요!" />
-      <link rel="canonical" href="https://puzzles.tmhub.co.kr/snapspot" />
-      <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"퍼즐 가든","item":"https://puzzles.tmhub.co.kr/"},{"@type":"ListItem","position":2,"name":"스냅스팟","item":"https://puzzles.tmhub.co.kr/snapspot"}]}`}</script>
-      <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"SoftwareApplication","name":"스냅스팟 - 퍼즐 가든","applicationCategory":"GameApplication","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}`}</script>
+      <title>{t('game.seoTitle')}</title>
+      <meta name="description" content={t('game.seoDescription')} />
+      <link rel="canonical" href={`https://puzzles.tmhub.co.kr${localeHref('/snapspot')}`} />
+      <script type="application/ld+json">{JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: tc('brand'), item: `https://puzzles.tmhub.co.kr${localeHref('/')}` },
+          { '@type': 'ListItem', position: 2, name: tc('games.snapspot.name'), item: `https://puzzles.tmhub.co.kr${localeHref('/snapspot')}` },
+        ],
+      })}</script>
+      <script type="application/ld+json">{JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: `${tc('games.snapspot.name')} - ${tc('brand')}`,
+        applicationCategory: 'GameApplication',
+        operatingSystem: 'Web Browser',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
+      })}</script>
     </Helmet>
     <div className="snapspot-game" ref={gameRef}>
       <div className="snapspot-header">
@@ -732,7 +750,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             className="snapspot-zoom-btn"
             onClick={() => { playBtnSfx(); setShowSettings(true); }}
             style={{ padding: '4px 8px' }}
-            title="사운드 설정"
+            title={t('game.soundSettings')}
           >
             <Settings size={16} />
           </button>
@@ -740,7 +758,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             className="snapspot-zoom-btn"
             onClick={() => { playBtnSfx(); setShowMarkerShop(true); }}
             style={{ padding: '4px 8px' }}
-            title="마커 상점"
+            title={t('game.markerShop')}
           >
             <Palette size={16} />
           </button>
@@ -768,7 +786,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             <div style={innerStyle}>
               <img
                 src={`${cdnBase}/${imageID}${side === 'mod' ? '_1' : ''}.${mode === 'arcade' ? 'webp' : 'jpg'}`}
-                alt={side === 'orig' ? '원본' : '변경본'}
+                alt={side === 'orig' ? t('game.altOriginal') : t('game.altModified')}
                 draggable={false}
                 onLoad={() => setImgsLoaded(prev => ({ ...prev, [side]: true }))}
                 onError={(e) => {
@@ -928,14 +946,14 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         <div className="snapspot-win-overlay">
           <div className="snapspot-win-card">
             <div className="snapspot-win-emoji">🎉</div>
-            <h2>모두 찾았어요!</h2>
-            <p>{differences.length}개 차이점을 모두 발견했습니다.</p>
+            <h2>{t('game.win.title')}</h2>
+            <p>{t('game.win.body', { count: differences.length })}</p>
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', margin: '0.75rem 0 0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#fefce8', border: '1px solid #eab308', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#92400e', fontSize: '0.95rem' }}>
                 🪙 +10
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#eef2ff', border: '1px solid #6366f1', borderRadius: '20px', padding: '0.4rem 0.9rem', fontWeight: 700, color: '#4338ca', fontSize: '0.95rem' }}>
-                ⚡ 퍼즐력 +1
+                ⚡ {t('game.win.puzzlePower')}
               </div>
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'center' }}>
@@ -943,13 +961,13 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                 onClick={handleNextStage}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#22c55e', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
-                다음 스테이지
+                {t('game.win.nextStage')}
               </button>
               <button
                 onClick={() => { playBtnSfx(); navigate('/snapspot'); }}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
-                모드 선택
+                {t('game.modeSelect')}
               </button>
             </div>
           </div>
@@ -978,20 +996,20 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         <div className="snapspot-win-overlay">
           <div className="snapspot-win-card">
             <div className="snapspot-win-emoji">💔</div>
-            <h2 style={{ color: '#ef4444' }}>게임 오버</h2>
-            <p>하트를 모두 소진했습니다.</p>
+            <h2 style={{ color: '#ef4444' }}>{t('game.over.title')}</h2>
+            <p>{t('game.over.body')}</p>
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem', justifyContent: 'center' }}>
               <button
                 onClick={handleRestart}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#ef4444', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
-                다시 도전
+                {t('game.over.retry')}
               </button>
               <button
                 onClick={() => { playBtnSfx(); navigate('/snapspot'); }}
                 style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
               >
-                모드 선택
+                {t('game.modeSelect')}
               </button>
             </div>
           </div>
@@ -1028,14 +1046,14 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
         <div className="snapspot-win-overlay" onClick={() => !adWatching && setHintPrompt(null)}>
           <div className="snapspot-win-card" onClick={e => e.stopPropagation()}>
             <div className="snapspot-win-emoji">🪙</div>
-            <h2 style={{ fontSize: '1.3rem' }}>코인이 부족해요</h2>
+            <h2 style={{ fontSize: '1.3rem' }}>{t('game.hint.title')}</h2>
             <p style={{ fontSize: '0.9rem', color: '#374151', margin: '0.4rem 0 0' }}>
               {hintPrompt === 'ad'
-                ? '광고를 시청하면 힌트를 한 번 쓸 수 있어요'
-                : '이번 판에서는 광고를 이미 시청했습니다'}
+                ? t('game.hint.adPrompt')
+                : t('game.hint.adUsed')}
             </p>
             <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '0.3rem 0 0.9rem' }}>
-              보유 {coins}🪙 · 필요 {HINT_COST}🪙
+              {t('game.hint.balance', { coins, cost: HINT_COST })}
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               {hintPrompt === 'ad' ? (
@@ -1045,14 +1063,14 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                     disabled={adWatching}
                     style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: '1.5px solid #d1d5db', background: 'transparent', color: '#374151', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
                   >
-                    취소
+                    {t('game.hint.cancel')}
                   </button>
                   <button
                     onClick={() => { playBtnSfx(); if (pendingShowAd) pendingShowAd(); else handleWatchHintAd(); }}
                     disabled={adWatching}
                     style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#22c55e', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
                   >
-                    {adWatching ? '로딩…' : '광고 시청'}
+                    {adWatching ? t('game.hint.adLoading') : t('game.hint.watchAd')}
                   </button>
                 </>
               ) : (
@@ -1060,7 +1078,7 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
                   onClick={() => { playBtnSfx(); setHintPrompt(null); }}
                   style={{ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', background: '#6366f1', color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
                 >
-                  확인
+                  {t('game.hint.ok')}
                 </button>
               )}
             </div>

@@ -2,6 +2,8 @@
  * Stage-clear share card: draws a 1080×1350 picture (same look as the in-game clear screen)
  * on a canvas and shares it through the Web Share API, falling back to a download + copied text.
  */
+import i18n from '../../../i18n';
+import { isKo, localeAbsoluteUrl } from '../../../i18n/locale';
 
 export interface ShareCardInput {
     image: string;
@@ -92,24 +94,27 @@ function text(
     font: string,
     color: string,
     shadow?: { dy: number; color: string },
+    maxWidth?: number,
 ) {
     ctx.font = font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     if (shadow) {
         ctx.fillStyle = shadow.color;
-        ctx.fillText(str, x, y + shadow.dy);
+        ctx.fillText(str, x, y + shadow.dy, maxWidth);
     }
     ctx.fillStyle = color;
-    ctx.fillText(str, x, y);
+    ctx.fillText(str, x, y, maxWidth);
 }
 
 export async function buildShareCard(input: ShareCardInput): Promise<Blob> {
     const deep = shade(input.tint, 0.55);
-    const scoreLine = `${input.moves}번 만에 완성`;
+    const scoreLine = i18n.t('jigsaw:share.cardMoves', { count: input.moves });
+    const challengeLine = i18n.t('jigsaw:share.challenge');
+    const mpLabel = i18n.t('jigsaw:win.masterpiece');
     await Promise.all([
         document.fonts.load('170px "Lilita One"', 'CLEAR!STAGE 0123456789Tiny Pieces'),
-        document.fonts.load('62px "Black Han Sans"', `${input.title}${scoreLine}너는 몇 번 만에 맞출 수 있어?명화 컬렉션`),
+        document.fonts.load('62px "Black Han Sans"', `${input.title}${scoreLine}${challengeLine}${mpLabel}`),
     ]).catch(() => undefined);
     const [pic, buddy] = await Promise.all([loadImage(input.image), loadBuddy(input.buddySvg)]);
 
@@ -212,23 +217,23 @@ export async function buildShareCard(input: ShareCardInput): Promise<Blob> {
 
     // title + score
     const ink = input.masterpiece ? '#5a3a00' : '#3a3046';
-    text(ctx, input.title, cardX + cardW / 2, picY + picSize + 78, '62px "Black Han Sans"', ink);
-    text(ctx, scoreLine, cardX + cardW / 2, picY + picSize + 138, '40px "Black Han Sans"', input.masterpiece ? '#7a5200' : deep);
+    text(ctx, input.title, cardX + cardW / 2, picY + picSize + 78, '62px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif', ink, undefined, !isKo ? cardW - 60 : undefined);
+    text(ctx, scoreLine, cardX + cardW / 2, picY + picSize + 138, '40px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif', input.masterpiece ? '#7a5200' : deep, undefined, !isKo ? cardW - 60 : undefined);
 
     // masterpiece label (top-left of the card)
     if (input.masterpiece) {
         ctx.save();
         ctx.translate(cardX + 40, cardY + 70);
         ctx.rotate(-0.17);
-        ctx.font = '34px "Black Han Sans"';
-        const lw = ctx.measureText('명화 컬렉션').width + 44;
+        ctx.font = '34px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif';
+        const lw = ctx.measureText(mpLabel).width + 44;
         ctx.fillStyle = 'rgba(0,0,0,0.2)';
         roundRect(ctx, -lw / 2, -30 + 7, lw, 60, 18);
         ctx.fill();
         ctx.fillStyle = '#3a3046';
         roundRect(ctx, -lw / 2, -30, lw, 60, 18);
         ctx.fill();
-        text(ctx, '명화 컬렉션', 0, 12, '34px "Black Han Sans"', '#ffd34d');
+        text(ctx, mpLabel, 0, 12, '34px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif', '#ffd34d');
         ctx.restore();
     }
 
@@ -270,7 +275,7 @@ export async function buildShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.restore();
 
     // challenge line + brand
-    text(ctx, '너는 몇 번 만에 맞출 수 있어?', W / 2, 1236, '44px "Black Han Sans"', '#ffffff', { dy: 4, color: 'rgba(0,0,0,0.18)' });
+    text(ctx, challengeLine, W / 2, 1236, '44px "Black Han Sans", "M PLUS Rounded 1c", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif', '#ffffff', { dy: 4, color: 'rgba(0,0,0,0.18)' });
     text(ctx, 'Tiny Pieces', W / 2, 1310, '64px "Lilita One"', '#ffffff', { dy: 6, color: 'rgba(0,0,0,0.2)' });
 
     return new Promise((resolve, reject) =>
@@ -281,7 +286,7 @@ export async function buildShareCard(input: ShareCardInput): Promise<Blob> {
 export function shareText(input: ShareCardInput): string {
     const stars = '★'.repeat(input.stars) + '☆'.repeat(Math.max(0, 3 - input.stars));
     const grade = GRADE[input.stars] ?? 'GOOD';
-    return `🧩 Tiny Pieces ${input.stageId}번 '${input.title}' ${stars} ${grade}!\n나는 ${input.moves}번 만에 맞췄어. 너는 몇 번 만에 맞출 수 있어?\n👉 ${window.location.origin}/jigsaw`;
+    return i18n.t('jigsaw:share.text', { id: input.stageId, title: input.title, stars, grade, count: input.moves, url: localeAbsoluteUrl('/jigsaw') });
 }
 
 function download(blob: Blob, name: string) {

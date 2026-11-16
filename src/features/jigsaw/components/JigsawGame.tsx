@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Eye, Shuffle, Home, Play, RotateCcw, LayoutGrid, Music, VolumeX, Check, Undo2, Magnet, Paintbrush, X, Share2, Download } from 'lucide-react';
 import { useCoins } from '../../../context/CoinContext';
 import { logEvent } from '../../../firebase';
@@ -21,6 +22,7 @@ import { GRADES, GRADE_ORDER, priceOf, type Cosmetic, type CosmeticStore } from 
 import { Buddy } from './Buddy';
 import { shareClear, saveClearCard, type ShareCardInput } from '../utils/shareCard';
 import { BUDDY_SKINS, useBuddySkins, type BuddySkin } from '../data/buddySkins';
+import { stageTitle } from '../utils/stageTitle';
 
 /* ---------- sound ---------- */
 let audioCtx: AudioContext | null = null;
@@ -179,6 +181,7 @@ function HomeScreen({
     onOpenList: (idx: number) => void;
     onOpenShop: () => void;
 }) {
+    const { t } = useTranslation('jigsaw');
     const navigate = useNavigate();
     const stars = loadStars();
     const total = Object.values(stars).reduce((a, b) => a + b, 0);
@@ -204,11 +207,11 @@ function HomeScreen({
     return (
         <div className="jg-screen jg-home">
             <header className="jg-top">
-                <button className="jg-ghost-btn" onClick={() => navigate('/')} aria-label="홈으로">
+                <button className="jg-ghost-btn" onClick={() => navigate('/')} aria-label={t('home.homeAria')}>
                     <ChevronLeft size={28} strokeWidth={3.2} />
                 </button>
                 <div className="jg-home-right">
-                    <button className="jg-shop-btn" onClick={onOpenShop} aria-label="꾸미기">
+                    <button className="jg-shop-btn" onClick={onOpenShop} aria-label={t('home.shopAria')}>
                         <Paintbrush size={20} strokeWidth={2.6} />
                     </button>
                     <div className="jg-coin">
@@ -233,7 +236,7 @@ function HomeScreen({
                     if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
                 }}
             >
-                <button className="jg-arrow" onClick={() => go(-1)} disabled={idx === 0} aria-label="이전">
+                <button className="jg-arrow" onClick={() => go(-1)} disabled={idx === 0} aria-label={t('home.prev')}>
                     <ChevronLeft size={30} strokeWidth={3.4} />
                 </button>
                 <div key={stage.id} className={`jg-card ${dir > 0 ? 'from-r' : 'from-l'}`} onClick={() => unlocked && onPlay(stage)}>
@@ -242,7 +245,7 @@ function HomeScreen({
                         {got > 0 ? (
                             <img src={stage.image} alt="" draggable={false} />
                         ) : unlocked ? (
-                            <div className="jg-card-mystery" aria-label="아직 공개되지 않은 그림">
+                            <div className="jg-card-mystery" aria-label={t('home.mystery')}>
                                 <span>?</span>
                             </div>
                         ) : (
@@ -255,14 +258,14 @@ function HomeScreen({
                         <Buddy size={84} mood={got ? 'happy' : 'idle'} skin={buddy} />
                     </div>
                 </div>
-                <button className="jg-arrow" onClick={() => go(1)} disabled={idx >= maxIdx} aria-label="다음">
+                <button className="jg-arrow" onClick={() => go(1)} disabled={idx >= maxIdx} aria-label={t('home.next')}>
                     <ChevronRight size={30} strokeWidth={3.4} />
                 </button>
             </div>
 
             <div className="jg-stage-meta" key={`m${stage.id}`}>
                 <span className="jg-big-no">{stage.id}</span>
-                <span className="jg-stage-title">{unlocked ? stage.title : '잠긴 그림'}</span>
+                <span className="jg-stage-title">{unlocked ? stageTitle(stage) : t('home.lockedTitle')}</span>
                 <div className="jg-meta-stars">
                     {[1, 2, 3].map((k) => (
                         <FlatStar key={k} on={got >= k} size={30} />
@@ -272,7 +275,7 @@ function HomeScreen({
 
             <button className="jg-play-btn" disabled={!unlocked} onClick={() => onPlay(stage)}>
                 <Play size={26} fill="currentColor" strokeWidth={0} />
-                {unlocked ? '플레이' : '이전 그림을 완성하세요'}
+                {unlocked ? t('home.play') : t('home.playLocked')}
             </button>
 
             <button className="jg-list-btn" onClick={() => onOpenList(idx)}>
@@ -281,7 +284,7 @@ function HomeScreen({
                     <b>{idx + 1}</b> / {JIGSAW_STAGES.length}
                 </span>
                 <span className="sep" />
-                전체 보기
+                {t('home.viewAll')}
             </button>
         </div>
     );
@@ -289,6 +292,7 @@ function HomeScreen({
 
 /* ---------- stage list (all stages, chapters of 20, ranges of 100) ---------- */
 function StageList({ current, onPick, onBack }: { current: number; onPick: (idx: number) => void; onBack: () => void }) {
+    const { t } = useTranslation('jigsaw');
     const stars = useMemo(() => loadStars(), []);
     const total = Object.values(stars).reduce((a, b) => a + b, 0);
     const N = JIGSAW_STAGES.length;
@@ -336,10 +340,10 @@ function StageList({ current, onPick, onBack }: { current: number; onPick: (idx:
         <div className="jg-list" ref={scrollRef}>
             <div className="jg-list-head">
                 <header className="jg-top">
-                    <button className="jg-ghost-btn" onClick={onBack} aria-label="돌아가기">
+                    <button className="jg-ghost-btn" onClick={onBack} aria-label={t('list.back')}>
                         <ChevronLeft size={28} strokeWidth={3.2} />
                     </button>
-                    <h2 className="jg-list-title">전체 스테이지</h2>
+                    <h2 className="jg-list-title">{t('list.title')}</h2>
                     <div className="jg-coin">
                         <span className="jg-coin-num small">{total}</span>
                         <FlatStar size={26} />
@@ -348,11 +352,11 @@ function StageList({ current, onPick, onBack }: { current: number; onPick: (idx:
                 <form className="jg-jump" onSubmit={submitJump}>
                     <input
                         inputMode="numeric"
-                        placeholder={`번호로 이동 (1~${N})`}
+                        placeholder={t('list.jumpPlaceholder', { n: N })}
                         value={jump}
                         onChange={(e) => setJump(e.target.value.replace(/\D/g, ''))}
                     />
-                    <button type="submit">이동</button>
+                    <button type="submit">{t('list.jump')}</button>
                 </form>
                 {rangeCount > 1 && (
                     <div className="jg-ranges" ref={tabsRef}>
@@ -395,7 +399,7 @@ function StageList({ current, onPick, onBack }: { current: number; onPick: (idx:
                                         i === focus && focus !== current ? 'focus' : '',
                                     ].join(' ');
                                     return (
-                                        <button key={st.id} data-idx={i} className={cls} disabled={!open} onClick={() => onPick(i)} aria-label={`스테이지 ${st.id}`}>
+                                        <button key={st.id} data-idx={i} className={cls} disabled={!open} onClick={() => onPick(i)} aria-label={t('list.stageAria', { n: st.id })}>
                                             <span className={`jg-tile-face ${g >= 3 ? 'jg-gold' : ''}`} style={g >= 3 ? shineStyle(st.id) : undefined}>
                                                 {g >= 3 && <i className="jg-gold-spark" aria-hidden />}
                                                 {g ? (
@@ -446,6 +450,7 @@ function CosmeticShop({
     image: string;
     onClose: () => void;
 }) {
+    const { t } = useTranslation('jigsaw');
     const { coins } = useCoins();
     const [tab, setTab] = useState<ShopTab>('frame');
     const [msg, setMsg] = useState<string | null>(null);
@@ -473,36 +478,36 @@ function CosmeticShop({
         const item = confirm;
         const price = priceOf(item);
         setConfirm(null);
-        if (coins < price) return setMsg(`코인이 부족해요 (${price}개 필요)`);
+        if (coins < price) return setMsg(t('toast.needCoinsN', { cost: price }));
         if (await store.buy(item.id)) {
             sfx.win();
-            setMsg(`'${item.name}' 장착했어요`);
-        } else setMsg('코인이 부족해요');
+            setMsg(t('shop.equipped', { name: item.name }));
+        } else setMsg(t('toast.needCoins'));
     };
 
     return (
         <div className="jg-shop" onClick={onClose}>
             <div className="jg-shop-panel" onClick={(e) => e.stopPropagation()}>
                 <div className="jg-shop-head">
-                    <h2>꾸미기</h2>
+                    <h2>{t('shop.title')}</h2>
                     <span className="jg-shop-coins">
                         <img src="/coin_Icon.png" alt="" />
                         {coins.toLocaleString()}
                     </span>
-                    <button className="jg-shop-x" onClick={onClose} aria-label="닫기">
+                    <button className="jg-shop-x" onClick={onClose} aria-label={t('shop.close')}>
                         <X size={22} strokeWidth={3} />
                     </button>
                 </div>
                 <div className="jg-shop-tabs">
                     <button className={tab === 'frame' ? 'on' : ''} onClick={() => { setTab('frame'); setMsg(null); }}>
-                        보드 테두리
+                        {t('shop.tabFrame')}
                     </button>
                     <button className={tab === 'buddy' ? 'on' : ''} onClick={() => { setTab('buddy'); setMsg(null); }}>
-                        캐릭터
+                        {t('shop.tabBuddy')}
                     </button>
                 </div>
                 <div className="jg-shop-sub">
-                    {tab === 'frame' ? '퍼즐판 바깥을 꾸며요 · 그림은 가리지 않아요' : '판 위에서 함께 노는 조각 친구를 꾸며요'}
+                    {tab === 'frame' ? t('shop.subFrame') : t('shop.subBuddy')}
                 </div>
                 <div className="jg-shop-scroll" key={tab}>
                     {GRADE_ORDER.map((g) => {
@@ -527,7 +532,7 @@ function CosmeticShop({
                                                 {preview(item)}
                                                 <span className="nm">{item.name}</span>
                                                 <span className={`tag ${using ? 'using' : owned ? 'owned' : 'price'}`}>
-                                                    {using ? '사용 중' : owned ? '사용' : (
+                                                    {using ? t('shop.using') : owned ? t('shop.use') : (
                                                         <>
                                                             <img src="/coin_Icon.png" alt="" />
                                                             {priceOf(item)}
@@ -551,11 +556,11 @@ function CosmeticShop({
                         <p>
                             <b>{confirm.name}</b>
                             <br />
-                            <img src="/coin_Icon.png" alt="" /> {priceOf(confirm)} 코인으로 살까요?
+                            <img src="/coin_Icon.png" alt="" /> {t('shop.confirmPrice', { price: priceOf(confirm) })}
                         </p>
                         <div className="row">
-                            <button className="no" onClick={() => setConfirm(null)}>취소</button>
-                            <button className="yes" onClick={doBuy}>구매</button>
+                            <button className="no" onClick={() => setConfirm(null)}>{t('shop.cancel')}</button>
+                            <button className="yes" onClick={doBuy}>{t('shop.buy')}</button>
                         </div>
                     </div>
                 </div>
@@ -597,6 +602,7 @@ function PlayView({
     const [bgmId, setBgmId] = useState<string>(loadBgmPref);
     const [bgmMenu, setBgmMenu] = useState(false);
     const [vols, setVols] = useState(loadVolumes);
+    const { t } = useTranslation('jigsaw');
     const { coins, spendCoins, addCoins } = useCoins();
     /** board/moves snapshots before each drag, for undo */
     const historyRef = useRef<{ board: Board; moves: number }[]>([]);
@@ -807,11 +813,11 @@ function PlayView({
         if (!canHelp) return;
         const misplaced = board.map((p, sl) => (p !== sl ? p : -1)).filter((p) => p >= 0);
         if (!misplaced.length) return;
-        if (coins < MAGNET_COST) return showToast(`코인이 부족해요 (${MAGNET_COST}개 필요)`);
+        if (coins < MAGNET_COST) return showToast(t('toast.needCoinsN', { cost: MAGNET_COST }));
         setBusy(true);
         const ok = await spendCoins(MAGNET_COST);
         setBusy(false);
-        if (!ok) return showToast('코인이 부족해요');
+        if (!ok) return showToast(t('toast.needCoins'));
         const placed = (p: number) => board[p] === p;
         const touchesPlaced = (p: number) => {
             const r = Math.floor(p / cols), c = p % cols;
@@ -831,11 +837,11 @@ function PlayView({
     /** Undo: restore the board and move count from before the last drag. */
     const applyUndo = async () => {
         if (!canHelp || !historyRef.current.length) return;
-        if (coins < UNDO_COST) return showToast(`코인이 부족해요 (${UNDO_COST}개 필요)`);
+        if (coins < UNDO_COST) return showToast(t('toast.needCoinsN', { cost: UNDO_COST }));
         setBusy(true);
         const ok = await spendCoins(UNDO_COST);
         setBusy(false);
-        if (!ok) return showToast('코인이 부족해요');
+        if (!ok) return showToast(t('toast.needCoins'));
         const last = historyRef.current.pop()!;
         setHistoryLen(historyRef.current.length);
         setBoard(last.board);
@@ -854,11 +860,11 @@ function PlayView({
             return;
         }
         if (busy) return;
-        if (coins < PEEK_COST) return showToast(`코인이 부족해요 (${PEEK_COST}개 필요)`);
+        if (coins < PEEK_COST) return showToast(t('toast.needCoinsN', { cost: PEEK_COST }));
         setBusy(true);
         const ok = await spendCoins(PEEK_COST);
         setBusy(false);
-        if (!ok) return showToast('코인이 부족해요');
+        if (!ok) return showToast(t('toast.needCoins'));
         // already released while paying → still show it briefly so the coins aren't wasted
         setPeek(true);
         if (!peekHeld.current) setTimeout(() => setPeek(false), 1200);
@@ -895,7 +901,7 @@ function PlayView({
 
     const cardInput = (): ShareCardInput => ({
         image: stage.image,
-        title: stage.title,
+        title: stageTitle(stage),
         stageId: stage.id,
         stars: result?.stars ?? 0,
         moves,
@@ -907,9 +913,9 @@ function PlayView({
         if (sharing || !result) return;
         setSharing(true);
         try {
-            if ((await shareClear(cardInput())) === 'saved') showToast('이미지를 저장했어요 · 공유 문구도 복사됐어요');
+            if ((await shareClear(cardInput())) === 'saved') showToast(t('toast.sharedSaved'));
         } catch {
-            showToast('공유하지 못했어요');
+            showToast(t('toast.shareFail'));
         }
         setSharing(false);
     };
@@ -918,9 +924,9 @@ function PlayView({
         setSharing(true);
         try {
             await saveClearCard(cardInput());
-            showToast('이미지를 저장했어요');
+            showToast(t('toast.saved'));
         } catch {
-            showToast('저장하지 못했어요');
+            showToast(t('toast.saveFail'));
         }
         setSharing(false);
     };
@@ -945,20 +951,20 @@ function PlayView({
                 </span>
                 <div className="jg-top-right">
                     <div className="jg-top-btns">
-                    <button className="jg-bgm-btn" onClick={onExit} aria-label="나가기">
+                    <button className="jg-bgm-btn" onClick={onExit} aria-label={t('play.exitAria')}>
                         <Home size={18} strokeWidth={2.6} />
                     </button>
-                    <button className="jg-bgm-btn" onClick={reset} disabled={won || phase !== 'play'} aria-label="다시 섞기">
+                    <button className="jg-bgm-btn" onClick={reset} disabled={won || phase !== 'play'} aria-label={t('play.shuffleAria')}>
                         <Shuffle size={17} strokeWidth={2.6} />
                     </button>
-                    <button className="jg-bgm-btn" onClick={onOpenShop} aria-label="꾸미기">
+                    <button className="jg-bgm-btn" onClick={onOpenShop} aria-label={t('home.shopAria')}>
                         <Paintbrush size={17} strokeWidth={2.6} />
                     </button>
                     <div className="jg-bgm">
                         <button
                             className={`jg-bgm-btn ${bgmId === 'off' ? 'off' : ''}`}
                             onClick={() => setBgmMenu((v) => !v)}
-                            aria-label="배경음악"
+                            aria-label={t('play.bgmAria')}
                         >
                             {bgmId === 'off' ? <VolumeX size={18} strokeWidth={2.6} /> : <Music size={18} strokeWidth={2.6} />}
                         </button>
@@ -968,20 +974,20 @@ function PlayView({
                                 <div className="jg-bgm-menu">
                                     <div className="jg-vol">
                                         <div className="jg-vol-row">
-                                            <span>배경음악</span>
+                                            <span>{t('play.bgmLabel')}</span>
                                             <b>{Math.round(vols.bgm * 100)}</b>
                                         </div>
                                         <input type="range" min={0} max={100} value={Math.round(vols.bgm * 100)}
-                                            onChange={(e) => changeVol('bgm', Number(e.target.value) / 100)} aria-label="배경음악 볼륨" />
+                                            onChange={(e) => changeVol('bgm', Number(e.target.value) / 100)} aria-label={t('play.bgmVolAria')} />
                                         <div className="jg-vol-row">
-                                            <span>효과음</span>
+                                            <span>{t('play.sfxLabel')}</span>
                                             <b>{Math.round(vols.sfx * 100)}</b>
                                         </div>
                                         <input type="range" min={0} max={100} value={Math.round(vols.sfx * 100)}
                                             onChange={(e) => changeVol('sfx', Number(e.target.value) / 100)}
-                                            onPointerUp={previewSfx} aria-label="효과음 볼륨" />
+                                            onPointerUp={previewSfx} aria-label={t('play.sfxVolAria')} />
                                     </div>
-                                    <div className="jg-bgm-head">배경음악 선택</div>
+                                    <div className="jg-bgm-head">{t('play.bgmSelect')}</div>
                                     {BGM_TRACKS.map((t) => (
                                         <button key={t.id} className={bgmId === t.id ? 'on' : ''} onClick={() => pickBgm(t.id)}>
                                             <span className="nm">{t.name}</span>
@@ -990,10 +996,10 @@ function PlayView({
                                         </button>
                                     ))}
                                     <button className={bgmId === 'off' ? 'on' : ''} onClick={() => pickBgm('off')}>
-                                        <span className="nm">끄기</span>
+                                        <span className="nm">{t('play.bgmOff')}</span>
                                         {bgmId === 'off' && <Check size={16} strokeWidth={3} className="ck" />}
                                     </button>
-                                    {phase !== 'play' && <div className="jg-bgm-note">게임이 시작되면 재생돼요</div>}
+                                    {phase !== 'play' && <div className="jg-bgm-note">{t('play.bgmNote')}</div>}
                                 </div>
                             </>
                         )}
@@ -1116,13 +1122,13 @@ function PlayView({
                         </div>
                     )}
                     {peek && !won && <img className="jg-peek" src={stage.image} alt="" draggable={false} />}
-                    {won && <img className="jg-reveal" src={stage.image} alt={stage.title} draggable={false} />}
+                    {won && <img className="jg-reveal" src={stage.image} alt={stageTitle(stage)} draggable={false} />}
                 </div>
                 </div>
             </div>
 
             <div className="jg-controls">
-                <button className="jg-round item" onClick={applyUndo} disabled={!canHelp || historyLen === 0} aria-label="되돌리기">
+                <button className="jg-round item" onClick={applyUndo} disabled={!canHelp || historyLen === 0} aria-label={t('play.undoAria')}>
                     <Undo2 size={22} strokeWidth={2.8} />
                     <span className="jg-cost"><img src="/coin_Icon.png" alt="" />{UNDO_COST}</span>
                 </button>
@@ -1134,22 +1140,22 @@ function PlayView({
                     onPointerCancel={endPeek}
                     onContextMenu={(e) => e.preventDefault()}
                     disabled={won || phase !== 'play'}
-                    aria-label="원본 보기"
+                    aria-label={t('play.peekAria')}
                 >
                     <Eye size={30} strokeWidth={2.8} />
                     {peeksLeft > 0 ? (
-                        <span className="jg-cost free">남은 {peeksLeft}회</span>
+                        <span className="jg-cost free">{t('play.peeksLeft', { count: peeksLeft })}</span>
                     ) : (
                         <span className="jg-cost"><img src="/coin_Icon.png" alt="" />{PEEK_COST}</span>
                     )}
                 </button>
-                <button className="jg-round item" onClick={applyMagnet} disabled={!canHelp} aria-label="조각 자석">
+                <button className="jg-round item" onClick={applyMagnet} disabled={!canHelp} aria-label={t('play.magnetAria')}>
                     <Magnet size={22} strokeWidth={2.8} />
                     <span className="jg-cost"><img src="/coin_Icon.png" alt="" />{MAGNET_COST}</span>
                 </button>
             </div>
             <p className="jg-hint">
-                {peeksLeft > 0 ? '눈 버튼을 꾹 누르면 원본이 보여요' : `원본 보기를 다 썼어요 · 한 번 더 보려면 ${PEEK_COST}코인`}
+                {peeksLeft > 0 ? t('play.hintHold') : t('play.hintUsedUp', { cost: PEEK_COST })}
             </p>
             <div className="jg-coins-left">
                 <img src="/coin_Icon.png" alt="" />
@@ -1180,10 +1186,10 @@ function PlayView({
                     <div className="jg-win-inner">
                         <div className="jg-win-top">
                             <span className="jg-win-stage">STAGE {pad2(stage.id)}</span>
-                            <span className="jg-win-head">완성!</span>
+                            <span className="jg-win-head">{t('win.head')}</span>
                         </div>
                         <div className={`jg-win-card ${isMasterpiece(stage) ? 'masterpiece' : ''}`}>
-                            {isMasterpiece(stage) && <span className="jg-win-mp">명화 컬렉션</span>}
+                            {isMasterpiece(stage) && <span className="jg-win-mp">{t('win.masterpiece')}</span>}
                             <span className={`jg-win-stamp g${result.stars}`}>{GRADE[result.stars]}</span>
                             <div className="jg-win-stars">
                                 {[1, 2, 3].map((k) => (
@@ -1201,10 +1207,10 @@ function PlayView({
                                     <Buddy size={78} mood="happy" skin={buddy} />
                                 </div>
                             </div>
-                            <div className="jg-win-title">{stage.title}</div>
+                            <div className="jg-win-title">{stageTitle(stage)}</div>
                             <div className="jg-win-score">
                                 <span className="num">{moves}</span>
-                                <span className="lbl">번 만에 완성</span>
+                                <span className="lbl">{t('win.moves', { count: moves })}</span>
                                 {result.record && <span className="jg-best">BEST</span>}
                             </div>
                         </div>
@@ -1214,36 +1220,36 @@ function PlayView({
                                     <img src="/coin_Icon.png" alt="" />+{CLEAR_COIN_REWARD}
                                 </span>
                                 <span className="jg-reward-chip" style={{ animationDelay: '1.1s' }}>
-                                    <FlatStar size={20} />퍼즐력 +1
+                                    <FlatStar size={20} />{t('win.puzzlePower')}
                                 </span>
                             </div>
                         ) : (
-                            <div className="jg-win-rewards note">처음 클리어할 때만 보상을 받아요</div>
+                            <div className="jg-win-rewards note">{t('win.firstOnly')}</div>
                         )}
                         {collection && (
                             <div className="jg-win-collect">
-                                그림 <b>{collection.cleared}</b> / {JIGSAW_STAGES.length} 수집 · <FlatStar size={15} /> <b>{collection.stars}</b>
+                                {t('win.collectPre')} <b>{collection.cleared}</b> / {JIGSAW_STAGES.length} {t('win.collectPost')} · <FlatStar size={15} /> <b>{collection.stars}</b>
                             </div>
                         )}
                         <div className="jg-share-row">
                             <button className="jg-share-btn" onClick={doShare} disabled={sharing}>
-                                <Share2 size={26} strokeWidth={3} /> 친구에게 자랑하기
+                                <Share2 size={26} strokeWidth={3} /> {t('win.share')}
                             </button>
-                            <button className="jg-save-btn" onClick={doSave} disabled={sharing} aria-label="이미지 저장">
+                            <button className="jg-save-btn" onClick={doSave} disabled={sharing} aria-label={t('win.saveAria')}>
                                 <Download size={24} strokeWidth={3} />
                             </button>
                         </div>
-                        <p className="jg-share-hint">친구에게 도전장을 보내 보세요 ✉️</p>
+                        <p className="jg-share-hint">{t('win.shareHint')}</p>
                         <div className="jg-win-actions">
-                            <button className="jg-round" onClick={onExit} aria-label="홈">
+                            <button className="jg-round" onClick={onExit} aria-label={t('win.homeAria')}>
                                 <Home size={24} strokeWidth={2.8} />
                             </button>
-                            <button className="jg-round" onClick={reset} aria-label="다시 하기">
+                            <button className="jg-round" onClick={reset} aria-label={t('win.retryAria')}>
                                 <RotateCcw size={22} strokeWidth={2.8} />
                             </button>
                             {onNext && (
                                 <button className="jg-play-btn small" onClick={onNext}>
-                                    다음 <ChevronRight size={24} strokeWidth={3.4} />
+                                    {t('win.next')} <ChevronRight size={24} strokeWidth={3.4} />
                                 </button>
                             )}
                         </div>

@@ -1,0 +1,123 @@
+{
+  "modeSelect": {
+    "seoTitle": "スナップスポット 間違い探し - パズルガーデン",
+    "seoDescription": "2枚の写真を見比べて、違うところを見つける間違い探しゲーム。ノーマルとアーケードモードで観察力を試そう!",
+    "miniOriginal": "元の写真",
+    "miniModified": "変更後",
+    "miniHeartLeft": "ハートあと1個",
+    "stageAlt": "ステージ",
+    "arcadeAlt": "アーケード",
+    "loading": "読み込み中...",
+    "continueStage": "ステージ {{n}}/{{max}} をつづける",
+    "startStage": "ステージ 1/{{max}} をはじめる",
+    "aboutTitle": "スナップスポットとは?",
+    "aboutBody": "スナップスポットは、2枚の写真を並べて見比べ、<strong>隠れた間違い</strong>をすべて見つける間違い探しゲームです。500以上のステージとアーケードのタイムアタックモードで、集中力と観察力をぐんぐん鍛えましょう!",
+    "tips": {
+      "compare": {
+        "label": "基本",
+        "title": "2枚の写真を見比べよう",
+        "desc": "元の写真と変更後の写真を並べて、違うところを探しましょう。色・大きさ・位置など、小さな違いが隠れています。"
+      },
+      "tap": {
+        "label": "操作",
+        "title": "タップして答え合わせ",
+        "desc": "違うと思った場所をタップ(クリック)すると、すぐに正解かどうかわかります。正解ならマーカーが表示されます。"
+      },
+      "zoom": {
+        "label": "拡大",
+        "title": "ピンチで拡大",
+        "desc": "見えにくいところは、ピンチ操作やマウスのスクロールで最大3倍まで拡大してじっくり見てみましょう。"
+      },
+      "stage": {
+        "label": "ステージ",
+        "title": "ハートを大切に",
+        "desc": "ステージモードでは、間違えるたびにハートが減ります。0になるとゲームオーバー! 慎重にタップしましょう。"
+      }
+    }
+  },
+  "game": {
+    "seoTitle": "スナップスポット 間違い探し - パズルガーデン",
+    "seoDescription": "2枚の写真を見比べて、違うところを見つける間違い探しゲーム。あなたの観察力を試してみよう!",
+    "loading": "読み込み中...",
+    "alertAdDismissed": "広告を最後まで見るとヒントが使えます。",
+    "alertNoAd": "現在表示できる広告がありません。しばらくしてからお試しください。",
+    "soundSettings": "サウンド設定",
+    "markerShop": "マーカーショップ",
+    "altOriginal": "元の写真",
+    "altModified": "変更後",
+    "modeSelect": "モード選択",
+    "win": {
+      "title": "全部見つけました!",
+      "body_other": "{{count}}個の間違いをすべて見つけました。",
+      "puzzlePower": "パズル力 +1",
+      "nextStage": "次のステージ"
+    },
+    "over": {
+      "title": "ゲームオーバー",
+      "body": "ハートがなくなりました。",
+      "retry": "もう一度"
+    },
+    "hint": {
+      "title": "コインが足りません",
+      "adPrompt": "広告を見るとヒントを1回使えます",
+      "adUsed": "このステージではすでに広告を見ています",
+      "balance": "所持 {{coins}}🪙 · 必要 {{cost}}🪙",
+      "cancel": "キャンセル",
+      "adLoading": "読み込み中…",
+      "watchAd": "広告を見る",
+      "ok": "OK"
+    }
+  },
+  "settings": {
+    "title": "サウンド設定",
+    "sfx": "効果音"
+  },
+  "markerShop": {
+    "title": "マーカーショップ",
+    "balance": "所持コイン",
+    "applied": "使用中",
+    "select": "選ぶ",
+    "free": "無料",
+    "unlock": "解放",
+    "confirmSpend": "{{cost}}コインを使いますか?",
+    "cancel": "キャンセル",
+    "ok": "OK",
+    "designs": {
+      "circle": "まる",
+      "check": "チェック",
+      "star": "スター",
+      "thumbs": "いいね",
+      "dart": "ダーツ",
+      "hundred": "100点",
+      "gem": "ジェム",
+      "smile": "スマイル",
+      "magnify": "虫めがね",
+      "pin": "ピン",
+      "dizzy": "きらきら",
+      "target": "ターゲット",
+      "clover": "クローバー",
+      "frog": "カエル",
+      "cherry": "さくら",
+      "cactus": "サボテン",
+      "hue": "色相環",
+      "robot": "ロボット",
+      "lightning": "いなずま",
+      "sparkle": "スパークル",
+      "bulb": "電球",
+      "paw": "肉球",
+      "butterfly": "チョウ",
+      "cat": "ネコ",
+      "fox": "キツネ",
+      "panda": "パンダ",
+      "bomb": "ボンバー",
+      "heart": "ハート",
+      "magic": "マジック",
+      "eyes": "ひとみ",
+      "crown": "クラウン",
+      "rainbow": "レインボー",
+      "portal": "ポータル",
+      "arc": "放電",
+      "matrix": "マトリックス"
+    }
+  }
+}
