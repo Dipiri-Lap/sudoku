@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Eye, Shuffle, Home, Play, RotateCcw, LayoutGrid, Music, VolumeX, Check, Undo2, Magnet, Paintbrush, X, Share2, Download } from 'lucide-react';
 import { useCoins } from '../../../context/CoinContext';
@@ -182,6 +183,7 @@ function HomeScreen({
     onOpenShop: () => void;
 }) {
     const { t } = useTranslation('jigsaw');
+    const { t: tc } = useTranslation('common');
     const navigate = useNavigate();
     const stars = loadStars();
     const total = Object.values(stars).reduce((a, b) => a + b, 0);
@@ -206,6 +208,8 @@ function HomeScreen({
 
     return (
         <div className="jg-screen jg-home">
+            {/* PWA 서비스 워커가 재방문 때 기본 index.html(한국어 홈 제목)을 내주므로 탭 제목을 직접 세팅한다 */}
+            <Helmet><title>{`${tc('games.jigsaw.name')} - ${tc('brand')}`}</title></Helmet>
             <header className="jg-top">
                 <button className="jg-ghost-btn" onClick={() => navigate('/')} aria-label={t('home.homeAria')}>
                     <ChevronLeft size={28} strokeWidth={3.2} />
