@@ -39,6 +39,34 @@ export function sortOrderedInPile(pile: Card[]): Card[] {
     return out;
 }
 
+/*
+ * 배치 설계(level.catDepth): 카테고리 카드를 어디에 깔지 치우치게 해서 난이도를 잘게 조절한다.
+ * maxMoves 는 한 칸만 바꿔도 클리어율이 크게 뛰어서(어려운 구간에서 약 15~20%p) 목표에 딱 맞추기 어렵다.
+ * 이 값은 연속값이라 그 사이를 메운다.
+ *  - 0~1: 클수록 카테고리 카드가 스택 깊숙이(위에 카드가 많이 쌓인 자리)·덱 뒤쪽에 놓여 어려워진다.
+ *    0 이면 완전 무작위(예전과 같음), 1 이면 카테고리 카드가 전부 맨 아래·맨 뒤로 몰린다.
+ *  - 음수(위쪽으로 몰기)는 쉬워질 것 같지만 슬롯이 모자라 카테고리 카드가 스택을 막아 오히려 어려워진다 → 쓰지 않는다(0으로 자름).
+ *  - 값 맞추기는 scripts/calibrate-catdepth.mjs
+ * scripts/sim-indexed.mjs 의 deal() 이 같은 규칙을 그대로 따른다 — 둘을 함께 바꿀 것.
+ */
+const depthKey = (card: Card, depth: number) => Math.random() + (card.type === 'category' ? depth : 0);
+
+/** 스택의 자리를 "위에 쌓인 카드 수" 순으로 늘어놓고, 키가 큰 카드부터 깊은 자리에 채운다. */
+export function biasStacksByDepth(stacks: Card[][], depth: number): Card[][] {
+    const spots: { s: number; i: number; above: number; r: number }[] = [];
+    stacks.forEach((st, s) => st.forEach((_, i) => spots.push({ s, i, above: st.length - 1 - i, r: Math.random() })));
+    spots.sort((a, b) => b.above - a.above || a.r - b.r);
+    const cards = stacks.flat().map(c => ({ c, k: depthKey(c, depth) })).sort((a, b) => b.k - a.k);
+    const out = stacks.map(st => st.slice());
+    spots.forEach((p, n) => { out[p.s][p.i] = { ...cards[n].c, isRevealed: p.above === 0 }; });
+    return out;
+}
+
+/** 덱은 앞에서부터 뽑으므로 키가 작은 카드부터 앞에 둔다. */
+export function biasDeckByDepth(deck: Card[], depth: number): Card[] {
+    return deck.map(c => ({ c, k: depthKey(c, depth) })).sort((a, b) => a.k - b.k).map(x => x.c);
+}
+
 export interface ActiveSlot {
     catId: string;
     name: string;
@@ -194,6 +222,15 @@ function wordSolitaireReducer(state: WordSolitaireState, action: WordSolitaireAc
                     });
                 }
             });
+
+            // 배치 설계: 레벨에 catDepth 가 있을 때만 카테고리 카드 위치를 치우친다 (없으면 예전과 같은 무작위)
+            const catDepth = typeof level.catDepth === 'number' ? Math.max(0, Math.min(1, level.catDepth)) : 0;
+            let dealtStacks = newStacks;
+            if (catDepth !== 0) {
+                dealtStacks = biasStacksByDepth(newStacks, catDepth);
+                newDeck = biasDeckByDepth(newDeck, catDepth);
+            }
+            for (let s = 0; s < dealtStacks.length; s++) newStacks[s] = dealtStacks[s];
 
             const hasOrdered = categories.some((c: any) => c.ordered);
             if (hasOrdered) {

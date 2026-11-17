@@ -19,6 +19,8 @@ const allLevels = Array.isArray(raw) ? raw : raw.levels;
 const draftLevel = args.draft ? { id: 0, ...JSON.parse(fs.readFileSync(args.draft, 'utf8')) } : null;
 const levels = draftLevel ? [draftLevel] : args.level ? allLevels.filter((l) => l.id === +args.level) : allLevels.filter((l) => l.slots === SLOTS);
 const W = +(args.w ?? 0.6); // 이동 수 가중치(클수록 짧은 풀이 선호)
+// 배치 설계(level.catDepth) — --catdepth 로 덮어쓸 수 있다 (WordSortContext 의 biasStacksByDepth/biasDeckByDepth 와 같은 규칙)
+const CATDEPTH_OVERRIDE = args.catdepth !== undefined ? +args.catdepth : null;
 
 // ---- 배치 (START_LEVEL 복제) ----
 // 카드: {id, type:'c'|'w', cat, idx}  idx: 인덱싱 카테고리의 단어 번호(1..n), 카테고리 카드는 0
@@ -40,8 +42,22 @@ function deal(level, indexedCatPos) {
     const stackWord = wordCards.splice(0, totalStack - catInStack);
     const stackCards = shuffle([...stackCat, ...stackWord]);
     const deck = shuffle([...catCards, ...wordCards]);
-    const stacks = stackCounts.map((n) => { const s = []; for (let i = 0; i < n; i++) s.push(stackCards.pop()); return s; });
-    return { cards, stacks, deck };
+    let stacks = stackCounts.map((n) => { const s = []; for (let i = 0; i < n; i++) s.push(stackCards.pop()); return s; });
+    let dealtDeck = deck;
+    const depth = Math.max(0, Math.min(1, CATDEPTH_OVERRIDE ?? level.catDepth ?? 0));
+    if (depth !== 0) {
+        const key = (c) => rnd() + (c.type === 'c' ? depth : 0);
+        // 스택: 위에 쌓인 카드가 많은 자리부터, 키가 큰 카드로 채운다
+        const spots = [];
+        stacks.forEach((st, s) => st.forEach((_, i) => spots.push({ s, i, above: st.length - 1 - i, r: rnd() })));
+        spots.sort((a, b) => b.above - a.above || a.r - b.r);
+        const cs = stacks.flat().map((c) => ({ c, k: key(c) })).sort((a, b) => b.k - a.k);
+        stacks = stacks.map((st) => st.slice());
+        spots.forEach((p, n) => { stacks[p.s][p.i] = cs[n].c; });
+        // 덱: 앞에서 뽑으므로 키가 작은 카드부터
+        dealtDeck = deck.map((c) => ({ c, k: key(c) })).sort((a, b) => a.k - b.k).map((x) => x.c);
+    }
+    return { cards, stacks, deck: dealtDeck };
 }
 // 같은 배치를 복제해서 인덱싱 카드만 더미 안에서 정렬
 function sortedCopy(d) {
