@@ -368,14 +368,24 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
       const canvasX = (origX / W) * IMG_DISPLAY_W - HALF_W;
       const canvasY = HALF_H - (origY / H) * IMG_DISPLAY_H;
 
+      // When hit areas overlap, pick the unfound diff whose center is closest
+      // (normalized by its size) instead of whichever comes first in the list.
+      let best = -1;
+      let bestScore = Infinity;
+      for (let j = 0; j < levelData.differences.length; j++) {
+        if (found[j]) continue;
+        const d = levelData.differences[j];
+        const dp = side === 'orig' ? d.topPosition : d.bottomPosition;
+        const nx = (canvasX - dp.x) / (d.colSize.x / 2);
+        const ny = (canvasY - dp.y) / (d.colSize.y / 2);
+        if (Math.abs(nx) > 1 || Math.abs(ny) > 1) continue;
+        const score = nx * nx + ny * ny;
+        if (score < bestScore) { bestScore = score; best = j; }
+      }
+
       for (let i = 0; i < levelData.differences.length; i++) {
-        if (found[i]) continue;
-        const diff = levelData.differences[i];
-        const pos = side === 'orig' ? diff.topPosition : diff.bottomPosition;
-        if (
-          Math.abs(canvasX - pos.x) <= diff.colSize.x / 2 &&
-          Math.abs(canvasY - pos.y) <= diff.colSize.y / 2
-        ) {
+        if (i !== best) continue;
+        {
           const next = [...found];
           next[i] = true;
           setFound(next);

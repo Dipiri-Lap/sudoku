@@ -8,6 +8,18 @@ const HALF_H = IMG_H / 2;
 interface Spot {
   x: number;
   y: number;
+  /** detected change bbox size in canvas units (undefined for manually added spots) */
+  w?: number;
+  h?: number;
+}
+
+const SPOT_PAD = 16; // extra hit margin around detected bbox
+
+function spotSize(s: Spot, minSize: number) {
+  return {
+    x: Math.round(Math.max(minSize, (s.w ?? 0) + SPOT_PAD * 2)),
+    y: Math.round(Math.max(minSize, (s.h ?? 0) + SPOT_PAD * 2)),
+  };
 }
 
 function stripExt(filename: string): string {
@@ -102,7 +114,8 @@ function maskToDataUrl(mask: Uint8Array): string {
 
 function detectSpots(mask: Uint8Array, minPx: number, mergeRadius: number): Spot[] {
   const visited = new Uint8Array(IMG_W * IMG_H);
-  const raw: Spot[] = [];
+  type Box = { x0: number; y0: number; x1: number; y1: number };
+  const raw: (Spot & { box: Box })[] = [];
 
   for (let i = 0; i < IMG_W * IMG_H; i++) {
     if (visited[i] || !mask[i]) continue;
@@ -110,12 +123,15 @@ function detectSpots(mask: Uint8Array, minPx: number, mergeRadius: number): Spot
     const stack = [i];
     visited[i] = 1;
     let sumX = 0, sumY = 0, count = 0;
+    let x0 = IMG_W, y0 = IMG_H, x1 = 0, y1 = 0;
 
     while (stack.length) {
       const idx = stack.pop()!;
       const px = idx % IMG_W;
       const py = Math.floor(idx / IMG_W);
       sumX += px; sumY += py; count++;
+      if (px < x0) x0 = px; if (px > x1) x1 = px;
+      if (py < y0) y0 = py; if (py > y1) y1 = py;
 
       for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
         const nx = px + dx, ny = py + dy;
@@ -128,7 +144,7 @@ function detectSpots(mask: Uint8Array, minPx: number, mergeRadius: number): Spot
     }
 
     if (count < minPx) continue;
-    raw.push({ x: sumX / count - HALF_W, y: HALF_H - sumY / count });
+    raw.push({ x: sumX / count - HALF_W, y: HALF_H - sumY / count, box: { x0, y0, x1, y1 } });
   }
 
   // Merge nearby cluster centroids
@@ -147,9 +163,16 @@ function detectSpots(mask: Uint8Array, minPx: number, mergeRadius: number): Spot
         used[j] = true;
       }
     }
+    // Union bbox of the group → center + size follow the actual changed area
+    const bx0 = Math.min(...group.map(p => p.box.x0));
+    const by0 = Math.min(...group.map(p => p.box.y0));
+    const bx1 = Math.max(...group.map(p => p.box.x1));
+    const by1 = Math.max(...group.map(p => p.box.y1));
     merged.push({
-      x: Math.round(group.reduce((s, p) => s + p.x, 0) / group.length),
-      y: Math.round(group.reduce((s, p) => s + p.y, 0) / group.length),
+      x: Math.round((bx0 + bx1 + 1) / 2 - HALF_W),
+      y: Math.round(HALF_H - (by0 + by1 + 1) / 2),
+      w: bx1 - bx0 + 1,
+      h: by1 - by0 + 1,
     });
   }
   return merged;
@@ -176,7 +199,8 @@ export const DiffTool: React.FC = () => {
   const [diffUrl, setDiffUrl]   = useState<string | null>(null);
   const [showDiff, setShowDiff] = useState(true);
 
-  const [colSize,      setColSize]      = useState(120);
+  // Minimum hit size; each spot grows to fit its detected change area
+  const [colSize,      setColSize]      = useState(75);
   const [threshold,    setThreshold]    = useState(0.1);
   const [minPx,        setMinPx]        = useState(30);
   const [mergeRadius,  setMergeRadius]  = useState(80);
@@ -268,7 +292,7 @@ export const DiffTool: React.FC = () => {
       differences: spots.map(s => ({
         topPosition:    { x: s.x, y: s.y },
         bottomPosition: { x: s.x, y: s.y },
-        colSize: { x: colSize, y: colSize },
+        colSize: spotSize(s, colSize),
       })),
     }, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
@@ -284,8 +308,9 @@ export const DiffTool: React.FC = () => {
     spots.map((s, i) => {
       const left = (s.x + HALF_W) / IMG_W * 100;
       const top  = (HALF_H - s.y) / IMG_H * 100;
-      const w    = colSize / IMG_W * 100;
-      const h    = colSize / IMG_H * 100;
+      const sz   = spotSize(s, colSize);
+      const w    = sz.x / IMG_W * 100;
+      const h    = sz.y / IMG_H * 100;
       return (
         <div
           key={i}
@@ -294,7 +319,7 @@ export const DiffTool: React.FC = () => {
           style={{
             position: 'absolute',
             left: `${left}%`, top: `${top}%`,
-            width: `${w}%`, paddingBottom: `${h}%`,
+            width: `${w}%`, height: `${h}%`,
             transform: 'translate(-50%, -50%)',
             border: '3px solid #ff4444',
             borderRadius: '50%',
@@ -414,9 +439,9 @@ export const DiffTool: React.FC = () => {
               onChange={e => setImageID(e.target.value)} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: '#aaa' }}>
-            ColSize:
+            최소 ColSize:
             <input type="number" value={colSize} min={20} style={{ ...NUM_INPUT, width: '70px' }}
-              onChange={e => setColSize(parseInt(e.target.value) || 120)} />
+              onChange={e => setColSize(parseInt(e.target.value) || 75)} />
           </label>
           <button onClick={exportImages} style={{ ...BTN, background: '#2e7d32', color: '#fff' }}>
             이미지 저장 (WebP)
