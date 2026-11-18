@@ -1,0 +1,371 @@
+[
+ {
+  "id": 8,
+  "slots": 4,
+  "cards": 70,
+  "old": 153,
+  "new": 153,
+  "pct": 43.5,
+  "solvedPct": 88
+ },
+ {
+  "id": 18,
+  "slots": 4,
+  "cards": 54,
+  "old": 93,
+  "new": 93,
+  "pct": 36.5,
+  "solvedPct": 93.5
+ },
+ {
+  "id": 28,
+  "slots": 3,
+  "cards": 52,
+  "old": 114,
+  "new": 115,
+  "pct": 46.5,
+  "solvedPct": 83
+ },
+ {
+  "id": 38,
+  "slots": 4,
+  "cards": 50,
+  "old": 85,
+  "new": 85,
+  "pct": 42.5,
+  "solvedPct": 93
+ },
+ {
+  "id": 48,
+  "slots": 4,
+  "cards": 58,
+  "old": 102,
+  "new": 102,
+  "pct": 39.5,
+  "solvedPct": 92
+ },
+ {
+  "id": 58,
+  "slots": 4,
+  "cards": 48,
+  "old": 82,
+  "new": 83,
+  "pct": 49.5,
+  "solvedPct": 89.5
+ },
+ {
+  "id": 68,
+  "slots": 4,
+  "cards": 58,
+  "old": 102,
+  "new": 102,
+  "pct": 41,
+  "solvedPct": 94.5
+ },
+ {
+  "id": 78,
+  "slots": 4,
+  "cards": 46,
+  "old": 76,
+  "new": 76,
+  "pct": 34,
+  "solvedPct": 95.5
+ },
+ {
+  "id": 88,
+  "slots": 4,
+  "cards": 60,
+  "old": 121,
+  "new": 122,
+  "pct": 43.5,
+  "solvedPct": 88
+ },
+ {
+  "id": 98,
+  "slots": 3,
+  "cards": 50,
+  "old": 112,
+  "new": 112,
+  "pct": 42.5,
+  "solvedPct": 88
+ },
+ {
+  "id": 108,
+  "slots": 4,
+  "cards": 55,
+  "old": 99,
+  "new": 105,
+  "pct": 44.5,
+  "solvedPct": 92
+ },
+ {
+  "id": 118,
+  "slots": 4,
+  "cards": 60,
+  "old": 121,
+  "new": 122,
+  "pct": 45.5,
+  "solvedPct": 89.5
+ },
+ {
+  "id": 128,
+  "slots": 3,
+  "cards": 42,
+  "old": 78,
+  "new": 82,
+  "pct": 44.5,
+  "solvedPct": 89
+ },
+ {
+  "id": 138,
+  "slots": 3,
+  "cards": 46,
+  "old": 96,
+  "new": 97,
+  "pct": 45.5,
+  "solvedPct": 87
+ },
+ {
+  "id": 148,
+  "slots": 3,
+  "cards": 60,
+  "old": 146,
+  "new": 147,
+  "pct": 45,
+  "solvedPct": 81.5
+ },
+ {
+  "id": 158,
+  "slots": 4,
+  "cards": 46,
+  "old": 76,
+  "new": 76,
+  "pct": 35.5,
+  "solvedPct": 98.5
+ },
+ {
+  "id": 168,
+  "slots": 4,
+  "cards": 52,
+  "old": 90,
+  "new": 91,
+  "pct": 48,
+  "solvedPct": 91
+ },
+ {
+  "id": 178,
+  "slots": 3,
+  "cards": 40,
+  "old": 71,
+  "new": 71,
+  "pct": 48,
+  "solvedPct": 91
+ },
+ {
+  "id": 188,
+  "slots": 4,
+  "cards": 52,
+  "old": 89,
+  "new": 90,
+  "pct": 53.5,
+  "solvedPct": 94
+ },
+ {
+  "id": 198,
+  "slots": 4,
+  "cards": 54,
+  "old": 94,
+  "new": 94,
+  "pct": 45.5,
+  "solvedPct": 92.5
+ },
+ {
+  "id": 208,
+  "slots": 5,
+  "cards": 80,
+  "old": 162,
+  "new": 163,
+  "pct": 45.5,
+  "solvedPct": 91.5
+ },
+ {
+  "id": 218,
+  "slots": 3,
+  "cards": 43,
+  "old": 77,
+  "new": 77,
+  "pct": 49.5,
+  "solvedPct": 93
+ },
+ {
+  "id": 228,
+  "slots": 3,
+  "cards": 40,
+  "old": 78,
+  "new": 79,
+  "pct": 43.5,
+  "solvedPct": 86.5
+ },
+ {
+  "id": 238,
+  "slots": 4,
+  "cards": 52,
+  "old": 89,
+  "new": 90,
+  "pct": 52.5,
+  "solvedPct": 96
+ },
+ {
+  "id": 248,
+  "slots": 3,
+  "cards": 40,
+  "old": 73,
+  "new": 78,
+  "pct": 44,
+  "solvedPct": 85
+ },
+ {
+  "id": 258,
+  "slots": 4,
+  "cards": 51,
+  "old": 87,
+  "new": 87,
+  "pct": 42,
+  "solvedPct": 96
+ },
+ {
+  "id": 268,
+  "slots": 4,
+  "cards": 50,
+  "old": 85,
+  "new": 86,
+  "pct": 54.5,
+  "solvedPct": 95.5
+ },
+ {
+  "id": 278,
+  "slots": 4,
+  "cards": 50,
+  "old": 85,
+  "new": 85,
+  "pct": 42.5,
+  "solvedPct": 95
+ },
+ {
+  "id": 288,
+  "slots": 3,
+  "cards": 44,
+  "old": 88,
+  "new": 90,
+  "pct": 46,
+  "solvedPct": 89
+ },
+ {
+  "id": 298,
+  "slots": 4,
+  "cards": 48,
+  "old": 80,
+  "new": 80,
+  "pct": 41,
+  "solvedPct": 99.5
+ },
+ {
+  "id": 308,
+  "slots": 3,
+  "cards": 43,
+  "old": 88,
+  "new": 89,
+  "pct": 45,
+  "solvedPct": 81
+ },
+ {
+  "id": 318,
+  "slots": 3,
+  "cards": 44,
+  "old": 91,
+  "new": 92,
+  "pct": 47.5,
+  "solvedPct": 84.5
+ },
+ {
+  "id": 328,
+  "slots": 3,
+  "cards": 42,
+  "old": 84,
+  "new": 85,
+  "pct": 44.5,
+  "solvedPct": 86.5
+ },
+ {
+  "id": 338,
+  "slots": 5,
+  "cards": 58,
+  "old": 95,
+  "new": 95,
+  "pct": 38,
+  "solvedPct": 96.5
+ },
+ {
+  "id": 348,
+  "slots": 4,
+  "cards": 50,
+  "old": 85,
+  "new": 85,
+  "pct": 39.5,
+  "solvedPct": 96.5
+ },
+ {
+  "id": 358,
+  "slots": 3,
+  "cards": 44,
+  "old": 90,
+  "new": 91,
+  "pct": 44.5,
+  "solvedPct": 85.5
+ },
+ {
+  "id": 368,
+  "slots": 4,
+  "cards": 50,
+  "old": 85,
+  "new": 85,
+  "pct": 38,
+  "solvedPct": 91
+ },
+ {
+  "id": 378,
+  "slots": 5,
+  "cards": 70,
+  "old": 121,
+  "new": 121,
+  "pct": 44.5,
+  "solvedPct": 94.5
+ },
+ {
+  "id": 388,
+  "slots": 5,
+  "cards": 70,
+  "old": 120,
+  "new": 121,
+  "pct": 49,
+  "solvedPct": 90.5
+ },
+ {
+  "id": 398,
+  "slots": 3,
+  "cards": 43,
+  "old": 88,
+  "new": 88,
+  "pct": 43.5,
+  "solvedPct": 89
+ },
+ {
+  "id": 408,
+  "slots": 4,
+  "cards": 52,
+  "old": 89,
+  "new": 89,
+  "pct": 38.5,
+  "solvedPct": 92
+ }
+]
