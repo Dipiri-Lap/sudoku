@@ -1,10 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.syncMyPuzzlePower = exports.adminRecalcStagePuzzlePower = exports.adminRebalanceFakeUsers = exports.adminRecalcPuzzlePower = exports.adminMigrateLegacyCoins = exports.refundPortOnePayment = exports.adminGetPayments = exports.adminSaveUserData = exports.adminGetUserData = exports.verifyPortOnePayment = void 0;
+exports.dailyPuzzlePushEvening = exports.dailyPuzzlePushMorning = exports.syncMyPuzzlePower = exports.adminRecalcStagePuzzlePower = exports.adminRebalanceFakeUsers = exports.adminRecalcPuzzlePower = exports.adminMigrateLegacyCoins = exports.refundPortOnePayment = exports.adminGetPayments = exports.adminSaveUserData = exports.adminGetUserData = exports.verifyPortOnePayment = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const params_1 = require("firebase-functions/params");
 const app_1 = require("firebase-admin/app");
 const firestore_1 = require("firebase-admin/firestore");
+const scheduler_1 = require("firebase-functions/v2/scheduler");
+const firebase_functions_1 = require("firebase-functions");
+const dailyPush_1 = require("./dailyPush");
+const dailyPushSender_1 = require("./dailyPushSender");
 (0, app_1.initializeApp)();
 const db = (0, firestore_1.getFirestore)();
 const PORTONE_API_SECRET = (0, params_1.defineSecret)("PORTONE_API_SECRET");
@@ -262,6 +266,10 @@ const VALID_CHALLENGE_IDS = new Set([
     "crossum_stage_300", "crossum_stage_500", "crossum_stage_700", "crossum_stage_1000",
     "arrow_stage_5", "arrow_stage_10", "arrow_stage_25", "arrow_stage_50", "arrow_stage_100",
     "arrow_stage_300", "arrow_stage_500", "arrow_stage_700", "arrow_stage_1000",
+    "jigsaw_stage_5", "jigsaw_stage_10", "jigsaw_stage_25", "jigsaw_stage_50", "jigsaw_stage_100",
+    "jigsaw_stage_300", "jigsaw_stage_500", "jigsaw_stage_700", "jigsaw_stage_1000",
+    "jigsaw_stars_10", "jigsaw_stars_30", "jigsaw_stars_75", "jigsaw_stars_150", "jigsaw_stars_300",
+    "jigsaw_stars_600", "jigsaw_stars_1000", "jigsaw_stars_1500", "jigsaw_stars_3000",
 ]);
 exports.adminRecalcPuzzlePower = (0, https_1.onCall)({ timeoutSeconds: 540, memory: "512MiB" }, async (request) => {
     assertAdmin(request);
@@ -404,6 +412,8 @@ const STAGE_PROGRESS_SOURCES = [
     },
     // 애로우웨이는 클리어한 최고 스테이지 번호(=개수)를 그대로 저장한다.
     { collection: "arrowProgress", cleared: (d) => Math.max(0, Number(d.clearedStage) || 0) },
+    // Tiny Pieces(직소)도 클리어 수를 그대로 저장한다.
+    { collection: "jigsawProgress", cleared: (d) => Math.max(0, Number(d.clearedStage) || 0) },
 ];
 /**
  * 스도쿠 일반 스테이지 진행도는 저장 위치가 세 군데다.
@@ -581,4 +591,17 @@ exports.syncMyPuzzlePower = (0, https_1.onCall)(async (request) => {
     // 클라이언트가 (도전과제 PP - mainDocSyncedPP) 를 다시 더하지 않도록 함께 맞춘다
     await challengeRef.set({ mainDocSyncedPP: challengePP }, { merge: true });
     return { changed: true, before, puzzlePower: newPP, stagePP, challengePP };
+});
+// ─────────────────────────────────────────────────────────────
+// 오늘의 퍼즐 웹 푸시 알림 (발송 로직: dailyPushSender.ts, 문구 판단: dailyPush.ts)
+//  - 아침 8시(한국 시간): 오늘 아직 안 푼 사람에게 "오늘의 퍼즐이 열렸어요"
+//  - 밤 9시: 연속 기록이 있는데 오늘 아직 안 푼 사람에게만 "기록이 끊겨요"
+// ─────────────────────────────────────────────────────────────
+exports.dailyPuzzlePushMorning = (0, scheduler_1.onSchedule)({ schedule: "0 8 * * *", timeZone: "Asia/Seoul", timeoutSeconds: 540, memory: "512MiB" }, async () => {
+    const result = await (0, dailyPushSender_1.sendDailyPush)(db, dailyPush_1.buildMorningMessage, "daily-puzzle-morning");
+    firebase_functions_1.logger.info("dailyPuzzlePushMorning", result);
+});
+exports.dailyPuzzlePushEvening = (0, scheduler_1.onSchedule)({ schedule: "0 21 * * *", timeZone: "Asia/Seoul", timeoutSeconds: 540, memory: "512MiB" }, async () => {
+    const result = await (0, dailyPushSender_1.sendDailyPush)(db, dailyPush_1.buildEveningMessage, "daily-puzzle-evening");
+    firebase_functions_1.logger.info("dailyPuzzlePushEvening", result);
 });
