@@ -48,6 +48,8 @@ interface Difference {
 
 interface LevelData {
   imageID: number;
+  /** bump when a stage's images are replaced, so browsers skip their cached copy */
+  rev?: number;
   differences: Difference[];
 }
 
@@ -277,8 +279,9 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
             .then(r => r.json())
             .then((nextData: LevelData) => {
               prefetchCache.current[nextId] = nextData;
-              new Image().src = `${CDN_BASE}/${nextData.imageID}.jpg`;
-              new Image().src = `${CDN_BASE}/${nextData.imageID}_1.jpg`;
+              const nv = nextData.rev ? `?v=${nextData.rev}` : '';
+              new Image().src = `${CDN_BASE}/${nextData.imageID}.jpg${nv}`;
+              new Image().src = `${CDN_BASE}/${nextData.imageID}_1.jpg${nv}`;
             })
             .catch(() => {});
         }
@@ -697,7 +700,8 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
 
   if (!levelData) return <div className="snapspot-loading">{t('game.loading')}</div>;
 
-  const { imageID, differences } = levelData;
+  const { imageID, differences, rev } = levelData;
+  const revQuery = rev ? `?v=${rev}` : '';
   const cdnBase = mode === 'arcade' ? ARCADE_CDN_BASE : CDN_BASE;
   const foundCount = found.filter(Boolean).length;
 
@@ -796,16 +800,17 @@ const SnapSpotGame: React.FC<Props> = ({ mode }) => {
           >
             <div style={innerStyle}>
               <img
-                src={`${cdnBase}/${imageID}${side === 'mod' ? '_1' : ''}.${mode === 'arcade' ? 'webp' : 'jpg'}`}
+                src={`${cdnBase}/${imageID}${side === 'mod' ? '_1' : ''}.${mode === 'arcade' ? 'webp' : 'jpg'}${revQuery}`}
                 alt={side === 'orig' ? t('game.altOriginal') : t('game.altModified')}
                 draggable={false}
                 onLoad={() => setImgsLoaded(prev => ({ ...prev, [side]: true }))}
                 onError={(e) => {
                   const img = e.currentTarget;
-                  if (img.src.endsWith('.jpg')) {
-                    img.src = img.src.replace(/\.jpg$/, '.jpeg');
-                  } else if (img.src.endsWith('.jpeg')) {
-                    img.src = img.src.replace(/\.jpeg$/, '.webp');
+                  // keep the ?v= query while falling back jpg → jpeg → webp
+                  if (/\.jpg(\?|$)/.test(img.src)) {
+                    img.src = img.src.replace(/\.jpg(?=\?|$)/, '.jpeg');
+                  } else if (/\.jpeg(\?|$)/.test(img.src)) {
+                    img.src = img.src.replace(/\.jpeg(?=\?|$)/, '.webp');
                   }
                 }}
               />
