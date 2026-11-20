@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, useMatch, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { isKo, isGameAvailable } from './i18n/locale';
@@ -25,7 +25,14 @@ import DiffTool from './features/diff-tool/DiffTool';
 import CrosswordGame from './features/crossword/components/CrosswordGame';
 import CrossMathGame from './features/cross-math/components/CrossMathGame';
 import RoyalMatchGame from './features/royal-match/components/RoyalMatchGame';
-import JewelKingdomGame from './features/jewel-kingdom/ui/JewelKingdomGame';
+// 텃밭 3매치는 1000판 데이터·PixiJS 이펙트까지 덩치가 커서, 들어갈 때만 불러온다.
+// 메인 번들에 넣으면 PWA 캐시 한도(5MB)를 넘어 배포 빌드가 실패한다.
+const JewelKingdomGame = lazy(() => import('./features/jewel-kingdom/ui/JewelKingdomGame'));
+const jewelKingdom = (
+  <Suspense fallback={null}>
+    <JewelKingdomGame />
+  </Suspense>
+);
 import GardenMap from './features/garden/components/GardenMap';
 import JigsawGame from './features/jigsaw/components/JigsawGame';
 import DailyPuzzleCalendar from './features/daily/components/DailyPuzzleCalendar';
@@ -82,7 +89,7 @@ const AppContent: React.FC = () => {
       </Routes>
     );
   }
-  if (standaloneJewel) return <JewelKingdomGame />;
+  if (standaloneJewel) return jewelKingdom;
   if (standaloneNonogram) return <NonogramGame />;
 
   if (!isInitialized) {
@@ -185,7 +192,7 @@ const AppContent: React.FC = () => {
           <Route path="/crossword" element={<CrosswordGame />} />
           <Route path="/cross-math" element={<CrossMathGame />} />
           <Route path="/royal-match" element={<RoyalMatchGame />} />
-          <Route path="/jewel-kingdom" element={<JewelKingdomGame />} />
+          <Route path="/jewel-kingdom" element={jewelKingdom} />
           {window.location.hostname === 'localhost' && (
             <Route path="/garden" element={<GardenMap />} />
           )}
