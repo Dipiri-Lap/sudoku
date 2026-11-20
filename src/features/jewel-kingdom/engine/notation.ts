@@ -30,6 +30,21 @@ const SUFFIX_TO_KIND: Record<string, SpecialKind> = {
   '|': 'rocket-v',
   '*': 'tnt',
   '@': 'propeller',
+  // 스킬 아이템(skills.ts). 색 있는 것은 색 글자 뒤에 소문자를 붙인다: Rx = 빨강 낫
+  x: 'sickle',
+  p: 'plow',
+  b: 'butterfly',
+  l: 'ladybug',
+  m: 'watermelon',
+  s: 'sprinkler',
+  k: 'scarecrow',
+};
+
+/** 색 없는 아이템은 W 뒤에 붙인다: W = 라이트볼, Wd = 민들레, Wc = 물뿌리개 */
+const COLORLESS_SUFFIX: Record<string, SpecialKind> = {
+  '': 'lightball',
+  d: 'dandelion',
+  c: 'watering-can',
 };
 
 /** 장애물 표기 -> 축 조합. 종류를 늘려도 표기 한 줄만 추가하면 된다. */
@@ -51,6 +66,15 @@ const KIND_TO_SUFFIX: Record<SpecialKind, string> = {
   tnt: '*',
   lightball: '',
   propeller: '@',
+  sickle: 'x',
+  plow: 'p',
+  butterfly: 'b',
+  ladybug: 'l',
+  watermelon: 'm',
+  sprinkler: 's',
+  scarecrow: 'k',
+  dandelion: 'd',
+  'watering-can': 'c',
 };
 
 export function parseBoard(text: string): Board {
@@ -147,8 +171,8 @@ export function parseBoard(text: string): Board {
         rest = rest.slice(1 + (digits ? digits[0].length : 0));
       }
 
-      if (rest === 'W') {
-        cell.gem = { id: allocGemId(board), color: null, special: 'lightball' };
+      if (rest[0] === 'W' && COLORLESS_SUFFIX[rest.slice(1)]) {
+        cell.gem = { id: allocGemId(board), color: null, special: COLORLESS_SUFFIX[rest.slice(1)] };
         return;
       }
       const colorIndex = COLOR_CHARS.indexOf(rest[0] as (typeof COLOR_CHARS)[number]);
@@ -199,7 +223,8 @@ export function renderBoard(board: Board): string {
         ? '^' + (cell.ground.layers > 1 ? String(cell.ground.layers) : '')
         : '';
       if (!cell.gem) tokens.push((prefix ? prefix + '.' : '.') + groundSuffix);
-      else if (cell.gem.special === 'lightball') tokens.push(prefix + 'W' + groundSuffix);
+      else if (cell.gem.color === null && cell.gem.special)
+        tokens.push(prefix + 'W' + KIND_TO_SUFFIX[cell.gem.special] + groundSuffix);
       else {
         const ch = COLOR_CHARS[cell.gem.color as number];
         tokens.push(

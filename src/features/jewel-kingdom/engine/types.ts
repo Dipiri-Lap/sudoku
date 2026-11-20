@@ -6,11 +6,22 @@ export const COLOR_COUNT = 6;
 
 /** 특수 타일. 발동 범위는 specials.ts가 정의한다. */
 export type SpecialKind =
+  // ── 기본 장착 (레퍼런스와 같은 4종) ──
   | 'rocket-h' // 가로 로켓: 그 행 전체
   | 'rocket-v' // 세로 로켓: 그 열 전체
   | 'tnt' // TNT: 주변 사각 범위
   | 'propeller' // 프로펠러: 목표물이 많은 칸으로 날아간다
-  | 'lightball'; // 라이트볼: 색이 없다. 지목된 색 전체
+  | 'lightball' // 라이트볼: 색이 없다. 지목된 색 전체
+  // ── 스킬 아이템 (skills.ts). 게이지가 차면 지목한 칸에 심어 터뜨린다. 계열은 specials.ts의 familyOf ──
+  | 'sickle' // 줄 계열: 대각선 X자 두 줄
+  | 'plow' // 줄 계열: 3줄 두께로 좌우 3칸씩
+  | 'butterfly' // 날기 계열: 목표 두 곳을 한 칸씩
+  | 'ladybug' // 날기 계열: 목표 한 곳에 3x3
+  | 'watermelon' // 범위 계열: 제자리 3x3 + 목표 지점 3x3
+  | 'sprinkler' // 범위 계열: 마름모 반경 3
+  | 'scarecrow' // 범위 계열: 가로·세로 한 줄씩(십자) + 판의 까마귀 전부
+  | 'dandelion' // 색 계열(색 없음): 목표 열 곳을 한 칸씩
+  | 'watering-can'; // 색 계열(색 없음): 바닥·덮개가 있는 칸 전부
 
 export interface Gem {
   /** 애니메이션에서 같은 타일을 추적하기 위한 안정적인 식별자 */

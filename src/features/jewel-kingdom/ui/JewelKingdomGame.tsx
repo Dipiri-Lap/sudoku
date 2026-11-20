@@ -1,7 +1,7 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { at, cloneBoard, isCellSwappable, emptyCell, isAdjacent, key, makeGem } from '../engine/board';
-import { activateAt, hasAnyMove, listMoves, resolveTurn, activateBooster } from '../engine/resolve';
+import { activateAt, hasAnyMove, listMoves, resolveTurn, activateBooster, activateSkill } from '../engine/resolve';
 import { makeRng } from '../engine/rng';
 import { applyBooster, applyTurn, resolveOptionsFor, startLevel } from '../engine/level';
 import { applyGravity } from '../engine/gravity';
@@ -20,12 +20,17 @@ import { TEST_LEVELS, testLevelElement } from '../data/testLevels';
 import { GENERATED_LEVELS } from '../data/generated';
 
 /**
- * 고르는 판 = 본 레벨 + 요소별 시험 레벨.
+ * 고르는 판 = 스테이지(생성 레벨 1~1000) + 손으로 만든 레벨 + 요소별 시험 레벨.
  *
- * 시험 레벨을 따로 떼어 두지 않고 같은 목록에 잇는 이유: "다음 레벨"과
+ * 플레이어는 스테이지 1부터 시작해 "다음 레벨"로 이어 간다. 손으로 만든 레벨과
+ * 시험 레벨은 개발 서랍에서만 고른다. 한 목록에 잇는 이유: "다음 레벨"과
  * "다시 시작"이 두 벌로 갈라지지 않는다. 목록에서만 줄이 나뉜다.
  */
-const ALL_LEVELS = [...LEVELS, ...TEST_LEVELS, ...GENERATED_LEVELS];
+const ALL_LEVELS = [...GENERATED_LEVELS, ...LEVELS, ...TEST_LEVELS];
+const HAND_OFFSET = GENERATED_LEVELS.length;
+const TEST_OFFSET = GENERATED_LEVELS.length + LEVELS.length;
+
+const TIER_BADGE: Record<string, string> = { hard: '어려운 판', super: '아주 어려운 판' };
 import type { GemColor, Position } from '../engine/types';
 import SandboxPalette, { type PaintTool } from './SandboxPalette';
 import {
@@ -38,27 +43,71 @@ import {
   SpawnerSprite,
 } from './sprites';
 import { usePlayback } from './usePlayback';
+import SkillPanel from './SkillPanel';
+import FxLayer from './fx/FxLayer';
+import {
+  MAX_SKILL_SLOTS,
+  canUseSkillAt,
+  chargeSkills,
+  isSkillReady,
+  nextSlotLevel,
+  sanitizeSkills,
+  skillDef,
+  skillSlotsFor,
+} from '../engine/skills';
+import type { SpecialKind } from '../engine/types';
 import { GRAVITY_EASE, LAND_MS, SWAP_EASE, SWAP_MS, fallDurationMs } from './constants';
 import './JewelKingdomGame.css';
 
 const COMMIT_RATIO = 0.6; // 셀 크기의 60% 이상 끌어야 방향이 확정된다
 
 /**
- * 아이템이 되면 색 매치 역할은 잃지만(SPEC 3.11) 그림에는 색이 남는다.
- * 어느 보석으로 만들었는지 읽혀야 하고, 동시에 "여기서 줄이 끊긴다"도 보여야
- * 하므로 색은 유지한 채 모양을 바꾼다.
+ * 텃밭 컨셉: 블록은 색마다 채소 하나, 아이템은 색 없는 도구 하나씩이다.
+ * 아이템은 색 매치 역할을 잃으므로(SPEC 3.11, matchColorOf) 그림도 색을
+ * 따르지 않는다 - 무슨 색에서 왔는지보다 "무슨 아이템인지"가 읽혀야 한다.
+ *   로켓=삽(세로 로켓은 CSS로 90도 돌린다) / TNT=거름 포대 / 프로펠러=참새 / 라이트볼=무지개 꽃
  */
-const SPRITE_DIR: Record<string, string> = {
-  gem: 'gems', // 육각형
-  'rocket-h': 'rockets', // 다이아몬드
-  'rocket-v': 'rockets',
-  tnt: 'tnts', // 팔각형
-  propeller: 'propellers', // 별
+const ITEM_SPRITE: Record<string, string> = {
+  'rocket-h': 'rocket',
+  'rocket-v': 'rocket',
+  tnt: 'tnt',
+  propeller: 'propeller',
+  lightball: 'lightball',
 };
 
-function spriteFor(color: number, special?: string): string {
-  return `/assets/3match/${SPRITE_DIR[special ?? 'gem'] ?? 'gems'}/gem-${color}.png`;
+function spriteFor(color: number | null, special?: string): string {
+  // 장착 아이템(낫·제비 등)은 종류 이름이 곧 파일 이름이다.
+  if (special) return `/assets/3match/items/${ITEM_SPRITE[special] ?? special}.png`;
+  return `/assets/3match/gems/gem-${color}.png`;
 }
+
+/** 칸이 사라지기 시작할 시각을 CSS 변수로 넘긴다(이펙트 물결). 0이면 안 붙인다. */
+function withDelay(style: React.CSSProperties, delay: number | undefined): React.CSSProperties {
+  if (!delay) return style;
+  return { ...style, ['--d' as string]: `${Math.round(delay)}ms` };
+}
+
+const SKILLS_KEY = 'jk-skills';
+
+/** 스킬 장착은 기기에 기억해 둔다. 저장소가 막힌 환경(사생활 보호 창 등)이면 기본 장착으로 간다. */
+function readSkills(): SpecialKind[] {
+  try {
+    const raw = localStorage.getItem(SKILLS_KEY);
+    return sanitizeSkills(raw ? JSON.parse(raw) : null);
+  } catch {
+    return sanitizeSkills(null);
+  }
+}
+
+function writeSkills(skills: SpecialKind[]) {
+  try {
+    localStorage.setItem(SKILLS_KEY, JSON.stringify(skills));
+  } catch {
+    /* 저장 못 해도 이번 세션에서는 쓴다 */
+  }
+}
+
+type Gauges = Partial<Record<SpecialKind, number>>;
 
 interface DragState {
   pos: Position;
@@ -82,6 +131,15 @@ const JewelKingdomGame: React.FC = () => {
   const [sandbox, setSandbox] = useState(false);
   /** 지금 겨누고 있는 부스터. 칸을 지목해야 발동한다. */
   const [armed, setArmed] = useState<BoosterKind | null>(null);
+  /** 장착한 스킬(게이지가 차면 쓰는 아이템). 칸 수는 레벨에 따라 열린다 */
+  const [skills, setSkills] = useState<SpecialKind[]>(readSkills);
+  /** 스킬별 게이지. 판마다 0에서 시작한다 */
+  const [gauges, setGauges] = useState<Gauges>({});
+  /** 지금 겨누고 있는 스킬. 칸을 지목해야 발동한다 */
+  const [armedSkill, setArmedSkill] = useState<SpecialKind | null>(null);
+  const [skillOpen, setSkillOpen] = useState(false);
+  /** 개발 서랍(레벨·시험 목록)이 열려 있는가. 개발 서버에서만 쓴다. */
+  const [devOpen, setDevOpen] = useState(false);
   const { view, play, reset } = usePlayback(game.level.board);
 
   const boardRef = useRef<HTMLDivElement>(null);
@@ -89,10 +147,26 @@ const JewelKingdomGame: React.FC = () => {
   const prevPosRef = useRef<Map<number, Position>>(new Map());
   const dragRef = useRef<DragState | null>(null);
   const [grabbed, setGrabbed] = useState<Position | null>(null);
+  /** 큰 폭발 때 흔들 판 바깥 상자 */
+  const boardOuterRef = useRef<HTMLDivElement>(null);
+
+  // 앱 공통 틀(#root)의 최대 폭 500px·여백을 이 화면에서만 푼다 - 판이 화면 폭을
+  // 끝까지 써야 블록이 크게 보인다. 가이드 화면과 같은 방식(body 클래스).
+  useEffect(() => {
+    document.body.classList.add('jk-body');
+    return () => document.body.classList.remove('jk-body');
+  }, []);
 
   const size = view.board.width;
   const cellPct = 100 / size;
   const level = game.level;
+  /** 화면에 보이는 스테이지 번호. 생성 레벨은 내부 번호(1000+n)와 다르다 */
+  const stageNo = Number(level.level.label ?? level.level.id);
+  // 스킬 칸은 레벨이 오르면 열린다. 샌드박스·개발 서버에서는 시험하기 쉽게 다 열어 둔다.
+  const skillSlots = sandbox || import.meta.env.DEV ? MAX_SKILL_SLOTS : skillSlotsFor(stageNo);
+  const equipped = skills.slice(0, skillSlots);
+  // 샌드박스에서는 게이지가 늘 차 있다 - 같은 스킬을 반복해서 시험해야 한다.
+  const skillReady = (kind: SpecialKind) => sandbox || isSkillReady(gauges, kind);
 
   const loadLevel = useCallback(
     (index: number) => {
@@ -100,6 +174,8 @@ const JewelKingdomGame: React.FC = () => {
       const next = startLevel(ALL_LEVELS[index], rng);
       setGame({ rng, level: next });
       setArmed(null);
+      setArmedSkill(null);
+      setGauges({});
       setTool(null);
       setSandbox(false);
       reset(next.board);
@@ -112,6 +188,8 @@ const JewelKingdomGame: React.FC = () => {
     const next = startLevel(SANDBOX_LEVEL, rng);
     setGame({ rng, level: next });
     setArmed(null);
+    setArmedSkill(null);
+    setGauges({});
     setSandbox(true);
     reset(next.board);
   }, [reset]);
@@ -218,6 +296,9 @@ const JewelKingdomGame: React.FC = () => {
 
   const runTurn = (result: ReturnType<typeof resolveTurn>) => {
     const nextLevel = applyTurn(level, result);
+    // 내가 둔 수로 지운 칸만큼 스킬 게이지가 찬다. 부스터·스킬로 지운 칸은 치지 않는다 -
+    // 스킬이 스킬을 채우면 연달아 쓰게 된다.
+    if (result.valid) setGauges(g => chargeSkills(g, equipped, result.clearedCount));
     play(result.steps, () => {
       // 수가 없으면 다시 섞는다. 규칙이 아니라 진행 편의라 UI에 둔다.
       if (nextLevel.status === 'playing' && !hasAnyMove(nextLevel.board)) {
@@ -267,7 +348,14 @@ const JewelKingdomGame: React.FC = () => {
       reset(shuffled);
       return;
     }
+    setArmedSkill(null);
     setArmed(a => (a === kind ? null : kind));
+  };
+
+  const tapSkill = (kind: SpecialKind) => {
+    if (!canPlay || !skillReady(kind)) return;
+    setArmed(null);
+    setArmedSkill(a => (a === kind ? null : kind));
   };
 
   // 아이템은 탭만으로도 발동한다(SPEC 4.6).
@@ -285,6 +373,18 @@ const JewelKingdomGame: React.FC = () => {
       return;
     }
 
+    // 스킬을 겨누고 있으면 그 칸에 쓴다. 게이지는 다시 0부터.
+    if (armedSkill) {
+      if (!canUseSkillAt(level.board, pos)) return;
+      const result = activateSkill(level.board, pos, armedSkill, game.rng, resolveOptionsFor(level.level));
+      if (!result.valid) return;
+      const used = armedSkill;
+      if (!sandbox) setGauges(g => ({ ...g, [used]: 0 }));
+      setArmedSkill(null);
+      runBooster(result);
+      return;
+    }
+
     if (!at(level.board, pos.row, pos.col).gem?.special) return;
     runTurn(activateAt(level.board, pos, game.rng, resolveOptionsFor(level.level)));
   };
@@ -296,8 +396,8 @@ const JewelKingdomGame: React.FC = () => {
       return;
     }
     if (!canPlay) return;
-    // 부스터를 겨누는 중에는 스왑이 아니라 지목이다.
-    if (armed) {
+    // 부스터·스킬을 겨누는 중에는 스왑이 아니라 지목이다.
+    if (armed || armedSkill) {
       onTap(pos);
       return;
     }
@@ -364,7 +464,7 @@ const JewelKingdomGame: React.FC = () => {
       }
 
       cells.push(
-        <div key={`p-${k}`} className="jk-cell jk-plate" style={style}>
+        <div key={`p-${k}`} className={`jk-cell jk-plate${(r + c) % 2 ? ' alt' : ''}`} style={style}>
           {cell.ground && <GroundSprite kind={cell.ground.kind} layers={cell.ground.layers} />}
         </div>,
       );
@@ -402,7 +502,7 @@ const JewelKingdomGame: React.FC = () => {
             className={`jk-cell jk-blocker${view.damaged.has(k) ? ' damaged' : ''}${
               b.hidden ? ' unrevealed' : ''
             }`}
-            style={style}
+            style={withDelay(style, view.damaged.has(k) ? view.delays.get(k) : undefined)}
           >
             <BlockerSprite kind={b.kind} layers={b.layers} hidden={b.hidden} />
             {!b.hidden && b.layers > 1 && <span className="jk-layers">{b.layers}</span>}
@@ -423,7 +523,10 @@ const JewelKingdomGame: React.FC = () => {
         view.spawned.has(k) ? 'spawning' : '',
         view.invalid.has(k) ? 'invalid' : '',
         view.collecting.has(k) ? 'collecting' : '',
-        armed && canUseAt(view.board, { row: r, col: c }, armed) ? 'targetable' : '',
+        (armed && canUseAt(view.board, { row: r, col: c }, armed)) ||
+        (armedSkill && canUseSkillAt(view.board, { row: r, col: c }))
+          ? 'targetable'
+          : '',
       ]
         .filter(Boolean)
         .join(' ');
@@ -436,21 +539,16 @@ const JewelKingdomGame: React.FC = () => {
             else cellElsRef.current.delete(gem.id);
           }}
           className={classes}
-          style={style}
+          style={withDelay(style, view.clearing.has(k) ? view.delays.get(k) : undefined)}
           onPointerDown={onPointerDown({ row: r, col: c })}
         >
           {gem.inert ? (
             <CargoSprite color={gem.color} />
           ) : (
-            gem.color !== null && (
+            (gem.special || gem.color !== null) && (
               <img src={spriteFor(gem.color, gem.special)} alt="" draggable={false} />
             )
           )}
-          {gem.special === 'rocket-h' && <span className="jk-mark">↔</span>}
-          {gem.special === 'rocket-v' && <span className="jk-mark">↕</span>}
-          {gem.special === 'lightball' && <span className="jk-mark">✦</span>}
-          {gem.special === 'tnt' && <span className="jk-mark">✸</span>}
-          {gem.special === 'propeller' && <span className="jk-mark">✧</span>}
           {cell.cover && (
             <span className="jk-cover">
               <CoverSprite
@@ -472,77 +570,118 @@ const JewelKingdomGame: React.FC = () => {
 
   return (
     <div className="jk-page">
-      <header className="jk-header">
-        <h1>보석 왕국</h1>
-        <div className="jk-actions">
-          <div className="jk-levels">
-            {LEVELS.map((l, i) => (
+      {/* 플레이어가 보는 맨 위: 다시 시작(오른쪽)과, 개발 중에만 보이는 개발 서랍 버튼 */}
+      <div className="jk-topbar">
+        {import.meta.env.DEV && (
+          <button className="jk-dev-toggle" onClick={() => setDevOpen(o => !o)} aria-expanded={devOpen}>
+            개발
+          </button>
+        )}
+        {!sandbox && (
+          <div className={`jk-stage${level.level.tier ? ` tier-${level.level.tier}` : ''}`}>
+            <span className="jk-stage-no">레벨 {level.level.label ?? level.level.id}</span>
+            {level.level.tier && TIER_BADGE[level.level.tier] && (
+              <span className="jk-stage-badge">{TIER_BADGE[level.level.tier]}</span>
+            )}
+          </div>
+        )}
+        <button
+          className="jk-round-btn"
+          onClick={() => (sandbox ? openSandbox() : loadLevel(levelIndex))}
+          title="다시 시작"
+          aria-label="다시 시작"
+        >
+          <RotateCcw size={22} strokeWidth={3} />
+        </button>
+      </div>
+
+      {/* 개발 서랍: 레벨 고르기·시험 레벨·힌트·실험. 플레이 화면을 가리지 않게 접어 둔다. */}
+      {import.meta.env.DEV && devOpen && (
+        <div className="jk-dev">
+          <div className="jk-actions">
+            <div className="jk-levels">
+              {LEVELS.map((l, i) => (
+                <button
+                  key={l.id}
+                  className={`jk-lv${!sandbox && HAND_OFFSET + i === levelIndex ? ' active' : ''}`}
+                  onClick={() => loadLevel(HAND_OFFSET + i)}
+                  title="손으로 만든 레벨"
+                >
+                  {l.id}
+                </button>
+              ))}
+            </div>
+            <button onClick={hint} disabled={!canPlay} title="한 수 두기">
+              힌트
+            </button>
+            <button
+              className={`jk-lv${sandbox ? ' active' : ''}`}
+              onClick={openSandbox}
+              title="장애물을 직접 놓아보는 판"
+            >
+              실험
+            </button>
+          </div>
+
+        <div className="jk-testbar">
+          <span className="jk-testbar-title">
+            스테이지 {GENERATED_LEVELS.length}판
+            <input
+              className="jk-stage-jump"
+              type="number"
+              min={1}
+              max={GENERATED_LEVELS.length}
+              placeholder="번호"
+              onKeyDown={e => {
+                if (e.key !== 'Enter') return;
+                const n = Number((e.target as HTMLInputElement).value);
+                const i = GENERATED_LEVELS.findIndex(l => Number(l.label) === n);
+                if (i >= 0) loadLevel(i);
+              }}
+            />
+          </span>
+          <div className="jk-testbar-list">
+            {GENERATED_LEVELS.map((l, i) => (
               <button
                 key={l.id}
-                className={`jk-lv${!sandbox && i === levelIndex ? ' active' : ''}`}
+                className={`jk-lv${l.tier ? ` tier-${l.tier}` : ''}${!sandbox && i === levelIndex ? ' active' : ''}`}
                 onClick={() => loadLevel(i)}
+                title={`봇 승률 ${(l.winRate * 100).toFixed(0)}% (목표 ${(l.target * 100).toFixed(0)}%) · ${l.moves}수`}
               >
-                {l.id}
+                {l.label}
               </button>
             ))}
           </div>
-          <button onClick={hint} disabled={!canPlay} title="한 수 두기">
-            힌트
-          </button>
-          <button
-            className={`jk-lv${sandbox ? ' active' : ''}`}
-            onClick={openSandbox}
-            title="장애물을 직접 놓아보는 판"
-          >
-            실험
-          </button>
-          <button onClick={() => (sandbox ? openSandbox() : loadLevel(levelIndex))} title="다시 시작">
-            <RotateCcw size={16} />
-          </button>
         </div>
-      </header>
 
-      <div className="jk-testbar">
-        <span className="jk-testbar-title">생성 레벨</span>
-        <div className="jk-testbar-list">
-          {GENERATED_LEVELS.map((l, i) => (
-            <button
-              key={l.id}
-              className={`jk-lv${!sandbox && LEVELS.length + TEST_LEVELS.length + i === levelIndex ? ' active' : ''}`}
-              onClick={() => loadLevel(LEVELS.length + TEST_LEVELS.length + i)}
-              title={`봇 승률 ${(l.winRate * 100).toFixed(0)}% · ${l.moves}수`}
-            >
-              {l.label}
-            </button>
-          ))}
+        <div className="jk-testbar">
+          <span className="jk-testbar-title">요소별 시험</span>
+          <div className="jk-testbar-list">
+            {TEST_LEVELS.map((l, i) => {
+              const def = testLevelElement(l.id);
+              return (
+                <button
+                  key={l.id}
+                  className={`jk-lv${!sandbox && TEST_OFFSET + i === levelIndex ? ' active' : ''}`}
+                  onClick={() => loadLevel(TEST_OFFSET + i)}
+                  title={def?.note}
+                >
+                  {l.label}
+                  {def && !def.verified && <i className="jk-unverified">?</i>}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      <div className="jk-testbar">
-        <span className="jk-testbar-title">요소별 시험</span>
-        <div className="jk-testbar-list">
-          {TEST_LEVELS.map((l, i) => {
-            const def = testLevelElement(l.id);
-            return (
-              <button
-                key={l.id}
-                className={`jk-lv${!sandbox && LEVELS.length + i === levelIndex ? ' active' : ''}`}
-                onClick={() => loadLevel(LEVELS.length + i)}
-                title={def?.note}
-              >
-                {l.label}
-                {def && !def.verified && <i className="jk-unverified">?</i>}
-              </button>
-            );
-          })}
+        {testOf && !sandbox && (
+          <p className="jk-testnote">
+            <b>{testOf.label}</b> — {testOf.note}
+            {!testOf.verified && <span className="jk-unverified"> (동작 미확인)</span>}
+          </p>
+        )}
+
         </div>
-      </div>
-
-      {testOf && !sandbox && (
-        <p className="jk-testnote">
-          <b>{testOf.label}</b> — {testOf.note}
-          {!testOf.verified && <span className="jk-unverified"> (동작 미확인)</span>}
-        </p>
       )}
 
       <div className="jk-hud">
@@ -566,7 +705,7 @@ const JewelKingdomGame: React.FC = () => {
                     ) : goal.kind === 'collect' ? (
                       <CollectorSprite color={null} left={0} />
                     ) : (
-                      <CoverSprite layers={1} />
+                      <CoverSprite kind={goal.kind === 'cover' ? goal.coverKind : undefined} layers={1} />
                     )}
                   </span>
                 )}
@@ -579,7 +718,52 @@ const JewelKingdomGame: React.FC = () => {
         </div>
       </div>
 
-      <div className="jk-board-outer">
+      {/* 스킬 바: 장착한 스킬과 게이지. 꽉 찬 스킬을 누르면 겨누고, 칸을 찍으면 쓴다. */}
+      <div className="jk-skill-bar">
+        {Array.from({ length: skillSlots }, (_, i) => {
+          const kind = equipped[i];
+          if (!kind) {
+            return (
+              <button
+                key={`empty-${i}`}
+                className="jk-skill empty"
+                onClick={() => setSkillOpen(true)}
+                disabled={view.playing}
+              >
+                <span className="jk-skill-ring">
+                  <span className="jk-skill-face">＋</span>
+                </span>
+                <span className="jk-skill-name">빈 칸</span>
+              </button>
+            );
+          }
+          const def = skillDef(kind)!;
+          const ready = skillReady(kind);
+          const fill = sandbox ? 1 : Math.min(1, (gauges[kind] ?? 0) / def.cost);
+          return (
+            <button
+              key={kind}
+              className={`jk-skill${ready ? ' ready' : ''}${armedSkill === kind ? ' armed' : ''}`}
+              onClick={() => tapSkill(kind)}
+              disabled={!canPlay || !ready}
+              title={`${def.label}: ${def.desc}`}
+              style={{ ['--fill' as string]: fill }}
+            >
+              <span className="jk-skill-ring">
+                <span className="jk-skill-face">
+                  <img src={spriteFor(null, kind)} alt="" draggable={false} />
+                </span>
+              </span>
+              <span className="jk-skill-name">{ready ? '사용!' : def.label}</span>
+            </button>
+          );
+        })}
+        <button className="jk-equip-edit" onClick={() => setSkillOpen(true)} disabled={view.playing}>
+          장착
+        </button>
+      </div>
+
+      <div className="jk-board-outer" ref={boardOuterRef}>
         <div
           ref={boardRef}
           className="jk-board"
@@ -588,9 +772,16 @@ const JewelKingdomGame: React.FC = () => {
           onPointerCancel={endDrag}
         >
           {cells}
+          <FxLayer
+            step={view.step}
+            tick={view.tick}
+            cols={view.board.width}
+            rows={view.board.height}
+            shakeTarget={boardOuterRef}
+          />
         </div>
 
-        {armed && <div className="jk-aim">쓸 칸을 고르세요</div>}
+        {(armed || armedSkill) && <div className="jk-aim">쓸 칸을 고르세요</div>}
 
         {level.status !== 'playing' && !view.playing && (
           <div className="jk-overlay">
@@ -606,6 +797,24 @@ const JewelKingdomGame: React.FC = () => {
           </div>
         )}
       </div>
+
+      {skillOpen && (
+        <SkillPanel
+          equipped={equipped}
+          slots={skillSlots}
+          nextSlotLevel={nextSlotLevel(stageNo)}
+          spriteFor={kind => spriteFor(null, kind)}
+          onClose={() => setSkillOpen(false)}
+          onSave={next => {
+            setSkills(next);
+            writeSkills(next);
+            setSkillOpen(false);
+            // 판 도중에 바꾸면 게이지가 섞여 비교가 안 된다 - 새로 시작한다.
+            if (sandbox) openSandbox();
+            else loadLevel(levelIndex);
+          }}
+        />
+      )}
 
       {sandbox ? (
         <SandboxPalette

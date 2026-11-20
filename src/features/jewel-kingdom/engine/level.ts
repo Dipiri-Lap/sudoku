@@ -22,10 +22,15 @@ import type { Rng } from './rng';
  * 배치에서 `.`은 "평범한 칸"이고, 시작할 때 무작위 보석으로 채워진다.
  * `_`는 구멍, `#`은 장애물, `~`는 덮개.
  */
+/** 판의 성격(진행표가 정한다). 규칙에는 영향이 없고 화면 표시에만 쓴다 */
+export type LevelTier = 'intro' | 'relief' | 'normal' | 'hard' | 'super';
+
 export interface Level {
   id: number;
   /** 목록에 보일 이름. 없으면 번호로 보인다. */
   label?: string;
+  /** 판의 성격. "어려운 판" 표시용 */
+  tier?: LevelTier;
   /** 보드 배치 (notation.ts 표기) */
   layout: string;
   moves: number;

@@ -22,6 +22,8 @@ import {
 } from './gravity';
 import { applyDamage, damageAt, type DamageEvent } from './damage';
 import { canUseAt, plantBooster, type BoosterKind } from './boosters';
+import { canUseSkillAt, plantSkill } from './skills';
+import type { SpecialKind } from './types';
 import type { Rng } from './rng';
 
 /**
@@ -275,7 +277,7 @@ function cascade(
       // 아니라 합체 자체의 것이므로 expandSpecials가 만들어내지 못한다.
       const blasts =
         combo === 1 && revert?.comboBlasts
-          ? [...revert.comboBlasts, ...expanded.blasts]
+          ? [...revert.comboBlasts.map(b => ({ ...b, combo: true })), ...expanded.blasts]
           : expanded.blasts;
       spawned.forEach(s => cells.delete(s.key));
 
@@ -384,6 +386,25 @@ export function activateBooster(
 
   const planted = plantBooster(board, pos, kind);
   return cascade(board, planted, new Set([k]), null, [pos], [], options, rng);
+}
+
+/**
+ * 게이지가 찬 스킬을 지목한 칸에 쓴다(skills.ts).
+ * 부스터처럼 그 칸에 아이템을 심고 바로 터뜨린다 - 매치로 만든 아이템과 같은 경로라
+ * 목적지 고르기(제비·개구리·민들레)와 연쇄가 똑같이 돈다. 이동 횟수는 쓰지 않는다.
+ */
+export function activateSkill(
+  board: Board,
+  pos: Position,
+  kind: SpecialKind,
+  rng: Rng,
+  options: ResolveOptions = {},
+): TurnResult {
+  if (!canUseSkillAt(board, pos)) {
+    return { valid: false, steps: [], board, clearedCount: 0, maxCombo: 0 };
+  }
+  const planted = plantSkill(board, pos, kind);
+  return cascade(board, planted, new Set([key(pos.row, pos.col)]), null, [pos], [], options, rng);
 }
 
 /**

@@ -22,7 +22,7 @@
     "optimize-audio": "node scripts/optimize-audio.mjs",
     "audit-assets": "node scripts/audit-assets.mjs",
     "generate-jewel-levels": "tsx scripts/generate-jewel-levels.ts",
-    "bake-jewel-levels": "bash scripts/bake-jewel-levels.sh",
+    "bake-jewel-levels": "node scripts/bake-jewel-levels.mjs",
     "generate-daily": "tsx scripts/generate-daily-sudoku.ts",
     "generate-arrow-levels": "tsx scripts/generate-arrow-levels.ts"
   },
@@ -33,6 +33,8 @@
     "firebase": "^12.9.0",
     "i18next": "^27.1.3",
     "lucide-react": "^0.564.0",
+    "pixi-filters": "6.1.5",
+    "pixi.js": "8.22.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-helmet-async": "^3.0.0",

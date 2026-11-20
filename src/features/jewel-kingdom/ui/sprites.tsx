@@ -184,7 +184,13 @@ const Generic: React.FC<{ kind: string; layers: number }> = ({ kind, layers }) =
 };
 
 export const BlockerSprite: React.FC<Props> = ({ kind, layers, hidden }) => {
-  if (hidden) return <Vault />;
+  if (hidden) {
+    return ART.hiddenBlocker ? (
+      <img className="jk-sprite" src={ART.hiddenBlocker} alt="" draggable={false} />
+    ) : (
+      <Vault />
+    );
+  }
   const custom = ART.blockers[kind];
   if (custom) return <img className="jk-sprite" src={custom} alt="" draggable={false} />;
   const Drawn = BUILTIN[kind];
@@ -204,10 +210,19 @@ export const CoverSprite: React.FC<{
   hides?: boolean;
   locks?: boolean;
 }> = ({ kind, layers, hides, locks }) => {
-  if (hides) return <Cloud layers={layers} />;
+  const art = hides ? ART.covers.cloud : kind ? ART.covers[kind] : ART.covers.roof;
+  if (hides) {
+    return art ? <img className={`jk-cover-img hides`} src={art} alt="" draggable={false} /> : <Cloud layers={layers} />;
+  }
 
-  const body =
-    kind === 'honey' || kind === 'dark-honey' ? (
+  const body = art ? (
+    <img
+      className={`jk-cover-img${kind === 'dark-honey' ? ' dark' : ''}`}
+      src={art}
+      alt=""
+      draggable={false}
+    />
+  ) : kind === 'honey' || kind === 'dark-honey' ? (
       <Honey layers={layers} dark={kind === 'dark-honey'} />
     ) : kind === 'chain' ? (
       <Chain />
@@ -221,9 +236,13 @@ export const CoverSprite: React.FC<{
   return (
     <>
       {body}
-      <span className="jk-lock" aria-hidden>
-        ⛓
-      </span>
+      {ART.lockIcon ? (
+        <img className="jk-lock jk-lock-img" src={ART.lockIcon} alt="" draggable={false} />
+      ) : (
+        <span className="jk-lock" aria-hidden>
+          ⛓
+        </span>
+      )}
     </>
   );
 };
@@ -277,7 +296,19 @@ const Chain: React.FC = () => (
 );
 
 /** 하단 레이어(잔디·젤리). 보석 **아래** 깔리므로 칸 전체를 채운다. */
-export const GroundSprite: React.FC<{ kind: string; layers: number }> = ({ kind, layers }) => (
+export const GroundSprite: React.FC<{ kind: string; layers: number }> = ({ kind, layers }) => {
+  const art = ART.grounds[kind];
+  if (!art) return <DrawnGround kind={kind} layers={layers} />;
+  return (
+    <>
+      <img className="jk-ground-sprite jk-ground-img" src={art} alt="" draggable={false} />
+      {/* 여러 겹 바닥은 남은 겹 수를 같이 보여준다 - 그림만으로는 몇 번 더 터뜨려야 하는지 모른다 */}
+      {layers > 1 && <span className="jk-layers">{layers}</span>}
+    </>
+  );
+};
+
+const DrawnGround: React.FC<{ kind: string; layers: number }> = ({ kind, layers }) => (
   <svg viewBox={VIEW} className="jk-ground-sprite" preserveAspectRatio="none">
     <rect
       x="0"
@@ -298,7 +329,38 @@ export const GroundSprite: React.FC<{ kind: string; layers: number }> = ({ kind,
 export const CollectorSprite: React.FC<{ color: number | null; left: number }> = ({
   color,
   left,
-}) => (
+}) =>
+  ART.collector ? (
+    <span className="jk-art-stack">
+      <img className="jk-sprite" src={ART.collector} alt="" draggable={false} />
+      {/* 받을 색과 남은 개수는 규칙 정보라 그림 위에 코드로 얹는다 */}
+      <svg viewBox={VIEW} className="jk-art-overlay">
+        {color !== null && (
+          <circle cx="50" cy="64" r="15" fill={GEM_HEX[color]} stroke="rgba(0,0,0,0.4)" strokeWidth="3" />
+        )}
+        {left > 0 && (
+          <text
+            x="50"
+            y="65"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize="30"
+            fontWeight="900"
+            fill="#fff"
+            stroke="#3d2b1f"
+            strokeWidth="5"
+            paintOrder="stroke"
+          >
+            {left}
+          </text>
+        )}
+      </svg>
+    </span>
+  ) : (
+    <DrawnCollector color={color} left={left} />
+  );
+
+const DrawnCollector: React.FC<{ color: number | null; left: number }> = ({ color, left }) => (
   <svg viewBox={VIEW} className="jk-sprite">
     <path
       d="M8 40h84v46a8 8 0 0 1-8 8H16a8 8 0 0 1-8-8z"
@@ -325,7 +387,19 @@ export const CollectorSprite: React.FC<{ color: number | null; left: number }> =
  * 플레이어가 "여기는 못 두는 칸"으로 읽는다. 투입구 칸도 보통 칸이라
  * 보석이 앉고 매치도 스왑도 된다 - 그게 보여야 한다.
  */
-export const SpawnerSprite: React.FC<{ color: number }> = ({ color }) => (
+export const SpawnerSprite: React.FC<{ color: number }> = ({ color }) =>
+  ART.spawner ? (
+    <span className="jk-spawner-sprite jk-art-stack">
+      <img src={ART.spawner} alt="" draggable={false} />
+      <svg viewBox="0 0 100 34" className="jk-art-overlay" preserveAspectRatio="none">
+        <circle cx="50" cy="16" r="7" fill={GEM_HEX[color]} stroke="rgba(0,0,0,0.4)" strokeWidth="2.5" />
+      </svg>
+    </span>
+  ) : (
+    <DrawnSpawner color={color} />
+  );
+
+const DrawnSpawner: React.FC<{ color: number }> = ({ color }) => (
   <svg viewBox="0 0 100 34" className="jk-spawner-sprite" preserveAspectRatio="none">
     <path d="M14 0h72v18a10 10 0 0 1-10 10H24a10 10 0 0 1-10-10z" fill="#64748b" stroke="#334155" strokeWidth="4" />
     <path d="M14 10h72" stroke="#94a3b8" strokeWidth="4" />
@@ -334,7 +408,14 @@ export const SpawnerSprite: React.FC<{ color: number }> = ({ color }) => (
 );
 
 /** 수집물(트로피). 매치되지 않는 짐이라 보석과 확실히 달라 보여야 한다. */
-export const CargoSprite: React.FC<{ color: number | null }> = ({ color }) => (
+export const CargoSprite: React.FC<{ color: number | null }> = ({ color }) =>
+  ART.cargo ? (
+    <img className="jk-sprite" src={ART.cargo} alt="" draggable={false} />
+  ) : (
+    <DrawnCargo color={color} />
+  );
+
+const DrawnCargo: React.FC<{ color: number | null }> = ({ color }) => (
   <svg viewBox={VIEW} className="jk-sprite">
     <path
       d="M30 16h40v22a20 20 0 0 1-40 0z"
@@ -350,6 +431,8 @@ export const CargoSprite: React.FC<{ color: number | null }> = ({ color }) => (
 
 /** 부스터 아이콘. 판 위의 아이템과 모양을 맞춰 무엇이 나올지 읽히게 한다. */
 export const BoosterSprite: React.FC<{ kind: string }> = ({ kind }) => {
+  const art = ART.boosters[kind];
+  if (art) return <img className="jk-sprite" src={art} alt="" draggable={false} />;
   switch (kind) {
     case 'hammer':
       return (

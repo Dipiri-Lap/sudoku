@@ -4,6 +4,7 @@ import type { TurnStep } from '../engine/resolve';
 import type { FallMove } from '../engine/gravity';
 import { key } from '../engine/board';
 import { CLEAR_HOLD_MS, CLEAR_MS, COLLECT_MS, EFFECT_MS, SWAP_MS, fallDurationMs } from './constants';
+import { clearStepMs, scheduleClear } from './fx/schedule';
 
 /**
  * 단계 목록 재생기.
@@ -19,6 +20,10 @@ export interface PlaybackView {
   board: Board;
   /** 지금 터지는 중인 칸 */
   clearing: Set<string>;
+  /** 칸이 사라지기 시작하는 시각(ms). 아이템 이펙트가 물결처럼 지나가게 한다 */
+  delays: Map<string, number>;
+  /** 지금 재생 중인 단계(이펙트 층이 본다) */
+  step: TurnStep | null;
   /** 이번에 새로 생긴 아이템 칸 */
   spawned: Set<string>;
   /** 겹이 깎인 장애물·덮개 칸 */
@@ -36,6 +41,8 @@ export interface PlaybackView {
 
 const NONE = {
   clearing: new Set<string>(),
+  delays: new Map<string, number>(),
+  step: null as TurnStep | null,
   spawned: new Set<string>(),
   damaged: new Set<string>(),
   falling: [] as FallMove[],
@@ -50,7 +57,8 @@ export function stepDurationMs(step: TurnStep): number {
     case 'revert':
       return SWAP_MS;
     case 'clear':
-      return CLEAR_MS + CLEAR_HOLD_MS;
+      // 이펙트가 있으면 물결이 마지막 칸에 닿아 사라질 때까지, 없으면 기존 길이
+      return clearStepMs(step, CLEAR_MS) || CLEAR_MS + CLEAR_HOLD_MS;
     case 'fall': {
       if (step.moves.length === 0) return 0;
       const longest = Math.max(...step.moves.map(m => fallDurationMs(m.toRow - m.fromRow)));
@@ -67,6 +75,8 @@ function viewOf(step: TurnStep, tick: number): PlaybackView {
   return {
     board: step.board,
     clearing: step.kind === 'clear' ? new Set(step.cells) : NONE.clearing,
+    delays: step.kind === 'clear' ? scheduleClear(step).delays : NONE.delays,
+    step,
     spawned: step.kind === 'clear' ? new Set(step.spawned.map(s => s.key)) : NONE.spawned,
     damaged: step.kind === 'clear' ? new Set(step.damage.map(e => e.key)) : NONE.damaged,
     falling: step.kind === 'fall' ? step.moves : NONE.falling,

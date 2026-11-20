@@ -58,6 +58,10 @@ export interface Blast {
   targetColor?: number | null;
   /** 프로펠러가 날아간 목적지(프로펠러일 때만) */
   destination?: Position;
+  /** 여러 곳을 노리는 아이템(제비·민들레 등)의 목적지 전부 */
+  destinations?: Position[];
+  /** 아이템 둘을 합친 폭발인가. 연출용 표시일 뿐 규칙에는 영향이 없다. */
+  combo?: boolean;
 }
 
 /**
@@ -162,6 +166,9 @@ export function planSpecials(groups: MatchGroup[], preferred: Position[] = []): 
   return spawns;
 }
 
+/** 허수아비가 쫓아내는 장애물 종류(텃밭 그림에서는 까마귀) */
+export const SCARED_BLOCKER = 'ghost';
+
 /** 아이템 하나가 터뜨리는 범위. 표를 읽어 좌표만 계산한다. */
 export function blastArea(
   board: Board,
@@ -170,14 +177,90 @@ export function blastArea(
   kind: SpecialKind,
   targetColor: number | null,
   destination: Position | null = null,
+  destinations: Position[] = [],
 ): string[] {
   const out: string[] = [];
   const push = (r: number, c: number) => {
     if (r < 0 || c < 0 || r >= board.height || c >= board.width) return;
     out.push(key(r, c));
   };
+  const square = (r0: number, c0: number, radius: number) => {
+    for (let r = r0 - radius; r <= r0 + radius; r++) {
+      for (let c = c0 - radius; c <= c0 + radius; c++) push(r, c);
+    }
+  };
 
   switch (kind) {
+    case 'sickle':
+      // 대각선 두 줄. 판 끝까지 간다.
+      for (let d = -Math.max(board.width, board.height); d <= Math.max(board.width, board.height); d++) {
+        push(row + d, col + d);
+        push(row + d, col - d);
+      }
+      break;
+    case 'plow':
+      for (let r = row - 1; r <= row + 1; r++) {
+        for (let c = col - 3; c <= col + 3; c++) push(r, c);
+      }
+      break;
+    case 'butterfly':
+    case 'dandelion':
+      // 자기 자리 + 목적지마다 한 칸
+      push(row, col);
+      destinations.forEach(d => push(d.row, d.col));
+      break;
+    case 'ladybug':
+      push(row, col);
+      destinations.forEach(d => square(d.row, d.col, 1));
+      break;
+    case 'watermelon':
+      square(row, col, 1);
+      destinations.forEach(d => square(d.row, d.col, 1));
+      break;
+    case 'scarecrow':
+      // 팔 벌린 모양 그대로 가로 한 줄 + 세로 한 줄. 그리고 판의 까마귀는
+      // 어디 있든 놀라 달아난다(까마귀 장애물을 한 대씩 친다).
+      for (let c = 0; c < board.width; c++) push(row, c);
+      for (let r = 0; r < board.height; r++) if (r !== row) push(r, col);
+      for (let r = 0; r < board.height; r++) {
+        for (let c = 0; c < board.width; c++) {
+          if (r !== row && c !== col && at(board, r, c).blocker?.kind === SCARED_BLOCKER) push(r, c);
+        }
+      }
+      break;
+    case 'sprinkler':
+      for (let r = row - 3; r <= row + 3; r++) {
+        for (let c = col - 3; c <= col + 3; c++) {
+          if (Math.abs(r - row) + Math.abs(c - col) <= 3) push(r, c);
+        }
+      }
+      break;
+    case 'watering-can': {
+      // 바닥(잡초·꽃밭 등)이나 덮개가 있는 칸 전부. 그런 칸이 없는 판이면
+      // 자기만 사라지는 헛방이 되므로, 가장 많은 색을 대신 친다.
+      push(row, col);
+      let hit = 0;
+      for (let r = 0; r < board.height; r++) {
+        for (let c = 0; c < board.width; c++) {
+          const cell = at(board, r, c);
+          if (cell.ground || cell.cover) {
+            push(r, c);
+            hit++;
+          }
+        }
+      }
+      if (hit === 0) {
+        const color = mostCommonColor(board);
+        if (color !== null) {
+          for (let r = 0; r < board.height; r++) {
+            for (let c = 0; c < board.width; c++) {
+              if (matchColorOf(at(board, r, c).gem) === color) push(r, c);
+            }
+          }
+        }
+      }
+      break;
+    }
     case 'rocket-h':
       for (let c = 0; c < board.width; c++) push(row, c);
       break;
@@ -256,9 +339,17 @@ export function expandSpecials(
       kind === 'propeller'
         ? propellerDestination(board, { row, col }, options.targetScorer, options.rng)
         : undefined;
-    blasts.push({ row, col, kind, targetColor, destination });
+    const destinations = destinationsFor(board, { row, col }, kind, options);
+    blasts.push({
+      row,
+      col,
+      kind,
+      targetColor,
+      destination: destination ?? destinations[0],
+      ...(destinations.length > 0 ? { destinations } : {}),
+    });
 
-    blastArea(board, row, col, kind, targetColor, destination ?? null).forEach(nk => {
+    blastArea(board, row, col, kind, targetColor, destination ?? null, destinations).forEach(nk => {
       const p = parseKey(nk);
       const target = at(board, p.row, p.col);
       if (!isPlayable(target)) return;
@@ -276,6 +367,44 @@ export function expandSpecials(
   return { cells, blasts, blastCells };
 }
 
+/** 목표를 노리고 날아가는 아이템이 몇 곳을 치는가 (프로펠러는 따로 처리한다) */
+const DESTINATION_COUNT: Partial<Record<SpecialKind, number>> = {
+  butterfly: 2,
+  ladybug: 1,
+  watermelon: 1,
+  dandelion: 10,
+};
+
+/**
+ * 여러 곳을 노리는 아이템의 목적지. 같은 칸을 두 번 고르지 않는다.
+ * 점수 함수가 레벨 목표를 알고 있으므로 목표물 쪽으로 날아간다.
+ */
+export function destinationsFor(
+  board: Board,
+  origin: Position,
+  kind: SpecialKind,
+  options: ExpandOptions = {},
+): Position[] {
+  const count = DESTINATION_COUNT[kind] ?? 0;
+  const taken = new Set<string>();
+  const out: Position[] = [];
+  for (let i = 0; i < count; i++) {
+    const scorer: TargetScorer = (b, r, c) =>
+      taken.has(key(r, c)) ? -Infinity : (options.targetScorer ?? defaultTargetScorer)(b, r, c);
+    const dest = propellerDestination(board, origin, scorer, options.rng);
+    if (dest.row === origin.row && dest.col === origin.col) break; // 더 노릴 칸이 없다
+    if (taken.has(key(dest.row, dest.col))) break;
+    taken.add(key(dest.row, dest.col));
+    out.push(dest);
+  }
+  return out;
+}
+
+/** 색이 없는 아이템(색 계열). 색 매치에도, 색 표시에도 참여하지 않는다. */
+export function isColorless(kind: SpecialKind): boolean {
+  return familyOf(kind) === 'lightball';
+}
+
 /** 아이템이 생길 칸의 보석을 그 자리에서 변신시킨다. id는 유지한다. */
 export function markSpecials(board: Board, spawns: SpecialSpawn[]): Board {
   if (spawns.length === 0) return board;
@@ -284,7 +413,7 @@ export function markSpecials(board: Board, spawns: SpecialSpawn[]): Board {
     const { row, col } = parseKey(k);
     const cell = next.cells[row * next.width + col];
     if (!cell.gem) return;
-    cell.gem = { ...cell.gem, special: kind, color: kind === 'lightball' ? null : cell.gem.color };
+    cell.gem = { ...cell.gem, special: kind, color: isColorless(kind) ? null : cell.gem.color };
   });
   return next;
 }
@@ -297,8 +426,31 @@ export function markSpecials(board: Board, spawns: SpecialSpawn[]): Board {
 /** 로켓은 방향이 둘이지만 합체 판정에서는 하나로 본다. */
 export type SpecialFamily = 'rocket' | 'tnt' | 'propeller' | 'lightball';
 
+/**
+ * 아이템 계열. 장착 슬롯과 1:1이다(줄=4줄, 날기=네모, 범위=ㄱ·ㅗ자, 색=5줄).
+ * 합체는 계열끼리만 정의한다 - 아이템이 늘어도 합체표가 짝 수만큼 불어나지 않는다.
+ */
 export function familyOf(kind: SpecialKind): SpecialFamily {
-  return kind === 'rocket-h' || kind === 'rocket-v' ? 'rocket' : kind;
+  switch (kind) {
+    case 'rocket-h':
+    case 'rocket-v':
+    case 'sickle':
+    case 'plow':
+      return 'rocket';
+    case 'tnt':
+    case 'watermelon':
+    case 'sprinkler':
+    case 'scarecrow':
+      return 'tnt';
+    case 'propeller':
+    case 'butterfly':
+    case 'ladybug':
+      return 'propeller';
+    case 'lightball':
+    case 'dandelion':
+    case 'watering-can':
+      return 'lightball';
+  }
 }
 
 export type ComboEffect =
@@ -342,7 +494,22 @@ export function findCombo(a: SpecialKind, b: SpecialKind): ComboEffect | null {
   const fa = familyOf(a);
   const fb = familyOf(b);
   const rule = COMBOS.find(r => (r.a === fa && r.b === fb) || (r.a === fb && r.b === fa));
-  return rule ? rule.combo : null;
+  if (!rule) return null;
+  const combo = rule.combo;
+
+  // 표는 계열끼리만 적는다. 변신·운반의 대상은 실제로 합쳐진 아이템이다 -
+  // 무지개꽃+낫이면 낫으로 변신하고, 참새+수박폭탄이면 수박폭탄을 싣고 간다.
+  // 로켓은 방향이 둘이라 대표값(rocket-h)으로 맞춘다(변신은 방향을 번갈아 준다).
+  const norm = (k: SpecialKind): SpecialKind => (k === 'rocket-v' ? 'rocket-h' : k);
+  if (combo.effect === 'transform') {
+    const other = fa === 'lightball' ? b : a;
+    return { effect: 'transform', into: norm(other) };
+  }
+  if (combo.effect === 'carry') {
+    const other = fa === 'propeller' ? b : a;
+    return { effect: 'carry', payload: norm(other) };
+  }
+  return combo;
 }
 
 /** 보드에 실제로 존재하는 색들 */
@@ -484,7 +651,9 @@ export function applyCombo(
 
     case 'carry': {
       const dest = propellerDestination(board, origin, options.targetScorer, options.rng);
-      blastArea(board, dest.row, dest.col, combo.payload, null).forEach(k => {
+      // 실은 아이템이 또 목표를 노리는 종류(수박폭탄)면 도착 지점에서 다시 고른다.
+      const payloadDests = destinationsFor(board, dest, combo.payload, options);
+      blastArea(board, dest.row, dest.col, combo.payload, null, null, payloadDests).forEach(k => {
         const p = parseKey(k);
         push(p.row, p.col);
       });

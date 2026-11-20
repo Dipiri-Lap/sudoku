@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# 레벨 굽기 중간 파일(scripts/bake-jewel-levels.mjs)
+.cache/
