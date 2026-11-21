@@ -15,6 +15,9 @@ import type { CrossMathLevel, GridCell, Operator } from '../utils/generator';
  * 오답 타일이 있으면 뒤에 "|<값>,<값>,..." 을 붙인다 (10진수, 기호 오답은 기호 그대로). 없으면 생략 — 예전 데이터와 같은 형식.
  *   예)   "9x9|1cN30,...,1gB6|7,15"
  *
+ * 안개 관문이면 그 뒤에 "|<안개 칸 인덱스(36진수)>,..." 를 하나 더 붙인다 (오답 칸이 비어 있어도 자리는 둔다).
+ *   예)   "13x13|...|7,15|1c,1d,2e"
+ *
  * 원본 JSON(셀당 {row,col,type,value,isBlank})에 비해 약 5배 작다.
  * 스테이지가 1000개까지 늘어나는 것을 감안한 선택이다.
  */
@@ -30,11 +33,13 @@ export function encodeLevel(level: CrossMathLevel): string {
   });
   const base = `${level.rows}x${level.cols}|${parts.join(',')}`;
   const decoys = [...(level.decoys ?? []), ...(level.opDecoys ?? [])];
+  const fog = level.cells.filter(c => c.fog).map(c => (c.row * level.cols + c.col).toString(RADIX));
+  if (fog.length > 0) return `${base}|${decoys.join(',')}|${fog.join(',')}`;
   return decoys.length > 0 ? `${base}|${decoys.join(',')}` : base;
 }
 
 export function decodeLevel(encoded: string): CrossMathLevel {
-  const [size, body, decoyPart] = encoded.split('|');
+  const [size, body, decoyPart, fogPart] = encoded.split('|');
   const [rows, cols] = size.split('x').map(Number);
   if (!Number.isFinite(rows) || !Number.isFinite(cols)) {
     throw new Error(`스테이지 데이터가 손상되었습니다: ${encoded.slice(0, 24)}…`);
@@ -54,6 +59,11 @@ export function decodeLevel(encoded: string): CrossMathLevel {
     if (kind === 'B') return { row, col, type: 'num', value: Number(rest), isBlank: true };
     return { row, col, type: 'num', value: Number(rest) };
   });
+
+  if (fogPart) {
+    const fogIdx = new Set(fogPart.split(',').map(t => parseInt(t, RADIX)));
+    for (const c of cells) if (fogIdx.has(c.row * cols + c.col)) c.fog = true;
+  }
 
   const level: CrossMathLevel = { rows, cols, cells };
   if (decoyPart) {

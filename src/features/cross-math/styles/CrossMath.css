@@ -1178,3 +1178,29 @@
   color: var(--cm-accent);
   box-shadow: 0 3px 0 var(--cm-accent);
 }
+
+/* ── 안개 관문 ───────────────────────────────────────────────────────────── */
+
+/* 칸 모양은 남기되 내용은 가린다 — 어디에 식이 있는지는 보이고, 무엇인지는 안 보인다 */
+.cm-cell-fog {
+  border-radius: 6px;
+  background:
+    radial-gradient(circle at 30% 35%, rgba(255, 255, 255, 0.75) 0 22%, transparent 23%),
+    radial-gradient(circle at 65% 60%, rgba(255, 255, 255, 0.6) 0 26%, transparent 27%),
+    #c9ccd6;
+  border: 1px solid #b6bac6;
+  animation: cm-fog-drift 4s ease-in-out infinite alternate;
+}
+@keyframes cm-fog-drift {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to { background-position: 3px -2px, -3px 2px, 0 0; }
+}
+
+/* 안개가 걷힌 순간 — 흐릿하게 커졌다가 제자리로 */
+.cm-cell-unfog {
+  animation: cm-unfog 0.6s ease-out both;
+}
+@keyframes cm-unfog {
+  0% { opacity: 0; filter: blur(4px); transform: scale(1.15); }
+  100% { opacity: 1; filter: none; transform: none; }
+}

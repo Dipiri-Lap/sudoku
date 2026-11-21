@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { generateLevelFromConfig, DIFFICULTY_CONFIGS } from '../src/features/cross-math/utils/generator';
-import { stageDifficulty, stageLevel, stageTripleRatio, isMilestone, isOperatorMilestone, stageOpBlankCount, TOTAL_STAGES } from '../src/features/cross-math/stage/schedule';
+import { stageDifficulty, stageLevel, stageTripleRatio, isOperatorMilestone, isFogMilestone, isFullLineMilestone, stageOpBlankCount, TOTAL_STAGES } from '../src/features/cross-math/stage/schedule';
 import { encodeLevel, decodeLevel } from '../src/features/cross-math/stage/codec';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,11 +27,20 @@ function pad(n: number): string {
  * 사용법:
  *   npm run generate-cross-math-stages            → 1 ~ TOTAL_STAGES 전체
  *   npm run generate-cross-math-stages 501 600    → 해당 구간만 (이미 만든 묶음은 건드리지 않음)
- *   npm run generate-cross-math-stages -- --only-op-milestones
- *       → 기존 파일을 유지하고 기호 관문(…25, …75)만 새로 만든다. 이미 배포한 판을 바꾸지 않으려고 쓴다.
+ *   npm run generate-cross-math-stages -- --only=op     → 기존 파일을 유지하고 기호 관문(…25, …75)만 새로 만든다
+ *   npm run generate-cross-math-stages -- --only=fog    → 안개 관문(…50)만
+ *   npm run generate-cross-math-stages -- --only=line   → 부호만 남은 줄 관문(…00)만
+ *       이미 배포한 판을 바꾸지 않고 한 종류만 다시 만들 때 쓴다.
  */
 function main() {
-  const onlyOp = process.argv.includes('--only-op-milestones');
+  const onlyArg = process.argv.find(a => a.startsWith('--only='))?.slice('--only='.length);
+  const ONLY: Record<string, (stage: number) => boolean> = {
+    op: isOperatorMilestone,
+    fog: isFogMilestone,
+    line: isFullLineMilestone,
+  };
+  if (onlyArg && !ONLY[onlyArg]) throw new Error(`--only 값은 ${Object.keys(ONLY).join('/')} 중 하나: ${onlyArg}`);
+  const only = onlyArg ? ONLY[onlyArg] : null;
   const args = process.argv.slice(2).filter(a => !a.startsWith('--'));
   const argFrom = Number(args[0]);
   const argTo = Number(args[1]);
@@ -50,10 +59,10 @@ function main() {
     const to = Math.min(from + CHUNK - 1, rangeTo);
     const levels: string[] = [];
     const file = path.join(OUT_DIR, `stages-${pad(from)}-${pad(to)}.json`);
-    const existing: string[] = onlyOp ? (JSON.parse(fs.readFileSync(file, 'utf8')) as Chunk).levels : [];
+    const existing: string[] = only ? (JSON.parse(fs.readFileSync(file, 'utf8')) as Chunk).levels : [];
 
     for (let stage = from; stage <= to; stage++) {
-      if (onlyOp && !isOperatorMilestone(stage)) {
+      if (only && !only(stage)) {
         levels.push(existing[stage - from]);
         continue;
       }
@@ -63,8 +72,9 @@ function main() {
       const cfg = {
         ...base,
         tripleRatio: stageTripleRatio(stage),
-        fullLineBias: isMilestone(stage) && opBlankCount === 0,
+        fullLineBias: isFullLineMilestone(stage),
         opBlankCount,
+        fog: isFogMilestone(stage),
       };
       let encoded: string | null = null;
 

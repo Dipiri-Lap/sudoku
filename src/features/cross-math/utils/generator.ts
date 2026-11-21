@@ -1,6 +1,7 @@
 // Cross Math (숫자 크로스워드) 퍼즐 생성기.
 // 격자에 가로/세로 방정식(num op num = num)을 서로 교차시켜 배치하고,
 // 교차 구조를 이용해 일부 숫자 칸을 빈칸(플레이어가 채워야 하는 칸)으로 지정한다.
+import { simulateFog } from '../stage/board';
 
 export type Operator = '+' | '-' | '×' | '÷';
 export type CellType = 'num' | 'op' | 'eq';
@@ -12,6 +13,8 @@ export interface GridCell {
   value?: number;
   operator?: Operator;
   isBlank?: boolean;
+  /** 안개 관문 — 처음에 가려진 칸 */
+  fog?: boolean;
 }
 
 export interface CrossMathLevel {
@@ -74,6 +77,8 @@ export interface DifficultyConfig {
    * 숫자가 모두 정해졌을 때 답이 하나뿐인 연산자만 비운다 (2+2=4 / 2×2=4 같은 칸은 제외).
    */
   opBlankCount?: number;
+  /** 안개 관문 — 보드 일부를 안개로 가린다. 식을 완성하면 교차하는 식의 안개가 걷힌다. */
+  fog?: boolean;
 }
 
 export const DIFFICULTIES: Difficulty[] = [
@@ -958,6 +963,39 @@ export function analyzeBlanks(
   return { solvable: unknown.size === 0, open, depth };
 }
 
+// ── 안개 ────────────────────────────────────────────────────────────────────
+// 한 점을 중심으로 둥근 구름 모양 영역을 가린다. 판을 열었을 때 실제로 가려지는 칸
+// (빈칸 없는 식으로 걷히는 것까지 반영)이 전체의 FOG_MIN~FOG_MAX 이고,
+// 보이는 칸만으로 끝까지 풀리는 배치만 쓴다.
+
+const FOG_MIN = 0.3;
+const FOG_MAX = 0.55;
+/** 안개 속에 숨은 빈칸 최소 수 — 걷혔을 때 풀 거리가 있어야 한다 */
+const FOG_MIN_BLANKS = 3;
+
+function applyFog(level: CrossMathLevel): boolean {
+  let best: { keys: Set<string>; hidden: number } | null = null;
+  for (let t = 0; t < 80; t++) {
+    const center = level.cells[randInt(0, level.cells.length - 1)];
+    const radius = 2.5 + Math.random() * 2.5;
+    const keys = new Set(
+      level.cells
+        .filter(c => Math.hypot(c.row - center.row, c.col - center.col) <= radius)
+        .map(c => `${c.row},${c.col}`)
+    );
+    for (const c of level.cells) c.fog = keys.has(`${c.row},${c.col}`) || undefined;
+    const sim = simulateFog(level);
+    const ratio = sim.hiddenAtStart / level.cells.length;
+    if (!sim.solvable || ratio < FOG_MIN || ratio > FOG_MAX || sim.hiddenBlanksAtStart < FOG_MIN_BLANKS) continue;
+    if (!best || sim.hiddenAtStart > best.hidden) best = { keys, hidden: sim.hiddenAtStart };
+  }
+  for (const c of level.cells) {
+    delete c.fog;
+    if (best?.keys.has(`${c.row},${c.col}`)) c.fog = true;
+  }
+  return best !== null;
+}
+
 // ── 오답 타일 ─────────────────────────────────────────────────────────────
 // 정답과 자릿수가 같고 값이 가까운 수를 고른다. 크기만 보고 걸러낼 수 없어야 한다.
 // 판에 이미 적힌 숫자도 후보로 쓴다 — 보드에서 본 수라 그럴듯해 보인다.
@@ -1140,6 +1178,7 @@ export function generateLevelFromConfig(cfg: DifficultyConfig): CrossMathLevel |
     const decoys = pickDecoys(occ, blanks, hasOpBlanks ? { ...cfg, decoyCount: (cfg.decoyCount ?? 0) - 1 } : cfg);
     if (decoys.length > 0) level.decoys = decoys;
     if (hasOpBlanks) level.opDecoys = [cfg.operators[randInt(0, cfg.operators.length - 1)]];
+    if (cfg.fog && !applyFog(level)) continue;
     return level;
   }
   return null;

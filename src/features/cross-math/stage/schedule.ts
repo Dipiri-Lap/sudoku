@@ -104,12 +104,22 @@ export function isMilestone(stage: number): boolean {
 
 /**
  * 관문은 번갈아 가며 규칙을 바꾼다.
- *   25·75번대(…25, …75) → 기호 관문: 숫자 대신 + − × ÷ 칸이 비어 있다
- *   50·100번대(…50, …00) → 부호만 남은 줄 관문 (fullLineBias)
+ *   …25, …75 → 기호 관문: 숫자 대신 + − × ÷ 칸이 비어 있다
+ *   …50      → 안개 관문: 보드 일부가 가려져 있고, 식을 완성하면 이어진 식의 안개가 걷힌다
+ *   …00      → 부호만 남은 줄 관문 (fullLineBias)
  * 새 변주를 넣을 때는 여기서 관문 종류를 나눈다.
  */
 export function isOperatorMilestone(stage: number): boolean {
   return isMilestone(stage) && stage % 50 === 25;
+}
+
+export function isFogMilestone(stage: number): boolean {
+  return isMilestone(stage) && stage % 100 === 50;
+}
+
+/** 부호만 남은 줄 관문 (…00) */
+export function isFullLineMilestone(stage: number): boolean {
+  return isMilestone(stage) && stage % 100 === 0;
 }
 
 /** 기호 관문에서 비울 연산자 칸 수 (일반 스테이지는 0) */

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { CrossMathLevel, GridCell } from '../utils/generator';
 import { decodeLevel } from './codec';
-import { stageLevel, TOTAL_STAGES, isMilestone, isOperatorMilestone, stageOpBlankCount, TRIPLE_FROM } from './schedule';
-import { extractEquations } from './board';
+import { stageLevel, TOTAL_STAGES, isMilestone, isOperatorMilestone, isFogMilestone, isFullLineMilestone, stageOpBlankCount, TRIPLE_FROM } from './schedule';
+import { extractEquations, simulateFog } from './board';
 import { DIFFICULTY_CONFIGS, analyzeBlanks, effectiveMaxOpen, isOperatorDetermined, type Difficulty } from '../utils/generator';
 
 import c1 from '../data/stages/stages-001-100.json';
@@ -146,13 +146,13 @@ describe('사전 생성 스테이지 데이터', () => {
     }
   });
 
-  it('부호 관문(…50, …00)에는 숫자 없이 부호만 있는 식이 여럿 들어 있다', () => {
+  it('부호 관문(…00)에는 숫자 없이 부호만 있는 식이 여럿 들어 있다', () => {
     // 관문은 fullLineBias 로 생성해 이런 식이 많아야 한다. 일반 스테이지보다 확실히 많은지 본다.
     const countFullBlank = (level: CrossMathLevel) => {
       const at = new Map(level.cells.map(c => [`${c.row},${c.col}`, c]));
       return extractEquations(level).filter(eq => eq.numKeys.every(k => at.get(k)!.isBlank)).length;
     };
-    const milestones = stages.filter(s => isMilestone(s.stage) && !isOperatorMilestone(s.stage));
+    const milestones = stages.filter(s => isFullLineMilestone(s.stage));
     const thin = milestones.filter(s => countFullBlank(s.level) < 2).map(s => s.stage);
     expect(thin).toEqual([]);
 
@@ -213,7 +213,7 @@ describe('사전 생성 스테이지 데이터', () => {
       const a = analyzeBlanks(eqs, blanks);
       return { stage: s.stage, ...a, maxOpen: effectiveMaxOpen({
         ...cfg,
-        fullLineBias: isMilestone(s.stage) && !isOperatorMilestone(s.stage),
+        fullLineBias: isFullLineMilestone(s.stage),
         opBlankCount: stageOpBlankCount(s.stage),
       }), minDepth: cfg.minDepth };
     }).filter(r => !r.solvable || r.open > (r.maxOpen ?? Infinity) || r.depth < (r.minDepth ?? 0)).slice(0, 10);
@@ -255,6 +255,17 @@ describe('사전 생성 스테이지 데이터', () => {
       }
     }
     expect(bad).toEqual([]);
+  });
+
+  it('안개는 안개 관문(…50)에만 있고, 보이는 칸만으로 끝까지 풀린다', () => {
+    const misplaced = stages.filter(s => s.level.cells.some(c => c.fog) !== isFogMilestone(s.stage)).map(s => s.stage);
+    expect(misplaced).toEqual([]);
+    const bad = stages.filter(s => isFogMilestone(s.stage)).map(s => {
+      const sim = simulateFog(s.level);
+      return { stage: s.stage, ...sim, ratio: sim.hiddenAtStart / s.level.cells.length };
+    }).filter(r => !r.solvable || r.ratio < 0.3 || r.ratio > 0.55 || r.hiddenBlanksAtStart < 3);
+    expect(bad).toEqual([]);
+    expect(stages.filter(s => isFogMilestone(s.stage)).length).toBe(12);
   });
 
   it('격자 크기가 해당 난이도 설정을 넘지 않는다', () => {

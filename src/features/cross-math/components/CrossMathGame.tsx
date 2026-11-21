@@ -21,9 +21,9 @@ import {
   type Operator,
 } from '../utils/generator';
 import { loadStage, prefetchStage } from '../stage/loader';
-import { stageLevel, TOTAL_STAGES, isOperatorMilestone } from '../stage/schedule';
+import { stageLevel, TOTAL_STAGES, isOperatorMilestone, isFogMilestone } from '../stage/schedule';
 import { useCrossumProgress, useCrossumStars, starsFor } from '../stage/progress';
-import { extractEquations, evaluate } from '../stage/board';
+import { extractEquations, evaluate, crossingEquations, cascadeFog, type BoardEquation } from '../stage/board';
 import { useCoins } from '../../../context/CoinContext';
 import { logEvent } from '../../../firebase';
 import {
@@ -120,6 +120,12 @@ const RULES = [
     title: '기호 관문',
     desc: '25·75번째 관문에서는 숫자 대신 기호 칸이 비어 있어요. + − × ÷ 타일을 넣어 식을 완성하세요.',
     visual: <MiniRow cells={['6', 'B', '4', '=', '24']} />,
+  },
+  {
+    label: '규칙 5',
+    title: '안개 관문',
+    desc: '50번째 관문은 보드 일부가 안개에 가려져 있어요. 식을 완성하면 그 식과 이어진 식의 안개가 걷힙니다.',
+    visual: <MiniRow cells={['3', '+', 'B', '=', '☁']} />,
   },
   {
     label: '별',
@@ -244,6 +250,10 @@ const CrossMathGame: React.FC = () => {
   const [lastPlaced, setLastPlaced] = useState<string | null>(null);
   /** 막 완성된 줄의 칸별 지연(ms). 왼쪽부터 번져나가게 한다 */
   const [flash, setFlash] = useState<Record<string, number>>({});
+  /** 안개 관문 — 지금 보이는 칸. 한 번 걷힌 안개는 타일을 빼도 다시 끼지 않는다 */
+  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+  /** 방금 안개가 걷힌 칸 — 걷히는 연출용, 잠시 뒤 지운다 */
+  const [unfogged, setUnfogged] = useState<Set<string>>(new Set());
   const prevSolvedRef = useRef<Set<string>>(new Set());
 
   /**
@@ -338,6 +348,8 @@ const CrossMathGame: React.FC = () => {
     };
 
     const solved = new Set<string>();
+    /** 완성된 식 — 빈칸이 없는 식은 처음부터 완성. 안개를 걷는 기준이다 */
+    const complete = new Set<BoardEquation>();
     const broken = new Set<string>();
     let allValid = equations.length > 0;
 
@@ -352,6 +364,7 @@ const CrossMathGame: React.FC = () => {
       // 빈칸이 하나도 없는 식은 처음부터 완성 상태다. 색을 입히면 아무것도 안 했는데
       // 녹색이 떠 있어서 오해를 준다. 플레이어가 채워야 하는 식만 표시한다.
       const ownBlanks = eq.cellKeys.filter(k => cellMap.get(k)?.isBlank);
+      if (ok) complete.add(eq);
       if (ownBlanks.length === 0) continue;
 
       // 맞으면 줄 전체를 녹색으로, 틀리면 플레이어가 놓은 칸만 빨갛게.
@@ -359,7 +372,7 @@ const CrossMathGame: React.FC = () => {
       if (ok) for (const k of eq.cellKeys) solved.add(k);
       else for (const k of ownBlanks) broken.add(k);
     }
-    return { solved, broken, allValid };
+    return { solved, broken, allValid, complete };
   }, [equations, cellMap, placements]);
 
   const isWinner = useMemo(
@@ -386,6 +399,8 @@ const CrossMathGame: React.FC = () => {
         .sort((a, b) => rank(a.value) - rank(b.value))
     );
     setPenalty(0);
+    setRevealed(new Set(lvl.cells.filter(c => !c.fog).map(c => `${c.row},${c.col}`)));
+    setUnfogged(new Set());
     setPlacements({});
     setSelectedTileId(null);
     setSelectedCellKey(null);
@@ -396,6 +411,24 @@ const CrossMathGame: React.FC = () => {
     setHintMode(false);
     setAdHintCredit(false);
   }, []);
+
+  const crossing = useMemo(() => crossingEquations(equations), [equations]);
+  const hasFog = useMemo(() => !!level?.cells.some(c => c.fog), [level]);
+
+  /** 식이 완성될 때마다 교차하는 식의 안개를 걷는다 (빈칸 없는 식은 판을 열자마자 걷는다) */
+  useEffect(() => {
+    if (!hasFog) return;
+    const next = cascadeFog(equations, crossing, revealed, eq => cellState.complete.has(eq));
+    if (next.size === revealed.size) return;
+    setUnfogged(new Set([...next].filter(k => !revealed.has(k))));
+    setRevealed(next);
+  }, [hasFog, equations, crossing, cellState.complete, revealed]);
+
+  useEffect(() => {
+    if (unfogged.size === 0) return;
+    const t = setTimeout(() => setUnfogged(new Set()), 700);
+    return () => clearTimeout(t);
+  }, [unfogged]);
 
   /** 방금 완성된 줄을 찾아 왼쪽(위)부터 차례로 번지게 한다 */
   useEffect(() => {
@@ -951,6 +984,9 @@ const CrossMathGame: React.FC = () => {
       {stage !== null && isOperatorMilestone(stage) && (
         <div className="cm-variant-banner">기호 관문 · 빈 기호 칸에 + − × ÷ 타일을 넣으세요</div>
       )}
+      {stage !== null && isFogMilestone(stage) && (
+        <div className="cm-variant-banner">안개 관문 · 식을 완성하면 안개가 걷혀요</div>
+      )}
 
       <section className="cm-board-panel">
         <div
@@ -981,9 +1017,12 @@ const CrossMathGame: React.FC = () => {
               const key = `${r},${c}`;
               const cell = cellMap.get(key);
               if (!cell) return <div key={idx} className="cm-cell cm-cell-empty" />;
+              // 안개 속 칸 — 무엇이 있는지 보이지 않고 놓을 수도 없다 (data-cell 이 없어 드롭 대상도 아님)
+              if (cell.fog && !revealed.has(key)) return <div key={idx} className="cm-cell cm-cell-fog" aria-label="안개" />;
 
               // 방금 놓은 칸과 그 이웃에 반응을 준다. 놓인 칸만 움직이면 밋밋하다.
               const fxCls = [
+                unfogged.has(key) ? 'cm-cell-unfog' : '',
                 lastPlaced === key ? 'cm-cell-pop' : '',
                 lastPlaced && nudgeClass(lastPlaced, key),
                 flash[key] !== undefined ? 'cm-cell-flash' : '',
