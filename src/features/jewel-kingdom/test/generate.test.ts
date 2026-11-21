@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { generateLevel, fitMoves, DEFAULT_FIT, type Recipe } from '../engine/generate';
 import { recipeFor, targetWinRate, tierFor, LAST_SCHEDULED } from '../data/schedule';
+import { maskKey } from '../engine/layouts';
 import { parseBoard } from '../engine/notation';
 import { at } from '../engine/board';
 import { isComplete, startLevel } from '../engine/level';
@@ -194,28 +195,49 @@ describe('진행표', () => {
   });
 
   it('어려운 판 다음에는 쉬어가는 판이 온다', () => {
-    // 계속 어렵기만 하면 그만두게 된다. 10판마다 5번째는 어려운 판, 10번째는 아주
-    // 어려운 판이고 그 바로 다음 판은 확 풀어 준다.
-    for (let n = 30; n < LAST_SCHEDULED; n += 5) {
-      if (tierFor(n) === 'intro' || tierFor(n + 1) === 'intro') continue;
+    // 계속 어렵기만 하면 그만두게 된다. x5·x9번째가 어려운 판이고 그 바로 다음 판은 풀어 준다.
+    for (let n = 45; n < LAST_SCHEDULED; n++) {
+      if (tierFor(n) !== 'hard' && tierFor(n) !== 'super') continue;
+      if (tierFor(n + 1) === 'intro') continue;
       expect(targetWinRate(n + 1), `레벨 ${n}→${n + 1}`).toBeGreaterThan(targetWinRate(n));
     }
   });
 
-  it('주기마다 10번째 판이 가장 어렵다', () => {
-    for (let start = 31; start + 9 <= LAST_SCHEDULED; start += 10) {
-      const rates = Array.from({ length: 9 }, (_, i) => start + i)
-        .filter(n => tierFor(n) !== 'intro')
+  it('59판부터 주기마다 x9번째 판이 가장 어렵다', () => {
+    for (let start = 60; start + 9 <= LAST_SCHEDULED; start += 10) {
+      const others = Array.from({ length: 10 }, (_, i) => start + i)
+        .filter(n => n % 10 !== 9 && tierFor(n) !== 'intro')
         .map(targetWinRate);
-      expect(targetWinRate(start + 9), `레벨 ${start + 9}`).toBeLessThan(Math.min(...rates));
+      const superLevel = start + 9;
+      expect(tierFor(superLevel), `레벨 ${superLevel}`).toBe('super');
+      expect(targetWinRate(superLevel), `레벨 ${superLevel}`).toBeLessThan(Math.min(...others));
     }
   });
 
-  it('처음 나오는 요소는 어려운 판에 섞이지 않는다', () => {
+  it('처음 나오는 요소는 어려운 자리(x5·x9)에 오지 않는다', () => {
     for (let n = 1; n <= LAST_SCHEDULED; n++) {
       if (tierFor(n) !== 'intro') continue;
-      expect(n % 5, `레벨 ${n}`).not.toBe(0);
+      expect([5, 9]).not.toContain(n % 10);
     }
+  });
+
+  it('판 모양이 최근 판들과 겹치지 않는다', () => {
+    // 레퍼런스처럼 거의 매 판 생김새가 달라야 한다
+    const keys = Array.from({ length: 300 }, (_, i) => maskKey(recipeFor(i + 1).mask!));
+    for (let n = 4; n <= 300; n++) {
+      const recent = keys.slice(Math.max(0, n - 61), n - 1);
+      expect(recent, `레벨 ${n}`).not.toContain(keys[n - 1]);
+    }
+  });
+
+  it('판당 장애물 종류가 뒤로 갈수록 는다', () => {
+    const avg = (from: number, to: number) => {
+      let sum = 0;
+      for (let n = from; n <= to; n++) sum += recipeFor(n).elements.length;
+      return sum / (to - from + 1);
+    };
+    expect(avg(101, 200)).toBeGreaterThan(avg(11, 50));
+    expect(avg(101, 200)).toBeGreaterThanOrEqual(2.8);
   });
 });
 

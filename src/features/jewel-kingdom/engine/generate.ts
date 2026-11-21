@@ -3,6 +3,7 @@ import type { Goal } from './goals';
 import type { Level, TurnEndEffect } from './level';
 import { measureDifficulty } from '../bot/bot';
 import type { Rng } from './rng';
+import { patternCells, zoneRows, type Mask, type Pattern, type Zone } from './layouts';
 
 /**
  * 레벨 생성기.
@@ -27,10 +28,30 @@ export interface Recipe {
   /** 쓸 색 수. 적을수록 쉽다 - 난이도를 가장 크게 좌우한다 */
   colors: number;
   shape: ShapeKind;
+  /**
+   * 조각한 판 모양(layouts.ts sculptMask). 있으면 shape 대신 이걸 쓴다.
+   * 크기는 mask 크기를 따른다.
+   */
+  mask?: Mask;
   /** 심을 요소들. 카탈로그 id를 쓴다 */
-  elements: { id: string; count: number; layers?: number }[];
+  elements: RecipeElement[];
   /** 장애물이 없을 때 쓸 색 목표의 수량 */
   colorGoal?: number;
+}
+
+export interface RecipeElement {
+  id: string;
+  count: number;
+  layers?: number;
+  /** 배치 무늬. 없으면 흩뿌린다 */
+  pattern?: Pattern;
+  /** 놓을 구역(위·가운데·아래). 요소 자체의 제약(그릇은 맨 아랫줄 등)이 먼저다 */
+  zone?: Zone;
+  /**
+   * 목표로 걸까. false면 길을 막기만 하는 장애물이다 - 레퍼런스처럼 "목표물을 감싼
+   * 상자를 뚫어야 목표에 닿는" 판을 만들 때 쓴다. 기본은 목표.
+   */
+  goal?: boolean;
 }
 
 export interface FitOptions {
@@ -91,16 +112,19 @@ interface Placement {
   def: ElementDef;
   layers: number;
   cells: [number, number][];
+  goal: boolean;
 }
 
 /** 판을 흔들어 요소를 심는다. 같은 시드면 같은 판이 나온다. */
 function place(recipe: Recipe, rng: Rng): { grid: string[][]; placed: Placement[] } | null {
-  const { width: w, height: h } = recipe;
+  const w = recipe.mask ? recipe.mask[0].length : recipe.width;
+  const h = recipe.mask ? recipe.mask.length : recipe.height;
   const grid: string[][] = [];
   for (let r = 0; r < h; r++) {
     grid.push([]);
     for (let c = 0; c < w; c++) {
-      grid[r].push(inShape(recipe.shape, r, c, w, h) ? '.' : '_');
+      const inside = recipe.mask ? recipe.mask[r][c] : inShape(recipe.shape, r, c, w, h);
+      grid[r].push(inside ? '.' : '_');
     }
   }
 
@@ -114,19 +138,39 @@ function place(recipe: Recipe, rng: Rng): { grid: string[][]; placed: Placement[
     const layers = spec.layers ?? def.layers ?? 1;
     const zone = zoneOf(def, h);
     const { layer } = elementLayer(def);
-
-    const free: [number, number][] = [];
-    for (let r = zone.from; r <= zone.to; r++) {
-      for (let c = 0; c < w; c++) {
-        if (grid[r]?.[c] !== '.' || taken.has(`${r},${c}`)) continue;
-        free.push([r, c]);
+    // 구역은 요소 자체의 제약(그릇은 맨 아랫줄 등)이 없을 때만 좁힌다
+    const free0 = (from: number, to: number) => {
+      const out: [number, number][] = [];
+      for (let r = from; r <= to; r++) {
+        for (let c = 0; c < w; c++) {
+          if (grid[r]?.[c] !== '.' || taken.has(`${r},${c}`)) continue;
+          // 그릇은 같은 열 맨 위에 관이 붙어야 한다 - 맨 윗칸이 판 밖이면 못 놓는다
+          if (layer === 'collector' && (grid[0][c] !== '.' || taken.has(`0,${c}`))) continue;
+          out.push([r, c]);
+        }
       }
+      return out;
+    };
+    let free = free0(zone.from, zone.to);
+    const special = layer === 'collector' || layer === 'spawner' || def.hook === 'golem';
+    if (!special && spec.zone && spec.zone !== 'any') {
+      const z = zoneRows(spec.zone, h);
+      const narrowed = free0(Math.max(zone.from, z.from), Math.min(zone.to, z.to));
+      if (narrowed.length >= spec.count) free = narrowed;
     }
     if (free.length < spec.count) return null;
 
+    // 무늬대로 고른다(그릇·투입구·골렘은 자리 규칙이 따로 있어 흩뿌린다)
+    const chosen: [number, number][] =
+      !special && spec.pattern
+        ? patternCells(spec.pattern, free, w, h, spec.count, rng, placed.flatMap(p => (p.goal ? p.cells : [])))
+        : [];
+    const total = chosen.length > 0 ? chosen.length : spec.count;
+
     const cells: [number, number][] = [];
-    for (let i = 0; i < spec.count; i++) {
-      const [r, c] = free.splice(rng.int(free.length), 1)[0];
+    for (let i = 0; i < total; i++) {
+      const [r, c] = chosen.length > 0 ? chosen[i] : free.splice(rng.int(free.length), 1)[0];
+      if (taken.has(`${r},${c}`)) continue;
       grid[r][c] = layers > 1 ? `[${def.id}:${layers}]` : `[${def.id}]`;
       taken.add(`${r},${c}`);
       cells.push([r, c]);
@@ -138,7 +182,8 @@ function place(recipe: Recipe, rng: Rng): { grid: string[][]; placed: Placement[
         taken.add(`0,${c}`);
       }
     }
-    placed.push({ def, layers, cells });
+    if (cells.length === 0) return null;
+    placed.push({ def, layers, cells, goal: spec.goal !== false });
   }
 
   return { grid, placed };
@@ -157,6 +202,8 @@ function goalsFrom(placed: Placement[], recipe: Recipe): Goal[] {
   const goals: Goal[] = [];
 
   for (const p of placed) {
+    // 길만 막는 장애물은 목표로 걸지 않는다
+    if (!p.goal) continue;
     const { layer, kind } = elementLayer(p.def);
     const n = p.cells.length;
 
@@ -175,7 +222,7 @@ function goalsFrom(placed: Placement[], recipe: Recipe): Goal[] {
       const spreads = p.def.id === 'jelly';
       goals.push(
         spreads
-          ? { kind: 'spread', groundKind: kind, count: Math.round(recipe.width * recipe.height * 0.4) }
+          ? { kind: 'spread', groundKind: kind, count: Math.round(playableCells(recipe) * 0.4) }
           : { kind: 'ground', groundKind: kind, count: n * p.layers },
       );
     } else if (layer === 'collector') goals.push({ kind: 'collect', collectKind: kind, count: n });
@@ -187,6 +234,12 @@ function goalsFrom(placed: Placement[], recipe: Recipe): Goal[] {
     trimmed.push({ kind: 'color', color: 0, count: recipe.colorGoal ?? 25 });
   }
   return trimmed;
+}
+
+/** 판 안 칸 수(조각한 판이면 구멍을 뺀다) */
+function playableCells(recipe: Recipe): number {
+  if (!recipe.mask) return recipe.width * recipe.height;
+  return recipe.mask.reduce((s, row) => s + row.filter(Boolean).length, 0);
 }
 
 /** 심은 요소가 요구하는 턴 종료 훅 */

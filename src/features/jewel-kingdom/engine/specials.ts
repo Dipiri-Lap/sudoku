@@ -69,13 +69,18 @@ export interface Blast {
  * "목표물이 가장 많은 칸"이 어디인지는 레벨 목표에 달렸으므로 주입받는다 -
  * 엔진이 레벨을 알아서는 안 된다.
  */
-export type TargetScorer = (board: Board, row: number, col: number) => number;
+/**
+ * radius는 그 칸에 떨어져 터지는 범위다. 0이면 그 칸 하나(참새·제비·민들레 - 한 칸만 콕),
+ * 1이면 주변 3×3(개구리·수박폭탄·실어 나르는 짐). 한 칸만 치는 아이템을 3×3 점수로
+ * 고르면 "목표물 옆의 아무 블록"을 치게 돼서 목표물은 안 맞는다.
+ */
+export type TargetScorer = (board: Board, row: number, col: number, radius: number) => number;
 
-/** 목표를 모를 때의 기본값: 주변에 장애물·덮개가 많은 칸을 노린다. */
-export function defaultTargetScorer(board: Board, row: number, col: number): number {
+/** 목표를 모를 때의 기본값: 장애물·덮개가 많은 칸을 노린다. */
+export function defaultTargetScorer(board: Board, row: number, col: number, radius = 1): number {
   let score = 0;
-  for (let r = row - 1; r <= row + 1; r++) {
-    for (let c = col - 1; c <= col + 1; c++) {
+  for (let r = row - radius; r <= row + radius; r++) {
+    for (let c = col - radius; c <= col + radius; c++) {
       if (r < 0 || c < 0 || r >= board.height || c >= board.width) continue;
       const cell = at(board, r, c);
       if (cell.blocker) score += 2;
@@ -89,12 +94,16 @@ export function defaultTargetScorer(board: Board, row: number, col: number): num
  * 프로펠러의 목적지. 점수가 가장 높은 칸들 중 하나를 고른다.
  * rng를 주면 동점인 칸 중 무작위로, 안 주면 첫 번째로 고정한다
  * (봇이 수를 평가할 때 난수열을 건드리면 시드 재현성이 깨진다).
+ *
+ * 장애물 칸도 후보다 - 목표 장애물을 직접 쪼아야 한다(보석이 있는 칸만 보면
+ * 장애물 옆 보석을 치고 만다). 수집물(짐)은 폭발 면역이라 뺀다.
  */
 export function propellerDestination(
   board: Board,
   origin: Position,
   scorer: TargetScorer = defaultTargetScorer,
   rng?: Rng,
+  radius = 0,
 ): Position {
   let best: Position[] = [];
   let bestScore = -Infinity;
@@ -102,9 +111,10 @@ export function propellerDestination(
   for (let r = 0; r < board.height; r++) {
     for (let c = 0; c < board.width; c++) {
       const cell = at(board, r, c);
-      if (!isPlayable(cell) || !cell.gem) continue;
+      if (!cell.exists) continue;
+      if (!(isPlayable(cell) && cell.gem && !cell.gem.inert) && !cell.blocker) continue;
       if (r === origin.row && c === origin.col) continue;
-      const score = scorer(board, r, c);
+      const score = scorer(board, r, c, radius);
       if (score > bestScore) {
         bestScore = score;
         best = [{ row: r, col: c }];
@@ -317,11 +327,13 @@ export function expandSpecials(
   board: Board,
   seed: Set<string>,
   options: ExpandOptions = {},
-): { cells: Set<string>; blasts: Blast[]; blastCells: Set<string> } {
+): { cells: Set<string>; blasts: Blast[]; blastCells: Set<string>; blastBlockers: Set<string> } {
   const lightballTarget = options.lightballTarget ?? null;
   const cells = new Set(seed);
   // 폭발로 딸려 들어온 칸만 따로 센다 - "아이템으로만 부서지는" 장애물 판정에 쓴다.
   const blastCells = new Set<string>();
+  // 범위 안에 든 장애물 칸. 보석이 없어 cells에는 못 들지만 직접 한 번 맞는다(applyDamage)
+  const blastBlockers = new Set<string>();
   const blasts: Blast[] = [];
   const queue = [...seed];
 
@@ -337,7 +349,17 @@ export function expandSpecials(
       kind === 'lightball' ? lightballTarget ?? pickLightballColor(board, options.rng) : null;
     const destination =
       kind === 'propeller'
-        ? propellerDestination(board, { row, col }, options.targetScorer, options.rng)
+        ? propellerDestination(
+            board,
+            { row, col },
+            // 출발할 때 이미 십자를 날리므로, 십자 안의 칸을 또 노리면 헛방이다
+            (b, r, c, rad) =>
+              Math.abs(r - row) + Math.abs(c - col) <= 1
+                ? -Infinity
+                : (options.targetScorer ?? defaultTargetScorer)(b, r, c, rad),
+            options.rng,
+            0,
+          )
         : undefined;
     const destinations = destinationsFor(board, { row, col }, kind, options);
     blasts.push({
@@ -352,7 +374,10 @@ export function expandSpecials(
     blastArea(board, row, col, kind, targetColor, destination ?? null, destinations).forEach(nk => {
       const p = parseKey(nk);
       const target = at(board, p.row, p.col);
-      if (!isPlayable(target)) return;
+      if (!isPlayable(target)) {
+        if (target.blocker) blastBlockers.add(nk);
+        return;
+      }
       // 수집물은 폭발에 면역이다. 없애버리면 그릇까지 보낼 것이 사라져
       // 진행이 날아가고, 수가 한정된 레벨은 아예 못 깨게 된다.
       // 폭발은 그 위를 지나가고 아래 보석만 치운다 - 오히려 길을 내준다.
@@ -364,7 +389,7 @@ export function expandSpecials(
     });
   }
 
-  return { cells, blasts, blastCells };
+  return { cells, blasts, blastCells, blastBlockers };
 }
 
 /** 목표를 노리고 날아가는 아이템이 몇 곳을 치는가 (프로펠러는 따로 처리한다) */
@@ -386,12 +411,14 @@ export function destinationsFor(
   options: ExpandOptions = {},
 ): Position[] {
   const count = DESTINATION_COUNT[kind] ?? 0;
+  // 개구리·수박폭탄은 떨어진 자리 3×3이 터지므로 주변까지 보고, 제비·민들레는 그 칸만 본다
+  const radius = kind === 'ladybug' || kind === 'watermelon' ? 1 : 0;
   const taken = new Set<string>();
   const out: Position[] = [];
   for (let i = 0; i < count; i++) {
-    const scorer: TargetScorer = (b, r, c) =>
-      taken.has(key(r, c)) ? -Infinity : (options.targetScorer ?? defaultTargetScorer)(b, r, c);
-    const dest = propellerDestination(board, origin, scorer, options.rng);
+    const scorer: TargetScorer = (b, r, c, rad) =>
+      taken.has(key(r, c)) ? -Infinity : (options.targetScorer ?? defaultTargetScorer)(b, r, c, rad);
+    const dest = propellerDestination(board, origin, scorer, options.rng, radius);
     if (dest.row === origin.row && dest.col === origin.col) break; // 더 노릴 칸이 없다
     if (taken.has(key(dest.row, dest.col))) break;
     taken.add(key(dest.row, dest.col));
@@ -560,6 +587,8 @@ export interface ComboOutcome {
   /** 즉시 삭제 대상 */
   cells: Set<string>;
   blasts: Blast[];
+  /** 범위 안에 든 장애물 칸 - 직접 한 번 맞는다(참새 떼가 장애물을 쪼는 등) */
+  hits: Set<string>;
 }
 
 /**
@@ -589,11 +618,15 @@ export function applyCombo(
   board = consumed;
 
   const cells = new Set<string>();
+  const hits = new Set<string>();
   const blasts: Blast[] = [];
   const push = (r: number, c: number) => {
     if (r < 0 || c < 0 || r >= board.height || c >= board.width) return;
     const target = at(board, r, c);
-    if (!isPlayable(target)) return;
+    if (!isPlayable(target)) {
+      if (target.blocker) hits.add(key(r, c));
+      return;
+    }
     if (target.gem?.inert) return; // 수집물은 폭발에 면역(SPEC 6.24)
     cells.add(key(r, c));
   };
@@ -611,7 +644,7 @@ export function applyCombo(
       }
       blasts.push({ row: origin.row, col: origin.col, kind: 'rocket-h' });
       blasts.push({ row: origin.row, col: origin.col, kind: 'rocket-v' });
-      return { board, cells, blasts };
+      return { board, cells, blasts, hits };
     }
 
     case 'radius': {
@@ -619,7 +652,7 @@ export function applyCombo(
         for (let c = origin.col - combo.radius; c <= origin.col + combo.radius; c++) push(r, c);
       }
       blasts.push({ row: origin.row, col: origin.col, kind: 'tnt' });
-      return { board, cells, blasts };
+      return { board, cells, blasts, hits };
     }
 
     case 'transform': {
@@ -627,7 +660,7 @@ export function applyCombo(
       // 단독 발동(라이트볼 + 평범한 보석)이 "스왑한 상대 색"을 노리는 것과 달리
       // 합체는 "보드에서 가장 많은 색"을 노린다 - 헷갈리기 쉬운 지점이다.
       const target = mostCommonColor(board);
-      if (target === null) return { board, cells, blasts };
+      if (target === null) return { board, cells, blasts, hits };
 
       const next: Board = { ...board, cells: board.cells.map(c => ({ ...c })) };
       let turned = 0;
@@ -646,11 +679,12 @@ export function applyCombo(
           turned++;
         }
       }
-      return { board: next, cells, blasts };
+      return { board: next, cells, blasts, hits };
     }
 
     case 'carry': {
-      const dest = propellerDestination(board, origin, options.targetScorer, options.rng);
+      // 실어 나르는 짐은 도착 자리에서 넓게 터지므로 주변까지 보고 고른다
+      const dest = propellerDestination(board, origin, options.targetScorer, options.rng, 1);
       // 실은 아이템이 또 목표를 노리는 종류(수박폭탄)면 도착 지점에서 다시 고른다.
       const payloadDests = destinationsFor(board, dest, combo.payload, options);
       blastArea(board, dest.row, dest.col, combo.payload, null, null, payloadDests).forEach(k => {
@@ -659,7 +693,7 @@ export function applyCombo(
       });
       blasts.push({ row: origin.row, col: origin.col, kind: 'propeller', destination: dest });
       blasts.push({ row: dest.row, col: dest.col, kind: combo.payload });
-      return { board, cells, blasts };
+      return { board, cells, blasts, hits };
     }
 
     case 'swarm': {
@@ -671,17 +705,17 @@ export function applyCombo(
       // 목적지가 겹치지 않도록 이미 고른 칸은 후보에서 뺀다.
       const taken = new Set<string>();
       for (let i = 0; i < combo.count; i++) {
-        const scorer: TargetScorer = (b, r, c) =>
+        const scorer: TargetScorer = (b, r, c, rad) =>
           taken.has(key(r, c))
             ? -Infinity
-            : (options.targetScorer ?? defaultTargetScorer)(b, r, c);
-        const dest = propellerDestination(board, origin, scorer, options.rng);
+            : (options.targetScorer ?? defaultTargetScorer)(b, r, c, rad);
+        const dest = propellerDestination(board, origin, scorer, options.rng, 0);
         taken.add(key(dest.row, dest.col));
         // 프로펠러 하나당 목표 한 칸. 십자는 출발 자리에서 한 번만 일어난다.
         push(dest.row, dest.col);
         blasts.push({ row: origin.row, col: origin.col, kind: 'propeller', destination: dest });
       }
-      return { board, cells, blasts };
+      return { board, cells, blasts, hits };
     }
 
     case 'clear-board': {
@@ -689,7 +723,7 @@ export function applyCombo(
         for (let c = 0; c < board.width; c++) push(r, c);
       }
       blasts.push({ row: origin.row, col: origin.col, kind: 'lightball' });
-      return { board, cells, blasts };
+      return { board, cells, blasts, hits };
     }
   }
 }

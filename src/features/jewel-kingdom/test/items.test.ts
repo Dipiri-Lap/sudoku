@@ -7,9 +7,10 @@ import {
   expandSpecials,
   findCombo,
 } from '../engine/specials';
-import { resolveTurn } from '../engine/resolve';
+import { activateAt, resolveTurn } from '../engine/resolve';
 import { makeRng } from '../engine/rng';
 import { SKILLS, plantSkill } from '../engine/skills';
+import { goalTargetScorer } from '../engine/goals';
 import type { SpecialKind } from '../engine/types';
 
 const FILLER = `
@@ -147,3 +148,61 @@ function suffix(kind: SpecialKind): string {
     kind as 'sickle'
   ];
 }
+
+describe('참새류 목표 고르기', () => {
+  // 장애물(상자)은 보석이 없는 칸이다. 예전에는 보석 칸만 후보라 상자 "옆" 보석을 쪼았다.
+  const withBoxes = () => {
+    const board = parseBoard(FILLER);
+    at(board, 0, 6).blocker = { kind: 'box', layers: 1 };
+    at(board, 0, 6).gem = null;
+    at(board, 6, 0).blocker = { kind: 'box', layers: 1 };
+    at(board, 6, 0).gem = null;
+    return board;
+  };
+  const boxGoal = goalTargetScorer([{ kind: 'blocker', blockerKind: 'box', count: 2 }]);
+  const isBox = (p: { row: number; col: number }) =>
+    (p.row === 0 && p.col === 6) || (p.row === 6 && p.col === 0);
+
+  it('참새는 목표 장애물 칸을 직접 노린다', () => {
+    const board = withBoxes();
+    const gem = at(board, 0, 3).gem!;
+    at(board, 0, 3).gem = { ...gem, special: 'propeller' };
+    const { blasts, blastBlockers } = expandSpecials(board, new Set([key(0, 3)]), {
+      targetScorer: boxGoal,
+      rng: makeRng(3),
+    });
+    expect(blasts[0].kind).toBe('propeller');
+    const d = blasts[0].destination!;
+    expect(isBox(d)).toBe(true);
+    expect(blastBlockers.has(key(d.row, d.col))).toBe(true);
+  });
+
+  it('참새가 쪼면 옆에 터지는 칸이 없어도 그 장애물이 깨진다', () => {
+    // 상자 하나만 판 구석에 두면 참새가 거기로 간다. 구석 상자 옆 칸은 참새 범위 밖이다.
+    const board = parseBoard(FILLER);
+    at(board, 6, 6).blocker = { kind: 'box', layers: 1 };
+    at(board, 6, 6).gem = null;
+    const gem = at(board, 0, 0).gem!;
+    at(board, 0, 0).gem = { ...gem, special: 'propeller' };
+    const result = activateAt(board, { row: 0, col: 0 }, makeRng(4), {
+      targetScorer: goalTargetScorer([{ kind: 'blocker', blockerKind: 'box', count: 1 }]),
+    });
+    const clear = result.steps.find(s => s.kind === 'clear');
+    expect(clear && clear.kind === 'clear' && clear.damage.some(e => e.key === '6,6' && e.destroyed)).toBe(true);
+  });
+
+  it('제비 두 마리는 목표 장애물 둘을 하나씩 노린다', () => {
+    const dests = destinationsFor(withBoxes(), { row: 3, col: 3 }, 'butterfly', { targetScorer: boxGoal, rng: makeRng(1) });
+    expect(dests.length).toBe(2);
+    expect(dests.every(isBox)).toBe(true);
+  });
+
+  it('색 목표 판에서 민들레는 목표 색 블록만 콕콕 친다', () => {
+    const board = parseBoard(FILLER);
+    const colorGoal = goalTargetScorer([{ kind: 'color', color: 0, count: 10 }]);
+    const dests = destinationsFor(board, { row: 3, col: 3 }, 'dandelion', { targetScorer: colorGoal, rng: makeRng(2) });
+    // 출발 칸(3,3)도 빨강이라 후보에서 빠진다
+    const reds = board.cells.filter(c => c.gem?.color === 0).length - (at(board, 3, 3).gem?.color === 0 ? 1 : 0);
+    dests.slice(0, reds).forEach(d => expect(at(board, d.row, d.col).gem?.color).toBe(0));
+  });
+});

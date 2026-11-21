@@ -60,9 +60,9 @@ function main() {
       { recipe: lighterRecipe(base, 2), shift: -0.08 },
       { recipe: lighterRecipe(base, 3), shift: -0.15 },
       // 모양 있는 판(다이아몬드 등)은 칸이 적어서 재료가 많으면 판이 거의 막힌다 - 사각형으로
-      { recipe: { ...base, shape: 'full' as const }, shift: 0 },
-      { recipe: { ...lighterRecipe(base, 1), shape: 'full' as const }, shift: -0.08 },
-      { recipe: { ...lighterRecipe(base, 3), shape: 'full' as const }, shift: -0.15 },
+      { recipe: { ...base, shape: 'full' as const, mask: undefined }, shift: 0 },
+      { recipe: { ...lighterRecipe(base, 1), shape: 'full' as const, mask: undefined }, shift: -0.08 },
+      { recipe: { ...lighterRecipe(base, 3), shape: 'full' as const, mask: undefined }, shift: -0.15 },
     ];
     let g: Generated | null = null;
     let target = targetWinRate(n);

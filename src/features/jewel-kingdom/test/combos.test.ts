@@ -168,8 +168,9 @@ describe('프로펠러 + X = 싣고 날아간다', () => {
     expect(flights).toHaveLength(3);
     const spots = new Set(flights.map(f => `${f.destination!.row},${f.destination!.col}`));
     expect(spots.size).toBe(3);
-    // 목적지마다 한 칸씩
-    spots.forEach(k => expect(clear!.cells).toContain(k));
+    // 목표물(장애물)을 직접 하나씩 친다. 장애물 칸은 보석 칸이 아니라 피해 목록에 든다.
+    expect([...spots].sort()).toEqual(['0,0', '0,8', '8,8']);
+    spots.forEach(k => expect(clear!.damage.some(e => e.key === k)).toBe(true));
   });
 });
 

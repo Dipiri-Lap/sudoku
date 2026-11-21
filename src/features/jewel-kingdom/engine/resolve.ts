@@ -159,6 +159,7 @@ export function resolveTurn(
         a,
         b,
         comboBlasts: outcome.blasts,
+        comboHits: outcome.hits,
       });
     }
   }
@@ -222,7 +223,7 @@ function cascade(
   steps: TurnStep[],
   options: ResolveOptions,
   rng: Rng,
-  revert?: { a: Position; b: Position; comboBlasts?: Blast[] },
+  revert?: { a: Position; b: Position; comboBlasts?: Blast[]; comboHits?: Set<string> },
 ): TurnResult {
   const colors = options.colors ?? COLOR_COUNT;
   const maxCascades = options.maxCascades ?? 50;
@@ -284,7 +285,10 @@ function cascade(
       current = markSpecials(current, spawned);
 
       // 장애물·덮개 피해. 덮개가 막아준 칸은 보석이 살아남으므로 삭제 대상에서 뺀다.
-      const damage = applyDamage(current, cells, blastCells);
+      // 범위 안의 장애물 칸은 직접 한 번 맞는다(합체 첫 단계면 합체가 친 장애물도)
+      const directHits = new Set(expanded.blastBlockers);
+      if (combo === 1) revert?.comboHits?.forEach(k => directHits.add(k));
+      const damage = applyDamage(current, cells, blastCells, directHits);
       current = damage.board;
       damage.shielded.forEach(k => cells.delete(k));
       turnDamage.push(...damage.events);

@@ -161,10 +161,10 @@ function touchesGround(board: Board, row: number, col: number, kind: string): bo
 }
 
 export function goalTargetScorer(goals: Goal[]): TargetScorer {
-  return (board, row, col) => {
+  return (board, row, col, radius = 1) => {
     let score = 0;
-    for (let r = row - 1; r <= row + 1; r++) {
-      for (let c = col - 1; c <= col + 1; c++) {
+    for (let r = row - radius; r <= row + radius; r++) {
+      for (let c = col - radius; c <= col + radius; c++) {
         if (r < 0 || c < 0 || r >= board.height || c >= board.width) continue;
         const cell = at(board, r, c);
         goals.forEach(goal => {
