@@ -159,14 +159,21 @@ const NEIGHBORS = [
  *   참새가 목표 장애물을 쪼는 경우가 대표적이다 - 이게 없으면 장애물을 노려 날아가도
  *   옆 칸 보석이 없는 한 아무 일도 일어나지 않는다. 한 번의 clear에서 최대 한 겹이라는
  *   규칙(hitOnce)은 그대로라, 옆 칸 타격과 겹쳐도 두 번 깎이지 않는다.
+ *
+ * @param reborn 매치에 들었지만 새 아이템으로 남는 칸. 보석은 안 사라져도 매치는 일어났으므로
+ *   바닥(잔디 등)은 다른 매치 칸처럼 벗겨지고 번진다. 이게 빠지면 아이템 밑에 잔디가
+ *   숨어 남아 "목표는 남았는데 판에 안 보이는" 상태가 된다.
  */
 export function applyDamage(
   board: Board,
   cleared: Set<string>,
   blastCells: Set<string> = new Set(),
   directHits: Set<string> = new Set(),
+  reborn: Set<string> = new Set(),
 ): DamageResult {
   const next = cloneBoard(board);
+  /** 바닥이 반응하는 칸: 터진 칸 + 아이템으로 다시 태어난 칸 */
+  const matchedGround = new Set([...cleared, ...reborn]);
   const shielded = new Set<string>();
   const events: DamageEvent[] = [];
 
@@ -191,7 +198,7 @@ export function applyDamage(
   // 2. 바닥: 그 칸에서 보석이 실제로 터져야 한 겹 벗겨진다.
   //    덮개가 막아준 칸은 보석이 안 터졌으므로 바닥도 그대로다.
   //    옆에서 터뜨리는 걸로 되는 장애물과 다른 점이다.
-  cleared.forEach(k => {
+  matchedGround.forEach(k => {
     if (shielded.has(k)) return;
     const { row, col } = parseKey(k);
     const cell = at(next, row, col);
@@ -205,7 +212,7 @@ export function applyDamage(
   //
   //  판정을 원본(board)에서 읽는 이유: 이번에 새로 번진 칸을 다시 씨앗으로 삼으면
   //  한 수에 판을 가로질러 퍼진다. 한 번의 매치는 한 칸만 넓힌다.
-  cleared.forEach(k => {
+  matchedGround.forEach(k => {
     if (shielded.has(k)) return;
     const { row, col } = parseKey(k);
     if (at(next, row, col).ground) return;

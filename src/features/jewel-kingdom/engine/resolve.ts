@@ -288,7 +288,8 @@ function cascade(
       // 범위 안의 장애물 칸은 직접 한 번 맞는다(합체 첫 단계면 합체가 친 장애물도)
       const directHits = new Set(expanded.blastBlockers);
       if (combo === 1) revert?.comboHits?.forEach(k => directHits.add(k));
-      const damage = applyDamage(current, cells, blastCells, directHits);
+      const reborn = new Set(spawned.map(s => s.key));
+      const damage = applyDamage(current, cells, blastCells, directHits, reborn);
       current = damage.board;
       damage.shielded.forEach(k => cells.delete(k));
       turnDamage.push(...damage.events);

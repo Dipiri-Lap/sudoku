@@ -201,3 +201,20 @@ describe('합체가 아닌 경우', () => {
     expect(clear!.cells).toContain('4,5');
   });
 });
+
+describe('아이템이 생기는 칸의 바닥', () => {
+  it('매치로 아이템이 생긴 칸의 잔디도 벗겨진다', () => {
+    // 가운데 R을 내려 5개 매치 - 그 자리엔 아이템이 생기지만 잔디는 남으면 안 된다
+    // (남으면 아이템 그림에 가려 "목표는 남았는데 판에 잔디가 없는" 상태가 된다)
+    const board = parseBoard(`
+      G B Y G B
+      B Y R B Y
+      R^ R^ B^ R^ R^
+      Y G Y G B
+      G B G Y G
+    `);
+    const { result } = combine(board, [1, 2], [2, 2]);
+    expect(result.valid).toBe(true);
+    for (let c = 0; c < 5; c++) expect(at(result.board, 2, c).ground).toBeNull();
+  });
+});

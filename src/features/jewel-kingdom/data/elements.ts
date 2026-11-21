@@ -105,7 +105,7 @@ export const ELEMENTS: ElementDef[] = [
     note: '옆에서 두 번 매치하면 깨진다. 다 깨면 보물지도가 완성된다',
     apply: blocker('bottle'),
   },
-  { id: 'ice', label: '얼음', category: 'blocker', layers: 3, verified: true, note: '칸을 막는다. 옆에서 매치하거나 아이템으로 때리면 한 겹씩 깎인다', apply: blocker('ice') },
+  { id: 'ice', label: '돌', category: 'blocker', layers: 3, verified: true, note: '칸을 막는다. 옆 매치는 안 통하고 아이템으로 때려야 한 겹씩 깎인다(나무상자와 구분되는 성격)', apply: blocker('ice', { powerUpOnly: true }) },
   { id: 'crate', label: '나무상자', category: 'blocker', layers: 3, verified: true, note: '판자가 여러 겹이라 여러 번 때려야 한다', apply: blocker('crate-heavy') },
   { id: 'log', label: '통나무', category: 'blocker', verified: false, note: '아래로 떨어뜨려 판 밖으로 빼낸다', apply: blocker('crate', { fallsOut: true }) },
   { id: 'barrel', label: '통', category: 'blocker', layers: 3, verified: true, note: '세 번 때리면 주변까지 크게 터진다', apply: blocker('barrel', { explodes: 1 }) },

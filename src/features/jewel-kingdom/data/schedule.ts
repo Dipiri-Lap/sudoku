@@ -57,7 +57,7 @@ const INTRODUCTIONS: Introduction[] = [
   { at: 4, id: 'grass', count: 10 },
   { at: 7, id: 'crate', count: 3, layers: 2 },
   { at: 10, id: 'honey', count: 6 },
-  { at: 13, id: 'ice', count: 4, layers: 2 },
+  { at: 13, id: 'ice', count: 3 }, // 돌: 아이템으로만 깨지므로 처음엔 한 겹
   { at: 17, id: 'shelf', count: 3, max: 4, layers: 2 },
   { at: 21, id: 'golem', count: 1, max: 1, layers: 4 },
   { at: 27, id: 'mushroom', count: 5 },
@@ -79,14 +79,15 @@ const INTRODUCTIONS: Introduction[] = [
  */
 const VARIANTS: { at: number; id: string; layers: number }[] = [
   { at: 114, id: 'crate', layers: 3 },
-  { at: 127, id: 'ice', layers: 3 },
+  { at: 127, id: 'ice', layers: 2 },
   { at: 141, id: 'bottle', layers: 3 },
   { at: 153, id: 'flowerpot', layers: 3 },
   { at: 167, id: 'barrel', layers: 4 },
 ];
 
 /** 길만 막는 장애물(목표 아님)로 쓸 수 있는 것: 흔한 상자·덮개류. 그릇·골렘 같은 장치는 뺀다 */
-const OBSTACLE_IDS = new Set(['box', 'crate', 'ice', 'barrel', 'honey', 'bottle', 'flowerpot', 'rubble', 'cloud']);
+// 돌(ice)은 아이템으로만 깨져서 길막이로 깔면 사실상 벽이 된다 - 목표로만 쓴다
+const OBSTACLE_IDS = new Set(['box', 'crate', 'barrel', 'honey', 'bottle', 'flowerpot', 'rubble', 'cloud']);
 
 /** 바닥(밑에 깔리는 것). 배치 무늬를 고를 때 쓴다 */
 const GROUND_IDS = new Set(['grass', 'soil', 'jelly']);

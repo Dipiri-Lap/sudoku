@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { at, cloneBoard, isCellSwappable, emptyCell, isAdjacent, key, makeGem } from '../engine/board';
 import { activateAt, hasAnyMove, listMoves, resolveTurn, activateBooster, activateSkill } from '../engine/resolve';
@@ -31,7 +31,7 @@ const HAND_OFFSET = GENERATED_LEVELS.length;
 const TEST_OFFSET = GENERATED_LEVELS.length + LEVELS.length;
 
 const TIER_BADGE: Record<string, string> = { hard: '어려운 판', super: '아주 어려운 판' };
-import type { GemColor, Position } from '../engine/types';
+import type { Board, GemColor, Position } from '../engine/types';
 import SandboxPalette, { type PaintTool } from './SandboxPalette';
 import {
   BlockerSprite,
@@ -771,6 +771,7 @@ const JewelKingdomGame: React.FC = () => {
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
         >
+          <BoardOutline board={view.board} />
           {cells}
           <FxLayer
             step={view.step}
@@ -849,3 +850,33 @@ const JewelKingdomGame: React.FC = () => {
 };
 
 export default JewelKingdomGame;
+
+/**
+ * 판 칸 모양을 따라가는 얇은 나무 테두리.
+ *
+ * 그리는 법: 칸보다 조금 큰 나무색 사각형을 모든 칸에 깔고, 그 위에 칸 크기의 흙색
+ * 사각형을 덮는다. 겹친 안쪽은 지워지고 바깥 윤곽에만 테가 남는다 - 모서리를 따로
+ * 계산하지 않아도 오목·볼록 모서리가 다 맞는다. 칸(.jk-plate)보다 먼저 그려 밑에 깔린다.
+ */
+function BoardOutline({ board }: { board: Board }) {
+  const shape = board.cells.map(c => (c.exists ? '1' : '0')).join('');
+  const w = board.width;
+  return useMemo(() => {
+    const n = w;
+    const live: [number, number][] = [];
+    [...shape].forEach((ch, i) => ch === '1' && live.push([Math.floor(i / w), i % w]));
+    // 테 두께(칸 크기 대비). 바깥 진한 선 + 안쪽 밝은 나무결
+    const outer = 0.07;
+    const inner = 0.045;
+    const rect = (r: number, c: number, o: number, fill: string, k: string) => (
+      <rect key={k} x={c - o} y={r - o} width={1 + o * 2} height={1 + o * 2} rx={o} fill={fill} />
+    );
+    return (
+      <svg className="jk-outline" viewBox={`0 0 ${n} ${n}`} preserveAspectRatio="none" aria-hidden>
+        {live.map(([r, c]) => rect(r, c, outer, '#5b3514', `o${r},${c}`))}
+        {live.map(([r, c]) => rect(r, c, inner, '#c98a4a', `i${r},${c}`))}
+        {live.map(([r, c]) => rect(r, c, 0, '#3a2314', `b${r},${c}`))}
+      </svg>
+    );
+  }, [shape, w]);
+}

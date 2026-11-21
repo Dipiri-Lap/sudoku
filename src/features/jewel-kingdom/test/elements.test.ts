@@ -157,3 +157,13 @@ describe('확인이 남은 것들', () => {
     expect(elementById('없는것')).toBeUndefined();
   });
 });
+
+describe('돌(ice)', () => {
+  // 나무상자와 규칙이 같으면 "새 장애물"이 그림만 다른 셈이라 아이템 전용으로 구분한다
+  it('옆 매치로는 안 깎이고 아이템 폭발로만 깎인다', () => {
+    const board = parseBoard('[ice:2] R R R');
+    const cleared = new Set(['0,1', '0,2', '0,3']);
+    expect(at(applyDamage(board, cleared).board, 0, 0).blocker?.layers).toBe(2);
+    expect(at(applyDamage(board, cleared, cleared).board, 0, 0).blocker?.layers).toBe(1);
+  });
+});
