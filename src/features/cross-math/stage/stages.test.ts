@@ -3,7 +3,7 @@ import type { CrossMathLevel, GridCell } from '../utils/generator';
 import { decodeLevel } from './codec';
 import { stageLevel, TOTAL_STAGES, isMilestone, TRIPLE_FROM } from './schedule';
 import { extractEquations } from './board';
-import { DIFFICULTY_CONFIGS, type Difficulty } from '../utils/generator';
+import { DIFFICULTY_CONFIGS, analyzeBlanks, effectiveMaxOpen, type Difficulty } from '../utils/generator';
 
 import c1 from '../data/stages/stages-001-100.json';
 import c2 from '../data/stages/stages-101-200.json';
@@ -200,6 +200,29 @@ describe('사전 생성 스테이지 데이터', () => {
         }
       }
     }
+    expect(bad).toEqual([]);
+  });
+
+  it('바로 풀리는 출발점 수와 풀이 단계가 난이도 설정을 지킨다', () => {
+    const bad = stages.map(s => {
+      const cfg = DIFFICULTY_CONFIGS[`lv${stageLevel(s.stage)}` as Difficulty];
+      const eqs = extractEquations(s.level).map(e => e.numKeys);
+      const blanks = new Set(s.level.cells.filter(c => c.isBlank).map(c => `${c.row},${c.col}`));
+      const a = analyzeBlanks(eqs, blanks);
+      return { stage: s.stage, ...a, maxOpen: effectiveMaxOpen({ ...cfg, fullLineBias: isMilestone(s.stage) }), minDepth: cfg.minDepth };
+    }).filter(r => !r.solvable || r.open > (r.maxOpen ?? Infinity) || r.depth < (r.minDepth ?? 0)).slice(0, 10);
+    expect(bad).toEqual([]);
+  });
+
+  it('오답 타일은 설정한 개수만큼 있고 정답 값과 겹치지 않는다', () => {
+    const bad = stages.filter(s => {
+      const cfg = DIFFICULTY_CONFIGS[`lv${stageLevel(s.stage)}` as Difficulty];
+      const decoys = s.level.decoys ?? [];
+      const answers = new Set(s.level.cells.filter(c => c.isBlank).map(c => c.value));
+      return decoys.length !== (cfg.decoyCount ?? 0) ||
+        new Set(decoys).size !== decoys.length ||
+        decoys.some(d => answers.has(d) || !Number.isInteger(d) || d < 0);
+    }).map(s => s.stage).slice(0, 10);
     expect(bad).toEqual([]);
   });
 

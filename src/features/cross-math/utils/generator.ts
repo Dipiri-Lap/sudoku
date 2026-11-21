@@ -18,6 +18,8 @@ export interface CrossMathLevel {
   rows: number;
   cols: number;
   cells: GridCell[];
+  /** 타일 풀에 섞이는 오답 타일 값. 없으면 정답 타일만 나온다. */
+  decoys?: number[];
 }
 
 export type Difficulty =
@@ -53,6 +55,17 @@ export interface DifficultyConfig {
    * 25의 배수(관문) 스테이지에 쓴다.
    */
   fullLineBias?: boolean;
+  /**
+   * 판을 열자마자 계산 한 번으로 채울 수 있는 빈칸의 최대 개수 (풀이의 출발점 수).
+   * 예전에는 제한이 없어 빈칸의 절반이 처음부터 바로 풀렸다 — 쉬움의 주원인.
+   */
+  maxOpenStart?: number;
+  /** 풀이 단계(한 번에 풀리는 칸을 모두 채우는 것을 1단계) 최소 수 */
+  minDepth?: number;
+  /**
+   * 타일 풀에 섞을 오답 타일 수. 정답만 있으면 계산 없이 "남은 타일 맞추기"로 풀린다.
+   */
+  decoyCount?: number;
 }
 
 export const DIFFICULTIES: Difficulty[] = [
@@ -63,20 +76,25 @@ export const DIFFICULTIES: Difficulty[] = [
 // 식이 항상 짝수 칸씩 뻗어나가 경계 상자의 한 변이 홀수로 고정되기 때문에,
 // gridSize 에 10·11 을 줘도 결과는 9×9 가 된다. 그래서 9 / 12 / 13 만 쓴다.
 // 각 크기가 담을 수 있는 정답 개수(실측): 9×9 → 10개, 11×11 → 20개, 13×13 → 21개 이상.
+//
+// maxOpenStart / minDepth / decoyCount 는 2026-11 난이도 상향 때 추가했다.
+// 이전 데이터는 빈칸의 절반이 처음부터 바로 풀리고(풀이 4~6단계) 풀에 정답만 있어서
+// 후반에도 "타일 맞추기"로 풀린다는 피드백이 있었다.
+// 관문(25의 배수)은 부호만 남은 식 때문에 출발점 상한이 3으로 풀린다 — effectiveMaxOpen 참고.
 export const DIFFICULTY_CONFIGS: Record<Difficulty, DifficultyConfig> = {
-  lv1:  { level: 1,  label: '입문',       color: '#4ade80', desc: '9×9 · 덧셈·뺄셈 기초',   gridSize: 9,  equationCount: 14, numberRange: { min: 1, max: 9 },  factorRange: { min: 2, max: 6 },  maxResult: 18,  operators: ['+', '-'],               blankCount: 10 },
-  lv2:  { level: 2,  label: '쉬움',       color: '#34d399', desc: '11×11 · 조금 더 큰 수',    gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 12 }, factorRange: { min: 2, max: 6 },  maxResult: 24,  operators: ['+', '-'],               blankCount: 11 },
-  lv3:  { level: 3,  label: '초급',       color: '#38bdf8', desc: '11×11 · 곱셈 등장',        gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 15 }, factorRange: { min: 2, max: 9 },  maxResult: 60,  operators: ['+', '-', '×'],          blankCount: 12 },
-  lv4:  { level: 4,  label: '초중급',     color: '#60a5fa', desc: '11×11 · 더 큰 수',         gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 20 }, factorRange: { min: 2, max: 9 },  maxResult: 90,  operators: ['+', '-', '×'],          blankCount: 13 },
-  lv5:  { level: 5,  label: '중급',       color: '#818cf8', desc: '11×11 · 나눗셈 등장',      gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 20 }, factorRange: { min: 2, max: 9 },  maxResult: 100, operators: ['+', '-', '×', '÷'],     blankCount: 14 },
-  lv6:  { level: 6,  label: '중상급',     color: '#a78bfa', desc: '11×11 · 연산 종류 확대',   gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 30 }, factorRange: { min: 2, max: 9 },  maxResult: 130, operators: ['+', '-', '×', '÷'],     blankCount: 15 },
-  lv7:  { level: 7,  label: '상급',       color: '#fb923c', desc: '11×11 · 큰 숫자',        gridSize: 12, equationCount: 24, numberRange: { min: 1, max: 40 }, factorRange: { min: 2, max: 12 }, maxResult: 170, operators: ['+', '-', '×', '÷'],     blankCount: 16 },
-  lv8:  { level: 8,  label: '고급',       color: '#f87171', desc: '13×13 · 넓은 격자',      gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 50 }, factorRange: { min: 2, max: 12 }, maxResult: 220, operators: ['+', '-', '×', '÷'],     blankCount: 17 },
-  lv9:  { level: 9,  label: '전문가',     color: '#e879f9', desc: '13×13 · 고난도 조합',    gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 60 }, factorRange: { min: 2, max: 12 }, maxResult: 270, operators: ['+', '-', '×', '÷'],     blankCount: 18 },
-  lv10: { level: 10, label: '마스터',     color: '#f43f5e', desc: '13×13 · 최고 난이도',    gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 80 }, factorRange: { min: 3, max: 12 }, maxResult: 320, operators: ['+', '-', '×', '÷'],     blankCount: 19 },
-  lv11: { level: 11, label: '달인',       color: '#c084fc', desc: '13×13 · 초고난도',       gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 99 }, factorRange: { min: 3, max: 12 }, maxResult: 380, operators: ['+', '-', '×', '÷'],     blankCount: 20 },
-  lv12: { level: 12, label: '그랜드마스터', color: '#fb7185', desc: '13×13 · 극한 난이도',   gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 99 }, factorRange: { min: 3, max: 12 }, maxResult: 450, operators: ['+', '-', '×', '÷'],     blankCount: 21 },
-  lv13: { level: 13, label: '레전드',      color: '#38bdf8', desc: '13×13 · 관문 전용', gridSize: 13, equationCount: 34, numberRange: { min: 1, max: 99 }, factorRange: { min: 3, max: 12 }, maxResult: 520, operators: ['+', '-', '×', '÷'],     blankCount: 22 },
+  lv1:  { level: 1,  label: '입문',       color: '#4ade80', desc: '9×9 · 덧셈·뺄셈 기초',   gridSize: 9,  equationCount: 14, numberRange: { min: 1, max: 9 },  factorRange: { min: 2, max: 6 },  maxResult: 18,  operators: ['+', '-'],               blankCount: 10, maxOpenStart: 4, minDepth: 4, decoyCount: 0 },
+  lv2:  { level: 2,  label: '쉬움',       color: '#34d399', desc: '11×11 · 조금 더 큰 수',    gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 12 }, factorRange: { min: 2, max: 6 },  maxResult: 24,  operators: ['+', '-'],               blankCount: 11, maxOpenStart: 4, minDepth: 4, decoyCount: 1 },
+  lv3:  { level: 3,  label: '초급',       color: '#38bdf8', desc: '11×11 · 곱셈 등장',        gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 15 }, factorRange: { min: 2, max: 9 },  maxResult: 60,  operators: ['+', '-', '×'],          blankCount: 12, maxOpenStart: 3, minDepth: 5, decoyCount: 2 },
+  lv4:  { level: 4,  label: '초중급',     color: '#60a5fa', desc: '11×11 · 더 큰 수',         gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 20 }, factorRange: { min: 2, max: 9 },  maxResult: 90,  operators: ['+', '-', '×'],          blankCount: 13, maxOpenStart: 3, minDepth: 6, decoyCount: 2 },
+  lv5:  { level: 5,  label: '중급',       color: '#818cf8', desc: '11×11 · 나눗셈 등장',      gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 20 }, factorRange: { min: 2, max: 9 },  maxResult: 100, operators: ['+', '-', '×', '÷'],     blankCount: 14, maxOpenStart: 3, minDepth: 6, decoyCount: 3 },
+  lv6:  { level: 6,  label: '중상급',     color: '#a78bfa', desc: '11×11 · 연산 종류 확대',   gridSize: 12,  equationCount: 24, numberRange: { min: 1, max: 30 }, factorRange: { min: 2, max: 9 },  maxResult: 130, operators: ['+', '-', '×', '÷'],     blankCount: 15, maxOpenStart: 2, minDepth: 7, decoyCount: 3 },
+  lv7:  { level: 7,  label: '상급',       color: '#fb923c', desc: '11×11 · 큰 숫자',        gridSize: 12, equationCount: 24, numberRange: { min: 1, max: 40 }, factorRange: { min: 2, max: 12 }, maxResult: 170, operators: ['+', '-', '×', '÷'],     blankCount: 16, maxOpenStart: 2, minDepth: 8, decoyCount: 3 },
+  lv8:  { level: 8,  label: '고급',       color: '#f87171', desc: '13×13 · 넓은 격자',      gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 50 }, factorRange: { min: 2, max: 12 }, maxResult: 220, operators: ['+', '-', '×', '÷'],     blankCount: 17, maxOpenStart: 2, minDepth: 9, decoyCount: 4 },
+  lv9:  { level: 9,  label: '전문가',     color: '#e879f9', desc: '13×13 · 고난도 조합',    gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 60 }, factorRange: { min: 2, max: 12 }, maxResult: 270, operators: ['+', '-', '×', '÷'],     blankCount: 18, maxOpenStart: 2, minDepth: 10, decoyCount: 4 },
+  lv10: { level: 10, label: '마스터',     color: '#f43f5e', desc: '13×13 · 최고 난이도',    gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 80 }, factorRange: { min: 3, max: 12 }, maxResult: 320, operators: ['+', '-', '×', '÷'],     blankCount: 19, maxOpenStart: 2, minDepth: 11, decoyCount: 4 },
+  lv11: { level: 11, label: '달인',       color: '#c084fc', desc: '13×13 · 초고난도',       gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 99 }, factorRange: { min: 3, max: 12 }, maxResult: 380, operators: ['+', '-', '×', '÷'],     blankCount: 20, maxOpenStart: 2, minDepth: 12, decoyCount: 5 },
+  lv12: { level: 12, label: '그랜드마스터', color: '#fb7185', desc: '13×13 · 극한 난이도',   gridSize: 13, equationCount: 30, numberRange: { min: 1, max: 99 }, factorRange: { min: 3, max: 12 }, maxResult: 450, operators: ['+', '-', '×', '÷'],     blankCount: 21, maxOpenStart: 2, minDepth: 12, decoyCount: 5 },
+  lv13: { level: 13, label: '레전드',      color: '#38bdf8', desc: '13×13 · 관문 전용', gridSize: 13, equationCount: 34, numberRange: { min: 1, max: 99 }, factorRange: { min: 3, max: 12 }, maxResult: 520, operators: ['+', '-', '×', '÷'],     blankCount: 22, maxOpenStart: 3, minDepth: 14, decoyCount: 5 },
 };
 
 // ── 난수 유틸 ────────────────────────────────────────────────────────────────
@@ -653,7 +671,11 @@ function buildStructure(cfg: DifficultyConfig): { equations: PlacedEquation[]; o
 
 // ── 빈칸 선택: 순전파(propagation)로 유도 가능한 만큼만 빈칸으로 지정 ─────────
 
-function selectBlanks(equations: PlacedEquation[], occ: Map<string, OccInfo>, cfg: DifficultyConfig): Set<string> {
+function selectBlanks(
+  equations: PlacedEquation[],
+  occ: Map<string, OccInfo>,
+  cfg: DifficultyConfig
+): { blanks: Set<string>; open: number; depth: number; fullLines: number } {
   const numKeys = [...occ.entries()].filter(([, v]) => v.type === 'num').map(([k]) => k);
   const target = Math.min(cfg.blankCount, numKeys.length);
 
@@ -678,36 +700,160 @@ function selectBlanks(equations: PlacedEquation[], occ: Map<string, OccInfo>, cf
     return out;
   }
 
-  function isSolvable(candidate: Set<string>): boolean {
-    const unknown = new Set(candidate);
-    let progress = true;
-    while (progress && unknown.size > 0) {
-      progress = false;
-      for (const keys of eqKeySets) {
-        const unknownInEq = keys.filter(k => unknown.has(k));
-        if (unknownInEq.length === 1) {
-          unknown.delete(unknownInEq[0]);
-          progress = true;
-        }
-      }
-    }
-    return unknown.size === 0;
-  }
+  const maxOpen = effectiveMaxOpen(cfg);
 
   // 한 번의 탐욕 선택으로는 목표에 못 미치는 경우가 잦다(고른 순서에 따라 막힘).
-  // 순서를 바꿔 여러 번 시도하고 가장 많이 채운 결과를 쓴다.
+  // 순서를 바꿔 여러 번 시도하고, 목표 개수를 채운 것 중 풀이 단계가 가장 긴 결과를 쓴다.
   let best = new Set<string>();
-  for (let round = 0; round < 12 && best.size < target; round++) {
-    let cur = new Set<string>();
-    for (const k of makeOrder()) {
-      if (cur.size >= target) break;
-      const trial = new Set(cur);
-      trial.add(k);
-      if (isSolvable(trial)) cur = trial;
+  let bestScore = -1;
+  // 관문은 숫자 없이 부호만 남은 식이 2개 이상 있어야 한다 — 출발점 상한과 함께 맞추기 어려워 더 많이 시도한다.
+  const wantFull = cfg.fullLineBias ? MIN_FULL_LINES : 0;
+  const rounds = cfg.fullLineBias ? 40 : 12;
+  const fullLines = (set: Set<string>) => eqKeySets.filter(keys => keys.every(k => set.has(k))).length;
+  for (let round = 0; round < rounds; round++) {
+    if (cfg.fullLineBias) {
+      const cur = buildAroundFullLines(eqKeySets, numKeys, target);
+      if (!cur) continue;
+      const a = analyzeBlanks(eqKeySets, cur);
+      if (a.open > maxOpen) continue;
+      const score = cur.size * 10000 + Math.min(fullLines(cur), wantFull) * 100 + a.depth;
+      if (score > bestScore) { best = cur; bestScore = score; }
+      if (best.size >= target && fullLines(best) >= wantFull && a.depth >= (cfg.minDepth ?? 0)) break;
+      continue;
     }
-    if (cur.size > best.size) best = cur;
+    let cur = new Set<string>();
+    // "바로 풀리는 칸" 상한 때문에 지금은 못 넣는 칸도, 다른 칸이 같은 식에 들어가
+    // 그 식의 미지수가 둘이 되면 넣을 수 있게 된다. 그래서 더 못 넣을 때까지 여러 번 훑는다.
+    const order = makeOrder();
+    let changed = true;
+    while (changed && cur.size < target) {
+      changed = false;
+      for (const k of order) {
+        if (cur.size >= target) break;
+        if (cur.has(k)) continue;
+        const trial = new Set(cur);
+        trial.add(k);
+        const a = analyzeBlanks(eqKeySets, trial);
+        if (a.solvable && a.open <= maxOpen) { cur = trial; changed = true; }
+      }
+    }
+    // 우선순위: 목표 개수 → (관문이면) 부호만 남은 식 수 → 풀이 단계 수
+    const depth = analyzeBlanks(eqKeySets, cur).depth;
+    const full = Math.min(fullLines(cur), wantFull);
+    const score = cur.size * 10000 + full * 100 + depth;
+    if (score > bestScore) { best = cur; bestScore = score; }
+    if (best.size >= target && fullLines(best) >= wantFull && analyzeBlanks(eqKeySets, best).depth >= (cfg.minDepth ?? 0)) break;
   }
-  return best;
+  return { blanks: best, fullLines: fullLines(best), ...analyzeBlanks(eqKeySets, best) };
+}
+
+/** 관문 스테이지에 최소한 들어 있어야 하는 "부호만 남은 식" 수 */
+const MIN_FULL_LINES = 2;
+
+/**
+ * 부호만 남은 식을 2개 넣으면 출발점이 구조적으로 최소 3개 필요하다(실측: 3 미만은 한 번도 안 나옴).
+ * 그래서 관문은 레벨 설정보다 상한을 3까지 풀어 준다.
+ */
+export const MILESTONE_MAX_OPEN = 3;
+
+export function effectiveMaxOpen(cfg: DifficultyConfig): number {
+  const base = cfg.maxOpenStart ?? Infinity;
+  return cfg.fullLineBias ? Math.max(base, MILESTONE_MAX_OPEN) : base;
+}
+
+/**
+ * 관문용 빈칸 선택. 식 두 개를 통째로 비워 두고 시작해서, 남은 칸은 매번
+ * "넣었을 때 출발점이 가장 적어지는" 칸을 고른다.
+ * 칸을 하나씩 넣으며 매번 출발점 상한을 검사하면, 한 줄을 다 비우는 도중에
+ * 출발점이 잠깐 늘어나는 단계를 넘지 못해 부호만 남은 줄이 만들어지지 않는다.
+ */
+function buildAroundFullLines(eqKeySets: string[][], numKeys: string[], target: number): Set<string> | null {
+  const lines = shuffle(eqKeySets).slice(0, MIN_FULL_LINES);
+  const cur = new Set<string>(lines.flat());
+  if (cur.size > target || !analyzeBlanks(eqKeySets, cur).solvable) return null;
+  while (cur.size < target) {
+    let pick: string | null = null;
+    let bestOpen = Infinity, bestDepth = -1;
+    for (const k of shuffle(numKeys)) {
+      if (cur.has(k)) continue;
+      cur.add(k);
+      const a = analyzeBlanks(eqKeySets, cur);
+      cur.delete(k);
+      if (!a.solvable) continue;
+      if (a.open < bestOpen || (a.open === bestOpen && a.depth > bestDepth)) {
+        pick = k; bestOpen = a.open; bestDepth = a.depth;
+      }
+    }
+    if (!pick) return null;
+    cur.add(pick);
+  }
+  return cur;
+}
+
+/**
+ * 빈칸 집합을 "모르는 칸이 하나뿐인 식부터 채워 나가는" 방식으로 풀어 본다.
+ *  open  — 판을 열자마자 바로 계산되는 빈칸 수 (풀이의 출발점 개수)
+ *  depth — 한 번에 풀 수 있는 칸을 모두 채우는 것을 한 단계로 셀 때 필요한 단계 수
+ * open 이 작고 depth 가 클수록 "어디서부터 풀지"를 찾는 추리가 길어진다.
+ */
+export function analyzeBlanks(
+  eqKeySets: string[][],
+  blanks: Set<string>
+): { solvable: boolean; open: number; depth: number } {
+  const unknown = new Set(blanks);
+  let open = 0;
+  let depth = 0;
+  while (unknown.size > 0) {
+    const now = new Set<string>();
+    for (const keys of eqKeySets) {
+      let only: string | null = null;
+      let n = 0;
+      for (const k of keys) if (unknown.has(k)) { n++; only = k; }
+      if (n === 1) now.add(only!);
+    }
+    if (now.size === 0) break;
+    if (depth === 0) open = now.size;
+    depth++;
+    for (const k of now) unknown.delete(k);
+  }
+  return { solvable: unknown.size === 0, open, depth };
+}
+
+// ── 오답 타일 ─────────────────────────────────────────────────────────────
+// 정답과 자릿수가 같고 값이 가까운 수를 고른다. 크기만 보고 걸러낼 수 없어야 한다.
+// 판에 이미 적힌 숫자도 후보로 쓴다 — 보드에서 본 수라 그럴듯해 보인다.
+
+function pickDecoys(occ: Map<string, OccInfo>, blanks: Set<string>, cfg: DifficultyConfig): number[] {
+  const count = cfg.decoyCount ?? 0;
+  if (count <= 0) return [];
+  const answers: number[] = [];
+  const givens: number[] = [];
+  for (const [k, v] of occ) {
+    if (v.type !== 'num') continue;
+    (blanks.has(k) ? answers : givens).push(v.value!);
+  }
+  const taken = new Set(answers);
+  const digits = (n: number) => String(n).length;
+  const out: number[] = [];
+  const tryAdd = (n: number, like: number) => {
+    if (!Number.isInteger(n) || n < 0 || n > cfg.maxResult) return false;
+    if (taken.has(n) || digits(n) !== digits(like)) return false;
+    taken.add(n);
+    out.push(n);
+    return true;
+  };
+  for (let t = 0; t < 200 && out.length < count; t++) {
+    const base = answers[randInt(0, answers.length - 1)];
+    if (Math.random() < 0.25 && givens.length > 0) {
+      const g = givens[randInt(0, givens.length - 1)];
+      tryAdd(g, g);
+      continue;
+    }
+    const deltas = [1, 2, 3, 4, 10];
+    const d = deltas[randInt(0, deltas.length - 1)] * (Math.random() < 0.5 ? -1 : 1);
+    tryAdd(base + d, base);
+  }
+  return out;
 }
 
 // ── 조립 ──────────────────────────────────────────────────────────────────
@@ -840,14 +986,19 @@ export function generateLevelFromConfig(cfg: DifficultyConfig): CrossMathLevel |
     // 3항 식을 쓰는 난이도라면 최소 한 개는 반드시 들어가야 한다.
     // 배치가 확률이라 그냥 두면 3항이 하나도 없는 판이 드물게 섞인다.
     if ((cfg.tripleRatio ?? 0) > 0 && !equations.some(e => e.len === LEN_TRIPLE)) continue;
-    const blanks = selectBlanks(equations, occ, cfg);
+    const { blanks, open, depth, fullLines } = selectBlanks(equations, occ, cfg);
     // 난이도별 정답 개수는 고정이다. 못 채우면 이 배치는 버리고 다시 만든다.
     if (blanks.size < cfg.blankCount) continue;
+    if (open > effectiveMaxOpen(cfg) || depth < (cfg.minDepth ?? 0)) continue;
+    if (cfg.fullLineBias && fullLines < MIN_FULL_LINES) continue;
     for (const k of blanks) {
       occ.get(k)!.isBlank = true;
     }
     if (hasPhantomEquation(occ, equations)) continue;
-    return occToLevel(occ);
+    const level = occToLevel(occ);
+    const decoys = pickDecoys(occ, blanks, cfg);
+    if (decoys.length > 0) level.decoys = decoys;
+    return level;
   }
   return null;
 }

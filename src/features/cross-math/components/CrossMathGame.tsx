@@ -89,7 +89,7 @@ const RULES = [
   {
     label: '규칙 1',
     title: '빈칸을 채워 식을 완성',
-    desc: '아래 숫자 타일을 골라 빈칸에 넣습니다. 탭해서 놓거나 끌어다 놓아도 됩니다.',
+    desc: '아래 숫자 타일을 골라 빈칸에 넣습니다. 탭해서 놓거나 끌어다 놓아도 됩니다. 쓰이지 않는 함정 타일도 섞여 있어요.',
     visual: <MiniRow cells={['12', '+', 'B', '=', '19']} />,
   },
   {
@@ -117,7 +117,8 @@ function nudgeClass(placedKey: string, key: string): string {
   return '';
 }
 
-const POOL_COLS = 8;
+/** 풀 한 줄의 타일 수. 오답 타일까지 24장을 넘으면 9장으로 늘려 3줄을 유지한다. */
+const poolCols = (n: number) => (n > 24 ? 9 : 8);
 const MIN_CELL_PX = 16;
 const MAX_CELL_PX = 54;
 interface View { scale: number; x: number; y: number }
@@ -332,9 +333,11 @@ const CrossMathGame: React.FC = () => {
   const loadLevel = useCallback((lvl: CrossMathLevel) => {
     setLevel(lvl);
     const blanks = lvl.cells.filter(c => c.type === 'num' && c.isBlank);
+    // 오답 타일(decoys)도 같은 풀에 섞는다 — 정렬 후에는 정답과 구분되지 않는다
+    const values = [...blanks.map(c => c.value!), ...(lvl.decoys ?? [])];
     setPoolOrder(
-      blanks
-        .map((c, i) => ({ id: i, value: c.value! }))
+      values
+        .map((value, i) => ({ id: i, value }))
         .sort((a, b) => b.value - a.value) // 내림차순 정렬 — 정답 위치가 드러나지 않으면서 순서가 고정된다
     );
     setPlacements({});
@@ -995,7 +998,7 @@ const CrossMathGame: React.FC = () => {
 
       <section className="cm-pool-panel">
         {/* 보드에 놓인 타일도 빈 자리로 남겨둔다 — 풀 높이가 변하지 않으므로 보드 크기가 흔들리지 않는다 */}
-        <div className="cm-pool" style={{ gridTemplateColumns: `repeat(${POOL_COLS}, minmax(0, 1fr))` }}>
+        <div className="cm-pool" style={{ gridTemplateColumns: `repeat(${poolCols(poolOrder.length)}, minmax(0, 1fr))` }}>
           {poolOrder.map(tile => {
             if (placedIds.has(tile.id)) return <span key={tile.id} className="cm-tile-hole" aria-hidden="true" />;
             return (

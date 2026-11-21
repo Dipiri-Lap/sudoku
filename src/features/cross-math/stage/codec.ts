@@ -11,6 +11,9 @@ import type { CrossMathLevel, GridCell, Operator } from '../utils/generator';
  * 종류 표시를 대문자로 둔 이유: 인덱스가 36진수라 소문자 a~z가 그대로 나타난다.
  * 소문자를 구분자로 쓰면 인덱스 11('b')과 빈칸 표시가 충돌한다.
  *
+ * 오답 타일이 있으면 뒤에 "|<값>,<값>,..." 을 붙인다 (10진수). 없으면 생략 — 예전 데이터와 같은 형식.
+ *   예)   "9x9|1cN30,...,1gB6|7,15"
+ *
  * 원본 JSON(셀당 {row,col,type,value,isBlank})에 비해 약 5배 작다.
  * 스테이지가 1000개까지 늘어나는 것을 감안한 선택이다.
  */
@@ -24,11 +27,12 @@ export function encodeLevel(level: CrossMathLevel): string {
     if (c.type === 'op') return `${idx}O${c.operator}`;
     return `${idx}${c.isBlank ? 'B' : 'N'}${c.value}`;
   });
-  return `${level.rows}x${level.cols}|${parts.join(',')}`;
+  const base = `${level.rows}x${level.cols}|${parts.join(',')}`;
+  return level.decoys && level.decoys.length > 0 ? `${base}|${level.decoys.join(',')}` : base;
 }
 
 export function decodeLevel(encoded: string): CrossMathLevel {
-  const [size, body] = encoded.split('|');
+  const [size, body, decoyPart] = encoded.split('|');
   const [rows, cols] = size.split('x').map(Number);
   if (!Number.isFinite(rows) || !Number.isFinite(cols)) {
     throw new Error(`스테이지 데이터가 손상되었습니다: ${encoded.slice(0, 24)}…`);
@@ -48,5 +52,7 @@ export function decodeLevel(encoded: string): CrossMathLevel {
     return { row, col, type: 'num', value: Number(rest) };
   });
 
-  return { rows, cols, cells };
+  const level: CrossMathLevel = { rows, cols, cells };
+  if (decoyPart) level.decoys = decoyPart.split(',').map(Number);
+  return level;
 }
