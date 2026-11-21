@@ -101,3 +101,19 @@ export function stageTripleRatio(stage: number): number {
 export function isMilestone(stage: number): boolean {
   return stage > INTRO.length && stage % 25 === 0;
 }
+
+/**
+ * 관문은 번갈아 가며 규칙을 바꾼다.
+ *   25·75번대(…25, …75) → 기호 관문: 숫자 대신 + − × ÷ 칸이 비어 있다
+ *   50·100번대(…50, …00) → 부호만 남은 줄 관문 (fullLineBias)
+ * 새 변주를 넣을 때는 여기서 관문 종류를 나눈다.
+ */
+export function isOperatorMilestone(stage: number): boolean {
+  return isMilestone(stage) && stage % 50 === 25;
+}
+
+/** 기호 관문에서 비울 연산자 칸 수 (일반 스테이지는 0) */
+export function stageOpBlankCount(stage: number): number {
+  if (!isOperatorMilestone(stage)) return 0;
+  return stageLevel(stage) >= 11 ? 4 : 3;
+}

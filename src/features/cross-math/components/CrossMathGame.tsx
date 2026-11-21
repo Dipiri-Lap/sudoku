@@ -18,10 +18,11 @@ import {
   type Difficulty,
   type CrossMathLevel,
   type GridCell,
+  type Operator,
 } from '../utils/generator';
 import { loadStage, prefetchStage } from '../stage/loader';
-import { stageLevel, TOTAL_STAGES } from '../stage/schedule';
-import { useCrossumProgress } from '../stage/progress';
+import { stageLevel, TOTAL_STAGES, isOperatorMilestone } from '../stage/schedule';
+import { useCrossumProgress, useCrossumStars, starsFor } from '../stage/progress';
 import { extractEquations, evaluate } from '../stage/board';
 import { useCoins } from '../../../context/CoinContext';
 import { logEvent } from '../../../firebase';
@@ -36,11 +37,21 @@ import '../styles/CrossMathThemes.css';
 
 interface Tile {
   id: number;
-  value: number;
+  /** 숫자 타일이면 수, 기호 관문의 기호 타일이면 연산자 */
+  value: number | Operator;
+}
+
+const OP_ORDER: Operator[] = ['+', '-', '×', '÷'];
+const isOpTile = (t: Tile) => typeof t.value === 'string';
+
+/** 칸 종류와 타일 종류가 맞아야 놓을 수 있다 — 숫자 칸에 기호, 기호 칸에 숫자는 안 된다 */
+function tileFits(cell: GridCell | undefined, tile: Tile): boolean {
+  if (!cell?.isBlank) return false;
+  return (cell.type === 'op') === isOpTile(tile);
 }
 
 /** 타일 크기는 고정하고 자릿수가 많을 때 글자 크기만 줄인다. */
-function digitClass(value: number): string {
+function digitClass(value: number | string): string {
   const len = String(value).length;
   if (len >= 4) return 'cm-d4';
   if (len === 3) return 'cm-d3';
@@ -104,6 +115,18 @@ const RULES = [
     desc: '501스테이지부터는 세 수를 계산하는 긴 식이 섞여 나옵니다. 왼쪽부터 차례로 계산해요.',
     visual: <MiniRow cells={['7', '+', 'B', '-', '4', '=', '11']} />,
   },
+  {
+    label: '규칙 4',
+    title: '기호 관문',
+    desc: '25·75번째 관문에서는 숫자 대신 기호 칸이 비어 있어요. + − × ÷ 타일을 넣어 식을 완성하세요.',
+    visual: <MiniRow cells={['6', 'B', '4', '=', '24']} />,
+  },
+  {
+    label: '별',
+    title: '틀리지 않고 깨면 별 3개',
+    desc: '식을 틀리게 완성하거나 힌트를 쓸 때마다 별이 줄어요. 0번이면 ★3, 1~2번이면 ★2, 그 이상이면 ★1.',
+    visual: <MiniRow cells={['★', '★', '★']} />,
+  },
 ];
 
 /** 방금 놓은 칸의 상하좌우 이웃이면 바깥으로 밀리는 클래스를 준다 */
@@ -164,6 +187,10 @@ const CrossMathGame: React.FC = () => {
   /** 스테이지 모드로 플레이 중일 때의 번호. 자유 모드면 null */
   const [stage, setStage] = useState<number | null>(null);
   const { stageProgress, clearStage } = useCrossumProgress();
+  const { totalStars, recordStars } = useCrossumStars();
+  /** 이번 판의 감점 — 틀린 식 완성 1회, 힌트 1회마다 1점 */
+  const [penalty, setPenalty] = useState(0);
+  const stars = starsFor(penalty);
   const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
   const [testStage, setTestStage] = useState('1');
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -263,8 +290,9 @@ const CrossMathGame: React.FC = () => {
     return m;
   }, [level]);
 
+  // 기호 관문에서는 연산자 칸도 빈칸이다
   const blankCells = useMemo(
-    () => (level ? level.cells.filter(c => c.type === 'num' && c.isBlank) : []),
+    () => (level ? level.cells.filter(c => c.isBlank) : []),
     [level]
   );
 
@@ -296,7 +324,17 @@ const CrossMathGame: React.FC = () => {
     const valueAt = (k: string): number | undefined => {
       const cell = cellMap.get(k);
       if (!cell) return undefined;
-      return cell.isBlank ? placements[k]?.value : cell.value;
+      if (!cell.isBlank) return cell.value;
+      const v = placements[k]?.value;
+      return typeof v === 'number' ? v : undefined;
+    };
+    /** 비어 있는 기호 칸은 정답이 아니라 플레이어가 놓은 기호로 판정한다 */
+    const opAt = (k: string): Operator | undefined => {
+      const cell = cellMap.get(k);
+      if (!cell) return undefined;
+      if (!cell.isBlank) return cell.operator;
+      const v = placements[k]?.value;
+      return typeof v === 'string' ? v : undefined;
     };
 
     const solved = new Set<string>();
@@ -305,14 +343,15 @@ const CrossMathGame: React.FC = () => {
 
     for (const eq of equations) {
       const values = eq.numKeys.map(valueAt);
-      if (values.some(v => v === undefined)) { allValid = false; continue; }
+      const ops = eq.opKeys.map(opAt);
+      if (values.some(v => v === undefined) || ops.some(o => o === undefined)) { allValid = false; continue; }
       const nums = values as number[];
-      const ok = evaluate(nums.slice(0, -1), eq.operators) === nums[nums.length - 1];
+      const ok = evaluate(nums.slice(0, -1), ops as Operator[]) === nums[nums.length - 1];
       if (!ok) allValid = false;
 
       // 빈칸이 하나도 없는 식은 처음부터 완성 상태다. 색을 입히면 아무것도 안 했는데
       // 녹색이 떠 있어서 오해를 준다. 플레이어가 채워야 하는 식만 표시한다.
-      const ownBlanks = eq.numKeys.filter(k => cellMap.get(k)?.isBlank);
+      const ownBlanks = eq.cellKeys.filter(k => cellMap.get(k)?.isBlank);
       if (ownBlanks.length === 0) continue;
 
       // 맞으면 줄 전체를 녹색으로, 틀리면 플레이어가 놓은 칸만 빨갛게.
@@ -332,14 +371,21 @@ const CrossMathGame: React.FC = () => {
 
   const loadLevel = useCallback((lvl: CrossMathLevel) => {
     setLevel(lvl);
-    const blanks = lvl.cells.filter(c => c.type === 'num' && c.isBlank);
+    const blanks = lvl.cells.filter(c => c.isBlank);
     // 오답 타일(decoys)도 같은 풀에 섞는다 — 정렬 후에는 정답과 구분되지 않는다
-    const values = [...blanks.map(c => c.value!), ...(lvl.decoys ?? [])];
+    const values: (number | Operator)[] = [
+      ...blanks.map(c => (c.type === 'op' ? c.operator! : c.value!)),
+      ...(lvl.decoys ?? []),
+      ...(lvl.opDecoys ?? []),
+    ];
+    // 숫자는 내림차순, 기호는 그 뒤에 + − × ÷ 순 — 정답 위치가 드러나지 않으면서 순서가 고정된다
+    const rank = (v: number | Operator) => (typeof v === 'number' ? -v : 100000 + OP_ORDER.indexOf(v));
     setPoolOrder(
       values
         .map((value, i) => ({ id: i, value }))
-        .sort((a, b) => b.value - a.value) // 내림차순 정렬 — 정답 위치가 드러나지 않으면서 순서가 고정된다
+        .sort((a, b) => rank(a.value) - rank(b.value))
     );
+    setPenalty(0);
     setPlacements({});
     setSelectedTileId(null);
     setSelectedCellKey(null);
@@ -377,7 +423,10 @@ const CrossMathGame: React.FC = () => {
   const prevBrokenRef = useRef(0);
   useEffect(() => {
     const n = cellState.broken.size;
-    if (n > prevBrokenRef.current) playSfx('fail');
+    if (n > prevBrokenRef.current) {
+      playSfx('fail');
+      setPenalty(p => p + 1);
+    }
     prevBrokenRef.current = n;
   }, [cellState.broken]);
 
@@ -385,6 +434,7 @@ const CrossMathGame: React.FC = () => {
   useEffect(() => {
     if (!isWinner || stage === null) return;
     clearStage(stage);
+    recordStars(stage, stars);
 
     // 한 판에 한 번만 지급한다. 워드스택과 같은 보상량.
     if (awardedRef.current === stage) return;
@@ -404,7 +454,7 @@ const CrossMathGame: React.FC = () => {
         m.incrementPuzzlePower(uid).catch(console.error)
       );
     });
-  }, [isWinner, stage, clearStage, addCoins]);
+  }, [isWinner, stage, clearStage, addCoins, recordStars, stars]);
 
   /** 스테이지를 깬 뒤 다음으로 넘어갈 때 — 전면 광고를 한 번 띄운다 */
   const goNextStage = useCallback((n: number) => {
@@ -440,6 +490,8 @@ const CrossMathGame: React.FC = () => {
 
   /** 빈칸에 타일을 놓고 선택 상태를 모두 푼다 */
   const place = useCallback((key: string, tile: Tile) => {
+    // 숫자 칸에 기호를, 기호 칸에 숫자를 놓으려 하면 무시한다
+    if (!tileFits(cellMap.get(key), tile)) { playSfx('select'); return; }
     setPlacements(prev => ({ ...prev, [key]: tile }));
     // 짧을수록 날카롭게 느껴진다
     navigator.vibrate?.(15);
@@ -448,7 +500,7 @@ const CrossMathGame: React.FC = () => {
     setHistory(prev => [...prev.filter(k => k !== key), key]);
     setSelectedTileId(null);
     setSelectedCellKey(null);
-  }, []);
+  }, [cellMap]);
 
   useEffect(() => {
     if (!lastPlaced) return;
@@ -489,7 +541,8 @@ const CrossMathGame: React.FC = () => {
    * 정답 값의 타일이 풀에 없으면(다른 칸에 잘못 놓아둔 경우) 그 칸에서 회수해 온다.
    */
   const revealCell = useCallback((key: string) => {
-    const answer = cellMap.get(key)?.value;
+    const cell = cellMap.get(key);
+    const answer = cell?.type === 'op' ? cell.operator : cell?.value;
     if (answer === undefined) return false;
 
     const fromPool = pool.find(t => t.value === answer);
@@ -514,7 +567,7 @@ const CrossMathGame: React.FC = () => {
   /** 힌트 대기 상태에서 빈칸을 골랐을 때 */
   const applyHintTo = useCallback(async (key: string) => {
     if (adHintCredit) {
-      if (revealCell(key)) { setAdHintCredit(false); setHintMode(false); }
+      if (revealCell(key)) { setAdHintCredit(false); setHintMode(false); setPenalty(p => p + 1); }
       return;
     }
     if (!(await spendCoins(HINT_COST))) {
@@ -522,7 +575,7 @@ const CrossMathGame: React.FC = () => {
       setHintPrompt('insufficient');
       return;
     }
-    revealCell(key);
+    if (revealCell(key)) setPenalty(p => p + 1);
     setHintMode(false);
   }, [adHintCredit, revealCell, spendCoins]);
 
@@ -634,8 +687,10 @@ const CrossMathGame: React.FC = () => {
       setSelectedTileId(null);
       setSelectedCellKey(null);
     }
-    setDrag({ tile: start.tile, x: e.clientX, y: e.clientY, overKey: dropTargetAt(e.clientX, e.clientY) });
-  }, [dropTargetAt]);
+    const over = dropTargetAt(e.clientX, e.clientY);
+    // 종류가 안 맞는 칸(숫자 칸 ↔ 기호 타일)은 놓을 곳으로 표시하지 않는다
+    setDrag({ tile: start.tile, x: e.clientX, y: e.clientY, overKey: over && tileFits(cellMap.get(over), start.tile) ? over : null });
+  }, [dropTargetAt, cellMap]);
 
   const handleTilePointerUp = useCallback((e: React.PointerEvent) => {
     const start = dragStartRef.current;
@@ -756,6 +811,9 @@ const CrossMathGame: React.FC = () => {
                 ? `Level ${stageProgress}/${TOTAL_STAGES} 이어하기`
                 : `Level 1/${TOTAL_STAGES} 시작하기`}
             </span>
+            {totalStars > 0 && (
+              <span style={{ fontSize: '0.82rem', color: '#f5b301', fontWeight: 700 }}>★ {totalStars}</span>
+            )}
           </div>
 
         </div>
@@ -861,7 +919,14 @@ const CrossMathGame: React.FC = () => {
           </button>
         </div>
 
-        <span className="cm-topbar-title">{stage !== null ? `스테이지 ${stage}` : 'Crossum'}</span>
+        <span className="cm-topbar-title">
+          {stage !== null ? `스테이지 ${stage}` : 'Crossum'}
+          <span className="cm-stars-live" aria-label={`별 ${stars}개`}>
+            {[1, 2, 3].map(i => (
+              <span key={i} className={i <= stars ? 'cm-star-on' : 'cm-star-off'}>★</span>
+            ))}
+          </span>
+        </span>
 
         <div className="cm-topbar-side cm-topbar-side-right">
           <button
@@ -882,6 +947,10 @@ const CrossMathGame: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {stage !== null && isOperatorMilestone(stage) && (
+        <div className="cm-variant-banner">기호 관문 · 빈 기호 칸에 + − × ÷ 타일을 넣으세요</div>
+      )}
 
       <section className="cm-board-panel">
         <div
@@ -930,13 +999,13 @@ const CrossMathGame: React.FC = () => {
                   ? 'cm-cell-solved'
                   : '';
 
-              if (cell.type === 'op') {
+              if (cell.type === 'op' && !cell.isBlank) {
                 return <div key={idx} className={`cm-cell cm-cell-op ${lineCls} ${fxCls}`} style={fxStyle}>{cell.operator}</div>;
               }
               if (cell.type === 'eq') {
                 return <div key={idx} className={`cm-cell cm-cell-eq ${lineCls} ${fxCls}`} style={fxStyle}>=</div>;
               }
-              if (!cell.isBlank) {
+              if (cell.type === 'num' && !cell.isBlank) {
                 return (
                   <div key={idx} className={`cm-cell cm-cell-given ${lineCls} ${fxCls} ${digitClass(cell.value!)}`} style={fxStyle}>
                     {cell.value}
@@ -953,7 +1022,7 @@ const CrossMathGame: React.FC = () => {
                 <div
                   key={idx}
                   data-cell={key}
-                  className={`cm-cell cm-cell-blank ${cls} ${fxCls} ${filled ? digitClass(placed.value) : ''}`}
+                  className={`cm-cell cm-cell-blank ${cell.type === 'op' ? 'cm-cell-opslot' : ''} ${cls} ${fxCls} ${filled ? digitClass(placed.value) : ''}`}
                   style={fxStyle}
                   onClick={() => handleCellClick(key)}
                 >
@@ -970,8 +1039,16 @@ const CrossMathGame: React.FC = () => {
         {isWinner && (
           <div className="cm-clear-overlay">
             <div className="cm-clear-card">
-              <div className="cm-clear-emoji">🎉</div>
-              <h2>클리어!</h2>
+              <div className="cm-clear-stars" aria-label={`별 ${stars}개`}>
+                {[1, 2, 3].map(i => (
+                  <span
+                    key={i}
+                    className={i <= stars ? 'cm-star-on' : 'cm-star-off'}
+                    style={{ '--cm-star-delay': `${i * 140}ms` } as React.CSSProperties}
+                  >★</span>
+                ))}
+              </div>
+              <h2>{stars === 3 ? '완벽해요!' : '클리어!'}</h2>
               <p>스테이지 {stage} · Lv.{cfg?.level} {cfg?.label}</p>
 
               <div className="cm-reward-row">
@@ -1004,7 +1081,7 @@ const CrossMathGame: React.FC = () => {
             return (
               <button
                 key={tile.id}
-                className={`cm-tile ${digitClass(tile.value)} ${selectedTileId === tile.id ? 'cm-tile-selected' : ''} ${drag?.tile.id === tile.id ? 'cm-tile-dragging' : ''}`}
+                className={`cm-tile ${isOpTile(tile) ? 'cm-tile-op' : ''} ${digitClass(tile.value)} ${selectedTileId === tile.id ? 'cm-tile-selected' : ''} ${drag?.tile.id === tile.id ? 'cm-tile-dragging' : ''}`}
                 onPointerDown={e => handleTilePointerDown(e, tile)}
                 onPointerMove={handleTilePointerMove}
                 onPointerUp={handleTilePointerUp}
@@ -1042,7 +1119,7 @@ const CrossMathGame: React.FC = () => {
       </nav>
 
       {drag && (
-        <div className={`cm-drag-ghost ${digitClass(drag.tile.value)}`} style={{ left: drag.x, top: drag.y }}>
+        <div className={`cm-drag-ghost ${isOpTile(drag.tile) ? 'cm-tile-op' : ''} ${digitClass(drag.tile.value)}`} style={{ left: drag.x, top: drag.y }}>
           {drag.tile.value}
         </div>
       )}

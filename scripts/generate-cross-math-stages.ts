@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { generateLevelFromConfig, DIFFICULTY_CONFIGS } from '../src/features/cross-math/utils/generator';
-import { stageDifficulty, stageLevel, stageTripleRatio, isMilestone, TOTAL_STAGES } from '../src/features/cross-math/stage/schedule';
+import { stageDifficulty, stageLevel, stageTripleRatio, isMilestone, isOperatorMilestone, stageOpBlankCount, TOTAL_STAGES } from '../src/features/cross-math/stage/schedule';
 import { encodeLevel, decodeLevel } from '../src/features/cross-math/stage/codec';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,10 +27,14 @@ function pad(n: number): string {
  * 사용법:
  *   npm run generate-cross-math-stages            → 1 ~ TOTAL_STAGES 전체
  *   npm run generate-cross-math-stages 501 600    → 해당 구간만 (이미 만든 묶음은 건드리지 않음)
+ *   npm run generate-cross-math-stages -- --only-op-milestones
+ *       → 기존 파일을 유지하고 기호 관문(…25, …75)만 새로 만든다. 이미 배포한 판을 바꾸지 않으려고 쓴다.
  */
 function main() {
-  const argFrom = Number(process.argv[2]);
-  const argTo = Number(process.argv[3]);
+  const onlyOp = process.argv.includes('--only-op-milestones');
+  const args = process.argv.slice(2).filter(a => !a.startsWith('--'));
+  const argFrom = Number(args[0]);
+  const argTo = Number(args[1]);
   const rangeFrom = Number.isFinite(argFrom) && Number.isFinite(argTo) ? argFrom : 1;
   const rangeTo = Number.isFinite(argTo) ? argTo : Number.isFinite(argFrom) ? argFrom : TOTAL_STAGES;
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -45,11 +49,23 @@ function main() {
   for (let from = firstChunk; from <= rangeTo; from += CHUNK) {
     const to = Math.min(from + CHUNK - 1, rangeTo);
     const levels: string[] = [];
+    const file = path.join(OUT_DIR, `stages-${pad(from)}-${pad(to)}.json`);
+    const existing: string[] = onlyOp ? (JSON.parse(fs.readFileSync(file, 'utf8')) as Chunk).levels : [];
 
     for (let stage = from; stage <= to; stage++) {
+      if (onlyOp && !isOperatorMilestone(stage)) {
+        levels.push(existing[stage - from]);
+        continue;
+      }
       const base = DIFFICULTY_CONFIGS[stageDifficulty(stage)];
-      // 관문(25의 배수)은 숫자 없이 부호만 남은 식이 많은 형태로 만든다
-      const cfg = { ...base, tripleRatio: stageTripleRatio(stage), fullLineBias: isMilestone(stage) };
+      // 관문은 두 종류를 번갈아 낸다 — 기호 관문(연산자 빈칸) / 부호만 남은 줄이 많은 관문
+      const opBlankCount = stageOpBlankCount(stage);
+      const cfg = {
+        ...base,
+        tripleRatio: stageTripleRatio(stage),
+        fullLineBias: isMilestone(stage) && opBlankCount === 0,
+        opBlankCount,
+      };
       let encoded: string | null = null;
 
       for (let retry = 0; retry < MAX_RETRY && !encoded; retry++) {
@@ -73,7 +89,6 @@ function main() {
     }
 
     const chunk: Chunk = { from, to, levels };
-    const file = path.join(OUT_DIR, `stages-${pad(from)}-${pad(to)}.json`);
     const json = JSON.stringify(chunk);
     fs.writeFileSync(file, json);
     totalBytes += json.length;

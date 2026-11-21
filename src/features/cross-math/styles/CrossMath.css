@@ -1111,3 +1111,70 @@
 .cm-shop-badge-lock {
   background: var(--cm-text-muted);
 }
+
+/* ── 별 3개 평가 ─────────────────────────────────────────────────────────── */
+
+.cm-topbar-title {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+}
+/* 제목 아래 작은 줄 — 옆에 두면 좁은 화면에서 오른쪽 버튼과 겹친다 */
+.cm-stars-live {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+.cm-star-on { color: #f5b301; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15); }
+.cm-star-off { color: var(--cm-slot-border); }
+/* 별이 줄어드는 순간이 눈에 띄도록 */
+.cm-stars-live .cm-star-off { transition: color 0.3s; }
+
+.cm-clear-stars {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.cm-clear-stars span {
+  display: inline-block;
+  animation: cm-star-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: var(--cm-star-delay, 0ms);
+}
+.cm-clear-stars span:nth-child(2) { transform: translateY(-0.25em); font-size: 1.15em; }
+@keyframes cm-star-pop {
+  0% { opacity: 0; transform: scale(0.2) rotate(-30deg); }
+  100% { opacity: 1; }
+}
+
+/* ── 기호 관문 ───────────────────────────────────────────────────────────── */
+
+.cm-variant-banner {
+  margin: 0 auto 0.35rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  background: var(--cm-accent-soft);
+  color: var(--cm-accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: center;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+}
+
+/* 비어 있는 기호 칸 — 숫자 빈칸과 구분되게 점선 */
+.cm-cell-opslot.cm-cell-slot {
+  border-style: dashed;
+  border-width: 2px;
+  border-color: var(--cm-accent);
+}
+
+.cm-tile.cm-tile-op,
+.cm-drag-ghost.cm-tile-op {
+  background: var(--cm-accent-soft);
+  border-color: var(--cm-accent);
+  color: var(--cm-accent);
+  box-shadow: 0 3px 0 var(--cm-accent);
+}

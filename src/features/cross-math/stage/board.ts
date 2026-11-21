@@ -5,6 +5,9 @@ export interface BoardEquation {
   cellKeys: string[];
   /** 숫자 칸 좌표 키 — 앞에서부터 피연산자, 마지막이 결과 */
   numKeys: string[];
+  /** 연산자 칸 좌표 키 — 기호 관문에서는 이 칸이 비어 있을 수 있다 */
+  opKeys: string[];
+  /** 정답 연산자. 비어 있는 칸이면 플레이어가 놓은 타일로 판정해야 한다 */
   operators: Operator[];
 }
 
@@ -30,6 +33,7 @@ export function extractEquations(level: CrossMathLevel): BoardEquation[] {
     out.push({
       cellKeys: keys,
       numKeys: keys.filter((_, i) => i % 2 === 0),
+      opKeys: keys.filter((_, i) => i % 2 === 1 && i !== equalsAt),
       operators: cells.filter((_, i) => i % 2 === 1 && i !== equalsAt).map(c => c.operator!),
     });
   };

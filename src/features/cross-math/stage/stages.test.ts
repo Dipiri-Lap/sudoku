@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import type { CrossMathLevel, GridCell } from '../utils/generator';
 import { decodeLevel } from './codec';
-import { stageLevel, TOTAL_STAGES, isMilestone, TRIPLE_FROM } from './schedule';
+import { stageLevel, TOTAL_STAGES, isMilestone, isOperatorMilestone, stageOpBlankCount, TRIPLE_FROM } from './schedule';
 import { extractEquations } from './board';
-import { DIFFICULTY_CONFIGS, analyzeBlanks, effectiveMaxOpen, type Difficulty } from '../utils/generator';
+import { DIFFICULTY_CONFIGS, analyzeBlanks, effectiveMaxOpen, isOperatorDetermined, type Difficulty } from '../utils/generator';
 
 import c1 from '../data/stages/stages-001-100.json';
 import c2 from '../data/stages/stages-101-200.json';
@@ -146,13 +146,13 @@ describe('사전 생성 스테이지 데이터', () => {
     }
   });
 
-  it('관문(25의 배수)에는 숫자 없이 부호만 있는 식이 여럿 들어 있다', () => {
+  it('부호 관문(…50, …00)에는 숫자 없이 부호만 있는 식이 여럿 들어 있다', () => {
     // 관문은 fullLineBias 로 생성해 이런 식이 많아야 한다. 일반 스테이지보다 확실히 많은지 본다.
     const countFullBlank = (level: CrossMathLevel) => {
       const at = new Map(level.cells.map(c => [`${c.row},${c.col}`, c]));
       return extractEquations(level).filter(eq => eq.numKeys.every(k => at.get(k)!.isBlank)).length;
     };
-    const milestones = stages.filter(s => isMilestone(s.stage));
+    const milestones = stages.filter(s => isMilestone(s.stage) && !isOperatorMilestone(s.stage));
     const thin = milestones.filter(s => countFullBlank(s.level) < 2).map(s => s.stage);
     expect(thin).toEqual([]);
 
@@ -164,7 +164,9 @@ describe('사전 생성 스테이지 데이터', () => {
 
   it('빈칸에는 반드시 정답 값이 들어 있다', () => {
     const bad = stages.filter(s =>
-      s.level.cells.some(c => c.isBlank && !Number.isFinite(c.value))
+      s.level.cells.some(c =>
+        c.isBlank && (c.type === 'op' ? !['+', '-', '×', '÷'].includes(c.operator!) : !Number.isFinite(c.value))
+      )
     ).map(s => s.stage);
     expect(bad).toEqual([]);
   });
@@ -206,10 +208,14 @@ describe('사전 생성 스테이지 데이터', () => {
   it('바로 풀리는 출발점 수와 풀이 단계가 난이도 설정을 지킨다', () => {
     const bad = stages.map(s => {
       const cfg = DIFFICULTY_CONFIGS[`lv${stageLevel(s.stage)}` as Difficulty];
-      const eqs = extractEquations(s.level).map(e => e.numKeys);
+      const eqs = extractEquations(s.level).map(e => [...e.numKeys, ...e.opKeys]);
       const blanks = new Set(s.level.cells.filter(c => c.isBlank).map(c => `${c.row},${c.col}`));
       const a = analyzeBlanks(eqs, blanks);
-      return { stage: s.stage, ...a, maxOpen: effectiveMaxOpen({ ...cfg, fullLineBias: isMilestone(s.stage) }), minDepth: cfg.minDepth };
+      return { stage: s.stage, ...a, maxOpen: effectiveMaxOpen({
+        ...cfg,
+        fullLineBias: isMilestone(s.stage) && !isOperatorMilestone(s.stage),
+        opBlankCount: stageOpBlankCount(s.stage),
+      }), minDepth: cfg.minDepth };
     }).filter(r => !r.solvable || r.open > (r.maxOpen ?? Infinity) || r.depth < (r.minDepth ?? 0)).slice(0, 10);
     expect(bad).toEqual([]);
   });
@@ -218,11 +224,36 @@ describe('사전 생성 스테이지 데이터', () => {
     const bad = stages.filter(s => {
       const cfg = DIFFICULTY_CONFIGS[`lv${stageLevel(s.stage)}` as Difficulty];
       const decoys = s.level.decoys ?? [];
+      const opDecoys = s.level.opDecoys ?? [];
       const answers = new Set(s.level.cells.filter(c => c.isBlank).map(c => c.value));
-      return decoys.length !== (cfg.decoyCount ?? 0) ||
+      return decoys.length + opDecoys.length !== (cfg.decoyCount ?? 0) ||
+        opDecoys.length !== (isOperatorMilestone(s.stage) ? 1 : 0) ||
         new Set(decoys).size !== decoys.length ||
         decoys.some(d => answers.has(d) || !Number.isInteger(d) || d < 0);
     }).map(s => s.stage).slice(0, 10);
+    expect(bad).toEqual([]);
+  });
+
+  it('기호 관문에만 기호 빈칸이 있고, 개수가 설정과 같다', () => {
+    const bad = stages.filter(s => {
+      const ops = s.level.cells.filter(c => c.type === 'op' && c.isBlank).length;
+      return ops !== stageOpBlankCount(s.stage);
+    }).map(s => s.stage);
+    expect(bad).toEqual([]);
+    expect(stages.filter(s => isOperatorMilestone(s.stage)).length).toBe(24);
+  });
+
+  it('비어 있는 기호 칸은 숫자를 다 알면 답이 하나로 정해진다', () => {
+    const bad: string[] = [];
+    for (const { stage, level } of stages) {
+      const at = new Map(level.cells.map(c => [`${c.row},${c.col}`, c]));
+      for (const eq of extractEquations(level)) {
+        const values = eq.numKeys.map(k => at.get(k)!.value!);
+        eq.opKeys.forEach((k, j) => {
+          if (at.get(k)!.isBlank && !isOperatorDetermined(values, eq.operators, j)) bad.push(`${stage}@${k}`);
+        });
+      }
+    }
     expect(bad).toEqual([]);
   });
 

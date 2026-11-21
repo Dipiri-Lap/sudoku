@@ -20,6 +20,8 @@ export interface CrossMathLevel {
   cells: GridCell[];
   /** 타일 풀에 섞이는 오답 타일 값. 없으면 정답 타일만 나온다. */
   decoys?: number[];
+  /** 기호 관문에서 섞이는 오답 기호 타일 */
+  opDecoys?: Operator[];
 }
 
 export type Difficulty =
@@ -66,6 +68,12 @@ export interface DifficultyConfig {
    * 타일 풀에 섞을 오답 타일 수. 정답만 있으면 계산 없이 "남은 타일 맞추기"로 풀린다.
    */
   decoyCount?: number;
+  /**
+   * 숫자 대신 비워 둘 연산자 칸 수 (기호 관문용). 0 이면 연산자는 늘 보인다.
+   * blankCount 에 포함된다 — 숫자 빈칸은 blankCount - opBlankCount 개가 된다.
+   * 숫자가 모두 정해졌을 때 답이 하나뿐인 연산자만 비운다 (2+2=4 / 2×2=4 같은 칸은 제외).
+   */
+  opBlankCount?: number;
 }
 
 export const DIFFICULTIES: Difficulty[] = [
@@ -702,6 +710,10 @@ function selectBlanks(
 
   const maxOpen = effectiveMaxOpen(cfg);
 
+  if ((cfg.opBlankCount ?? 0) > 0) {
+    return selectWithOperatorBlanks(equations, numKeys, eqKeySets, cfg, maxOpen);
+  }
+
   // 한 번의 탐욕 선택으로는 목표에 못 미치는 경우가 잦다(고른 순서에 따라 막힘).
   // 순서를 바꿔 여러 번 시도하고, 목표 개수를 채운 것 중 풀이 단계가 가장 긴 결과를 쓴다.
   let best = new Set<string>();
@@ -747,6 +759,129 @@ function selectBlanks(
   return { blanks: best, fullLines: fullLines(best), ...analyzeBlanks(eqKeySets, best) };
 }
 
+/** 왼쪽부터 계산 — 게임 화면의 판정(board.evaluate)과 같은 규칙 */
+function evalLeftToRight(values: number[], ops: Operator[]): number | null {
+  let acc = values[0];
+  for (let i = 0; i < ops.length; i++) {
+    const b = values[i + 1];
+    if (ops[i] === '÷') {
+      if (b === 0 || acc % b !== 0) return null;
+      acc = acc / b;
+    } else acc = evalOp(acc, ops[i], b);
+  }
+  return acc;
+}
+
+const ALL_OPS: Operator[] = ['+', '-', '×', '÷'];
+
+/**
+ * 식의 숫자를 모두 알 때 j번째 연산자 자리에 들어갈 수 있는 기호가 하나뿐인가.
+ * 플레이어는 풀에 있는 어떤 기호든 놓을 수 있으므로 네 기호 전부를 따져 본다.
+ */
+export function isOperatorDetermined(values: number[], ops: Operator[], j: number): boolean {
+  const result = values[values.length - 1];
+  const operands = values.slice(0, -1);
+  let n = 0;
+  for (const o of ALL_OPS) {
+    const trial = [...ops];
+    trial[j] = o;
+    if (evalLeftToRight(operands, trial) === result) n++;
+  }
+  return n === 1;
+}
+
+/**
+ * 기호 관문용 빈칸 선택. 연산자 칸도 미지수로 취급한다.
+ * 연산자 칸은 교차하지 않으므로 늘 한 식에만 속하고, 그 식의 숫자를 모두 알아야 정해진다.
+ */
+function selectWithOperatorBlanks(
+  equations: PlacedEquation[],
+  numKeys: string[],
+  eqNumKeySets: string[][],
+  cfg: DifficultyConfig,
+  maxOpen: number
+): { blanks: Set<string>; open: number; depth: number; fullLines: number } {
+  const opTarget = cfg.opBlankCount!;
+  const numTarget = Math.min(cfg.blankCount - opTarget, numKeys.length);
+  const opKeys: string[] = [];
+  const eqKeySets = equations.map((eq, idx) => {
+    const keys = [...eqNumKeySets[idx]];
+    for (let j = 0; j < eq.operators.length; j++) {
+      const [r, c] = eq.cells[1 + j * 2];
+      const k = `${r},${c}`;
+      keys.push(k);
+      if (isOperatorDetermined(eq.values, eq.operators, j)) opKeys.push(k);
+    }
+    return keys;
+  });
+  if (opKeys.length < opTarget) return { blanks: new Set(), open: 0, depth: 0, fullLines: 0 };
+  const isOp = new Set(opKeys);
+
+  // 1) 숫자 빈칸: 일반 스테이지와 같은 "상한을 지키며 여러 번 훑기"
+  // 2) 기호 빈칸: 넣었을 때 출발점이 가장 적게 늘어나는 자리부터
+  // 3) 국소 탐색: 빈칸 하나를 같은 종류의 다른 칸과 맞바꿔 출발점이 줄거나(같으면 단계가 늘면) 채택
+  // 기호 빈칸은 숫자가 다 보이는 식에 들어가면 곧바로 출발점이 되므로 1~2만으로는 상한을 못 지킨다.
+  const score = (set: Set<string>) => {
+    const a = analyzeBlanks(eqKeySets, set);
+    return a.solvable ? a.open * 1000 - a.depth : Infinity;
+  };
+  let best = new Set<string>();
+  let bestScore = Infinity;
+  for (let round = 0; round < 6; round++) {
+    const cur = new Set<string>();
+    const order = shuffle(numKeys);
+    let changed = true;
+    while (changed && cur.size < numTarget) {
+      changed = false;
+      for (const k of order) {
+        if (cur.size >= numTarget) break;
+        if (cur.has(k)) continue;
+        cur.add(k);
+        const a = analyzeBlanks(eqKeySets, cur);
+        if (a.solvable && a.open <= maxOpen) changed = true; else cur.delete(k);
+      }
+    }
+    if (cur.size < numTarget) continue;
+
+    for (let ops = 0; ops < opTarget; ops++) {
+      let pick: string | null = null;
+      let pickScore = Infinity;
+      for (const k of shuffle(opKeys)) {
+        if (cur.has(k)) continue;
+        cur.add(k);
+        const sc = score(cur);
+        cur.delete(k);
+        if (sc < pickScore) { pick = k; pickScore = sc; }
+      }
+      if (!pick) break;
+      cur.add(pick);
+    }
+    if (cur.size < numTarget + opTarget) continue;
+
+    let curScore = score(cur);
+    // 출발점·단계 기준을 이미 만족하면 더 돌리지 않는다
+    const goal = maxOpen * 1000 - (cfg.minDepth ?? 0);
+    for (let it = 0; it < 600 && curScore > goal; it++) {
+      const members = [...cur];
+      const out = members[randInt(0, members.length - 1)];
+      const pool = isOp.has(out) ? opKeys : numKeys;
+      const inn = pool[randInt(0, pool.length - 1)];
+      if (cur.has(inn)) continue;
+      cur.delete(out); cur.add(inn);
+      const sc = score(cur);
+      if (sc <= curScore) curScore = sc;
+      else { cur.delete(inn); cur.add(out); }
+    }
+    if (curScore < bestScore) { best = new Set(cur); bestScore = curScore; }
+    const a = analyzeBlanks(eqKeySets, best);
+    if (a.open <= maxOpen && a.depth >= (cfg.minDepth ?? 0)) break;
+  }
+  const opCount = [...best].filter(k => isOp.has(k)).length;
+  // 기호 수가 모자라면 전체 개수 검사(blankCount)에서 걸러지도록 빈 결과를 돌려준다
+  if (opCount < opTarget) return { blanks: new Set(), open: 0, depth: 0, fullLines: 0 };
+  return { blanks: best, fullLines: 0, ...analyzeBlanks(eqKeySets, best) };
+}
+
 /** 관문 스테이지에 최소한 들어 있어야 하는 "부호만 남은 식" 수 */
 const MIN_FULL_LINES = 2;
 
@@ -758,6 +893,10 @@ export const MILESTONE_MAX_OPEN = 3;
 
 export function effectiveMaxOpen(cfg: DifficultyConfig): number {
   const base = cfg.maxOpenStart ?? Infinity;
+  const ops = cfg.opBlankCount ?? 0;
+  // 기호 빈칸도 숫자가 다 보이는 식에 들어가면 그 자체로 출발점이 된다.
+  // 실측상 출발점 수는 기호 빈칸 수 아래로 거의 내려가지 않는다.
+  if (ops > 0) return Math.max(base, MILESTONE_MAX_OPEN, ops);
   return cfg.fullLineBias ? Math.max(base, MILESTONE_MAX_OPEN) : base;
 }
 
@@ -996,8 +1135,11 @@ export function generateLevelFromConfig(cfg: DifficultyConfig): CrossMathLevel |
     }
     if (hasPhantomEquation(occ, equations)) continue;
     const level = occToLevel(occ);
-    const decoys = pickDecoys(occ, blanks, cfg);
+    const hasOpBlanks = (cfg.opBlankCount ?? 0) > 0;
+    // 기호 관문은 오답 타일 하나를 기호로 바꾼다 — 남은 기호 타일 수로 자리를 짐작하지 못하게
+    const decoys = pickDecoys(occ, blanks, hasOpBlanks ? { ...cfg, decoyCount: (cfg.decoyCount ?? 0) - 1 } : cfg);
     if (decoys.length > 0) level.decoys = decoys;
+    if (hasOpBlanks) level.opDecoys = [cfg.operators[randInt(0, cfg.operators.length - 1)]];
     return level;
   }
   return null;

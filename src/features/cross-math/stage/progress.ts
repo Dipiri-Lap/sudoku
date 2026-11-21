@@ -82,3 +82,97 @@ export function useCrossumProgress() {
 
   return { stageProgress, clearStage };
 }
+
+// ── 별 3개 평가 ──────────────────────────────────────────────────────────────
+
+const STARS_KEY = 'crossum_stage_stars';
+
+/** 스테이지 번호 → 최고 별 수(1~3) */
+type StarMap = Record<string, number>;
+
+/**
+ * 감점 → 별. 감점은 틀린 식을 완성한 횟수 + 힌트 사용 횟수.
+ *   0 → ★3, 1~2 → ★2, 3 이상 → ★1 (깨기만 하면 최소 1개)
+ */
+export function starsFor(penalty: number): number {
+  if (penalty <= 0) return 3;
+  if (penalty <= 2) return 2;
+  return 1;
+}
+
+function loadStars(): StarMap {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STARS_KEY) ?? '{}');
+    return raw && typeof raw === 'object' ? (raw as StarMap) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveStars(map: StarMap) {
+  try {
+    localStorage.setItem(STARS_KEY, JSON.stringify(map));
+  } catch {
+    // 저장 실패는 무시
+  }
+}
+
+/** 두 기록을 합친다 — 스테이지마다 더 많은 별을 남긴다 */
+function mergeStars(a: StarMap, b: StarMap): StarMap {
+  const out: StarMap = { ...a };
+  for (const [k, v] of Object.entries(b)) {
+    const n = Number(v);
+    if (Number.isFinite(n) && n > (out[k] ?? 0)) out[k] = Math.min(3, n);
+  }
+  return out;
+}
+
+/**
+ * 스테이지별 최고 별 기록. 진행도와 같은 문서(crossumProgress/data)의 stars 필드에 병합한다.
+ * 기록은 더 높을 때만 갱신된다 — 다시 풀어서 별이 줄어도 예전 기록이 남는다.
+ */
+export function useCrossumStars() {
+  const [stars, setStars] = useState<StarMap>(loadStars);
+  const starsRef = useRef(stars);
+  const syncedRef = useRef(false);
+
+  useEffect(() => {
+    starsRef.current = stars;
+    saveStars(stars);
+  }, [stars]);
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, async user => {
+      if (!user || syncedRef.current) return;
+      syncedRef.current = true;
+      try {
+        const ref = FIRESTORE_DOC(user.uid);
+        const snap = await getDoc(ref);
+        const cloud = (snap.exists() ? snap.data()?.stars : null) as StarMap | null ?? {};
+        const merged = mergeStars(cloud, loadStars());
+        setStars(prev => mergeStars(prev, merged));
+        if (JSON.stringify(merged) !== JSON.stringify(cloud)) {
+          await setDoc(ref, { stars: merged }, { merge: true });
+        }
+      } catch (e) {
+        console.error('크로썸 별 기록 동기화 실패', e);
+      }
+    });
+  }, []);
+
+  const recordStars = useCallback((stage: number, n: number) => {
+    const key = String(stage);
+    if ((starsRef.current[key] ?? 0) >= n) return;
+    const next = { ...starsRef.current, [key]: n };
+    starsRef.current = next;
+    setStars(next);
+    const user = auth.currentUser;
+    if (user) {
+      // 필드 하나만 갱신 — 다른 스테이지 기록을 덮어쓰지 않는다
+      setDoc(FIRESTORE_DOC(user.uid), { stars: { [key]: n } }, { merge: true }).catch(console.error);
+    }
+  }, []);
+
+  const totalStars = Object.values(stars).reduce((a, b) => a + (Number(b) || 0), 0);
+  return { stars, totalStars, recordStars };
+}
