@@ -206,3 +206,25 @@ describe('참새류 목표 고르기', () => {
     dests.slice(0, reds).forEach(d => expect(at(board, d.row, d.col).gem?.color).toBe(0));
   });
 });
+
+describe('도토리는 다른 아이템을 목표로 삼지 않는다', () => {
+  it('토마토 목표일 때 빨간 도토리(같은 색 아이템)로 날아가지 않고 토마토로 간다', () => {
+    // 도토리 (0,0)을 터뜨린다. 빨간 아이템들만 멀리 있고 토마토(R)는 (6,6) 하나뿐
+    const board = parseBoard(`
+      G@ B G B G B G
+      B G B G B G B
+      G B G B R@ B G
+      B G B G B G B
+      G B R- B G B G
+      B G B G B G B
+      G B G B G B R
+    `);
+    const scorer = goalTargetScorer([{ kind: 'color', color: 0, count: 2 }]);
+    for (let seed = 1; seed <= 20; seed++) {
+      const res = activateAt(board, { row: 0, col: 0 }, makeRng(seed), { targetScorer: scorer });
+      const clear = res.steps.find(s => s.kind === 'clear');
+      const fly = clear && clear.kind === 'clear' ? clear.blasts.find(b => b.kind === 'propeller') : undefined;
+      expect(fly?.destination, `seed ${seed}`).toEqual({ row: 6, col: 6 });
+    }
+  });
+});

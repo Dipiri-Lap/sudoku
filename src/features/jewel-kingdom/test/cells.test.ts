@@ -261,3 +261,41 @@ describe('턴 종료 훅', () => {
     expect(called).toBe(false);
   });
 });
+
+describe('낙하 경로', () => {
+  // 화면은 이 경로를 그대로 따라간다 - 출발·도착만 이으면 대각선이 처음부터 일어난 것처럼 보인다
+  it('막힌 칸은 아래로 내려온 뒤 마지막에 대각선으로 비켜 들어온다', () => {
+    const board = parseBoard(`
+      R G B
+      Y [box] P
+      G B Y
+    `);
+    const { moves } = applyGravity(board, new Set(['2,1']), makeRng(1), 5);
+    const diag = moves.find(m => m.col === 1 && m.toRow === 2)!;
+    expect(diag.path).toBeDefined();
+    const p = diag.path!;
+    // 한 걸음씩: 매 걸음 한 줄 내려가고 열은 많아야 한 칸 바뀐다
+    for (let i = 1; i < p.length; i++) {
+      expect(p[i].row - p[i - 1].row).toBe(1);
+      expect(Math.abs(p[i].col - p[i - 1].col)).toBeLessThanOrEqual(1);
+    }
+    expect(p[p.length - 1]).toEqual({ row: 2, col: 1 });
+  });
+
+  it('새 보석은 판 위에서 한 칸씩 줄지어 들어온다(앞 보석을 추월하지 않게)', () => {
+    const board = parseBoard(`
+      R G B
+      Y P B
+      G B Y
+    `);
+    const { moves } = applyGravity(board, new Set(['0,1', '1,1', '2,1']), makeRng(1), 5);
+    const spawned = moves.filter(m => m.spawned).sort((a, b) => b.toRow - a.toRow);
+    expect(spawned).toHaveLength(3);
+    spawned.forEach((m, i) => {
+      // 아래에 놓일 것이 판에 가장 가깝게 선다: -1, -2, -3
+      expect(m.fromRow).toBe(-1 - i);
+      // 출발부터 도착까지 끊김 없이 한 줄씩
+      expect(m.path!.length - 1).toBe(m.toRow - m.fromRow);
+    });
+  });
+});

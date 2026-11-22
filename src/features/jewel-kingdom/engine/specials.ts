@@ -62,6 +62,10 @@ export interface Blast {
   destinations?: Position[];
   /** 아이템 둘을 합친 폭발인가. 연출용 표시일 뿐 규칙에는 영향이 없다. */
   combo?: boolean;
+  /** 십자 합체의 줄 두께(삽+삽 1, 삽+거름포대 3). 연출이 둘을 구분한다 */
+  band?: number;
+  /** 무지개꽃 변신 합체: 지목한 색 채소를 이 아이템으로 바꾼다(연출용 표시) */
+  into?: SpecialKind;
 }
 
 /**
@@ -70,7 +74,7 @@ export interface Blast {
  * 엔진이 레벨을 알아서는 안 된다.
  */
 /**
- * radius는 그 칸에 떨어져 터지는 범위다. 0이면 그 칸 하나(참새·제비·민들레 - 한 칸만 콕),
+ * radius는 그 칸에 떨어져 터지는 범위다. 0이면 그 칸 하나(도토리·제비·민들레 - 한 칸만 콕),
  * 1이면 주변 3×3(개구리·수박폭탄·실어 나르는 짐). 한 칸만 치는 아이템을 3×3 점수로
  * 고르면 "목표물 옆의 아무 블록"을 치게 돼서 목표물은 안 맞는다.
  */
@@ -105,25 +109,32 @@ export function propellerDestination(
   rng?: Rng,
   radius = 0,
 ): Position {
-  let best: Position[] = [];
-  let bestScore = -Infinity;
-
-  for (let r = 0; r < board.height; r++) {
-    for (let c = 0; c < board.width; c++) {
-      const cell = at(board, r, c);
-      if (!cell.exists) continue;
-      if (!(isPlayable(cell) && cell.gem && !cell.gem.inert) && !cell.blocker) continue;
-      if (r === origin.row && c === origin.col) continue;
-      const score = scorer(board, r, c, radius);
-      if (score > bestScore) {
-        bestScore = score;
-        best = [{ row: r, col: c }];
-      } else if (score === bestScore) {
-        best.push({ row: r, col: c });
+  // 다른 아이템 칸은 노리지 않는다 - 도토리가 도토리로 날아가면 목표가 아니다.
+  // 판에 다른 후보가 하나도 없을 때만 아이템 칸도 본다.
+  const pick = (allowItems: boolean) => {
+    let best: Position[] = [];
+    let bestScore = -Infinity;
+    for (let r = 0; r < board.height; r++) {
+      for (let c = 0; c < board.width; c++) {
+        const cell = at(board, r, c);
+        if (!cell.exists) continue;
+        if (!(isPlayable(cell) && cell.gem && !cell.gem.inert) && !cell.blocker) continue;
+        if (r === origin.row && c === origin.col) continue;
+        if (!allowItems && cell.gem?.special) continue;
+        const score = scorer(board, r, c, radius);
+        if (score === -Infinity) continue;
+        if (score > bestScore) {
+          bestScore = score;
+          best = [{ row: r, col: c }];
+        } else if (score === bestScore) {
+          best.push({ row: r, col: c });
+        }
       }
     }
-  }
-
+    return best;
+  };
+  let best = pick(false);
+  if (best.length === 0) best = pick(true);
   if (best.length === 0) return origin;
   return best[rng ? rng.int(best.length) : 0];
 }
@@ -321,6 +332,8 @@ export interface ExpandOptions {
   rng?: Rng;
   /** 프로펠러가 노릴 칸의 점수 함수 (레벨 목표에서 만들어 넣는다) */
   targetScorer?: TargetScorer;
+  /** 이번 터짐에서 이미 맞은 장애물 칸(합체가 친 곳 등) - 마지막 겹이면 또 노리지 않는다 */
+  alreadyHit?: Set<string>;
 }
 
 export function expandSpecials(
@@ -347,6 +360,16 @@ export function expandSpecials(
 
     const targetColor =
       kind === 'lightball' ? lightballTarget ?? pickLightballColor(board, options.rng) : null;
+    // 날아가는 아이템은 이번에 이미 지워지는 칸·이미 맞아 깨질 장애물을 노리지 않는다.
+    // 연쇄로 터진 도토리가 앞서 날아간 아이템의 목표(곧 빌 칸)를 또 노려 빈칸을 쳤다.
+    const baseScorer = options.targetScorer ?? defaultTargetScorer;
+    const spent = (r: number, c: number) => {
+      const kk = key(r, c);
+      if (cells.has(kk)) return true;
+      const bl = at(board, r, c).blocker;
+      return !!bl && bl.layers <= 1 && (blastBlockers.has(kk) || !!options.alreadyHit?.has(kk));
+    };
+    const freshScorer: TargetScorer = (b, r, c, rad) => (spent(r, c) ? -Infinity : baseScorer(b, r, c, rad));
     const destination =
       kind === 'propeller'
         ? propellerDestination(
@@ -354,14 +377,12 @@ export function expandSpecials(
             { row, col },
             // 출발할 때 이미 십자를 날리므로, 십자 안의 칸을 또 노리면 헛방이다
             (b, r, c, rad) =>
-              Math.abs(r - row) + Math.abs(c - col) <= 1
-                ? -Infinity
-                : (options.targetScorer ?? defaultTargetScorer)(b, r, c, rad),
+              Math.abs(r - row) + Math.abs(c - col) <= 1 ? -Infinity : freshScorer(b, r, c, rad),
             options.rng,
             0,
           )
         : undefined;
-    const destinations = destinationsFor(board, { row, col }, kind, options);
+    const destinations = destinationsFor(board, { row, col }, kind, { ...options, targetScorer: freshScorer });
     blasts.push({
       row,
       col,
@@ -525,7 +546,7 @@ export function findCombo(a: SpecialKind, b: SpecialKind): ComboEffect | null {
   const combo = rule.combo;
 
   // 표는 계열끼리만 적는다. 변신·운반의 대상은 실제로 합쳐진 아이템이다 -
-  // 무지개꽃+낫이면 낫으로 변신하고, 참새+수박폭탄이면 수박폭탄을 싣고 간다.
+  // 무지개꽃+낫이면 낫으로 변신하고, 도토리+수박폭탄이면 수박폭탄을 싣고 간다.
   // 로켓은 방향이 둘이라 대표값(rocket-h)으로 맞춘다(변신은 방향을 번갈아 준다).
   const norm = (k: SpecialKind): SpecialKind => (k === 'rocket-v' ? 'rocket-h' : k);
   if (combo.effect === 'transform') {
@@ -587,8 +608,13 @@ export interface ComboOutcome {
   /** 즉시 삭제 대상 */
   cells: Set<string>;
   blasts: Blast[];
-  /** 범위 안에 든 장애물 칸 - 직접 한 번 맞는다(참새 떼가 장애물을 쪼는 등) */
+  /** 범위 안에 든 장애물 칸 - 직접 한 번 맞는다(도토리 떼가 장애물을 쪼는 등) */
   hits: Set<string>;
+  /**
+   * 같은 장애물을 여러 마리가 친 경우, 첫 번째 말고 더 맞는 횟수.
+   * 도토리 떼가 겹 많은 돌 하나에 몰려가면 마리 수만큼 깎여야 한다.
+   */
+  extraHits?: Map<string, number>;
 }
 
 /**
@@ -611,9 +637,12 @@ export function applyCombo(
   // 이어지는 연쇄에서 각자 한 번 더 발동해버린다(십자 합체가 로켓 두 발을
   // 덤으로 쏘는 식). 겉보기 결과가 같은 조합도 있어서 눈에 잘 안 띈다.
   const consumed: Board = { ...board, cells: board.cells.map(c => ({ ...c })) };
+  //
+  // 색도 지운다: 아이템을 떼어낸 자리에 원래 채소 색이 남으면 옆 채소와 보통 매치가
+  // 되어, 합친 칸 위아래·옆이 같이 지워지고 그 줄에 낀 다른 아이템까지 터졌다.
   [origin, other].forEach(p => {
     const cell = consumed.cells[p.row * consumed.width + p.col];
-    if (cell.gem?.special) cell.gem = { ...cell.gem, special: undefined };
+    if (cell.gem?.special) cell.gem = { ...cell.gem, special: undefined, color: null };
   });
   board = consumed;
 
@@ -642,8 +671,8 @@ export function applyCombo(
         for (let c = 0; c < board.width; c++) push(origin.row + d, c);
         for (let r = 0; r < board.height; r++) push(r, origin.col + d);
       }
-      blasts.push({ row: origin.row, col: origin.col, kind: 'rocket-h' });
-      blasts.push({ row: origin.row, col: origin.col, kind: 'rocket-v' });
+      blasts.push({ row: origin.row, col: origin.col, kind: 'rocket-h', band: combo.band });
+      blasts.push({ row: origin.row, col: origin.col, kind: 'rocket-v', band: combo.band });
       return { board, cells, blasts, hits };
     }
 
@@ -679,12 +708,34 @@ export function applyCombo(
           turned++;
         }
       }
+      // 연출용: 무지개꽃이 꽃잎을 뿌려 하나씩 바꾸고, 다 바뀌면 차례로 터진다(규칙과는 무관)
+      blasts.push({ row: origin.row, col: origin.col, kind: 'lightball', targetColor: target, into: combo.into });
       return { board: next, cells, blasts, hits };
     }
 
     case 'carry': {
-      // 실어 나르는 짐은 도착 자리에서 넓게 터지므로 주변까지 보고 고른다
-      const dest = propellerDestination(board, origin, options.targetScorer, options.rng, 1);
+      // 도토리 효과 그대로: 출발 자리 십자를 지우고 날아간다(혼자 터질 때와 같다)
+      [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => push(origin.row + dr, origin.col + dc));
+      // 실어 나르는 짐은 도착 자리에서 넓게 터지므로 주변까지 보고 고른다.
+      //  - 자기 십자는 이미 지웠으므로 후보에서 뺀다(혼자 터질 때와 같다)
+      //  - 짐이 출발 자리에서도 닿는 곳(삽이면 같은 줄, 거름포대면 주변 5×5)은 점수가 같을 때만
+      //    뒤로 민다. 안 그러면 목표가 없는 판에서 바로 옆·같은 줄로 "날아가" 그 줄의 다른
+      //    아이템까지 터뜨렸다. 목표물이 그쪽에 더 많으면(점수가 높으면) 그대로 간다.
+      const base = options.targetScorer ?? defaultTargetScorer;
+      const pay = combo.payload;
+      const nearOrigin = (r: number, c: number) =>
+        pay === 'rocket-h'
+          ? r === origin.row
+          : pay === 'rocket-v'
+            ? c === origin.col
+            : pay === 'tnt'
+              ? Math.abs(r - origin.row) <= 2 && Math.abs(c - origin.col) <= 2
+              : false;
+      const carryScorer: TargetScorer = (b, r, c, rad) =>
+        Math.abs(r - origin.row) + Math.abs(c - origin.col) <= 1
+          ? -Infinity
+          : base(b, r, c, rad) - (nearOrigin(r, c) ? 0.5 : 0);
+      const dest = propellerDestination(board, origin, carryScorer, options.rng, 1);
       // 실은 아이템이 또 목표를 노리는 종류(수박폭탄)면 도착 지점에서 다시 고른다.
       const payloadDests = destinationsFor(board, dest, combo.payload, options);
       blastArea(board, dest.row, dest.col, combo.payload, null, null, payloadDests).forEach(k => {
@@ -702,20 +753,31 @@ export function applyCombo(
       push(origin.row + 1, origin.col);
       push(origin.row, origin.col - 1);
       push(origin.row, origin.col + 1);
-      // 목적지가 겹치지 않도록 이미 고른 칸은 후보에서 뺀다.
-      const taken = new Set<string>();
+      // 목적지 고르기: 보석 칸은 한 마리만, 장애물 칸은 남은 겹 수만큼 여러 마리가 갈 수 있다.
+      // 남은 목표가 세 겹 돌 하나뿐이면 세 마리가 모두 그 돌로 가서 콕·콕·콕 깨뜨린다.
+      // 합쳐진 자리의 십자(벌써 지운 칸)는 후보에서 뺀다.
+      const uses = new Map<string, number>();
+      const capOf = (r: number, c: number) => {
+        const b = at(board, r, c).blocker;
+        if (!b) return 1;
+        return Math.max(1, b.layers + (b.shield ?? 0) + (b.hidden ? 1 : 0));
+      };
+      const extraHits = new Map<string, number>();
       for (let i = 0; i < combo.count; i++) {
         const scorer: TargetScorer = (b, r, c, rad) =>
-          taken.has(key(r, c))
+          (uses.get(key(r, c)) ?? 0) >= capOf(r, c) || Math.abs(r - origin.row) + Math.abs(c - origin.col) <= 1
             ? -Infinity
             : (options.targetScorer ?? defaultTargetScorer)(b, r, c, rad);
         const dest = propellerDestination(board, origin, scorer, options.rng, 0);
-        taken.add(key(dest.row, dest.col));
+        const dk = key(dest.row, dest.col);
+        const n = (uses.get(dk) ?? 0) + 1;
+        uses.set(dk, n);
         // 프로펠러 하나당 목표 한 칸. 십자는 출발 자리에서 한 번만 일어난다.
         push(dest.row, dest.col);
+        if (n > 1 && hits.has(dk)) extraHits.set(dk, n - 1);
         blasts.push({ row: origin.row, col: origin.col, kind: 'propeller', destination: dest });
       }
-      return { board, cells, blasts, hits };
+      return { board, cells, blasts, hits, ...(extraHits.size > 0 ? { extraHits } : {}) };
     }
 
     case 'clear-board': {

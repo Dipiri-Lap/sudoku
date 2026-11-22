@@ -218,3 +218,104 @@ describe('아이템이 생기는 칸의 바닥', () => {
     for (let c = 0; c < 5; c++) expect(at(result.board, 2, c).ground).toBeNull();
   });
 });
+
+describe('합체 표시(화면 연출용)', () => {
+  it('아이템 둘을 겹치면 스왑 단계는 합체로, 첫 터짐 단계는 합친 두 칸을 알린다', () => {
+    const board = boardWith({ '4,3': 'R@', '4,4': 'G-' });
+    const { result } = combine(board, [4, 3], [4, 4]);
+    const swap = result.steps[0];
+    expect(swap.kind).toBe('swap');
+    expect(swap.kind === 'swap' && swap.merge).toBe(true);
+    const clear = result.steps.find(s => s.kind === 'clear') as Extract<TurnStep, { kind: 'clear' }>;
+    expect(clear.merged).toEqual([
+      { row: 4, col: 3 },
+      { row: 4, col: 4 },
+    ]);
+  });
+
+  it('보통 스왑은 합체로 표시하지 않는다', () => {
+    const board = parseBoard(`
+      R G B
+      G R G
+      B B R
+    `);
+    const result = resolveTurn(board, { row: 0, col: 1 }, { row: 1, col: 1 }, rng());
+    const swap = result.steps[0];
+    expect(swap.kind === 'swap' && swap.merge).toBeFalsy();
+  });
+});
+
+describe('합체한 두 칸은 매치에 끼지 않는다', () => {
+  it('도토리+삽을 합쳐도 그 칸 위아래 같은 색 채소가 매치로 지워지지 않는다', () => {
+    // 끌어서 바꾸면 G 삽은 (4,3)으로 온다. 그 위아래(3,3)(5,3)도 G로 두면, 아이템을 떼어낸
+    // 자리에 색이 남을 경우 세로 G 3매치가 되어 위아래가 같이 지워졌다(그 줄의 아이템까지 터짐)
+    const board = boardWith({ '4,3': 'R@', '4,4': 'G-', '3,3': 'G', '5,3': 'G', '3,4': 'B', '5,4': 'Y' });
+    const { clear } = combine(board, [4, 3], [4, 4]);
+    expect(clear!.cells).not.toContain('3,3');
+    expect(clear!.cells).not.toContain('5,3');
+  });
+});
+
+describe('도토리 합체도 출발 자리 십자를 지운다', () => {
+  it('도토리+삽: 합체 아이템이 나오는 칸(놓은 칸)의 상하좌우가 지워진다', () => {
+    const board = boardWith({ '4,3': 'R@', '4,4': 'G-' });
+    const { clear } = combine(board, [4, 3], [4, 4]);
+    ['3,4', '5,4', '4,3', '4,5'].forEach(k => expect(clear!.cells).toContain(k));
+  });
+});
+
+describe('도토리 합체 도착지', () => {
+  it('목표가 없으면 자기 십자·같은 줄을 피해 날아가 그 줄의 다른 아이템을 터뜨리지 않는다', () => {
+    // [도토리2 . 도토리1 삽] - 예전엔 도착지가 같은 줄이면 삽이 그 줄을 지우며 도토리2까지 터졌다
+    for (let seed = 1; seed <= 30; seed++) {
+      const board = boardWith({ '6,2': 'B@', '6,4': 'R@', '6,5': 'G-' });
+      const result = resolveTurn(board, { row: 6, col: 4 }, { row: 6, col: 5 }, makeRng(seed));
+      const first = result.steps.find(s => s.kind === 'clear') as Extract<TurnStep, { kind: 'clear' }>;
+      const fly = first.blasts.find(b => b.kind === 'propeller' && b.destination)!;
+      expect(fly.destination!.row, `seed ${seed}`).not.toBe(6);
+      expect(first.cells, `seed ${seed}`).not.toContain('6,2');
+    }
+  });
+});
+
+describe('도토리 떼: 겹 많은 장애물 하나뿐이면 몰려가서 깨뜨린다', () => {
+  it('세 겹 돌 하나만 있으면 세 마리가 모두 그 돌로 가서 깬다', () => {
+    const board = boardWith({ '4,3': 'R@', '4,4': 'G@', '0,0': '[ice:3]' });
+    const { result, clear } = combine(board, [4, 3], [4, 4]);
+    const dests = clear!.blasts.filter(b => b.kind === 'propeller' && b.destination).map(b => key(b.destination!));
+    expect(dests).toEqual(['0,0', '0,0', '0,0']);
+    expect(at(result.board, 0, 0).blocker).toBeNull();
+  });
+
+  it('두 겹 돌이면 두 마리만 돌로 가고 한 마리는 다른 곳으로', () => {
+    const board = boardWith({ '4,3': 'R@', '4,4': 'G@', '0,0': '[ice:2]' });
+    const { result, clear } = combine(board, [4, 3], [4, 4]);
+    const dests = clear!.blasts.filter(b => b.kind === 'propeller' && b.destination).map(b => key(b.destination!));
+    expect(dests.filter(k => k === '0,0')).toHaveLength(2);
+    expect(at(result.board, 0, 0).blocker).toBeNull();
+  });
+});
+
+function key(p: { row: number; col: number }) {
+  return `${p.row},${p.col}`;
+}
+
+describe('연쇄로 터진 도토리는 이미 지워지는 칸을 노리지 않는다', () => {
+  it('도토리+삽이 목표 줄을 지울 때 그 줄의 도토리는 다른 곳으로 날아간다', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      // 목표 짚단(0,6) 하나. 합체 도토리가 그쪽으로 가 0번 줄을 삽으로 지우면 (0,2) 도토리가 연쇄로 터진다
+      const board = boardWith({ '6,3': 'R@', '6,4': 'G-', '0,6': '[box]', '0,2': 'B@' });
+      const result = resolveTurn(board, { row: 6, col: 3 }, { row: 6, col: 4 }, makeRng(seed));
+      const clear = result.steps.find(s => s.kind === 'clear') as Extract<TurnStep, { kind: 'clear' }>;
+      const chained = clear.blasts.find(b => b.kind === 'propeller' && !b.combo);
+      if (!chained) continue; // 이 시드에선 0번 줄로 안 갔다
+      const d = chained.destination!;
+      // 합체가 지운 칸(0번 줄 등)이나 깨진 짚단을 노리면 안 된다
+      const comboCells = new Set(clear.cells);
+      const box = result.steps[0].board; // 스왑 직후 판
+      expect(d.row, `seed ${seed}`).not.toBe(0);
+      expect(at(box, d.row, d.col).blocker?.kind === 'box' && d.row === 0, `seed ${seed}`).toBe(false);
+      expect(comboCells.size).toBeGreaterThan(0);
+    }
+  });
+});

@@ -29,8 +29,24 @@ const plain: Recipe = {
 };
 
 describe('배치', () => {
+  it('정한 겹 수가 판 글자로 적었다 읽어도 그대로다(기본 3겹인 돌을 1겹으로)', () => {
+    // 한 겹이라고 겹 수를 생략하면 읽는 쪽이 카탈로그 기본값(3겹)으로 채운다 -
+    // 아이템 전용 돌이 세 배로 단단해져 굽기가 실패했었다
+    const g = generateLevel(
+      1,
+      { ...plain, elements: [{ id: 'ice', count: 3, layers: 1 }] },
+      makeRng(2),
+      { ...FAST, maxReshufflesPerMove: Infinity },
+    );
+    const board = parseBoard(g!.level.layout);
+    const stones = board.cells.filter(c => c.blocker?.kind === 'ice');
+    expect(stones.length).toBe(3);
+    stones.forEach(c => expect(c.blocker!.layers).toBe(1));
+  });
+
   it('판 모양 밖은 구멍이 된다', () => {
-    const g = generateLevel(1, { ...plain, shape: 'diamond' }, makeRng(1), FAST);
+    // 모양만 본다 - 6x6 마름모는 작아서 섞기가 잦아 섞기 거름은 끈다
+    const g = generateLevel(1, { ...plain, shape: 'diamond' }, makeRng(1), { ...FAST, maxReshufflesPerMove: Infinity });
     const board = parseBoard(g!.level.layout);
 
     expect(at(board, 0, 0).exists).toBe(false);

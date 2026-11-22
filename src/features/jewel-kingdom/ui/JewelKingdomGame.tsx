@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { isMuted, playSfx, setMuted, unlockAudio } from './sound';
+import { playStepSounds } from './stepSounds';
 import { at, cloneBoard, isCellSwappable, emptyCell, isAdjacent, key, makeGem } from '../engine/board';
 import { activateAt, hasAnyMove, listMoves, resolveTurn, activateBooster, activateSkill } from '../engine/resolve';
 import { makeRng } from '../engine/rng';
@@ -43,20 +45,12 @@ import {
   SpawnerSprite,
 } from './sprites';
 import { usePlayback } from './usePlayback';
-import SkillPanel from './SkillPanel';
 import FxLayer from './fx/FxLayer';
-import {
-  MAX_SKILL_SLOTS,
-  canUseSkillAt,
-  chargeSkills,
-  isSkillReady,
-  nextSlotLevel,
-  sanitizeSkills,
-  skillDef,
-  skillSlotsFor,
-} from '../engine/skills';
+import { canUseSkillAt, chargeSkills, isSkillReady, skillDef } from '../engine/skills';
+import { DEFAULT_CHARACTER } from '../data/characters';
 import type { SpecialKind } from '../engine/types';
-import { GRAVITY_EASE, LAND_MS, SWAP_EASE, SWAP_MS, fallDurationMs } from './constants';
+import { LAND_MS, MERGE_MS, SWAP_EASE, SWAP_MS, fallDelays, fallDurationMs, fallKeyframes } from './constants';
+import { fallDistance } from '../engine/gravity';
 import './JewelKingdomGame.css';
 
 const COMMIT_RATIO = 0.6; // 셀 크기의 60% 이상 끌어야 방향이 확정된다
@@ -65,7 +59,7 @@ const COMMIT_RATIO = 0.6; // 셀 크기의 60% 이상 끌어야 방향이 확정
  * 텃밭 컨셉: 블록은 색마다 채소 하나, 아이템은 색 없는 도구 하나씩이다.
  * 아이템은 색 매치 역할을 잃으므로(SPEC 3.11, matchColorOf) 그림도 색을
  * 따르지 않는다 - 무슨 색에서 왔는지보다 "무슨 아이템인지"가 읽혀야 한다.
- *   로켓=삽(세로 로켓은 CSS로 90도 돌린다) / TNT=거름 포대 / 프로펠러=참새 / 라이트볼=무지개 꽃
+ *   로켓=삽(세로 로켓은 CSS로 90도 돌린다) / TNT=거름 포대 / 프로펠러=도토리 / 라이트볼=무지개 꽃
  */
 const ITEM_SPRITE: Record<string, string> = {
   'rocket-h': 'rocket',
@@ -85,26 +79,6 @@ function spriteFor(color: number | null, special?: string): string {
 function withDelay(style: React.CSSProperties, delay: number | undefined): React.CSSProperties {
   if (!delay) return style;
   return { ...style, ['--d' as string]: `${Math.round(delay)}ms` };
-}
-
-const SKILLS_KEY = 'jk-skills';
-
-/** 스킬 장착은 기기에 기억해 둔다. 저장소가 막힌 환경(사생활 보호 창 등)이면 기본 장착으로 간다. */
-function readSkills(): SpecialKind[] {
-  try {
-    const raw = localStorage.getItem(SKILLS_KEY);
-    return sanitizeSkills(raw ? JSON.parse(raw) : null);
-  } catch {
-    return sanitizeSkills(null);
-  }
-}
-
-function writeSkills(skills: SpecialKind[]) {
-  try {
-    localStorage.setItem(SKILLS_KEY, JSON.stringify(skills));
-  } catch {
-    /* 저장 못 해도 이번 세션에서는 쓴다 */
-  }
 }
 
 type Gauges = Partial<Record<SpecialKind, number>>;
@@ -131,15 +105,16 @@ const JewelKingdomGame: React.FC = () => {
   const [sandbox, setSandbox] = useState(false);
   /** 지금 겨누고 있는 부스터. 칸을 지목해야 발동한다. */
   const [armed, setArmed] = useState<BoosterKind | null>(null);
-  /** 장착한 스킬(게이지가 차면 쓰는 아이템). 칸 수는 레벨에 따라 열린다 */
-  const [skills, setSkills] = useState<SpecialKind[]>(readSkills);
+  /** 함께하는 캐릭터. 캐릭터마다 스킬이 하나 있다(지금은 샘플 한 명) */
+  const character = DEFAULT_CHARACTER;
   /** 스킬별 게이지. 판마다 0에서 시작한다 */
   const [gauges, setGauges] = useState<Gauges>({});
   /** 지금 겨누고 있는 스킬. 칸을 지목해야 발동한다 */
   const [armedSkill, setArmedSkill] = useState<SpecialKind | null>(null);
-  const [skillOpen, setSkillOpen] = useState(false);
   /** 개발 서랍(레벨·시험 목록)이 열려 있는가. 개발 서버에서만 쓴다. */
   const [devOpen, setDevOpen] = useState(false);
+  /** 소리 끔(기기에 기억) */
+  const [soundOff, setSoundOff] = useState(isMuted);
   const { view, play, reset } = usePlayback(game.level.board);
 
   const boardRef = useRef<HTMLDivElement>(null);
@@ -162,9 +137,8 @@ const JewelKingdomGame: React.FC = () => {
   const level = game.level;
   /** 화면에 보이는 스테이지 번호. 생성 레벨은 내부 번호(1000+n)와 다르다 */
   const stageNo = Number(level.level.label ?? level.level.id);
-  // 스킬 칸은 레벨이 오르면 열린다. 샌드박스·개발 서버에서는 시험하기 쉽게 다 열어 둔다.
-  const skillSlots = sandbox || import.meta.env.DEV ? MAX_SKILL_SLOTS : skillSlotsFor(stageNo);
-  const equipped = skills.slice(0, skillSlots);
+  // 게이지를 채우는 스킬은 캐릭터의 스킬 하나다
+  const equipped: SpecialKind[] = [character.skill];
   // 샌드박스에서는 게이지가 늘 차 있다 - 같은 스킬을 반복해서 시험해야 한다.
   const skillReady = (kind: SpecialKind) => sandbox || isSkillReady(gauges, kind);
 
@@ -249,7 +223,12 @@ const JewelKingdomGame: React.FC = () => {
     }
     // id가 -1인 이동은 굴러떨어지는 장애물이라 보석 애니메이션 대상이 아니다.
     const fallById = new Map(view.falling.filter(m => m.id >= 0).map(m => [m.id, m]));
+    // 줄줄이 내려오기: 위 보석일수록 늦게 출발
+    const delays = fallDelays(view.falling);
+    const delayById = new Map(view.falling.map((m, i) => [m.id, delays[i]]));
     const running: Animation[] = [];
+    // 합체 스왑: 자리를 바꾸지 않고 끈 아이템(a)이 놓은 칸(b)으로 빨려 들어가 둘이 감기며 사라진다
+    const mergeStep = view.step?.kind === 'swap' && view.step.merge ? view.step : null;
 
     nextPos.forEach((pos, id) => {
       const el = cellElsRef.current.get(id);
@@ -263,23 +242,62 @@ const JewelKingdomGame: React.FC = () => {
       const dx = (prev.col - pos.col) * cellSize;
       const dy = (prev.row - pos.row) * cellSize;
       const dropping = !!fall && dy < 0;
-      const duration = dropping ? fallDurationMs(pos.row - prev.row) : SWAP_MS;
 
-      const anim = el.animate(
-        [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
-        { duration, easing: dropping ? GRAVITY_EASE : SWAP_EASE },
-      );
+      if (mergeStep) {
+        // 보드는 이미 바뀐 자리다: b에 있는 건 a에서 온 아이템, a에 있는 건 원래 b의 아이템
+        const atB = pos.row === mergeStep.b.row && pos.col === mergeStep.b.col;
+        // 원래 b의 아이템은 b 자리에 그대로 머문다(보드상 a에 있으므로 원래 자리 b만큼 밀어 둔다)
+        const stay = atB ? null : `translate(${dx}px, ${dy}px)`;
+        const from = atB ? `translate(${dx}px, ${dy}px)` : stay!;
+        const mid = atB ? 'translate(0px, 0px)' : stay!;
+        const turn = atB ? 1 : -1;
+        running.push(
+          el.animate(
+            [
+              { transform: `${from} scale(1) rotate(0deg)`, opacity: 1, offset: 0 },
+              { transform: `${mid} scale(1.08) rotate(${turn * 40}deg)`, opacity: 1, offset: 0.45 },
+              { transform: `${mid} scale(0.5) rotate(${turn * 220}deg)`, opacity: 1, offset: 0.85 },
+              { transform: `${mid} scale(0.2) rotate(${turn * 300}deg)`, opacity: 0, offset: 1 },
+            ],
+            { duration: MERGE_MS, easing: 'ease-in', fill: 'forwards' },
+          ),
+        );
+        return;
+      }
+
+      // 낙하는 엔진이 기록한 경로를 그대로 따라간다(아래 → 막히면 대각선 → 다시 아래).
+      // 출발·도착만 잇는 직선이면 대각선이 처음부터 일어난 것처럼 비스듬히 미끄러진다.
+      const anim = dropping
+        ? el.animate(
+            fallKeyframes(fall).map(f => ({
+              transform: `translate(${f.dx * cellSize}px, ${f.dy * cellSize}px)`,
+              offset: f.offset,
+            })),
+            {
+              duration: fallDurationMs(fallDistance(fall)),
+              easing: 'linear',
+              // 출발을 기다리는 동안에도 원래 자리(위)에 머물러 있어야 한다
+              delay: delayById.get(id) ?? 0,
+              fill: 'backwards',
+            },
+          )
+        : el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }], {
+            duration: SWAP_MS,
+            easing: SWAP_EASE,
+          });
       running.push(anim);
 
       if (dropping) {
         anim.finished
           .then(() => {
-            // 착지 스쿼시. 낙하가 실제로 끝난 뒤에만 얹는다.
+            // 착지: 납작 → 작게 통 튀기 → 살짝 눌렸다 제자리. 낙하가 실제로 끝난 뒤에만 얹는다.
+            const hop = cellSize * 0.07;
             el.animate(
               [
-                { transform: 'scaleY(0.82) scaleX(1.14)' },
-                { transform: 'scaleY(1.06) scaleX(0.96)', offset: 0.55 },
-                { transform: 'scale(1)' },
+                { transform: 'translateY(0) scaleY(0.84) scaleX(1.12)' },
+                { transform: `translateY(${-hop}px) scaleY(1.04) scaleX(0.97)`, offset: 0.4 },
+                { transform: 'translateY(0) scaleY(0.95) scaleX(1.04)', offset: 0.75 },
+                { transform: 'translateY(0) scale(1)' },
               ],
               { duration: LAND_MS, easing: 'ease-out' },
             );
@@ -312,6 +330,25 @@ const JewelKingdomGame: React.FC = () => {
   };
 
   const canPlay = !view.playing && level.status === 'playing';
+
+  // 효과음: 단계가 바뀔 때마다 그 단계의 소리를 연출 시간표에 맞춰 건다
+  useEffect(() => {
+    if (view.step) playStepSounds(view.step);
+  }, [view.tick, view.step]);
+
+  // 판이 끝나면 축하·아쉬움 소리(재생이 다 끝난 뒤 한 번)
+  const endedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (view.playing) return;
+    const key = `${level.level.id}:${level.status}`;
+    if (level.status === 'playing') {
+      endedRef.current = null;
+      return;
+    }
+    if (endedRef.current === key) return;
+    endedRef.current = key;
+    playSfx(level.status === 'won' ? 'win' : 'lose');
+  }, [view.playing, level.status, level.level.id]);
 
   const applyMove = (a: Position, b: Position) => {
     if (!canPlay) return;
@@ -390,6 +427,8 @@ const JewelKingdomGame: React.FC = () => {
   };
 
   const onPointerDown = (pos: Position) => (e: React.PointerEvent) => {
+    // 브라우저는 첫 터치 전에는 소리를 막는다 - 여기서 깨운다
+    unlockAudio();
     // 샌드박스에서 도구를 들고 있으면 스왑이 아니라 찍기다.
     if (tool) {
       paintAt(pos);
@@ -494,7 +533,29 @@ const JewelKingdomGame: React.FC = () => {
         );
       }
 
-      if (cell.blocker) {
+      // 이번에 깎이거나 깨지는 장애물: 맞는 시각까지는 피해 직전 모습을 보여 주고,
+      // 그 순간 옛 모습은 번쩍 사라지고 새 모습(남은 겹)이 나타난다
+      const oldB = view.before && view.damaged.has(k) ? at(view.before, r, c).blocker : null;
+      const changed = !!oldB && (!cell.blocker || cell.blocker.layers !== oldB.layers || cell.blocker.kind !== oldB.kind);
+      if (oldB && changed) {
+        const hit = { ...style, ['--h' as string]: `${Math.round(view.hitAt.get(k) ?? 0)}ms` };
+        cells.push(
+          <div key={`bo-${k}`} className="jk-cell jk-blocker pending-old" style={hit}>
+            <BlockerSprite kind={oldB.kind} layers={oldB.layers} hidden={oldB.hidden} />
+            {!oldB.hidden && oldB.layers > 1 && <span className="jk-layers">{oldB.layers}</span>}
+          </div>,
+        );
+        if (cell.blocker) {
+          const b = cell.blocker;
+          cells.push(
+            <div key={`b-${k}`} className="jk-cell jk-blocker pending-new" style={hit}>
+              <BlockerSprite kind={b.kind} layers={b.layers} hidden={b.hidden} />
+              {!b.hidden && b.layers > 1 && <span className="jk-layers">{b.layers}</span>}
+            </div>,
+          );
+          continue;
+        }
+      } else if (cell.blocker) {
         const b = cell.blocker;
         cells.push(
           <div
@@ -523,6 +584,8 @@ const JewelKingdomGame: React.FC = () => {
         view.spawned.has(k) ? 'spawning' : '',
         view.invalid.has(k) ? 'invalid' : '',
         view.collecting.has(k) ? 'collecting' : '',
+        view.merged.has(k) ? 'merged' : '',
+        view.morphAt.has(k) ? 'morphing' : '',
         (armed && canUseAt(view.board, { row: r, col: c }, armed)) ||
         (armedSkill && canUseSkillAt(view.board, { row: r, col: c }))
           ? 'targetable'
@@ -539,10 +602,33 @@ const JewelKingdomGame: React.FC = () => {
             else cellElsRef.current.delete(gem.id);
           }}
           className={classes}
-          style={withDelay(style, view.clearing.has(k) ? view.delays.get(k) : undefined)}
+          style={withDelay(
+            // 아이템마다 대기 동작의 박자를 어긋나게 - 판의 아이템이 한꺼번에 같이 깜빡이지 않게
+            gem.special ? { ...style, ['--ph' as string]: `${-((gem.id * 0.37) % 1.7).toFixed(2)}s` } : style,
+            view.clearing.has(k) ? view.delays.get(k) : undefined,
+          )}
           onPointerDown={onPointerDown({ row: r, col: c })}
         >
-          {gem.inert ? (
+          {gem.special && !gem.inert && <ItemIdleFx kind={gem.special} src={spriteFor(gem.color, gem.special)} />}
+          {view.morphAt.has(k) && view.before && !at(view.before, r, c).gem?.special ? (
+            // 무지개꽃 변신: 꽃잎이 닿기 전엔 원래 채소, 닿는 순간 아이템으로 뿅
+            <>
+              <img
+                className="morph-old"
+                style={{ ['--m' as string]: `${Math.round(view.morphAt.get(k)!)}ms` }}
+                src={spriteFor(at(view.before, r, c).gem?.color ?? gem.color)}
+                alt=""
+                draggable={false}
+              />
+              <img
+                className="morph-new"
+                style={{ ['--m' as string]: `${Math.round(view.morphAt.get(k)!)}ms` }}
+                src={spriteFor(gem.color, gem.special)}
+                alt=""
+                draggable={false}
+              />
+            </>
+          ) : gem.inert ? (
             <CargoSprite color={gem.color} />
           ) : (
             (gem.special || gem.color !== null) && (
@@ -585,6 +671,20 @@ const JewelKingdomGame: React.FC = () => {
             )}
           </div>
         )}
+        <button
+          className="jk-round-btn"
+          onClick={() => {
+            unlockAudio();
+            setSoundOff(m => {
+              setMuted(!m);
+              return !m;
+            });
+          }}
+          title={soundOff ? '소리 켜기' : '소리 끄기'}
+          aria-label={soundOff ? '소리 켜기' : '소리 끄기'}
+        >
+          {soundOff ? <VolumeX size={22} strokeWidth={3} /> : <Volume2 size={22} strokeWidth={3} />}
+        </button>
         <button
           className="jk-round-btn"
           onClick={() => (sandbox ? openSandbox() : loadLevel(levelIndex))}
@@ -684,83 +784,74 @@ const JewelKingdomGame: React.FC = () => {
         </div>
       )}
 
-      <div className="jk-hud">
-        <div className="jk-moves">
-          <span className="n">{level.movesLeft}</span>
-          <span className="label">남은 수</span>
+      {/* 상단 판(로얄킹덤식): 나무 판 하나에 [목표] [캐릭터 창문 + 스킬 게이지] [남은 수].
+          캐릭터는 아치 창문에 얼굴이 꽉 차고 판 위로 살짝 솟는다. 게이지가 꽉 차면
+          창문을 눌러 겨눈 뒤 칸을 찍어 스킬을 쓴다. */}
+      <div className="jk-hud2">
+        <div className="jk-hud-box">
+          <span className="jk-tab">목표</span>
+          <div className="jk-hud-goals">
+            {level.level.goals.map((goal, i) => {
+              const done = level.progress[i] >= goal.count;
+              return (
+                <div key={i} className={`jk-hgoal${done ? ' done' : ''}`} title={describeGoal(goal)}>
+                  {goal.kind === 'color' ? (
+                    <img src={spriteFor(goal.color)} alt="" />
+                  ) : (
+                    <span className="jk-goal-icon">
+                      {goal.kind === 'blocker' ? (
+                        <BlockerSprite kind={goal.blockerKind} layers={1} />
+                      ) : goal.kind === 'ground' || goal.kind === 'spread' ? (
+                        <GroundSprite kind={goal.groundKind} layers={1} />
+                      ) : goal.kind === 'collect' ? (
+                        <CollectorSprite color={null} left={0} />
+                      ) : (
+                        <CoverSprite kind={goal.kind === 'cover' ? goal.coverKind : undefined} layers={1} />
+                      )}
+                    </span>
+                  )}
+                  <span className="jk-hgoal-n">{done ? '✓' : Math.max(0, goal.count - level.progress[i])}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="jk-goals">
-          {level.level.goals.map((goal, i) => {
-            const done = level.progress[i] >= goal.count;
-            return (
-              <div key={i} className={`jk-goal${done ? ' done' : ''}`} title={describeGoal(goal)}>
-                {goal.kind === 'color' ? (
-                  <img src={spriteFor(goal.color)} alt="" />
-                ) : (
-                  <span className="jk-goal-icon">
-                    {goal.kind === 'blocker' ? (
-                      <BlockerSprite kind={goal.blockerKind} layers={1} />
-                    ) : goal.kind === 'ground' || goal.kind === 'spread' ? (
-                      <GroundSprite kind={goal.groundKind} layers={1} />
-                    ) : goal.kind === 'collect' ? (
-                      <CollectorSprite color={null} left={0} />
-                    ) : (
-                      <CoverSprite kind={goal.kind === 'cover' ? goal.coverKind : undefined} layers={1} />
-                    )}
-                  </span>
-                )}
-                <span className="jk-goal-n">
-                  {done ? '✓' : Math.max(0, goal.count - level.progress[i])}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* 스킬 바: 장착한 스킬과 게이지. 꽉 찬 스킬을 누르면 겨누고, 칸을 찍으면 쓴다. */}
-      <div className="jk-skill-bar">
-        {Array.from({ length: skillSlots }, (_, i) => {
-          const kind = equipped[i];
-          if (!kind) {
-            return (
-              <button
-                key={`empty-${i}`}
-                className="jk-skill empty"
-                onClick={() => setSkillOpen(true)}
-                disabled={view.playing}
-              >
-                <span className="jk-skill-ring">
-                  <span className="jk-skill-face">＋</span>
-                </span>
-                <span className="jk-skill-name">빈 칸</span>
-              </button>
-            );
-          }
+        {(() => {
+          const kind = character.skill;
           const def = skillDef(kind)!;
           const ready = skillReady(kind);
-          const fill = sandbox ? 1 : Math.min(1, (gauges[kind] ?? 0) / def.cost);
+          const have = sandbox ? def.cost : Math.min(def.cost, Math.floor(gauges[kind] ?? 0));
           return (
             <button
-              key={kind}
-              className={`jk-skill${ready ? ' ready' : ''}${armedSkill === kind ? ' armed' : ''}`}
+              className={`jk-buddy2${ready ? ' ready' : ''}${armedSkill === kind ? ' armed' : ''}`}
               onClick={() => tapSkill(kind)}
               disabled={!canPlay || !ready}
-              title={`${def.label}: ${def.desc}`}
-              style={{ ['--fill' as string]: fill }}
+              title={`${character.name} · ${def.label}: ${def.desc}`}
+              style={{ ['--fill' as string]: have / def.cost }}
             >
-              <span className="jk-skill-ring">
-                <span className="jk-skill-face">
-                  <img src={spriteFor(null, kind)} alt="" draggable={false} />
+              <span className="jk-arch">
+                <span className="jk-arch-in" />
+                {/* 캐릭터는 창문 하늘 위에 따로 얹는다 - 아래는 창틀 안쪽에서 잘리고 머리는 틀 위로 나온다 */}
+                <span className="jk-arch-pic">
+                  <img src={character.face} alt={character.name} draggable={false} />
                 </span>
+                <img className="jk-arch-leaf l" src="/assets/3match/fx/leaf-green.png" alt="" draggable={false} />
+                <img className="jk-arch-leaf r" src="/assets/3match/fx/leaf-green.png" alt="" draggable={false} />
               </span>
-              <span className="jk-skill-name">{ready ? '사용!' : def.label}</span>
+              <span className="jk-bgauge">
+                <img src={spriteFor(null, kind)} alt="" draggable={false} />
+                <i />
+                <b>{ready ? '사용!' : `${have}/${def.cost}`}</b>
+              </span>
             </button>
           );
-        })}
-        <button className="jk-equip-edit" onClick={() => setSkillOpen(true)} disabled={view.playing}>
-          장착
-        </button>
+        })()}
+
+        <div className="jk-hud-box">
+          <span className="jk-tab">남은 수</span>
+          <span className={`jk-hud-moves${level.movesLeft <= 5 ? ' low' : ''}`}>{level.movesLeft}</span>
+        </div>
       </div>
 
       <div className="jk-board-outer" ref={boardOuterRef}>
@@ -798,24 +889,6 @@ const JewelKingdomGame: React.FC = () => {
           </div>
         )}
       </div>
-
-      {skillOpen && (
-        <SkillPanel
-          equipped={equipped}
-          slots={skillSlots}
-          nextSlotLevel={nextSlotLevel(stageNo)}
-          spriteFor={kind => spriteFor(null, kind)}
-          onClose={() => setSkillOpen(false)}
-          onSave={next => {
-            setSkills(next);
-            writeSkills(next);
-            setSkillOpen(false);
-            // 판 도중에 바꾸면 게이지가 섞여 비교가 안 된다 - 새로 시작한다.
-            if (sandbox) openSandbox();
-            else loadLevel(levelIndex);
-          }}
-        />
-      )}
 
       {sandbox ? (
         <SandboxPalette
@@ -879,4 +952,31 @@ function BoardOutline({ board }: { board: Board }) {
       </svg>
     );
   }, [shape, w]);
+}
+
+/**
+ * 판 위 아이템이 "아이템"으로 읽히게 하는 대기 효과. 일반 채소와 한눈에 구분돼야 한다.
+ *  - 공통: 뒤에서 숨 쉬는 빛무리 + 가끔 반짝이는 별
+ *  - 거름포대: 심지 끝에서 불꽃이 타닥타닥 튄다(그림의 심지 끝 = 가로 58%·세로 11%)
+ *  - 삽: 날 위로 금속 반사광이 쓱 지나간다(그림 모양대로 가린 띠)
+ * 그림 자체의 움직임(부풀기·들썩이기·통통 뛰기·돌기)은 CSS가 img에 건다.
+ * 칸(.jk-gem)의 이동·터짐 애니메이션과 겹치지 않게 칸 안쪽 요소에만 건다.
+ */
+function ItemIdleFx({ kind, src }: { kind: string; src: string }) {
+  const mask = { WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` } as React.CSSProperties;
+  return (
+    <span className="jk-ifx" aria-hidden>
+      <span className="jk-aura" />
+      {kind === 'tnt' && (
+        <span className="jk-fuse">
+          <i />
+          <i />
+          <i />
+          <i />
+        </span>
+      )}
+      {(kind === 'rocket-h' || kind === 'rocket-v') && <span className="jk-glint" style={mask} />}
+      <span className="jk-twinkle" />
+    </span>
+  );
 }

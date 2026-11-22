@@ -40,7 +40,8 @@ import type { Rng } from './rng';
  * 그 순간 규칙이 두 군데에 존재하게 된다.
  */
 export type TurnStep =
-  | { kind: 'swap'; board: Board; a: Position; b: Position }
+  /** merge: 아이템 둘을 겹쳐 합체한다 - 화면은 자리 바꾸기 대신 a가 b로 빨려 들어가 합쳐지는 장면을 그린다 */
+  | { kind: 'swap'; board: Board; a: Position; b: Position; merge?: boolean }
   | { kind: 'revert'; board: Board; a: Position; b: Position }
   | {
       kind: 'clear';
@@ -52,6 +53,8 @@ export type TurnStep =
       blasts: Blast[];
       /** 이번에 겹이 깎인 장애물·덮개 */
       damage: DamageEvent[];
+      /** 합체한 두 칸(끈 자리 a, 놓은 자리 b). 합체 아이템은 b에서 나온다 */
+      merged?: [Position, Position];
     }
   | { kind: 'fall'; board: Board; moves: FallMove[]; exits: ExitEvent[] }
   /**
@@ -144,12 +147,12 @@ export function resolveTurn(
   }
 
   const current = swap(board, a, b);
-  steps.push({ kind: 'swap', board: current, a, b });
-
   // 아이템 둘을 서로 스왑하면 개별 발동이 아니라 합체다(SPEC 5장).
   // 합체는 개별 효과의 합이 아니라 별도의 효과이므로 여기서 먼저 가른다.
+  const combo = gemA.special && gemB.special ? findCombo(gemA.special, gemB.special) : null;
+  steps.push({ kind: 'swap', board: current, a, b, ...(combo ? { merge: true } : {}) });
+
   if (gemA.special && gemB.special) {
-    const combo = findCombo(gemA.special, gemB.special);
     if (combo) {
       const outcome = applyCombo(current, b, a, combo, {
         rng,
@@ -160,6 +163,7 @@ export function resolveTurn(
         b,
         comboBlasts: outcome.blasts,
         comboHits: outcome.hits,
+        comboExtraHits: outcome.extraHits,
       });
     }
   }
@@ -223,7 +227,13 @@ function cascade(
   steps: TurnStep[],
   options: ResolveOptions,
   rng: Rng,
-  revert?: { a: Position; b: Position; comboBlasts?: Blast[]; comboHits?: Set<string> },
+  revert?: {
+    a: Position;
+    b: Position;
+    comboBlasts?: Blast[];
+    comboHits?: Set<string>;
+    comboExtraHits?: Map<string, number>;
+  },
 ): TurnResult {
   const colors = options.colors ?? COLOR_COUNT;
   const maxCascades = options.maxCascades ?? 50;
@@ -272,6 +282,8 @@ function cascade(
         lightballTarget,
         rng,
         targetScorer: options.targetScorer,
+        // 합체가 이미 친 장애물은 연쇄로 터진 아이템이 또 노리지 않게 알려 준다
+        ...(combo === 1 && revert?.comboHits ? { alreadyHit: revert.comboHits } : {}),
       });
       const { cells, blastCells } = expanded;
       // 합체 연출은 첫 번째 clear 단계에 얹는다 - 그 폭발은 개별 아이템 발동이
@@ -289,7 +301,8 @@ function cascade(
       const directHits = new Set(expanded.blastBlockers);
       if (combo === 1) revert?.comboHits?.forEach(k => directHits.add(k));
       const reborn = new Set(spawned.map(s => s.key));
-      const damage = applyDamage(current, cells, blastCells, directHits, reborn);
+      const extraHits = combo === 1 ? revert?.comboExtraHits : undefined;
+      const damage = applyDamage(current, cells, blastCells, directHits, reborn, extraHits);
       current = damage.board;
       damage.shielded.forEach(k => cells.delete(k));
       turnDamage.push(...damage.events);
@@ -303,6 +316,7 @@ function cascade(
         spawned,
         blasts,
         damage: damage.events,
+        ...(combo === 1 && revert?.comboBlasts ? { merged: [revert.a, revert.b] as [Position, Position] } : {}),
       });
 
       const gravity = applyGravity(current, cells, rng, colors);

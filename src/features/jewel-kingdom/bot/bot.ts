@@ -2,7 +2,7 @@ import type { Board, Position } from '../engine/types';
 import { COLOR_COUNT } from '../engine/types';
 import { at, cloneBoard, createBoard, fillBoard, key, parseKey, swap } from '../engine/board';
 import { findMatchGroups } from '../engine/match';
-import { expandSpecials } from '../engine/specials';
+import { expandSpecials, planSpecials } from '../engine/specials';
 import { hasAnyMove, listMoves, resolveTurn, type TurnResult } from '../engine/resolve';
 import { applyTurn, resolveOptionsFor, startLevel, type Level } from '../engine/level';
 import { makeRng, type Rng } from '../engine/rng';
@@ -71,7 +71,8 @@ function pickMove(
       if (at(board, p.row, p.col).gem?.special) seed.add(key(p.row, p.col));
     });
     if (seed.size === 0) return;
-    const cells = expandSpecials(trial, seed).cells;
+    const expanded = expandSpecials(trial, seed);
+    const cells = expanded.cells;
 
     // 수집물 아래를 비우는 수에 가산점을 준다.
     //
@@ -79,6 +80,27 @@ function pickMove(
     // 그릇까지 흘러간다. 이걸 모르는 봇은 그릇 레벨을 거의 못 깨고,
     // 그러면 난이도 측정이 "레벨이 어렵다"가 아니라 "봇이 못 한다"를 재게 된다.
     let score = cells.size;
+
+    // 사람처럼 아이템을 만들고 장애물을 노린다.
+    //
+    // 칸 수만 세는 봇은 4·5개 매치나 2x2를 일부러 만들지 않고, 장애물 옆을 고르지도 않는다.
+    // 그러면 아이템으로만 깨지는 돌 판에서 45수를 줘도 승률이 10%대에 머물러 굽기가 실패한다 -
+    // 난이도가 아니라 "봇이 못 하는 것"을 재게 된다.
+    score += planSpecials(findMatchGroups(trial)).length * 4;
+    const hitBlockers = new Set(expanded.blastBlockers);
+    cells.forEach(k => {
+      const { row, col } = parseKey(k);
+      for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const r = row + dr;
+        const c = col + dc;
+        if (r < 0 || c < 0 || r >= board.height || c >= board.width) continue;
+        const b = at(board, r, c).blocker;
+        // 아이템 전용 장애물은 폭발로만 깎인다 - 옆 매치는 쳐주지 않는다
+        if (b && (!b.powerUpOnly || expanded.blastCells.has(k))) hitBlockers.add(key(r, c));
+      }
+    });
+    score += hitBlockers.size * 2;
+
     cells.forEach(k => {
       const { row, col } = parseKey(k);
       for (let r = row - 1; r >= 0; r--) {
@@ -208,6 +230,11 @@ export interface DifficultyReport {
   /** 한 번 깨는 데 걸리는 평균 시도 횟수 (SPEC 7.7의 난이도 지표) */
   attemptsPerClear: number;
   runs: number;
+  /**
+   * 한 수당 "둘 곳이 없어 섞기" 횟수. 높으면 판이 자꾸 막히는 배치다(작은 판에 장애물이
+   * 빽빽하면 맞출 수가 자주 사라진다) - 승률과 상관없이 사람에겐 답답하다.
+   */
+  reshufflesPerMove: number;
 }
 
 /**
@@ -219,9 +246,13 @@ export interface DifficultyReport {
 export function measureDifficulty(level: Level, runs = 200, strategy: Strategy = 'greedy'): DifficultyReport {
   let wins = 0;
   let movesWhenWon = 0;
+  let reshuffles = 0;
+  let movesUsed = 0;
 
   for (let seed = 0; seed < runs; seed++) {
     const attempt = playLevel(level, makeRng(seed), { strategy });
+    reshuffles += attempt.reshuffles;
+    movesUsed += attempt.movesUsed;
     if (attempt.won) {
       wins++;
       movesWhenWon += attempt.movesUsed;
@@ -234,5 +265,6 @@ export function measureDifficulty(level: Level, runs = 200, strategy: Strategy =
     avgMovesWhenWon: wins > 0 ? movesWhenWon / wins : 0,
     attemptsPerClear: winRate > 0 ? 1 / winRate : Infinity,
     runs,
+    reshufflesPerMove: reshuffles / Math.max(1, movesUsed),
   };
 }

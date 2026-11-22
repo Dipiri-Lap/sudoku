@@ -102,7 +102,7 @@ export const ART: ArtAssets = {
     shuffle: '/assets/3match/boosters/shuffle.png', // 덩굴 순환 화살표
     rocket: '/assets/3match/items/rocket.png', // 삽
     tnt: '/assets/3match/items/tnt.png', // 거름 포대
-    propeller: '/assets/3match/items/propeller.png', // 참새
+    propeller: '/assets/3match/items/propeller.png', // 도토리
     lightball: '/assets/3match/items/lightball.png', // 무지개 꽃
   },
 };

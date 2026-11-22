@@ -101,18 +101,15 @@ body.jk-body #root {
   position: relative;
   width: var(--jk-col);
   aspect-ratio: 1 / 1;
-  /* 나무 액자(frame.webp)의 두께만큼 안쪽을 비운다. 액자는 ::after로 맨 위에 얹는다.
-     액자 안쪽 테두리가 칸 가장자리를 살짝 덮어도 되게 그림 두께(약 6%)보다 조금 좁게 둔다. */
-  /* % 여백은 부모(화면) 폭 기준이라 PC에서 너무 커진다 - 판 폭(--jk-col) 기준으로 계산한다 */
-  padding: calc(var(--jk-col) * 0.054);
+  /* 두꺼운 액자 없이 밭 모양을 따라가는 얇은 테두리(.jk-outline)만 둔다(다른 3매치처럼).
+     여백은 그 테두리가 잘리지 않을 만큼만. % 여백은 부모 폭 기준이라 판 폭(--jk-col)으로 계산한다 */
+  padding: calc(var(--jk-col) * 0.014);
   box-sizing: border-box;
-  border-radius: 6%;
-  /* 칸 사이로 비치는 깊은 흙 */
-  background: #3a2314;
-  box-shadow: 0 10px 22px rgba(40, 20, 5, 0.45);
+  /* 칸이 없는 자리는 뒤 배경이 보인다. 칸 사이 흙은 .jk-outline이 밭 모양대로 깐다 */
+  background: none;
   margin-bottom: 10px;
   /* 새 보석은 판 위쪽(음수 행)에서 떨어져 들어온다. 잘라내지 않으면
-     정보판 위로 보석이 지나가는 게 보인다. 액자가 그 경계를 덮는다. */
+     정보판 위로 보석이 지나가는 게 보인다. */
   overflow: hidden;
 }
 
@@ -130,6 +127,8 @@ body.jk-body #root {
   height: 100%;
   overflow: visible;
   pointer-events: none;
+  /* 배경 위에 뜬 밭처럼 보이게 밭 모양 그대로 그림자를 드리운다 */
+  filter: drop-shadow(0 4px 6px rgba(40, 20, 5, 0.45));
 }
 
 .jk-cell {
@@ -289,10 +288,68 @@ body.jk-body #root {
   100% { transform: scale(1); filter: brightness(1); }
 }
 
-/* 아이템은 그림 자체가 종류를 말한다(삽·거름 포대·참새·무지개 꽃).
+/* 아이템은 그림 자체가 종류를 말한다(삽·거름 포대·도토리·무지개 꽃).
    로켓은 그림이 하나뿐이라 세로 로켓만 돌려서 발사 축을 보여준다. */
 .jk-gem.sp-rocket-v img {
   transform: rotate(90deg);
+}
+
+/* 깎이거나 깨지는 장애물: 맞는 시각(--h)까지는 옛 모습, 그 순간 번쩍하며 사라지고 새 모습이 나타난다 */
+.jk-blocker.pending-old {
+  animation: jk-old-out 0.24s ease-out var(--h, 0ms) both;
+}
+
+@keyframes jk-old-out {
+  0% { opacity: 1; transform: scale(1); filter: brightness(1); }
+  40% { opacity: 1; transform: scale(0.9); filter: brightness(2); }
+  100% { opacity: 0; transform: scale(0.6); filter: brightness(1); }
+}
+
+.jk-blocker.pending-new {
+  animation: jk-new-in 0.12s ease-out var(--h, 0ms) both;
+}
+
+@keyframes jk-new-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* 무지개꽃 변신: 꽃잎이 닿는 시각(--m)에 채소가 줄어들며 사라지고 아이템이 뿅 튀어나온다 */
+.jk-gem.morphing img.morph-old,
+.jk-gem.morphing img.morph-new {
+  position: absolute;
+  inset: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+}
+
+.jk-gem.morphing img.morph-old {
+  animation: jk-morph-out 0.16s ease-in var(--m, 0ms) both !important;
+}
+
+.jk-gem.morphing img.morph-new {
+  animation: jk-morph-in 0.32s cubic-bezier(0.34, 1.6, 0.64, 1) var(--m, 0ms) both !important;
+}
+
+@keyframes jk-morph-out {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+@keyframes jk-morph-in {
+  0% { opacity: 0; transform: scale(0.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 바뀌기 전에는 아이템 대기 효과(빛무리·반짝이)도 숨긴다 */
+.jk-gem.morphing .jk-ifx {
+  display: none;
+}
+
+/* 합체해서 사라진 두 칸 - 이펙트 층의 합체 아이템이 이어받는다 */
+.jk-gem.merged {
+  opacity: 0 !important;
+  animation: none !important;
 }
 
 /* 수집물은 집을 수 없다 - 커서로도 알린다 */
@@ -1226,24 +1283,35 @@ body.jk-body #root {
 }
 
 /* 거름포대: 부풀며 떨다가(예비 동작) 멈칫(히트스톱) 하고 터진다.
-   시간 비율은 fx/schedule.ts의 tntCharge 150 + tntHitstop 60 + 터짐 240 = 450ms에 맞춘다. */
+   시간 비율은 fx/schedule.ts의 tntCharge 520 + tntHitstop 80 + 터짐 240 = 840ms에 맞춘다
+   (예비 동작 0~62%, 멈칫 62~71%, 터짐 71~100%).
+   예비 동작은 갈수록 격해진다: 흔들림이 빨라지고 커지며 붉게 달아오른다. */
 .jk-gem.clearing.sp-tnt {
-  animation: jk-tnt-boom 0.45s linear var(--d, 0ms) both;
+  animation: jk-tnt-boom 0.84s linear var(--d, 0ms) both;
   z-index: 6;
 }
 
 @keyframes jk-tnt-boom {
-  0% { transform: scale(1) rotate(0deg); opacity: 1; }
-  8% { transform: scale(1.06) rotate(-7deg); }
-  16% { transform: scale(1.1) rotate(7deg); }
-  24% { transform: scale(1.14) rotate(-8deg); }
-  33% { transform: scale(1.2) rotate(8deg); }
-  40% { transform: scale(1.26) rotate(-4deg); }
-  47% { transform: scale(1.3) rotate(0deg); opacity: 1; }
-  /* 47~53%: 히트스톱 - 아주 잠깐 멈춘다 */
-  53% { transform: scale(1.3) rotate(0deg); opacity: 1; }
-  62% { transform: scale(1.55); opacity: 0.9; }
-  100% { transform: scale(0.2); opacity: 0; }
+  0% { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1); }
+  /* 느리게, 작게 */
+  10% { transform: scale(1.03) rotate(-3deg); }
+  20% { transform: scale(1.05) rotate(3deg); }
+  28% { transform: scale(1.07) rotate(-4deg); filter: brightness(1.05); }
+  /* 빨라지고 커진다 */
+  35% { transform: scale(1.09) rotate(5deg); }
+  41% { transform: scale(1.11) rotate(-5deg); filter: brightness(1.12) saturate(1.2); }
+  46% { transform: scale(1.13) rotate(6deg); }
+  50% { transform: scale(1.16) rotate(-7deg); filter: brightness(1.2) saturate(1.35); }
+  /* 막판: 아주 빠르게 부르르 - 붉게 달아오른다 */
+  53% { transform: scale(1.19) rotate(7deg); }
+  56% { transform: scale(1.22) rotate(-8deg); filter: brightness(1.32) saturate(1.5) drop-shadow(0 0 4px rgba(255, 90, 40, 0.8)); }
+  58.5% { transform: scale(1.25) rotate(8deg); }
+  61% { transform: scale(1.28) rotate(-4deg); }
+  /* 62~71%: 히트스톱 - 한껏 부푼 채 멈칫 */
+  62% { transform: scale(1.32) rotate(0deg); opacity: 1; filter: brightness(1.5) saturate(1.6) drop-shadow(0 0 8px rgba(255, 90, 40, 0.95)); }
+  71% { transform: scale(1.32) rotate(0deg); opacity: 1; filter: brightness(1.7) saturate(1.6) drop-shadow(0 0 10px rgba(255, 120, 40, 1)); }
+  77% { transform: scale(1.55); opacity: 0.9; filter: brightness(2); }
+  100% { transform: scale(0.2); opacity: 0; filter: brightness(1); }
 }
 
 /* 삽: 출발하는 순간 짧게 움츠렸다 사라진다(삽 자체는 이펙트 층이 날린다) */
@@ -1252,7 +1320,8 @@ body.jk-body #root {
   animation: jk-launch 0.16s ease-in var(--d, 0ms) both;
 }
 
-/* 참새·제비·개구리: 제자리 그림은 바로 사라지고 이펙트 층의 큰 그림이 이어받아 날아간다 */
+/* 도토리·제비·개구리·무지개꽃: 제자리 그림은 바로 사라지고 이펙트 층의 큰 그림이 이어받는다 */
+.jk-gem.clearing.sp-lightball,
 .jk-gem.clearing.sp-propeller,
 .jk-gem.clearing.sp-butterfly,
 .jk-gem.clearing.sp-ladybug,
@@ -1328,16 +1397,6 @@ body.jk-body #root {
   flex: 1;
 }
 
-/* 나무 액자. 판 위에 얹어 칸 가장자리와 떨어져 들어오는 보석의 경계를 덮는다.
-   이펙트 층(z 8)보다는 아래라 파편은 액자 위로 튈 수 있다. */
-.jk-board-outer::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 7;
-  pointer-events: none;
-  background: url('/assets/3match/ui/frame.webp') center / 100% 100% no-repeat;
-}
 
 .jk-skillpanel-item.active::after {
   content: '✓';
@@ -1359,6 +1418,11 @@ body.jk-body #root {
 /* ===== 스테이지 번호와 난이도 표시 (맨 위 왼쪽) ===== */
 .jk-topbar .jk-round-btn {
   margin-left: auto;
+}
+
+/* 소리 버튼과 다시 시작 버튼은 오른쪽에 나란히 */
+.jk-topbar .jk-round-btn + .jk-round-btn {
+  margin-left: 0;
 }
 
 .jk-stage {
@@ -1416,4 +1480,530 @@ body.jk-body #root {
   padding: 2px 4px;
   border-radius: 6px;
   border: 1px solid rgba(90, 52, 23, 0.4);
+}
+
+/* ===== 판 위 아이템의 대기 효과(ItemIdleFx) =====
+   채소와 한눈에 구분되도록 아이템은 늘 조금씩 살아 움직인다.
+   --ph: 아이템마다 다른 박자(음수 지연)로 한꺼번에 같이 움직이지 않게 한다. */
+
+.jk-gem .jk-ifx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.jk-gem.clearing .jk-ifx {
+  display: none;
+}
+
+/* 그림은 빛무리 위에 */
+.jk-gem[class*='sp-'] img {
+  position: relative;
+  z-index: 1;
+}
+
+/* 공통: 뒤에서 숨 쉬는 따뜻한 빛무리 */
+.jk-aura {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 244, 196, 0.85) 0%, rgba(255, 214, 110, 0.45) 40%, rgba(255, 200, 80, 0) 70%);
+  animation: jk-aura 1.6s ease-in-out var(--ph, 0s) infinite;
+}
+
+@keyframes jk-aura {
+  0%, 100% { transform: scale(0.82); opacity: 0.55; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+/* 무지개꽃: 빛무리가 무지개로 돈다 */
+.jk-gem.sp-lightball .jk-aura {
+  inset: -2%;
+  background: conic-gradient(from 0deg, #ff6b6b, #ffb347, #ffe66d, #7bd389, #5aa9ff, #b07cff, #ff6b6b);
+  filter: blur(5px);
+  opacity: 0.75;
+  -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 35%, transparent 70%);
+  animation: jk-rainbow 2.4s linear infinite;
+}
+
+@keyframes jk-rainbow {
+  to { transform: rotate(360deg); }
+}
+
+/* 가끔 반짝이는 별(오른쪽 위) */
+.jk-twinkle {
+  position: absolute;
+  right: 6%;
+  top: 6%;
+  width: 26%;
+  height: 26%;
+  z-index: 2;
+  background: url('/assets/3match/fx/sparkle.png') center / contain no-repeat;
+  animation: jk-twinkle 2.2s ease-in-out var(--ph, 0s) infinite;
+}
+
+@keyframes jk-twinkle {
+  0%, 62%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+  72% { transform: scale(1.1) rotate(30deg); opacity: 1; }
+  84% { transform: scale(0.4) rotate(60deg); opacity: 0.6; }
+}
+
+/* 거름포대: 심지 불꽃 - 밝은 심 + 사방으로 튀는 불티. 크기는 칸 비율(%)로 */
+.jk-fuse {
+  position: absolute;
+  left: 58%;
+  top: 11%;
+  width: 34%;
+  height: 34%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.jk-fuse::before {
+  content: '';
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #fff3a0 35%, rgba(255, 170, 40, 0.8) 60%, rgba(255, 120, 0, 0) 75%);
+  animation: jk-fuse-core 0.18s steps(2) infinite;
+}
+
+@keyframes jk-fuse-core {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.25); }
+}
+
+.jk-fuse i {
+  position: absolute;
+  left: 44%;
+  top: 44%;
+  width: 12%;
+  height: 12%;
+  border-radius: 50%;
+  background: #ffe27a;
+  box-shadow: 0 0 3px #ffb43a;
+  animation: jk-spark 0.5s ease-out infinite;
+}
+
+/* 불티가 날아가는 거리: 자기 크기(칸의 4%)의 몇 배 */
+.jk-fuse i:nth-child(1) { --sx: -380%; --sy: -460%; animation-delay: 0s; }
+.jk-fuse i:nth-child(2) { --sx: 420%; --sy: -380%; animation-delay: -0.12s; }
+.jk-fuse i:nth-child(3) { --sx: -260%; --sy: -160%; animation-delay: -0.25s; }
+.jk-fuse i:nth-child(4) { --sx: 300%; --sy: -580%; animation-delay: -0.37s; }
+
+@keyframes jk-spark {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--sx), var(--sy)) scale(0.2); opacity: 0; }
+}
+
+/* 삽: 날 위로 지나가는 반사광. 그림 모양으로 가려서 삽 위에만 보인다 */
+.jk-glint {
+  position: absolute;
+  inset: 1px;
+  z-index: 2;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.95) 48%, transparent 60%) no-repeat;
+  background-size: 250% 100%;
+  animation: jk-glint 1.8s ease-in-out var(--ph, 0s) infinite;
+}
+
+.jk-gem.sp-rocket-v .jk-glint {
+  transform: rotate(90deg);
+}
+
+@keyframes jk-glint {
+  0%, 45% { background-position: 120% 0; }
+  85%, 100% { background-position: -30% 0; }
+}
+
+/* 그림의 움직임 - 칸이 터지거나 새로 생기는 중에는 멈춘다 */
+.jk-gem.sp-tnt:not(.clearing):not(.spawning) img {
+  animation: jk-swell 0.9s ease-in-out var(--ph, 0s) infinite;
+  transform-origin: 50% 85%;
+}
+
+@keyframes jk-swell {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.06, 0.96); }
+}
+
+.jk-gem.sp-rocket-h:not(.clearing):not(.spawning) img {
+  animation: jk-nudge-h 1.1s ease-in-out var(--ph, 0s) infinite;
+}
+
+.jk-gem.sp-rocket-v:not(.clearing):not(.spawning) img {
+  animation: jk-nudge-v 1.1s ease-in-out var(--ph, 0s) infinite;
+}
+
+/* 날아갈 축으로 들썩 - 가로 삽은 좌우, 세로 삽은 위아래 */
+@keyframes jk-nudge-h {
+  0%, 100% { transform: translateX(-4%); }
+  50% { transform: translateX(4%); }
+}
+
+@keyframes jk-nudge-v {
+  0%, 100% { transform: rotate(90deg) translateX(-4%); }
+  50% { transform: rotate(90deg) translateX(4%); }
+}
+
+/* 도토리: 통통 - 뛰었다 내려앉으며 살짝 눌린다 */
+.jk-gem.sp-propeller:not(.clearing):not(.spawning) img {
+  animation: jk-hop 1.2s ease-in-out var(--ph, 0s) infinite;
+  transform-origin: 50% 90%;
+}
+
+@keyframes jk-hop {
+  0%, 55%, 100% { transform: translateY(0) scale(1, 1); }
+  62% { transform: translateY(0) scale(1.08, 0.9); }
+  74% { transform: translateY(-12%) scale(0.96, 1.05) rotate(-6deg); }
+  86% { transform: translateY(0) scale(1.06, 0.93); }
+  93% { transform: translateY(0) scale(1, 1); }
+}
+
+/* 무지개꽃: 천천히 돈다 */
+.jk-gem.sp-lightball:not(.clearing):not(.spawning) img {
+  animation: jk-spin 6s linear infinite;
+}
+
+@keyframes jk-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 스킬 아이템들: 살짝 들썩 */
+.jk-gem.sp-sickle:not(.clearing):not(.spawning) img,
+.jk-gem.sp-plow:not(.clearing):not(.spawning) img,
+.jk-gem.sp-butterfly:not(.clearing):not(.spawning) img,
+.jk-gem.sp-ladybug:not(.clearing):not(.spawning) img,
+.jk-gem.sp-watermelon:not(.clearing):not(.spawning) img,
+.jk-gem.sp-sprinkler:not(.clearing):not(.spawning) img,
+.jk-gem.sp-scarecrow:not(.clearing):not(.spawning) img,
+.jk-gem.sp-dandelion:not(.clearing):not(.spawning) img,
+.jk-gem.sp-watering-can:not(.clearing):not(.spawning) img {
+  animation: jk-bob 1.4s ease-in-out var(--ph, 0s) infinite;
+}
+
+@keyframes jk-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-5%) rotate(3deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jk-ifx *,
+  .jk-ifx *::before,
+  .jk-gem[class*='sp-'] img {
+    animation: none !important;
+  }
+}
+
+/* ===== 상단 판(로얄킹덤식): [목표] [캐릭터 창문 + 게이지] [남은 수] =====
+   다른 게임들 공통: 하나로 이어진 판, 틀 안에 꽉 찬 얼굴, 이름표 탭, 밝은 크림색 숫자 칸 */
+
+.jk-hud2 {
+  width: var(--jk-col);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  /* 가운데 창문이 판 위로 솟는 만큼 위를 비운다 */
+  margin: 22px 0 8px;
+  padding: 6px 6px;
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: 12px 16px;
+  border-image: url('/assets/3match/ui/sign.webp') 30% 10% fill / 12px 16px stretch;
+  filter: drop-shadow(0 4px 4px rgba(40, 20, 5, 0.35));
+}
+
+/* 크림색 숫자 칸 */
+.jk-hud-box {
+  position: relative;
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 6px 6px;
+  border-radius: 14px;
+  background: linear-gradient(#fffaf0, #f4e2c2);
+  box-shadow:
+    0 0 0 3px #7a4a22,
+    inset 0 2px 4px rgba(90, 50, 15, 0.25),
+    0 3px 0 3px rgba(60, 30, 10, 0.35);
+}
+
+/* 이름표 탭: 칸 위 가장자리에 걸친 초록 리본 */
+.jk-tab {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 12px 3px;
+  border-radius: 9px;
+  background: linear-gradient(#97d65c, #5c9a2c);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(40, 70, 10, 0.6);
+  box-shadow: 0 0 0 2px #3f6b1d, 0 2px 0 2px #3f6b1d, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.jk-hud-goals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 10px;
+}
+
+/* 목표: 그림 오른쪽 아래에 남은 개수를 겹쳐 붙인다(레퍼런스 방식) */
+.jk-hgoal {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jk-hgoal img,
+.jk-hgoal .jk-goal-icon {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.jk-hgoal-n {
+  position: absolute;
+  right: -8px;
+  bottom: -6px;
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: #5a3112;
+  text-shadow:
+    -2px 0 #fff, 2px 0 #fff, 0 -2px #fff, 0 2px #fff,
+    -1.5px -1.5px #fff, 1.5px -1.5px #fff, -1.5px 1.5px #fff, 1.5px 1.5px #fff;
+}
+
+.jk-hgoal.done .jk-hgoal-n {
+  color: #3f8a1c;
+}
+
+.jk-hud-moves {
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-size: 2.3rem;
+  line-height: 1;
+  color: #5a3112;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* 수가 얼마 안 남으면 빨갛게 콩닥 */
+.jk-hud-moves.low {
+  color: #d23a1e;
+  animation: jk-low 0.9s ease-in-out infinite;
+}
+
+@keyframes jk-low {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+/* 캐릭터 창문: 판 위로 솟는다 */
+.jk-buddy2 {
+  position: relative;
+  margin-top: -40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  transition: transform 0.12s ease-out;
+}
+
+.jk-buddy2:disabled {
+  cursor: default;
+}
+
+/* 텃밭 창고 창문 같은 아치 나무 틀 */
+.jk-arch {
+  position: relative;
+  display: block;
+  width: 92px;
+  height: 96px;
+  padding: 6px;
+  box-sizing: border-box;
+  border-radius: 46px 46px 16px 16px;
+  background: linear-gradient(160deg, #e0a35e, #b06d32 55%, #8a5226);
+  box-shadow:
+    0 0 0 3px #5b3514,
+    inset 0 2px 0 rgba(255, 232, 190, 0.7),
+    inset 0 -3px 0 rgba(70, 35, 10, 0.4),
+    0 5px 6px rgba(40, 20, 5, 0.4);
+}
+
+/* 창문 안: 맑은 하늘 - 얼굴이 또렷하게 튄다 */
+.jk-arch-in {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 40px 40px 11px 11px;
+  background: radial-gradient(circle at 50% 30%, #f2fbff 0%, #a9dcf7 55%, #6fb3e4 100%);
+  box-shadow: inset 0 3px 6px rgba(20, 50, 90, 0.35);
+}
+
+.jk-arch-pic {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 100px;
+  height: 108px;
+  transform: translateX(-50%);
+  /* 아래는 창틀 안쪽 선에서 자르고 위·옆은 틀 밖으로 나가도 된다 */
+  clip-path: inset(-40% -30% 0 -30%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.jk-arch-pic img {
+  /* 기본 자리를 조금 아래로 - 창문 안에 앉아 있게(잘리는 선은 상자 아래 그대로) */
+  position: relative;
+  top: 12px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 3px 3px rgba(40, 20, 5, 0.4));
+  animation: jk-buddy-breath 2.6s ease-in-out infinite;
+}
+
+@keyframes jk-buddy-breath {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.02, 0.985) rotate(-1deg); }
+}
+
+/* 틀 장식: 위 양쪽에 3D 나뭇잎 */
+.jk-arch-leaf {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  top: 4px;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 1px rgba(30, 50, 10, 0.4));
+}
+
+.jk-arch-leaf.l {
+  left: -12px;
+  transform: rotate(-50deg);
+}
+
+.jk-arch-leaf.r {
+  right: -12px;
+  transform: scaleX(-1) rotate(-50deg);
+}
+
+/* 스킬 게이지: 창문 아래 - 스킬 그림 + 막대 + 숫자(12/50) */
+.jk-bgauge {
+  position: relative;
+  display: block;
+  width: 100px;
+  height: 18px;
+  border-radius: 999px;
+  background: #4a2a12;
+  box-shadow: 0 0 0 2px #2e180a, inset 0 2px 3px rgba(0, 0, 0, 0.5);
+}
+
+.jk-bgauge i {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  bottom: 2px;
+  width: calc((100% - 4px) * var(--fill, 0));
+  border-radius: 999px;
+  background: linear-gradient(#a6e066, #5f9f2c);
+  transition: width 0.3s ease-out;
+}
+
+.jk-bgauge img {
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translateY(-50%);
+  z-index: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+}
+
+.jk-bgauge b {
+  position: relative;
+  display: block;
+  text-align: center;
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-size: 0.78rem;
+  line-height: 18px;
+  color: #fff;
+  text-shadow: 0 1px 0 #2e180a, 0 0 3px #2e180a;
+}
+
+/* 꽉 찼다: 게이지가 금빛, 창문이 빛나고 캐릭터가 신나서 통통 */
+.jk-buddy2.ready .jk-bgauge i {
+  background: linear-gradient(#ffe68a, #ffb52e);
+}
+
+.jk-buddy2.ready .jk-arch {
+  animation: jk-arch-glow 1.1s ease-in-out infinite;
+}
+
+@keyframes jk-arch-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 3px #5b3514, inset 0 2px 0 rgba(255, 232, 190, 0.7), 0 5px 6px rgba(40, 20, 5, 0.4),
+      0 0 6px 2px rgba(255, 210, 80, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 3px #5b3514, inset 0 2px 0 rgba(255, 232, 190, 0.7), 0 5px 6px rgba(40, 20, 5, 0.4),
+      0 0 16px 6px rgba(255, 210, 80, 0.95);
+  }
+}
+
+.jk-buddy2.ready .jk-arch-pic img {
+  animation: jk-buddy-hop2 0.8s ease-in-out infinite;
+}
+
+@keyframes jk-buddy-hop2 {
+  0%, 100% { transform: translateY(0) scale(1.03, 0.97); }
+  45% { transform: translateY(-7%) scale(0.98, 1.03) rotate(-4deg); }
+}
+
+.jk-buddy2.ready .jk-bgauge b {
+  color: #fff6c8;
+}
+
+.jk-buddy2.ready:not(:disabled):active {
+  transform: scale(0.95);
+}
+
+.jk-buddy2.armed {
+  transform: translateY(-3px) scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jk-arch-pic img,
+  .jk-buddy2 .jk-arch,
+  .jk-hud-moves.low {
+    animation: none !important;
+  }
 }

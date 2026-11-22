@@ -156,7 +156,7 @@ const NEIGHBORS = [
  * 일반 매치가 옆에서 터져도 안 깨지고 폭발만 통한다(SPEC 6장 "아이템 전용" 축).
  *
  * @param directHits 아이템 범위 안에 든 **장애물 칸**. 옆 칸이 터지지 않아도 직접 한 번 맞는다.
- *   참새가 목표 장애물을 쪼는 경우가 대표적이다 - 이게 없으면 장애물을 노려 날아가도
+ *   도토리가 목표 장애물을 쪼는 경우가 대표적이다 - 이게 없으면 장애물을 노려 날아가도
  *   옆 칸 보석이 없는 한 아무 일도 일어나지 않는다. 한 번의 clear에서 최대 한 겹이라는
  *   규칙(hitOnce)은 그대로라, 옆 칸 타격과 겹쳐도 두 번 깎이지 않는다.
  *
@@ -170,6 +170,8 @@ export function applyDamage(
   blastCells: Set<string> = new Set(),
   directHits: Set<string> = new Set(),
   reborn: Set<string> = new Set(),
+  /** 같은 장애물을 여러 번 직접 친 경우 첫 타격 뒤에 더 맞는 횟수(도토리 떼가 한 돌에 몰릴 때) */
+  extraDirectHits: Map<string, number> = new Map(),
 ): DamageResult {
   const next = cloneBoard(board);
   /** 바닥이 반응하는 칸: 터진 칸 + 아이템으로 다시 태어난 칸 */
@@ -296,6 +298,14 @@ export function applyDamage(
   // 3-1. 아이템이 장애물 칸을 직접 친 경우. 색이 정해진 장애물(빨강자물쇠)은 색 매치로만
   //      열리므로 색 없는 직접 타격으로는 안 열린다(sourceColor null).
   directHits.forEach(k => hitBlocker(k, true, null));
+  // 3-2. 여러 마리가 같은 장애물을 친 만큼 더 깎는다. "한 번의 clear에 한 겹" 규칙은
+  //      옆 칸 터짐이 여러 번 겹치는 경우를 막는 것이라, 따로따로 날아온 타격은 각각 센다.
+  extraDirectHits.forEach((n, k) => {
+    for (let i = 0; i < n; i++) {
+      hitOnce.delete(k);
+      hitBlocker(k, true, null);
+    }
+  });
 
   events.sort((x, y) => (x.key < y.key ? -1 : x.key > y.key ? 1 : 0));
   return { board: next, shielded, events, chain };

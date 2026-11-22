@@ -3,8 +3,8 @@ import type { Board } from '../engine/types';
 import type { TurnStep } from '../engine/resolve';
 import type { FallMove } from '../engine/gravity';
 import { key } from '../engine/board';
-import { CLEAR_HOLD_MS, CLEAR_MS, COLLECT_MS, EFFECT_MS, SWAP_MS, fallDurationMs } from './constants';
-import { clearStepMs, scheduleClear } from './fx/schedule';
+import { CLEAR_HOLD_MS, CLEAR_MS, COLLECT_MS, EFFECT_MS, MERGE_MS, SWAP_MS, fallStepMs } from './constants';
+import { arrivalMs, clearStepMs, flightTargets, scheduleClear } from './fx/schedule';
 
 /**
  * 단계 목록 재생기.
@@ -34,6 +34,17 @@ export interface PlaybackView {
   invalid: Set<string>;
   /** 지금 그릇으로 빨려 들어가는 수집물 칸 -> 목적지 그릇 칸 */
   collecting: Map<string, string>;
+  /** 합체해서 이미 사라진 두 칸 - 이펙트 층의 합체 아이템이 이어받는다 */
+  merged: Set<string>;
+  /**
+   * 이번 단계 직전의 판(터짐 단계에서만). 장애물은 피해 직전 모습으로 두었다가
+   * 맞는 시각(hitAt)에 깎이거나 깨져야 한다 - 안 그러면 도토리가 날아가기도 전에 돌이 사라진다.
+   */
+  before: Board | null;
+  /** 장애물 칸이 (마지막으로) 맞는 시각(ms). 도토리 떼가 한 돌에 몰리면 마지막 도착 시각 */
+  hitAt: Map<string, number>;
+  /** 무지개꽃 변신 합체: 채소가 아이템으로 바뀌는 시각(꽃잎이 닿는 순간) */
+  morphAt: Map<string, number>;
   /** 재생 위치. 같은 칸이 연속으로 터져도 애니메이션이 다시 시작되게 하는 key */
   tick: number;
   playing: boolean;
@@ -48,12 +59,17 @@ const NONE = {
   falling: [] as FallMove[],
   invalid: new Set<string>(),
   collecting: new Map<string, string>(),
+  merged: new Set<string>(),
+  before: null as Board | null,
+  hitAt: new Map<string, number>(),
+  morphAt: new Map<string, number>(),
 };
 
 /** 그 단계를 보여주는 데 필요한 시간 */
 export function stepDurationMs(step: TurnStep): number {
   switch (step.kind) {
     case 'swap':
+      return step.merge ? MERGE_MS : SWAP_MS;
     case 'revert':
       return SWAP_MS;
     case 'clear':
@@ -61,8 +77,7 @@ export function stepDurationMs(step: TurnStep): number {
       return clearStepMs(step, CLEAR_MS) || CLEAR_MS + CLEAR_HOLD_MS;
     case 'fall': {
       if (step.moves.length === 0) return 0;
-      const longest = Math.max(...step.moves.map(m => fallDurationMs(m.toRow - m.fromRow)));
-      return longest + 40;
+      return fallStepMs(step.moves) + 40;
     }
     case 'collect':
       return COLLECT_MS;
@@ -71,7 +86,23 @@ export function stepDurationMs(step: TurnStep): number {
   }
 }
 
-function viewOf(step: TurnStep, tick: number): PlaybackView {
+/** 장애물 칸마다 마지막으로 맞는 시각: 기본은 그 칸의 시각, 여러 마리가 날아오면 가장 늦은 도착 */
+function hitTimes(step: TurnStep): Map<string, number> {
+  const out = new Map<string, number>();
+  if (step.kind !== 'clear') return out;
+  const sched = scheduleClear(step);
+  step.damage.forEach(d => out.set(d.key, sched.delays.get(d.key) ?? 0));
+  sched.blasts.forEach(sb => {
+    flightTargets(sb.blast).forEach(t => {
+      const k = key(t.row, t.col);
+      if (!out.has(k)) return;
+      out.set(k, Math.max(out.get(k)!, sb.start + arrivalMs(sb.blast, t)));
+    });
+  });
+  return out;
+}
+
+function viewOf(step: TurnStep, tick: number, before: Board | null): PlaybackView {
   return {
     board: step.board,
     clearing: step.kind === 'clear' ? new Set(step.cells) : NONE.clearing,
@@ -88,6 +119,13 @@ function viewOf(step: TurnStep, tick: number): PlaybackView {
       step.kind === 'collect'
         ? new Map(step.collects.map(e => [e.from, e.key]))
         : NONE.collecting,
+    merged:
+      step.kind === 'clear' && step.merged
+        ? new Set(step.merged.map(p => key(p.row, p.col)))
+        : NONE.merged,
+    before: step.kind === 'clear' ? before : null,
+    hitAt: step.kind === 'clear' ? hitTimes(step) : NONE.hitAt,
+    morphAt: step.kind === 'clear' ? scheduleClear(step).morphAt : NONE.morphAt,
     tick,
     playing: true,
   };
@@ -148,8 +186,9 @@ export function usePlayback(initialBoard: Board) {
     setRestBoard(board);
   }, []);
 
+  const before = index > 0 ? queue[index - 1].board : restBoard;
   const view: PlaybackView = step
-    ? viewOf(step, tick)
+    ? viewOf(step, tick, before)
     : { board: restBoard, ...NONE, tick, playing: false };
 
   return { view, play, reset };

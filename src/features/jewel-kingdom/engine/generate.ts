@@ -63,6 +63,11 @@ export interface FitOptions {
   runs: number;
   minMoves: number;
   maxMoves: number;
+  /**
+   * 한 수당 섞기 허용치. 넘으면 승률이 맞아도 버린다 - "둘 데가 없어 자꾸 섞이는" 판은
+   * 답답하다(구운 판 표본 중앙값 0.017, 막힌다는 지적을 받은 12판은 0.35).
+   */
+  maxReshufflesPerMove?: number;
 }
 
 export const DEFAULT_FIT: FitOptions = {
@@ -71,6 +76,7 @@ export const DEFAULT_FIT: FitOptions = {
   runs: 30,
   minMoves: 4,
   maxMoves: 45,
+  maxReshufflesPerMove: 0.04,
 };
 
 // ── 판 모양 ────────────────────────────────────────────────────────────
@@ -171,7 +177,9 @@ function place(recipe: Recipe, rng: Rng): { grid: string[][]; placed: Placement[
     for (let i = 0; i < total; i++) {
       const [r, c] = chosen.length > 0 ? chosen[i] : free.splice(rng.int(free.length), 1)[0];
       if (taken.has(`${r},${c}`)) continue;
-      grid[r][c] = layers > 1 ? `[${def.id}:${layers}]` : `[${def.id}]`;
+      // 겹 수는 카탈로그 기본값과 같을 때만 생략한다. 읽는 쪽(notation)이 생략된 겹을
+      // 기본값으로 채우므로, "한 겹이라 생략"하면 기본 3겹인 돌이 3겹으로 읽힌다.
+      grid[r][c] = layers === (def.layers ?? 1) ? `[${def.id}]` : `[${def.id}:${layers}]`;
       taken.add(`${r},${c}`);
       cells.push([r, c]);
 
@@ -288,7 +296,11 @@ export function fitMoves(base: Level, opts: FitOptions): Fitted | null {
   };
 
   // 최대치로도 목표에 못 닿으면 이 배치로는 만들 수 없는 난이도다.
-  if (rateAt(hi) < opts.target) return null;
+  // 같은 측정으로 "자꾸 막히는" 배치도 걸러낸다(최대 수로 끝까지 둬 봐야 잘 드러난다).
+  measured += opts.runs;
+  const full = measureDifficulty({ ...base, moves: hi }, opts.runs);
+  if (full.winRate < opts.target) return null;
+  if (full.reshufflesPerMove > (opts.maxReshufflesPerMove ?? Infinity)) return null;
 
   while (lo <= hi) {
     const mid = Math.floor((lo + hi) / 2);

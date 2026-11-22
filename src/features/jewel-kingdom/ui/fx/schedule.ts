@@ -13,21 +13,21 @@ import { key, parseKey } from '../../engine/board';
  * 시간을 재면 삽이 지나가기 전에 칸이 먼저 사라지는 어긋남이 생긴다.
  */
 export const FX_TIMING = {
-  /** 거름포대: 부풀며 떠는 예비 동작 */
-  tntCharge: 150,
+  /** 거름포대: 부풀며 떠는 예비 동작. "터질 듯 말 듯"이 보이도록 길게(갈수록 격해진다) */
+  tntCharge: 520,
   /** 거름포대: 터지기 직전 멈칫(히트스톱) */
-  tntHitstop: 60,
+  tntHitstop: 80,
   /** 거름포대: 충격파가 한 칸 퍼지는 시간 */
   tntRing: 55,
   /** 삽: 떠나기까지 */
   rocketLaunch: 70,
   /** 삽: 한 칸 지나가는 시간 */
   rocketCell: 36,
-  /** 참새: 날개를 털며 떠오르기까지(이때 주변 십자가 바람에 날린다) */
-  sparrowTakeoff: 230,
-  /** 참새: 비행 기본 + 한 칸당 */
-  sparrowFlyBase: 380,
-  sparrowFlyCell: 62,
+  /** 도토리: 웅크렸다 튀어 오르기까지(이때 주변 십자가 튕겨 나간다) */
+  acornLaunch: 230,
+  /** 도토리: 비행 기본 + 한 칸당 */
+  acornFlyBase: 380,
+  acornFlyCell: 62,
   /** 제비: 갈라져 떠나기까지 */
   swallowTakeoff: 170,
   swallowFlyBase: 300,
@@ -45,34 +45,73 @@ export const FX_TIMING = {
   scarecrowCell: 38,
   /** 허수아비: 솟은 뒤 까마귀가 놀라 달아나기까지 */
   scarecrowScare: 120,
-  /** 합체(참새 떼): 참새끼리 출발 시차 */
+  /** 합체(삽 십자): 두 삽이 X자로 "쨍" 부딪히는 시간 - 네 방향으로 튀어나가기 전 */
+  crossClash: 260,
+  /** 합체(삽+거름포대): 포대가 부풀다 펑 터지기까지 - 그 폭발 속에서 큰 삽 네 자루가 나간다 */
+  crossBoom: 380,
+  /** 합체(도토리 떼): 도토리끼리 출발 시차 */
   swarmGap: 110,
+  /** 무지개꽃: 빙글 돌며 떠올라 활짝 피기까지 */
+  lightRise: 240,
+  /** 무지개꽃: 빛 한 줄기를 뿌리는 간격 - 하나씩 천천히 보이게 */
+  lightGap: 170,
+  /** 무지개꽃: 뿌리는 시간의 상한(같은 색이 아주 많을 때 간격을 좁혀 이 안에 다 뿌린다) */
+  lightSpreadMax: 1300,
+  /** 무지개꽃: 한 줄기가 날아가 닿는 시간 */
+  lightFly: 380,
+  /** 무지개꽃 변신 합체: 다 바뀐 뒤 바뀐 아이템이 하나씩 터지는 간격 */
+  transformGap: 200,
+  /** 무지개꽃: 다 뻗은 뒤 한꺼번에 팡 터지기 전 잠깐 */
+  lightHold: 110,
   /** 마지막 칸이 사라진 뒤 낙하 전까지 아주 잠깐 숨 고르기 */
   settle: 40,
 } as const;
 
 const FLYERS = new Set<Blast['kind']>(['propeller', 'butterfly', 'ladybug']);
 
+/** 무지개꽃이 빛을 뿌리는 간격: 기본 lightGap, 대상이 많으면 상한 안에 들도록 좁힌다 */
+export function lightGapFor(n: number): number {
+  if (n <= 1) return 0;
+  return Math.min(FX_TIMING.lightGap, FX_TIMING.lightSpreadMax / (n - 1));
+}
+
+/** 무지개꽃: 대상 n개에 빛을 하나씩 다 뿌리고 같은 색이 한꺼번에 팡 터지는 시각(발동 기준) */
+export function lightballPopMs(n: number): number {
+  return FX_TIMING.lightRise + Math.max(0, n - 1) * lightGapFor(n) + FX_TIMING.lightFly + FX_TIMING.lightHold;
+}
+
 /** 이 종류는 전용 이펙트가 있다. 나머지는 기존처럼 한 번에 사라진다. */
 export function hasFx(kind: Blast['kind']): boolean {
-  return kind === 'tnt' || kind === 'rocket-h' || kind === 'rocket-v' || kind === 'scarecrow' || FLYERS.has(kind);
+  return (
+    kind === 'tnt' ||
+    kind === 'rocket-h' ||
+    kind === 'rocket-v' ||
+    kind === 'scarecrow' ||
+    kind === 'lightball' ||
+    FLYERS.has(kind)
+  );
 }
 
 /**
  * 이 발동에 전용 이펙트를 붙일지.
- * 참새·제비·개구리는 날아갈 목적지가 있어야 하고, 합체 폭발(다른 아이템을 싣고 가는 등)은
+ * 도토리·제비·개구리는 날아갈 목적지가 있어야 하고, 합체 폭발(다른 아이템을 싣고 가는 등)은
  * 범위가 달라서 기존처럼 한 번에 터뜨린다.
  */
 export function blastHasFx(b: Blast): boolean {
   if (!hasFx(b.kind)) return false;
+  // 무지개꽃은 색을 지목했을 때만(빛줄기를 뻗을 대상이 있어야 한다). 합체는 변신 합체만
+  if (b.kind === 'lightball') {
+    if (b.combo) return !!b.into;
+    return b.targetColor !== null && b.targetColor !== undefined;
+  }
   if (!FLYERS.has(b.kind)) return true;
-  // 합체에서 날아가는 건 언제나 참새다(떼로 날기·실어 나르기). 제비·개구리 모양의
+  // 합체에서 날아가는 건 언제나 도토리다(떼로 날기·실어 나르기). 제비·개구리 모양의
   // 합체 발동은 만들어지지 않지만, 혹시 오면 기존처럼 한 번에 터뜨린다.
   if (b.combo && b.kind !== 'propeller') return false;
   return flightTargets(b).length > 0;
 }
 
-/** 날아가는 아이템의 목적지들(참새는 하나, 제비는 둘, 개구리는 하나) */
+/** 날아가는 아이템의 목적지들(도토리는 하나, 제비는 둘, 개구리는 하나) */
 export function flightTargets(b: Blast): { row: number; col: number }[] {
   if (b.kind === 'propeller') {
     const d = b.destination;
@@ -91,7 +130,7 @@ export function arrivalMs(b: Blast, t: { row: number; col: number }): number {
   const d = cellDist(b, t);
   switch (b.kind) {
     case 'propeller':
-      return FX_TIMING.sparrowTakeoff + FX_TIMING.sparrowFlyBase + d * FX_TIMING.sparrowFlyCell;
+      return FX_TIMING.acornLaunch + FX_TIMING.acornFlyBase + d * FX_TIMING.acornFlyCell;
     case 'butterfly':
       return FX_TIMING.swallowTakeoff + FX_TIMING.swallowFlyBase + d * FX_TIMING.swallowFlyCell;
     case 'ladybug':
@@ -105,21 +144,49 @@ export interface ScheduledBlast {
   blast: Blast;
   /** 이 아이템이 발동하는 시각(ms, 단계 시작 기준) */
   start: number;
-  /** 합체로 참새가 실어 나르는 아이템(참새 쪽에만). 참새 발밑에 매달아 그린다 */
+  /** 합체로 도토리가 실어 나르는 아이템(도토리 쪽에만). 도토리 발밑에 매달아 그린다 */
   payload?: Blast['kind'];
-  /** 참새가 실어 와서 목적지에서 터지는 아이템인가 */
+  /** 십자 합체(삽+삽 등)의 삽: 출발 전에 X자로 부딪히는 연출을 한다(start에 이미 그 시간이 들어 있다) */
+  clash?: boolean;
+  /** 도토리가 실어 와서 목적지에서 터지는 아이템인가 */
   carried?: boolean;
 }
 
 export interface ClearSchedule {
   /** 칸 → 사라지기 시작하는 시각 */
   delays: Map<string, number>;
+  /** 무지개꽃 변신 합체: 칸 → 꽃잎이 닿아 아이템으로 바뀌는 시각 */
+  morphAt: Map<string, number>;
   blasts: ScheduledBlast[];
   /** 가장 늦게 맞는 칸의 시각 */
   lastHit: number;
 }
 
-const EMPTY: ClearSchedule = { delays: new Map(), blasts: [], lastHit: 0 };
+const EMPTY: ClearSchedule = { delays: new Map(), morphAt: new Map(), blasts: [], lastHit: 0 };
+
+/** 무지개꽃 변신 합체 표시인가(칸을 직접 지우지 않고 아이템으로 바꾸기만 한다) */
+function isMorph(b: Blast): boolean {
+  return b.kind === 'lightball' && !!b.combo && !!b.into;
+}
+
+/**
+ * 무지개꽃 변신 합체가 바꾸는 칸들(합체 자리 빼고), 가까운 것부터. 꽃잎을 뿌리는 순서이자
+ * 다 바뀐 뒤 터지는 순서다 - 연출(FxLayer)과 시간표가 같은 순서를 쓴다.
+ */
+export function transformTargets(step: TurnStep, b: Blast): string[] {
+  if (step.kind !== 'clear' || !b.into) return [];
+  const want = b.into === 'rocket-h' || b.into === 'rocket-v' ? ['rocket-h', 'rocket-v'] : [b.into];
+  return step.cells
+    .filter(k => {
+      const { row, col } = parseKey(k);
+      if (row === b.row && col === b.col) return false;
+      const g = step.board.cells[row * step.board.width + col]?.gem;
+      return !!g?.special && want.includes(g.special);
+    })
+    .map(k => ({ k, ...parseKey(k) }))
+    .sort((u, v) => Math.hypot(u.row - b.row, u.col - b.col) - Math.hypot(v.row - b.row, v.col - b.col) || (u.k < v.k ? -1 : 1))
+    .map(x => x.k);
+}
 
 /**
  * 아이템이 발동한 뒤 그 칸이 맞기까지 걸리는 시간. 닿지 않으면 Infinity.
@@ -132,6 +199,9 @@ export function localDelay(blast: Blast, row: number, col: number): number {
   switch (blast.kind) {
     case 'tnt':
       return FX_TIMING.tntCharge + FX_TIMING.tntHitstop + Math.max(Math.abs(dr), Math.abs(dc)) * FX_TIMING.tntRing;
+    case 'lightball':
+      // 대상 수를 모를 때의 기본(한 줄기). 실제 시각은 scheduleClear가 대상 수로 다시 잰다
+      return lightballPopMs(1);
     case 'rocket-h':
       // 합체로 띠가 두꺼워져도(3줄) 같은 삽이 지나가는 것으로 본다
       return Math.abs(dr) <= 1 ? FX_TIMING.rocketLaunch + Math.abs(dc) * FX_TIMING.rocketCell : Infinity;
@@ -142,9 +212,9 @@ export function localDelay(blast: Blast, row: number, col: number): number {
       if (dr === 0 || dc === 0) return FX_TIMING.scarecrowRise + (Math.abs(dr) + Math.abs(dc)) * FX_TIMING.scarecrowCell;
       return FX_TIMING.scarecrowRise + FX_TIMING.scarecrowScare;
     case 'propeller': {
-      // 떠오르는 날갯바람이 주변 십자를 날리고, 목적지는 참새가 쪼는 순간
+      // 떠오르는 날갯바람이 주변 십자를 날리고, 목적지는 도토리가 쪼는 순간
       let best = Infinity;
-      if (Math.abs(dr) + Math.abs(dc) === 1) best = FX_TIMING.sparrowTakeoff * 0.5;
+      if (Math.abs(dr) + Math.abs(dc) === 1) best = FX_TIMING.acornLaunch * 0.5;
       flightTargets(blast).forEach(t => {
         if (t.row === row && t.col === col) best = Math.min(best, arrivalMs(blast, t));
       });
@@ -193,15 +263,24 @@ export function scheduleClear(step: TurnStep): ClearSchedule {
   const start = new Array<number>(n).fill(Infinity);
   const originOf = (i: number) => key(blasts[i].row, blasts[i].col);
   for (let i = 0; i < n; i++) {
-    const covered = blasts.some((_, j) => j !== i && !blasts[j].combo && areas[j].has(originOf(i)));
+    // 합체 폭발도 덮는다: 합체 단계에서는 합체 말고 처음부터 터지는 아이템이 없다 - 나머지는 모두
+    // 합체 폭발이 닿아서 터진 것이다. 빼면 큰 거름포대(포대+포대) 범위의 도토리가 포대가 부풀기도
+    // 전에(0초) 먼저 날아갔다. 실제로 닿는 범위(시각이 정해지는 칸)만 덮는 것으로 본다.
+    const covered = blasts.some((_, j) => {
+      if (j === i || !areas[j].has(originOf(i))) return false;
+      // 무지개꽃 변신 합체 표시는 칸을 직접 지우지 않는다(바뀐 아이템들이 지운다) - 덮는 폭발이 아니다
+      if (isMorph(blasts[j])) return false;
+      if (!blasts[j].combo) return true;
+      return Number.isFinite(localDelay(blasts[j], blasts[i].row, blasts[i].col));
+    });
     if (!covered || blasts[i].combo) start[i] = 0;
   }
   // 서로가 서로를 덮는 경우(같은 줄의 로켓 둘 등) 아무도 0이 아니면 첫 번째를 뿌리로 삼는다.
   if (n > 0 && start.every(s => s === Infinity)) start[0] = 0;
 
   // 합체 연출:
-  //  - 참새 떼(참새+참새): 한꺼번에 뜨면 겹쳐 보여서 한 마리씩 시차를 둔다.
-  //  - 실어 나르기(참새+다른 아이템): 실린 아이템은 참새가 목적지에 닿는 순간 터진다.
+  //  - 도토리 떼(도토리+도토리): 한꺼번에 뜨면 겹쳐 보여서 한 마리씩 시차를 둔다.
+  //  - 실어 나르기(도토리+다른 아이템): 실린 아이템은 도토리가 목적지에 닿는 순간 터진다.
   //    엔진은 둘을 같은 단계에 함께 내놓으므로, 순서는 여기서 정한다.
   const payloadOf = new Map<number, Blast['kind']>();
   const carried = new Set<number>();
@@ -220,14 +299,44 @@ export function scheduleClear(step: TurnStep): ClearSchedule {
       flock++;
     }
   }
+  // 십자 합체: 같은 자리에서 나가는 가로·세로 삽 한 쌍(실려 온 것 말고)은 먼저 X자로 부딪힌다
+  const clash = new Set<number>();
+  for (let i = 0; i < n; i++) {
+    const h = blasts[i];
+    if (!h.combo || h.kind !== 'rocket-h' || carried.has(i)) continue;
+    const j = blasts.findIndex((v, k) => k !== i && v.combo && v.kind === 'rocket-v' && !carried.has(k) && v.row === h.row && v.col === h.col);
+    if (j < 0) continue;
+    // 삽+삽은 X자 쨍, 삽+거름포대(두꺼운 십자)는 포대 폭발 - 기다리는 시간이 다르다
+    const wait = (h.band ?? 1) > 1 ? FX_TIMING.crossBoom : FX_TIMING.crossClash;
+    start[i] += wait;
+    start[j] += wait;
+    clash.add(i);
+    clash.add(j);
+  }
+  // 무지개꽃 변신 합체: 꽃잎이 하나씩 닿아 아이템으로 바뀌고, 다 바뀐 뒤 가까운 것부터 차례로 터진다
+  const morphAt = new Map<string, number>();
+  const fixed = new Set<number>();
+  blasts.forEach((tb, j) => {
+    if (!(tb.kind === 'lightball' && tb.combo && tb.into)) return;
+    const order = transformTargets(step, tb);
+    const gap = lightGapFor(order.length);
+    order.forEach((k, idx) => morphAt.set(k, start[j] + FX_TIMING.lightRise + idx * gap + FX_TIMING.lightFly));
+    const placed = start[j] + lightballPopMs(order.length);
+    order.forEach((k, idx) => {
+      const i = blasts.findIndex(b2 => !b2.combo && key(b2.row, b2.col) === k);
+      if (i < 0) return;
+      start[i] = placed + idx * FX_TIMING.transformGap;
+      fixed.add(i);
+    });
+  });
   for (let changed = true, guard = 0; changed && guard < n + 2; guard++) {
     changed = false;
     for (let j = 0; j < n; j++) {
-      if (start[j] === Infinity) continue;
+      if (start[j] === Infinity || isMorph(blasts[j])) continue;
       for (let i = 0; i < n; i++) {
         if (i === j || !areas[j].has(originOf(i))) continue;
-        // 합체가 정한 시각(참새 떼 시차, 실린 아이템)은 물결이 덮어쓰지 않는다
-        if (blasts[i].combo) continue;
+        // 합체가 정한 시각(도토리 떼 시차, 실린 아이템, 변신 순서)은 물결이 덮어쓰지 않는다
+        if (blasts[i].combo || fixed.has(i)) continue;
         const t = start[j] + (blastHasFx(blasts[j]) ? localDelay(blasts[j], blasts[i].row, blasts[i].col) : 0);
         if (t < start[i]) {
           start[i] = t;
@@ -238,6 +347,16 @@ export function scheduleClear(step: TurnStep): ClearSchedule {
   }
   for (let i = 0; i < n; i++) if (start[i] === Infinity) start[i] = 0;
 
+  // 무지개꽃이 빛을 뿌릴 대상 수(연출 FxLayer.spawnRainbow와 같은 기준)
+  const lightCount = (i: number) => {
+    const b = blasts[i];
+    return step.cells.filter(k => {
+      if (k === originOf(i)) return false;
+      const { row, col } = parseKey(k);
+      const g = step.board.cells[row * step.board.width + col]?.gem;
+      return !!g && !g.special && !g.inert && g.color === b.targetColor;
+    }).length;
+  };
   const delays = new Map<string, number>();
   const targets = new Set([...step.cells, ...step.damage.map(d => d.key)]);
   let lastHit = 0;
@@ -247,13 +366,19 @@ export function scheduleClear(step: TurnStep): ClearSchedule {
     for (let i = 0; i < n; i++) {
       if (!areas[i].has(k)) continue;
       if (carried.has(i)) {
-        // 실린 아이템: 참새가 닿기 전에는 아무것도 사라지지 않는다.
+        // 실린 아이템: 도토리가 닿기 전에는 아무것도 사라지지 않는다.
         // 전용 이펙트가 있으면 그 퍼짐을 따르고, 없으면 도착 순간 한꺼번에.
         const ld = blastHasFx(blasts[i]) ? localDelay(blasts[i], row, col) : 0;
         best = Math.min(best, start[i] + (Number.isFinite(ld) ? ld : 0));
         continue;
       }
       if (!blastHasFx(blasts[i])) continue;
+      if (blasts[i].kind === 'lightball') {
+        // 변신 합체는 칸을 직접 지우지 않는다 - 바뀐 아이템이 제 차례에 터진다
+        if (blasts[i].combo) continue;
+        best = Math.min(best, start[i] + lightballPopMs(lightCount(i)));
+        continue;
+      }
       best = Math.min(best, start[i] + localDelay(blasts[i], row, col));
     }
     const d = best === Infinity ? 0 : best;
@@ -261,9 +386,52 @@ export function scheduleClear(step: TurnStep): ClearSchedule {
     lastHit = Math.max(lastHit, d);
   });
 
+  // 날아가서 직접 치는 칸(장애물 등): 지워지는 범위에 안 잡혀 시각이 0으로 남는다.
+  // 첫 도착 시각을 그 칸의 시각으로 두고, 단계는 마지막 도착까지 기다린다 - 안 그러면
+  // 도토리 떼가 돌에 닿기도 전에 다음 단계(낙하)로 넘어가 돌이 미리 사라졌다.
+  const firstArrival = new Map<string, number>();
+  blasts.forEach((b, i) => {
+    if (!blastHasFx(b)) return;
+    flightTargets(b).forEach(t => {
+      const k = `${t.row},${t.col}`;
+      if (!targets.has(k)) return;
+      const arrive = start[i] + arrivalMs(b, t);
+      firstArrival.set(k, Math.min(firstArrival.get(k) ?? Infinity, arrive));
+      lastHit = Math.max(lastHit, arrive);
+    });
+  });
+  firstArrival.forEach((t, k) => {
+    if ((delays.get(k) ?? 0) === 0) delays.set(k, t);
+  });
+
+  // 옆 칸이 지워져서 깎이는 장애물: 어느 폭발 범위에도 안 잡혀 시각이 0으로 남는다.
+  // 옆 칸(이번에 지워지는 칸)이 사라지는 가장 이른 시각에 깎이게 한다 - 안 그러면
+  // 삽이 오기도 전에 짚단이 미리 사라졌다.
+  const clearedSet = new Set(step.cells);
+  step.damage.forEach(d => {
+    if (clearedSet.has(d.key) || (delays.get(d.key) ?? 0) > 0) return;
+    const { row, col } = parseKey(d.key);
+    let best = Infinity;
+    [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => {
+      const nk = `${row + dr},${col + dc}`;
+      if (clearedSet.has(nk)) best = Math.min(best, delays.get(nk) ?? 0);
+    });
+    if (Number.isFinite(best) && best > 0) {
+      delays.set(d.key, best);
+      lastHit = Math.max(lastHit, best);
+    }
+  });
+
   const result: ClearSchedule = {
     delays,
-    blasts: blasts.map((blast, i) => ({ blast, start: start[i], payload: payloadOf.get(i), carried: carried.has(i) })),
+    morphAt,
+    blasts: blasts.map((blast, i) => ({
+      blast,
+      start: start[i],
+      payload: payloadOf.get(i),
+      carried: carried.has(i),
+      ...(clash.has(i) ? { clash: true } : {}),
+    })),
     lastHit,
   };
   cache.set(step, result);

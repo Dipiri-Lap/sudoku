@@ -3,7 +3,17 @@ import type { Application, Container, Sprite, Texture } from 'pixi.js';
 import type { ShockwaveFilter } from 'pixi-filters/shockwave';
 import type { TurnStep } from '../../engine/resolve';
 import { at as cellAt, parseKey } from '../../engine/board';
-import { FX_TIMING, arrivalMs, blastHasFx, flightTargets, scheduleClear, type ScheduledBlast } from './schedule';
+import {
+  FX_TIMING,
+  arrivalMs,
+  blastHasFx,
+  flightTargets,
+  scheduleClear,
+  type ScheduledBlast,
+  lightGapFor,
+  lightballPopMs,
+  transformTargets,
+} from './schedule';
 
 /**
  * 판 위에 겹치는 이펙트 층(PixiJS, 투명 WebGL 캔버스).
@@ -35,10 +45,8 @@ interface Engine {
   tex: {
     glow: Texture;
     shovel: Texture;
-    /** 날아가는 아이템(참새·제비·개구리). 판 위 아이템과 같은 그림의 큰 판 */
-    sparrow: Texture;
-    /** 참새 날개를 내린 그림(날갯짓 두 번째 장) */
-    sparrowDown: Texture;
+    /** 날아가는 아이템(도토리·제비·개구리). 판 위 아이템과 같은 그림의 큰 판 */
+    acorn: Texture;
     swallow: Texture;
     /** 제비 날개를 위로 친 그림 */
     swallowUp: Texture;
@@ -46,13 +54,25 @@ interface Engine {
     /** 개구리 다리를 쭉 뻗은 점프 그림 */
     frogLeap: Texture;
     scarecrow: Texture;
-    /** 흰 깃털. 새 색으로 물들여 쓴다 */
+    /** 흰 깃털(3D 렌더). 새 색으로 물들여 쓴다 */
     feather: Texture;
-    /** 판 위 아이템 그림(합체 연출: 참새가 매달고 가는 짐, 커지는 거름포대). 키는 파일 이름 */
+    /** 판 위 아이템 그림(합체 연출: 도토리가 싣고 가는 짐, 커지는 거름포대). 키는 파일 이름 */
     items: Record<string, Texture>;
-    /** 흰색으로 그린 과즙 조각들. 채소 색으로 물들여(tint) 쓴다 */
+    /** 흰색 3D 렌더 과즙 조각들(방울·알갱이). 채소 색으로 물들여(tint) 쓴다 */
     juice: { drop: Texture; blob: Texture };
     debris: Record<string, Texture>;
+    /** 채소 그림(색 인덱스 순). 삽이 퍼 올려 던지는 채소 */
+    gems: Texture[];
+    /** 합체 아이템 그림: 삽을 멘 도토리, 거름포대를 안은 도토리, 도토리 꾸러미 */
+    combo: { shovel: Texture; bag: Texture; bundle: Texture };
+    /** 흰 연기 덩어리(3D 렌더). 흙먼지 색으로 물들여 쓴다 */
+    puff: Texture;
+    /** 통통한 금별(3D 렌더) - 맞는 순간·폭발 */
+    star: Texture;
+    /** 무지개 꼬리 리본(꼬리 쪽 가늘고 투명 → 머리 쪽 굵고 밝음) */
+    trail: Texture;
+    /** 네 갈래 반짝이(3D 렌더) */
+    sparkle: Texture;
   };
   ShockwaveFilter: typeof ShockwaveFilter;
   /** 이펙트 시계(ms). 탭이 숨으면 멈췄다가 이어진다. */
@@ -76,6 +96,10 @@ function itemFile(kind: string): string {
 }
 
 const DEBRIS = ['dirt', 'crumb', 'leaf-green', 'leaf-orange', 'drop-water', 'drop-juice', 'seed', 'petal'];
+/** 3D 렌더 입자(fx 폴더). 흰 것들은 물들여 쓴다 */
+const PARTS = ['drop-white', 'bead', 'puff', 'feather', 'star', 'sparkle'] as const;
+/** 공중에서 빙글 뒤집히는 납작한 조각 - 옆으로 눕는 순간 얇아져 입체로 보인다 */
+const FLIPPY = new Set(['leaf-green', 'leaf-orange', 'petal', 'feather']);
 
 function prefersReducedMotion(): boolean {
   try {
@@ -98,42 +122,6 @@ function makeGlowTexture(pixi: Pixi): Texture {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   return pixi.Texture.from(canvas);
-}
-
-/**
- * 씨·알갱이 조각: 흰 원 + 진한 외곽선. 흰 면만 채소 색으로 물들고 외곽선은
- * 진하게 남아서 플랫 그림체(채소 그림의 테두리)와 맞는다.
- * (즙 자체는 액체 층이 그리므로 여기엔 단단한 조각만 있다)
- */
-function makeJuiceTextures(pixi: Pixi): { drop: Texture; blob: Texture } {
-  const draw = (size: number, path: (ctx: CanvasRenderingContext2D, s: number) => void) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = size;
-    const ctx = canvas.getContext('2d')!;
-    ctx.lineJoin = 'round';
-    path(ctx, size);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.lineWidth = size * 0.07;
-    ctx.strokeStyle = 'rgba(40, 22, 10, 0.75)';
-    ctx.stroke();
-    return canvas;
-  };
-  // 물방울
-  const drop = draw(64, (ctx, s) => {
-    ctx.beginPath();
-    ctx.moveTo(s * 0.5, s * 0.08);
-    ctx.bezierCurveTo(s * 0.72, s * 0.38, s * 0.86, s * 0.55, s * 0.86, s * 0.66);
-    ctx.arc(s * 0.5, s * 0.66, s * 0.36, 0, Math.PI, false);
-    ctx.bezierCurveTo(s * 0.14, s * 0.55, s * 0.28, s * 0.38, s * 0.5, s * 0.08);
-    ctx.closePath();
-  });
-  // 씨·알갱이
-  const blob = draw(64, (ctx, s) => {
-    ctx.beginPath();
-    ctx.arc(s / 2, s / 2, s * 0.42, 0, Math.PI * 2);
-  });
-  return { drop: pixi.Texture.from(drop), blob: pixi.Texture.from(blob) };
 }
 
 /**
@@ -188,11 +176,10 @@ void main(void) {
   float an = texture(uTexture, vTextureCoord - px).a;
   // 반사광은 두꺼운 즙에만 - 작은 방울까지 넣으면 하얀 조각처럼 보인다
   float spec = smoothstep(0.08, 0.22, a - an) * smoothstep(0.66, 0.8, a);
-  col = mix(col, vec3(1.0), spec * 0.6);
-  // 테두리: 경계 바로 안쪽 띠를 진하게 - 채소 그림의 외곽선과 맞춘다
-  // 얇게, 너무 검지 않게 - 넓고 진하면 작은 방울이 통째로 어두워져 탁해 보인다
-  float rim = 1.0 - smoothstep(0.46, 0.51, a);
-  col = mix(col, col * 0.6, rim * 0.85);
+  col = mix(col, vec3(1.0), spec * 0.85);
+  // 가장자리 음영: 외곽선이 아니라 둥근 면이 돌아 들어가며 어두워지는 정도만(3D 그림체)
+  float rim = 1.0 - smoothstep(0.46, 0.56, a);
+  col = mix(col, col * 0.78, rim * 0.6);
   finalColor = vec4(col * body, body);
 }`;
   return new pixi.Filter({
@@ -201,29 +188,49 @@ void main(void) {
   });
 }
 
-/** 깃털: 끝이 뾰족한 잎 모양 + 가운데 깃대. 흰 면만 물들고 테두리는 진하게 남는다 */
-function makeFeatherTexture(pixi: Pixi): Texture {
-  const w = 40;
-  const h = 96;
+/**
+ * 무지개 꼬리 리본 텍스처. 가로(u)가 리본 길이 방향 - 0이 꼬리, 1이 머리.
+ * 리본(MeshRope) 두께는 한 가지라서 가늘어지는 모양을 그림에 그려 넣는다:
+ * 꼬리는 가늘고 투명, 머리로 갈수록 굵고 밝아지며, 색은 무지개를 지나 머리에서 하얗게 빛난다.
+ */
+function makeTrailTexture(pixi: Pixi): Texture {
+  const W = 256;
+  const H = 32;
   const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d')!;
-  ctx.beginPath();
-  ctx.moveTo(w / 2, 4);
-  ctx.bezierCurveTo(w - 3, h * 0.3, w - 4, h * 0.7, w / 2, h - 6);
-  ctx.bezierCurveTo(4, h * 0.7, 3, h * 0.3, w / 2, 4);
-  ctx.closePath();
-  ctx.fillStyle = '#ffffff';
-  ctx.fill();
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = 'rgba(60, 34, 16, 0.7)';
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(w / 2, 10);
-  ctx.lineTo(w / 2, h - 2);
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
+  const img = ctx.createImageData(W, H);
+  const hues = [
+    [255, 92, 92],
+    [255, 168, 60],
+    [255, 226, 80],
+    [110, 216, 110],
+    [80, 170, 255],
+    [170, 112, 255],
+  ];
+  for (let x = 0; x < W; x++) {
+    const u = x / (W - 1); // 0 꼬리 ~ 1 머리
+    const hp = (1 - u) * (hues.length - 1);
+    const i0 = Math.floor(hp);
+    const i1 = Math.min(hues.length - 1, i0 + 1);
+    const f = hp - i0;
+    const col = [0, 1, 2].map(ch => hues[i0][ch] * (1 - f) + hues[i1][ch] * f);
+    const half = 0.18 + 0.82 * Math.pow(u, 0.6); // 꼬리 가늘게 → 머리 굵게
+    const fade = Math.min(1, Math.pow(u, 0.9) * 1.15); // 꼬리 끝만 투명
+    for (let y = 0; y < H; y++) {
+      const d = Math.abs(y - (H - 1) / 2) / ((H - 1) / 2) / half; // 0 가운데 ~ 1 가장자리
+      // 또렷한 가장자리(1px 안팎만 부드럽게) + 가운데 살짝 밝은 띠
+      const edge = Math.max(0, Math.min(1, (1 - d) * (H * half * 0.5)));
+      const shine = Math.max(0, 1 - d * 3) * 0.35;
+      const k = (y * W + x) * 4;
+      img.data[k] = Math.min(255, col[0] + 255 * shine);
+      img.data[k + 1] = Math.min(255, col[1] + 255 * shine);
+      img.data[k + 2] = Math.min(255, col[2] + 255 * shine);
+      img.data[k + 3] = Math.round(255 * edge * fade);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
   return pixi.Texture.from(canvas);
 }
 
@@ -259,10 +266,11 @@ const FxLayer: React.FC<Props> = ({ step, tick, cols, rows, shakeTarget }) => {
         return;
       }
       host.appendChild(app.canvas);
-      const [shovel, sparrow, sparrowDown, swallow, swallowUp, frog, frogLeap, scarecrow, ...debrisTex] = await Promise.all([
+      const partTex = await Promise.all(PARTS.map(n => pixi.Assets.load<Texture>(`/assets/3match/fx/${n}.png`)));
+      const part = Object.fromEntries(PARTS.map((n, i) => [n, partTex[i]])) as Record<(typeof PARTS)[number], Texture>;
+      const [shovel, acorn, swallow, swallowUp, frog, frogLeap, scarecrow, ...debrisTex] = await Promise.all([
         pixi.Assets.load<Texture>('/assets/3match/items/rocket.png'),
-        pixi.Assets.load<Texture>('/assets/3match/fx/sparrow.png'),
-        pixi.Assets.load<Texture>('/assets/3match/fx/sparrow-down.png'),
+        pixi.Assets.load<Texture>('/assets/3match/fx/acorn.png'),
         pixi.Assets.load<Texture>('/assets/3match/fx/swallow.png'),
         pixi.Assets.load<Texture>('/assets/3match/fx/swallow-up.png'),
         pixi.Assets.load<Texture>('/assets/3match/fx/frog.png'),
@@ -271,6 +279,12 @@ const FxLayer: React.FC<Props> = ({ step, tick, cols, rows, shakeTarget }) => {
         ...DEBRIS.map(n => pixi.Assets.load<Texture>(`/assets/3match/fx/${n}.png`)),
       ]);
       const itemTex = await Promise.all(ITEM_FILES.map(n => pixi.Assets.load<Texture>(`/assets/3match/items/${n}.png`)));
+      const gemTex = await Promise.all([0, 1, 2, 3, 4, 5].map(i => pixi.Assets.load<Texture>(`/assets/3match/gems/gem-${i}.png`)));
+      const [comboShovel, comboBag, comboBundle] = await Promise.all([
+        pixi.Assets.load<Texture>('/assets/3match/items/acorn-shovel.png'),
+        pixi.Assets.load<Texture>('/assets/3match/items/acorn-bag.png'),
+        pixi.Assets.load<Texture>('/assets/3match/items/acorn-bundle.png'),
+      ]);
       if (cancelled) {
         app.destroy({ removeView: true }, { children: true });
         return;
@@ -289,17 +303,22 @@ const FxLayer: React.FC<Props> = ({ step, tick, cols, rows, shakeTarget }) => {
         tex: {
           glow: makeGlowTexture(pixi),
           shovel,
-          sparrow,
-          sparrowDown,
+          acorn,
           swallow,
           swallowUp,
           frog,
           frogLeap,
           scarecrow,
-          feather: makeFeatherTexture(pixi),
+          feather: part.feather,
           items: Object.fromEntries(ITEM_FILES.map((n, i) => [n, itemTex[i]])),
-          juice: makeJuiceTextures(pixi),
+          juice: { drop: part['drop-white'], blob: part.bead },
           debris: Object.fromEntries(DEBRIS.map((n, i) => [n, debrisTex[i]])),
+          gems: gemTex,
+          combo: { shovel: comboShovel, bag: comboBag, bundle: comboBundle },
+          puff: part.puff,
+          star: part.star,
+          trail: makeTrailTexture(pixi),
+          sparkle: part.sparkle,
         },
         ShockwaveFilter,
         clock: 0,
@@ -342,7 +361,32 @@ const FxLayer: React.FC<Props> = ({ step, tick, cols, rows, shakeTarget }) => {
     if (!host) return;
     const cell = host.clientWidth / cols;
     const schedule = scheduleClear(step);
-    spawnJuice(engine, step, schedule.delays, cell);
+    // 삽이 지나가는 줄의 채소는 퍼 올려 던진다 - 그 칸은 즙을 튀기지 않는다
+    const scooped = new Map<string, { color: number; dir: -1 | 1; horizontal: boolean }>();
+    schedule.blasts.forEach(sb => {
+      const { kind, row, col } = sb.blast;
+      if (kind !== 'rocket-h' && kind !== 'rocket-v') return;
+      const horizontal = kind === 'rocket-h';
+      step.cells.forEach(k => {
+        const p = parseKey(k);
+        if (horizontal ? p.row !== row : p.col !== col) return;
+        const gem = cellAt(step.board, p.row, p.col).gem;
+        if (!gem || gem.special || gem.inert || gem.color === null) return;
+        const along = horizontal ? p.col - col : p.row - row;
+        if (along === 0) return;
+        scooped.set(k, { color: gem.color, dir: along < 0 ? -1 : 1, horizontal });
+      });
+    });
+    spawnJuice(engine, step, schedule.delays, cell, scooped);
+    // 합체: 놓은 칸에서 "뿅" - 두 아이템이 감기며 사라진 자리에 빛 고리와 반짝이
+    if (step.merged) {
+      const c = centerOf(step.merged[1].row, step.merged[1].col, cell);
+      mergePop(engine, c.x, c.y, cell);
+    }
+    scooped.forEach((sc, k) => {
+      const p = parseKey(k);
+      at(engine, schedule.delays.get(k) ?? 0, () => scoopVeggie(engine, p.row, p.col, sc.color, sc.dir, sc.horizontal, cell));
+    });
     schedule.blasts.forEach(sb => {
       if (!blastHasFx(sb.blast)) return;
       switch (sb.blast.kind) {
@@ -350,7 +394,7 @@ const FxLayer: React.FC<Props> = ({ step, tick, cols, rows, shakeTarget }) => {
           spawnFertilizer(engine, sb, cell, shakeTarget.current);
           break;
         case 'propeller':
-          spawnSparrow(engine, sb, cell);
+          spawnAcorn(engine, sb, cell);
           break;
         case 'butterfly':
           spawnSwallows(engine, sb, cell);
@@ -361,11 +405,14 @@ const FxLayer: React.FC<Props> = ({ step, tick, cols, rows, shakeTarget }) => {
         case 'scarecrow':
           spawnScarecrow(engine, sb, step, cell, cols, rows);
           break;
+        case 'lightball':
+          spawnRainbow(engine, sb, step, cell);
+          break;
         default:
-          spawnShovel(engine, sb, cell, cols, rows);
+          spawnShovel(engine, sb, cell, cols, rows, shakeTarget.current);
       }
     });
-    // 참새가 실어 온 아이템인데 전용 이펙트가 없으면(낫·쟁기 등) 도착 순간 펑 하고 터진 걸 보여 준다
+    // 도토리가 실어 온 아이템인데 전용 이펙트가 없으면(낫·쟁기 등) 도착 순간 펑 하고 터진 걸 보여 준다
     schedule.blasts.forEach(sb => {
       if (!sb.carried || blastHasFx(sb.blast)) return;
       const c = centerOf(sb.blast.row, sb.blast.col, cell);
@@ -406,6 +453,8 @@ function particle(
     parent?: Container;
     /** 빠를수록 진행 방향으로 길쭉하게(액체 방울) */
     stretch?: number;
+    /** 공중에서 뒤집히는 빠르기(rad/ms). 납작한 조각이 옆으로 누울 때 얇아져 입체로 보인다 */
+    tumble?: number;
   },
 ) {
   (opts.parent ?? engine.root).addChild(sprite);
@@ -413,8 +462,10 @@ function particle(
   const baseAlpha = sprite.alpha;
   let age = 0;
   let { vx, vy } = opts;
+  let flip = rand(0, Math.PI * 2);
   engine.updaters.push(dt => {
     age += dt;
+    flip += (opts.tumble ?? 0) * dt;
     vy += (opts.gravity ?? 0) * dt;
     sprite.x += vx * dt;
     sprite.y += vy * dt;
@@ -426,6 +477,11 @@ function particle(
       const speed = Math.hypot(vx, vy);
       sprite.rotation = Math.atan2(vy, vx);
       sprite.scale.set(base * (1 + speed * opts.stretch), base * (1 - Math.min(0.35, speed * opts.stretch * 0.4)));
+    }
+    if (opts.tumble) {
+      // 뒤집히는 동안 가로가 얇아졌다 넓어진다(완전히 0이 되면 사라져 보여 바닥을 둔다)
+      const k = 0.2 + 0.8 * Math.abs(Math.cos(flip));
+      sprite.scale.x = Math.abs(sprite.scale.y) * k * (Math.cos(flip) < 0 ? -1 : 1);
     }
     const fadeFrom = opts.fadeFrom ?? 0.6;
     sprite.alpha = t < fadeFrom ? baseAlpha : baseAlpha * Math.max(0, 1 - (t - fadeFrom) / (1 - fadeFrom));
@@ -450,11 +506,12 @@ function centerOf(row: number, col: number, cell: number) {
 function dustPuff(engine: Engine, x: number, y: number, cell: number, count: number, spread = 0.35) {
   const { pixi, tex } = engine;
   for (let i = 0; i < count; i++) {
-    const s = new pixi.Sprite(tex.glow);
+    const s = new pixi.Sprite(tex.puff);
     s.anchor.set(0.5);
-    s.tint = 0x9c7048;
-    s.alpha = 0.45;
-    sizeTo(s, cell * rand(0.5, 0.8));
+    s.tint = 0xeedcc2;
+    s.alpha = 0.75;
+    s.rotation = rand(-0.4, 0.4);
+    sizeTo(s, cell * rand(0.42, 0.66));
     s.x = x + rand(-1, 1) * cell * 0.2;
     s.y = y + rand(-1, 1) * cell * 0.2;
     const a = rand(0, Math.PI * 2);
@@ -462,9 +519,9 @@ function dustPuff(engine: Engine, x: number, y: number, cell: number, count: num
     particle(engine, s, {
       vx: Math.cos(a) * v,
       vy: Math.sin(a) * v - 0.0004 * cell, // 먼지는 살짝 떠오른다
-      life: rand(260, 360),
-      grow: 0.9,
-      fadeFrom: 0.1,
+      life: rand(320, 440),
+      grow: 0.7,
+      fadeFrom: 0.35,
     });
   }
 }
@@ -489,6 +546,7 @@ function debrisBurst(engine: Engine, x: number, y: number, cell: number, count: 
       spin: rand(-0.012, 0.012),
       life: rand(620, 920),
       fadeFrom: 0.65,
+      tumble: FLIPPY.has(kinds[i % kinds.length]) ? rand(0.008, 0.016) : 0,
     });
   }
 }
@@ -554,12 +612,45 @@ function spawnFertilizer(engine: Engine, sb: ScheduledBlast, cell: number, shake
     sizeTo(g, cell * 1.2);
     root.addChild(g);
     let age = 0;
+    let phase = 0;
+    let sparkClock = 0;
     const dur = FX_TIMING.tntCharge + FX_TIMING.tntHitstop;
+    // 심지 끝(그림의 가로 58%·세로 11%)
+    const fx = x + cell * 0.08;
+    const fy = y - cell * 0.39;
     engine.updaters.push(dt => {
       age += dt;
       const t = Math.min(1, age / dur);
+      // 빛은 갈수록 밝고 붉어지며, 맥박이 점점 빨라진다
+      phase += dt * (0.008 + 0.05 * t * t);
       g.alpha = 0.85 * t;
-      sizeTo(g, cell * (1.2 + 0.6 * t + Math.sin(age * 0.09) * 0.08));
+      g.tint = t < 0.6 ? 0xffc46b : 0xff7a3a;
+      sizeTo(g, cell * (1.2 + 0.7 * t + Math.sin(phase) * (0.06 + 0.12 * t)));
+      // 심지에서 튀는 불티: 처음엔 드문드문, 막판엔 쉴 새 없이
+      sparkClock += dt;
+      const every = 120 - 95 * t;
+      if (age < FX_TIMING.tntCharge && sparkClock >= every) {
+        sparkClock = 0;
+        const n = t > 0.6 ? 2 : 1;
+        for (let i = 0; i < n; i++) {
+          const sp = new pixi.Sprite(tex.sparkle);
+          sp.anchor.set(0.5);
+          sizeTo(sp, cell * rand(0.14, 0.24) * (1 + 0.5 * t));
+          sp.x = fx;
+          sp.y = fy;
+          sp.rotation = rand(0, Math.PI);
+          const a = rand(-Math.PI * 0.95, -Math.PI * 0.05);
+          const v = rand(0.0015, 0.004) * cell * (1 + t);
+          particle(engine, sp, {
+            vx: Math.cos(a) * v,
+            vy: Math.sin(a) * v,
+            gravity: 0.000012 * cell,
+            spin: rand(-0.01, 0.01),
+            life: rand(220, 340),
+            fadeFrom: 0.3,
+          });
+        }
+      }
       if (age >= dur) {
         g.destroy();
         return false;
@@ -569,30 +660,22 @@ function spawnFertilizer(engine: Engine, sb: ScheduledBlast, cell: number, shake
   });
 
   at(engine, boom, () => {
-    // 펑! 만화풍 별. 밝은 흙색 판에서는 가산 혼합 빛이 거의 안 보여서
-    // 단색 면 + 진한 테두리로 그린다(플랫 그림체와도 맞는다).
-    const star = new pixi.Graphics();
-    const spikes = 10;
-    const pts: number[] = [];
-    for (let i = 0; i < spikes * 2; i++) {
-      const r = i % 2 === 0 ? 1 : 0.55 + Math.random() * 0.1;
-      const a = (i / (spikes * 2)) * Math.PI * 2 + rand(-0.06, 0.06);
-      pts.push(Math.cos(a) * r * 100, Math.sin(a) * r * 100);
-    }
-    star.poly(pts).fill({ color: 0xffd84a }).stroke({ width: 10, color: 0xf07a1a });
-    star.poly(pts.map(v => v * 0.55)).fill({ color: 0xfff6c8 });
-    star.scale.set((cell / 100) * 0.6);
+    // 펑! 통통한 3D 금별이 확 부풀었다 사라지고 반짝이가 사방으로 튄다
+    const star = new pixi.Sprite(tex.star);
+    star.anchor.set(0.5);
     star.x = x;
     star.y = y;
-    star.rotation = rand(0, Math.PI);
+    star.rotation = rand(-0.4, 0.4);
+    sizeTo(star, cell * 0.6);
     root.addChild(star);
     let sAge = 0;
     engine.updaters.push(dt => {
       sAge += dt;
-      const t = sAge / 300;
+      const t = sAge / 320;
       // 확 커졌다가 살짝 줄며 사라진다
-      const sc = K * (cell / 100) * (t < 0.35 ? 0.6 + 2.0 * easeOut(t / 0.35) : 2.6 - 0.6 * (t - 0.35));
-      star.scale.set(sc);
+      const sc = K * (t < 0.35 ? 0.6 + 1.9 * easeOut(t / 0.35) : 2.5 - 0.6 * (t - 0.35));
+      sizeTo(star, cell * sc);
+      star.rotation += 0.002 * dt;
       star.alpha = t < 0.5 ? 1 : Math.max(0, 1 - (t - 0.5) / 0.5);
       if (t >= 1) {
         star.destroy();
@@ -600,6 +683,7 @@ function spawnFertilizer(engine: Engine, sb: ScheduledBlast, cell: number, shake
       }
       return true;
     });
+    sparkleBurst(engine, x, y, cell, Math.round(8 * K), 1.6 * K);
 
     // 별 뒤를 받치는 빛 (어두운 칸·장애물 위에서는 이게 살린다)
     const flash = new pixi.Sprite(tex.glow);
@@ -610,29 +694,6 @@ function spawnFertilizer(engine: Engine, sb: ScheduledBlast, cell: number, shake
     flash.y = y;
     sizeTo(flash, cell * 2.4 * K);
     particle(engine, flash, { vx: 0, vy: 0, life: 320, grow: 1.8, fadeFrom: 0.1 });
-
-    // 사각 충격파 - 5x5 범위의 테두리까지 퍼진다
-    const ring = new pixi.Graphics();
-    root.addChild(ring);
-    let age = 0;
-    const reach = FX_TIMING.tntRing * (big ? 4.5 : 2.5);
-    engine.updaters.push(dt => {
-      age += dt;
-      const t = Math.min(1, age / (reach + 160));
-      const half = cell * (0.5 + (big ? 4.2 : 2.2) * easeOut(Math.min(1, age / reach)) + 0.35 * t);
-      ring.clear();
-      const w = Math.max(2, cell * 0.16 * (1 - t));
-      ring
-        .roundRect(x - half, y - half, half * 2, half * 2, cell * 0.35)
-        .stroke({ width: w + 4, color: 0x8a5a3b, alpha: 0.55 * (1 - t) })
-        .roundRect(x - half, y - half, half * 2, half * 2, cell * 0.35)
-        .stroke({ width: w, color: 0xfffbe8, alpha: 0.95 * (1 - t) });
-      if (t >= 1) {
-        ring.destroy();
-        return false;
-      }
-      return true;
-    });
 
     // 공기 일렁임 - 이펙트 층 전체(빛·먼지)를 충격파로 휘게 한다
     const wave = new engine.ShockwaveFilter({
@@ -667,14 +728,34 @@ function spawnFertilizer(engine: Engine, sb: ScheduledBlast, cell: number, shake
 
 // ───────────────────────── 삽 (로켓) ─────────────────────────
 //
-// 제자리에서 흙을 튀기며 출발 → 삽 두 자루가 양 끝으로 날아가며 흙 꼬리를 남기고,
-// 지나간 칸이 차례로 사라진다(칸 시각은 schedule.ts의 rocketCell과 같다).
+// 제자리에서 흙을 튀기며 출발 → 삽 두 자루가 양 끝으로 땅을 파며 달려간다:
+//  1) 흙 파도 - 날 앞에서 흙덩이가 양옆 위로 쏟아지고, 지나간 줄에 고랑 자국이 남았다 사라진다
+//  2) 채소 퍼 올리기 - 지나가는 칸의 채소를 퍼서 뒤쪽 위로 던진다(scoopVeggie)
+//  3) 끝에 꽂히기 - 판 끝에서 날을 땅에 탕 꽂고 부르르 떨다 사라진다
+// 칸 시각은 schedule.ts의 rocketCell과 같다(삽 속도 = 칸이 사라지는 속도).
 
-function spawnShovel(engine: Engine, sb: ScheduledBlast, cell: number, cols: number, rows: number) {
+function spawnShovel(
+  engine: Engine,
+  sb: ScheduledBlast,
+  cell: number,
+  cols: number,
+  rows: number,
+  shakeEl: HTMLElement | null,
+) {
   const { pixi, tex, root } = engine;
   const { row, col, kind } = sb.blast;
   const horizontal = kind === 'rocket-h';
   const { x, y } = centerOf(row, col, cell);
+  // 큰 삽(굵은 흙 파도): 두꺼운 십자(삽+거름포대)일 때만
+  const big = !!sb.blast.combo && !sb.carried && (sb.blast.band ?? 1) > 1;
+
+  // 십자 합체: 가로·세로 한 쌍 중 가로 쪽만 그린다(두 번 그리지 않게)
+  //  - 삽+삽: 두 삽이 X자로 날아와 "쨍" 부딪히고 흙이 솟구친 뒤 네 방향으로 튀어나간다
+  //  - 삽+거름포대: 포대가 부풀며 달아오르다 펑 터지고, 그 폭발 속에서 큰 삽 네 자루가 나간다
+  if (sb.clash && horizontal) {
+    if (big) at(engine, sb.start - FX_TIMING.crossBoom, () => bagBoomForShovels(engine, x, y, cell, shakeEl));
+    else at(engine, sb.start - FX_TIMING.crossClash, () => shovelClash(engine, x, y, cell, shakeEl));
+  }
 
   at(engine, sb.start, () => {
     dustPuff(engine, x, y, cell, 5, 0.6);
@@ -683,66 +764,312 @@ function spawnShovel(engine: Engine, sb: ScheduledBlast, cell: number, cols: num
 
   at(engine, sb.start + FX_TIMING.rocketLaunch, () => {
     const speed = cell / FX_TIMING.rocketCell; // px/ms - 칸이 사라지는 속도와 같다
-    const limit = (horizontal ? cols : rows) * cell + cell;
     ([-1, 1] as const).forEach(dir => {
+      // 판 끝(마지막 칸 가운데를 조금 지난 곳)까지 간 거리
+      const lastIdx = dir > 0 ? (horizontal ? cols : rows) - 1 : 0;
+      const reach = Math.abs(lastIdx - (horizontal ? col : row)) * cell + cell * 0.2;
+
+      // 고랑 자국: 지나간 길을 따라 늘어나는 흙빛 띠. 다 가고 나면 서서히 사라진다
+      const furrow = new pixi.Graphics();
+      root.addChildAt(furrow, 0);
+
       const s = new pixi.Sprite(tex.shovel);
       s.anchor.set(0.5);
-      sizeTo(s, cell * (sb.blast.combo && !sb.carried ? 1.5 : 1.05));
-      if (horizontal) s.scale.x *= dir; // 그림은 오른쪽을 본다
-      else s.rotation = (dir * Math.PI) / 2;
+      sizeTo(s, cell * (big ? 1.5 : 1.1));
+      const base = Math.abs(s.scale.y);
+      const baseRot = horizontal ? 0 : (dir * Math.PI) / 2;
+      if (horizontal) s.scale.x = base * dir; // 그림은 오른쪽을 본다
+      s.rotation = baseRot;
       s.x = x;
       s.y = y;
-
-      // 삽 밑의 빛 꼬리
-      const streak = new pixi.Sprite(tex.glow);
-      streak.anchor.set(0.5);
-      streak.blendMode = 'add';
-      streak.tint = 0xfff0c8;
-      streak.alpha = 0.7;
-      root.addChild(streak);
       root.addChild(s);
 
       let travelled = 0;
       let sinceTrail = 0;
+      let stuck = -1; // 꽂힌 뒤 흐른 시간(ms). -1이면 아직 달리는 중
+      let furrowFade = 1;
+      const thick = cell * (big ? 1.1 : 0.5);
       engine.updaters.push(dt => {
-        const step = speed * dt;
-        travelled += step;
-        if (horizontal) s.x += step * dir;
-        else s.y += step * dir;
-        // 꼬리는 진행 방향으로 길게 늘인다
-        const len = Math.min(travelled, cell * 2.2);
-        const thick = cell * (sb.blast.combo && !sb.carried ? 1.2 : 0.55);
-        streak.width = horizontal ? len : thick;
-        streak.height = horizontal ? thick : len;
-        streak.x = horizontal ? s.x - (dir * len) / 2 : s.x;
-        streak.y = horizontal ? s.y : s.y - (dir * len) / 2;
+        if (stuck < 0) {
+          const step = Math.min(speed * dt, reach - travelled);
+          travelled += step;
+          if (horizontal) s.x += step * dir;
+          else s.y += step * dir;
+          // 땅을 긁으며 덜컹덜컹
+          const bump = Math.sin(travelled * 0.25) * 0.08;
+          s.rotation = baseRot + bump * dir;
 
-        sinceTrail += dt;
-        if (sinceTrail > 22) {
-          sinceTrail = 0;
-          const d = new pixi.Sprite(tex.debris[Math.random() < 0.7 ? 'crumb' : 'dirt']);
-          d.anchor.set(0.5);
-          sizeTo(d, cell * rand(0.16, 0.26));
-          d.x = s.x;
-          d.y = s.y;
-          const side = Math.random() < 0.5 ? -1 : 1;
-          particle(engine, d, {
-            vx: horizontal ? -dir * speed * 0.08 : side * rand(0.001, 0.003) * cell,
-            vy: horizontal ? -rand(0.001, 0.004) * cell : -dir * speed * 0.08,
-            gravity: 0.00003 * cell,
-            spin: rand(-0.015, 0.015),
-            life: rand(320, 480),
-            fadeFrom: 0.4,
-          });
+          // 1) 흙 파도: 날 앞에서 흙덩이가 양옆 위로 쏟아진다
+          sinceTrail += dt;
+          if (sinceTrail > 16) {
+            sinceTrail = 0;
+            for (let i = 0; i < 2; i++) {
+              const d = new pixi.Sprite(tex.debris[Math.random() < 0.6 ? 'dirt' : 'crumb']);
+              d.anchor.set(0.5);
+              sizeTo(d, cell * rand(0.18, 0.32) * (big ? 1.3 : 1));
+              const side = i === 0 ? -1 : 1;
+              d.x = s.x + (horizontal ? dir * cell * 0.3 : side * cell * 0.2);
+              d.y = s.y + (horizontal ? side * cell * 0.15 : dir * cell * 0.3);
+              particle(engine, d, {
+                // 옆으로 튀어 나가며 위로 솟았다 떨어진다
+                vx: horizontal ? dir * speed * rand(0.05, 0.15) : side * rand(0.003, 0.006) * cell,
+                vy: horizontal ? side * rand(0.002, 0.005) * cell - 0.004 * cell : dir * speed * rand(0.05, 0.15) - 0.003 * cell,
+                gravity: 0.00005 * cell,
+                spin: rand(-0.02, 0.02),
+                life: rand(380, 560),
+                fadeFrom: 0.5,
+              });
+            }
+            if (Math.random() < 0.35) dustPuff(engine, s.x, s.y, cell, 1, 0.5);
+          }
+
+          if (travelled >= reach - 0.01) {
+            stuck = 0;
+            // 3) 탕! 땅에 꽂힌다
+            dustPuff(engine, s.x, s.y + cell * 0.1, cell, 6, 1);
+            debrisBurst(engine, s.x, s.y, cell, 8, ['dirt', 'crumb', 'dirt'], 0.8);
+            hitStar(engine, s.x, s.y, cell, 0.45);
+            if (dir > 0) shake(shakeEl, Math.max(2, cell * 0.05) * (big ? 1.5 : 1), 180);
+          }
+        } else if (!s.destroyed) {
+          stuck += dt;
+          // 앞으로 콕: 네 방향 모두 날아가던 방향 그대로 판 끝에 박히며 같은 각도(20도)만 숙인다
+          const STICK = 70;
+          const k = Math.min(1, stuck / STICK);
+          const tilt = 0.35 * (horizontal ? dir : 1);
+          // 박히는 만큼 앞으로 살짝 밀려 들어간다
+          const push = cell * 0.12 * easeOut(k);
+          if (stuck - dt <= STICK) {
+            const prev = cell * 0.12 * easeOut(Math.min(1, (stuck - dt) / STICK));
+            if (horizontal) s.x += (push - prev) * dir;
+            else s.y += (push - prev) * dir;
+          }
+          // 부르르: 꽂힌 뒤 점점 잦아드는 떨림
+          const wob = stuck > STICK ? Math.sin((stuck - STICK) * 0.09) * 0.22 * Math.exp(-(stuck - STICK) / 140) : 0;
+          s.rotation = baseRot + tilt * easeOut(k) + wob;
+          // 박히는 순간 살짝 눌렸다 펴진다
+          const squash = stuck < STICK ? 1 - 0.15 * Math.sin((k * Math.PI) / 2) : 1;
+          s.scale.y = base * squash;
+          if (stuck > 420) s.alpha = Math.max(0, 1 - (stuck - 420) / 160);
+          if (stuck > 580) s.destroy();
+        } else {
+          stuck += dt;
         }
-        if (travelled > limit) {
-          s.destroy();
-          streak.destroy();
+
+        // 고랑: 달린 길이만큼 띠가 늘어나고, 꽂힌 뒤 서서히 사라진다
+        if (stuck > 200) furrowFade = Math.max(0, furrowFade - dt / 400);
+        furrow.clear();
+        if (travelled > 2 && furrowFade > 0) {
+          const len = travelled;
+          const rx = horizontal ? (dir > 0 ? x : x - len) : x - thick / 2;
+          const ry = horizontal ? y - thick / 2 : dir > 0 ? y : y - len;
+          furrow
+            .roundRect(rx, ry, horizontal ? len : thick, horizontal ? thick : len, thick / 2)
+            .fill({ color: 0x3b2210, alpha: 0.45 * furrowFade });
+        }
+        if (stuck > 580 && furrowFade <= 0) {
+          if (!s.destroyed) s.destroy();
+          furrow.destroy();
           return false;
         }
         return true;
       });
     });
+  });
+}
+
+/** 삽+거름포대 합체: 포대가 부풀며 붉게 달아오르다 펑! - 큰 삽 네 자루가 그 폭발에서 나간다 */
+function bagBoomForShovels(engine: Engine, x: number, y: number, cell: number, shakeEl: HTMLElement | null) {
+  const { pixi, tex, root } = engine;
+  const CHARGE = FX_TIMING.crossBoom - 60; // 부풀기, 마지막 60ms는 멈칫
+  const sack = new pixi.Sprite(tex.items.tnt);
+  sack.anchor.set(0.5, 0.6);
+  sack.x = x;
+  sack.y = y + cell * 0.1;
+  sizeTo(sack, cell * 0.3);
+  root.addChild(sack);
+  const glow = new pixi.Sprite(tex.glow);
+  glow.anchor.set(0.5);
+  glow.blendMode = 'add';
+  glow.x = x;
+  glow.y = y;
+  glow.alpha = 0;
+  root.addChildAt(glow, Math.max(0, root.getChildIndex(sack)));
+  let age = 0;
+  engine.updaters.push(dt => {
+    age += dt;
+    if (age < FX_TIMING.crossBoom) {
+      const u = Math.min(1, age / CHARGE);
+      // 뿅 나타나 점점 부풀며 부르르 - 막판엔 붉게
+      const pop = age < 80 ? easeOut(age / 80) : 1;
+      sizeTo(sack, cell * (1.0 + 0.5 * u) * pop);
+      sack.rotation = age < CHARGE ? Math.sin(age * (0.08 + 0.2 * u)) * 0.14 * u : 0;
+      sack.tint = u > 0.6 ? 0xffb090 : 0xffffff;
+      glow.tint = u > 0.6 ? 0xff7a3a : 0xffc46b;
+      glow.alpha = 0.85 * u;
+      sizeTo(glow, cell * (1.4 + 0.8 * u));
+      return true;
+    }
+    sack.destroy();
+    glow.destroy();
+    // 펑!
+    const star = new pixi.Sprite(tex.star);
+    star.anchor.set(0.5);
+    star.x = x;
+    star.y = y;
+    sizeTo(star, cell * 0.6);
+    root.addChild(star);
+    let sAge = 0;
+    engine.updaters.push(d2 => {
+      sAge += d2;
+      const t = sAge / 300;
+      sizeTo(star, cell * (t < 0.35 ? 0.6 + 1.8 * easeOut(t / 0.35) : 2.4 - 0.6 * (t - 0.35)));
+      star.alpha = t < 0.5 ? 1 : Math.max(0, 1 - (t - 0.5) / 0.5);
+      if (t >= 1) {
+        star.destroy();
+        return false;
+      }
+      return true;
+    });
+    sparkleBurst(engine, x, y, cell, 8, 1.4);
+    debrisBurst(engine, x, y, cell, 18, ['dirt', 'crumb', 'dirt', 'leaf-green'], 1.2);
+    dustPuff(engine, x, y, cell, 8, 1.3);
+    shake(shakeEl, Math.max(3, cell * 0.08), 260);
+    return false;
+  });
+}
+
+/** 삽 십자 합체: 두 삽이 양쪽 위에서 X자로 날아와 "쨍" 부딪힌다 → 흙이 솟구친다 */
+function shovelClash(engine: Engine, x: number, y: number, cell: number, shakeEl: HTMLElement | null) {
+  const { pixi, tex, root } = engine;
+  const IN = 130; // 날아와 부딪히기까지
+  const HOLD = 130; // 부딪힌 채 부르르
+  ([-1, 1] as const).forEach(side => {
+    const s = new pixi.Sprite(tex.shovel);
+    s.anchor.set(0.5);
+    sizeTo(s, cell * 1.3);
+    const base = Math.abs(s.scale.y);
+    // 왼쪽 삽은 오른쪽 아래로, 오른쪽 삽은 왼쪽 아래로 - 날이 가운데서 X자로 엇갈린다
+    s.scale.x = base * -side;
+    const finalRot = side * -0.75;
+    const sx = x + side * cell * 1.1;
+    const sy = y - cell * 0.9;
+    s.x = sx;
+    s.y = sy;
+    s.rotation = finalRot + side * 0.6;
+    root.addChild(s);
+    let age = 0;
+    engine.updaters.push(dt => {
+      age += dt;
+      if (age < IN) {
+        const e = easeOut(age / IN);
+        s.x = sx + (x + side * cell * 0.08 - sx) * e;
+        s.y = sy + (y - sy) * e;
+        s.rotation = finalRot + side * 0.6 * (1 - e);
+      } else if (age < IN + HOLD) {
+        // 부딪힌 반동으로 부르르
+        const u = (age - IN) / HOLD;
+        s.x = x + side * cell * 0.08 + side * Math.sin(u * Math.PI * 6) * cell * 0.04 * (1 - u);
+        s.y = y;
+        s.rotation = finalRot + Math.sin(u * Math.PI * 6) * 0.08 * (1 - u);
+      } else {
+        // 네 방향 삽에게 넘기고 사라진다
+        const u = Math.min(1, (age - IN - HOLD) / 80);
+        s.alpha = 1 - u;
+        s.scale.set(base * -side * (1 + 0.3 * u), base * (1 + 0.3 * u));
+        if (u >= 1) {
+          s.destroy();
+          return false;
+        }
+      }
+      return true;
+    });
+  });
+  // 쨍! 부딪히는 순간
+  at(engine, IN, () => {
+    const flash = new pixi.Sprite(tex.glow);
+    flash.anchor.set(0.5);
+    flash.blendMode = 'add';
+    flash.tint = 0xf4fbff;
+    flash.x = x;
+    flash.y = y;
+    sizeTo(flash, cell * 1.8);
+    particle(engine, flash, { vx: 0, vy: 0, life: 220, grow: 1, fadeFrom: 0.1 });
+    hitStar(engine, x, y, cell, 0.9, 0xf2f7ff);
+    sparkleBurst(engine, x, y, cell, 8, 1.3);
+    bubble(engine, x, y - cell * 0.9, cell, '쨍!');
+    shake(shakeEl, Math.max(2, cell * 0.06), 160);
+    // 흙이 솟구친다
+    for (let i = 0; i < 14; i++) {
+      const d = new pixi.Sprite(tex.debris[i % 3 === 0 ? 'crumb' : 'dirt']);
+      d.anchor.set(0.5);
+      sizeTo(d, cell * rand(0.2, 0.34));
+      d.x = x + rand(-0.2, 0.2) * cell;
+      d.y = y;
+      const a = -Math.PI / 2 + rand(-0.7, 0.7);
+      const v = rand(0.006, 0.011) * cell;
+      particle(engine, d, {
+        vx: Math.cos(a) * v,
+        vy: Math.sin(a) * v,
+        gravity: 0.00005 * cell,
+        spin: rand(-0.02, 0.02),
+        life: rand(520, 720),
+        fadeFrom: 0.6,
+      });
+    }
+    dustPuff(engine, x, y, cell, 6, 1.1);
+  });
+}
+
+/** 2) 삽이 퍼 올린 채소: 뒤쪽 위로 빙글 돌며 포물선으로 날아가 작아지며 사라진다 */
+function scoopVeggie(
+  engine: Engine,
+  row: number,
+  col: number,
+  color: number,
+  dir: -1 | 1,
+  horizontal: boolean,
+  cell: number,
+) {
+  const { pixi, tex, root } = engine;
+  const t = tex.gems[color];
+  if (!t) return;
+  const { x, y } = centerOf(row, col, cell);
+  const s = new pixi.Sprite(t);
+  s.anchor.set(0.5);
+  sizeTo(s, cell * 0.92);
+  const base = s.scale.x;
+  s.x = x;
+  s.y = y;
+  root.addChild(s);
+  // 흙 한 줌이 같이 튄다
+  debrisBurst(engine, x, y, cell, 3, ['crumb', 'dirt'], 0.5);
+  // 던지는 방향: 삽이 온 쪽(뒤)으로, 위로 크게
+  const back = -dir;
+  const side = Math.random() < 0.5 ? -1 : 1;
+  let vx = horizontal ? back * rand(0.002, 0.004) * cell : side * rand(0.0015, 0.003) * cell;
+  let vy = horizontal ? -rand(0.009, 0.012) * cell : back * rand(0.002, 0.004) * cell - 0.009 * cell;
+  const spin = rand(0.008, 0.014) * (Math.random() < 0.5 ? -1 : 1);
+  const g = 0.000032 * cell;
+  const life = rand(560, 700);
+  let age = 0;
+  engine.updaters.push(dt => {
+    age += dt;
+    vy += g * dt;
+    s.x += vx * dt;
+    s.y += vy * dt;
+    vx *= Math.pow(0.999, dt);
+    s.rotation += spin * dt;
+    const k = age / life;
+    // 위로 떴다가 멀어지듯 작아진다
+    const sc = k < 0.25 ? 1 + 0.25 * (k / 0.25) : 1.25 - 0.85 * ((k - 0.25) / 0.75);
+    s.scale.set(base * sc);
+    s.alpha = k < 0.7 ? 1 : Math.max(0, 1 - (k - 0.7) / 0.3);
+    if (age >= life) {
+      s.destroy();
+      return false;
+    }
+    return true;
   });
 }
 
@@ -771,11 +1098,19 @@ const JUICE: JuiceRecipe[] = [
 /** 칸이 줄어드는 애니메이션(jk-pop)이 가장 부풀었을 때 터뜨린다 */
 const JUICE_AT = 70;
 
-function spawnJuice(engine: Engine, step: TurnStep, delays: Map<string, number>, cell: number) {
+function spawnJuice(
+  engine: Engine,
+  step: TurnStep,
+  delays: Map<string, number>,
+  cell: number,
+  skip: Map<string, unknown> = new Map(),
+) {
   if (step.kind !== 'clear') return;
   // 한꺼번에 많이 터지면(합체·큰 연쇄) 칸당 조각 수를 줄여 폰에서도 버티게 한다
   const many = step.cells.length > 20;
   step.cells.forEach(k => {
+    // 삽이 퍼 올려 던지는 채소는 터지지 않고 통째로 날아간다
+    if (skip.has(k)) return;
     const { row, col } = parseKey(k);
     const gem = cellAt(step.board, row, col).gem;
     // 아이템은 자기 이펙트가 있고, 수집물은 터지지 않는다
@@ -796,12 +1131,13 @@ function juiceBurst(engine: Engine, x: number, y: number, cell: number, recipe: 
 
   // 1) 즙 방울 - 사방으로 튀었다가 떨어진다. 방울은 날아가는 방향으로 기운다.
   //    크기를 섞어(큰 방울 몇 + 작은 방울 여럿) 한 번에 "촤악" 퍼지는 느낌을 낸다.
-  const drops = many ? 4 : 9;
+  // 3D 방울은 크고 적게 - 자잘하게 많으면 색종이처럼 보인다
+  const drops = many ? 3 : 6;
   for (let i = 0; i < drops; i++) {
     const s = new pixi.Sprite(tex.juice.drop);
     s.anchor.set(0.5, 0.65);
     s.tint = recipe.juice;
-    sizeTo(s, cell * (i % 3 === 0 ? rand(0.22, 0.28) : rand(0.15, 0.21)));
+    sizeTo(s, cell * (i % 3 === 0 ? rand(0.28, 0.34) : rand(0.19, 0.25)));
     s.x = x;
     s.y = y;
     const a = (i / drops) * Math.PI * 2 + rand(-0.35, 0.35);
@@ -839,7 +1175,7 @@ function juiceBurst(engine: Engine, x: number, y: number, cell: number, recipe: 
 
   // 3) 물보라 - 테두리 없는 아주 작은 과즙 입자가 빠르게 흩어진다. 터지는 순간의 "치익"
   if (!many) {
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 4; i++) {
       const m = new pixi.Sprite(tex.glow);
       m.anchor.set(0.5);
       m.tint = recipe.juice;
@@ -880,6 +1216,7 @@ function juiceBurst(engine: Engine, x: number, y: number, cell: number, recipe: 
         spin: rand(-0.012, 0.012),
         life: rand(460, 640),
         fadeFrom: 0.55,
+        tumble: FLIPPY.has(bit.tex) ? rand(0.008, 0.016) : 0,
       });
     }
   });
@@ -920,6 +1257,9 @@ function featherPuff(engine: Engine, x: number, y: number, cell: number, count: 
       f.x += vx * dt + Math.sin(age * sway + phase) * cell * 0.004;
       f.y += vy * dt;
       f.rotation = Math.sin(age * sway + phase) * 0.9;
+      // 팔랑: 좌우로 흔들릴 때 옆으로 누워 얇아진다
+      const k = 0.35 + 0.65 * Math.abs(Math.cos(age * sway * 1.3 + phase));
+      f.scale.x = Math.abs(f.scale.y) * k;
       const t = age / life;
       f.alpha = t < 0.6 ? 1 : Math.max(0, 1 - (t - 0.6) / 0.4);
       if (age >= life) {
@@ -931,36 +1271,67 @@ function featherPuff(engine: Engine, x: number, y: number, cell: number, count: 
   }
 }
 
-/** 콕! 맞은 자리에 터지는 작은 만화풍 별 */
-function hitStar(engine: Engine, x: number, y: number, cell: number, size: number, color = 0xfff1a8) {
-  const { pixi, root } = engine;
-  const star = new pixi.Graphics();
-  const spikes = 7;
-  const pts: number[] = [];
-  for (let i = 0; i < spikes * 2; i++) {
-    const r = i % 2 === 0 ? 1 : 0.45;
-    const a = (i / (spikes * 2)) * Math.PI * 2;
-    pts.push(Math.cos(a) * r * 100, Math.sin(a) * r * 100);
-  }
-  star.poly(pts).fill({ color }).stroke({ width: 12, color: 0xd9822b });
-  // 첫 갱신 전에 한 번 그려질 수 있다 - 원래 크기(반지름 100px)로 번쩍이지 않게 미리 줄여 둔다
-  star.scale.set((cell / 100) * size * 0.3);
+/** 콕! 맞은 자리에 통통한 3D 금별이 튀어나왔다 사라지고 반짝이가 흩어진다 */
+function hitStar(engine: Engine, x: number, y: number, cell: number, size: number, color = 0xffffff) {
+  const { pixi, tex, root } = engine;
+  const star = new pixi.Sprite(tex.star);
+  star.anchor.set(0.5);
+  star.tint = color;
+  const full = cell * size * 1.25;
+  sizeTo(star, full * 0.3);
   star.x = x;
   star.y = y;
-  star.rotation = rand(0, Math.PI);
+  star.rotation = rand(-0.5, 0.5);
   root.addChild(star);
+  const spin = rand(-0.004, 0.004);
   let age = 0;
   engine.updaters.push(dt => {
     age += dt;
-    const t = age / 220;
-    star.scale.set((cell / 100) * size * (t < 0.4 ? 0.3 + 0.7 * easeOut(t / 0.4) : 1 - 0.3 * (t - 0.4)));
-    star.alpha = t < 0.5 ? 1 : Math.max(0, 1 - (t - 0.5) / 0.5);
+    const t = age / 260;
+    // 퐁: 확 커졌다가(살짝 넘쳤다 돌아오며) 줄며 사라진다
+    const k = t < 0.35 ? 0.3 + 0.85 * easeOut(t / 0.35) : 1.15 - 0.15 * ((t - 0.35) / 0.65) - 0.3 * Math.max(0, t - 0.7);
+    sizeTo(star, full * k);
+    star.rotation += spin * dt;
+    star.alpha = t < 0.55 ? 1 : Math.max(0, 1 - (t - 0.55) / 0.45);
     if (t >= 1) {
       star.destroy();
       return false;
     }
     return true;
   });
+  sparkleBurst(engine, x, y, cell, Math.round(3 + size * 3), size);
+}
+
+/** 반짝이 몇 개가 튀어 나가며 반짝(커졌다 작아졌다) 사라진다 */
+function sparkleBurst(engine: Engine, x: number, y: number, cell: number, count: number, power = 1) {
+  const { pixi, tex, root } = engine;
+  for (let i = 0; i < count; i++) {
+    const sp = new pixi.Sprite(tex.sparkle);
+    sp.anchor.set(0.5);
+    const full = cell * rand(0.22, 0.36) * Math.max(0.7, power);
+    sizeTo(sp, full * 0.2);
+    sp.x = x;
+    sp.y = y;
+    root.addChild(sp);
+    const a = (i / count) * Math.PI * 2 + rand(-0.4, 0.4);
+    const v = rand(0.0025, 0.0045) * cell * Math.max(0.8, power);
+    let age = 0;
+    const life = rand(320, 460);
+    engine.updaters.push(dt => {
+      age += dt;
+      const t = age / life;
+      sp.x += Math.cos(a) * v * dt * (1 - t);
+      sp.y += Math.sin(a) * v * dt * (1 - t);
+      // 반짝: 한 번 크게, 한 번 작게
+      sizeTo(sp, full * (0.2 + 0.8 * Math.sin(Math.min(1, t) * Math.PI)));
+      sp.rotation = t * 1.2;
+      if (t >= 1) {
+        sp.destroy();
+        return false;
+      }
+      return true;
+    });
+  }
 }
 
 /** 그림은 오른쪽을 본다. 왼쪽으로 갈 땐 뒤집고, 진행 각도만큼 기울인다 */
@@ -972,142 +1343,493 @@ function face(sprite: Sprite, base: number, vx: number, vy: number, tilt: number
   sprite.rotation = left ? -r : r;
 }
 
-// ───────────────────────── 참새 (프로펠러) ─────────────────────────
+// ───────────────────────── 무지개꽃 (라이트볼) ─────────────────────────
 //
-// 제자리에서 파닥이며 수직으로 떠오른다(날갯바람에 주변 십자가 날아감) → 같은 높이로
-// 곧게 날아가(그림자가 땅을 따라온다) → 목표 위에 내려앉아 콕콕 두 번 쪼며 "짹!" →
-// 앞쪽 위로 비스듬히 날아올라 사라진다. 날개는 위·아래 두 장을 번갈아 그린다.
+// 꽃이 빙글 돌며 떠올라 활짝 핀다 → 꽃 가운데서 무지개빛 줄기가 같은 색 채소마다 "슝슝슝"
+// 차례로 뻗는다(닿은 채소는 반짝 빛난다) → 다 뻗으면 잠깐 숨을 고르고 한꺼번에 팡!
+// 채소가 사라지는 시각은 schedule.ts의 lightballPopMs(대상 수)로 같다.
 
-function spawnSparrow(engine: Engine, sb: ScheduledBlast, cell: number) {
+const RAINBOW = [0xff5a5a, 0xffa53a, 0xffe14a, 0x6ad66a, 0x4aa8ff, 0xa66bff];
+
+/**
+ * 빛 한 줄기: (x0,y0)에서 목표(x1,y1)로 포물선을 그리며 FLY ms 동안 날아간다.
+ *
+ * 꼬리는 매 프레임 지나온 자리를 이어 붙이지 않고 **비행 곡선 자체**에서 고른 간격으로 뽑는다 -
+ * 프레임 기록으로 잇으면 출발 직후 점이 한곳에 몰려 리본이 뭉개지고 울퉁불퉁했다.
+ * 리본은 한 줄(테두리 또렷한 무지개), 머리는 작고 밝은 반짝이. 닿으면 채소가 그 색 빛에 감싸이고
+ * 꼬리는 목표 쪽으로 빨려 들어간다. popIn ms 뒤(=한꺼번에 팡) 빛이 사라진다.
+ */
+/**
+ * 꽃잎이 닿은 자리: 작은 꽃잎 여섯 장이 꽃 모양으로 동그랗게 퍼지며 팔랑 뒤집히다 사라지고,
+ * 가운데서 그 색 빛이 번쩍한다.
+ */
+function petalBloom(engine: Engine, x: number, y: number, cell: number, hue: number) {
+  const { pixi, tex, root } = engine;
+  const flash = new pixi.Sprite(tex.glow);
+  flash.anchor.set(0.5);
+  flash.blendMode = 'add';
+  flash.tint = hue;
+  flash.x = x;
+  flash.y = y;
+  sizeTo(flash, cell * 0.9);
+  particle(engine, flash, { vx: 0, vy: 0, life: 220, grow: 0.8, fadeFrom: 0.2 });
+  // 그 색을 흰빛과 섞어 꽃잎을 물들인다(분홍 그림이 탁해지지 않게)
+  const r = (hue >> 16) & 255;
+  const g = (hue >> 8) & 255;
+  const b = hue & 255;
+  const w = 0.55;
+  const soft = (Math.round(r + (255 - r) * w) << 16) | (Math.round(g + (255 - g) * w) << 8) | Math.round(b + (255 - b) * w);
+  const COUNT = 6;
+  const turn = rand(0, Math.PI * 2);
+  for (let i = 0; i < COUNT; i++) {
+    const a = turn + (i / COUNT) * Math.PI * 2;
+    const pe = new pixi.Sprite(tex.debris.petal);
+    pe.anchor.set(0.5, 0.85); // 꽃잎 끝이 가운데를 향하게(꽃 모양으로 핀다)
+    pe.tint = soft;
+    sizeTo(pe, cell * 0.32);
+    pe.x = x;
+    pe.y = y;
+    pe.rotation = a + Math.PI / 2;
+    const v = cell * 0.0028;
+    particle(engine, pe, {
+      vx: Math.cos(a) * v,
+      vy: Math.sin(a) * v,
+      gravity: 0.000006 * cell,
+      spin: (i % 2 === 0 ? 1 : -1) * 0.004,
+      life: rand(380, 480),
+      fadeFrom: 0.45,
+      tumble: rand(0.008, 0.013),
+    });
+  }
+}
+
+function petalFlight(
+  engine: Engine,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  hue: number,
+  FLY: number,
+  popIn: number,
+  cell: number,
+  i: number,
+  morph = false,
+) {
+  const { pixi, tex, root } = engine;
+  const dist = Math.hypot(x1 - x0, y1 - y0);
+  // 포물선 조절점: 가운데에서 위로, 번갈아 좌우로 살짝 휘게
+  const side = i % 2 === 0 ? 1 : -1;
+  const cx = (x0 + x1) / 2 + side * Math.min(cell * 1.1, dist * 0.22);
+  const cy = Math.min(y0, y1) - (cell * 0.8 + dist * 0.4);
+  const pos = (t: number) => {
+    const u = 1 - t;
+    return { x: u * u * x0 + 2 * u * t * cx + t * t * x1, y: u * u * y0 + 2 * u * t * cy + t * t * y1 };
+  };
+  // 비행 진행(0~1): 출발은 톡 빠르게, 끝은 목표로 쏙
+  const ease = (t0: number) => (t0 < 0.5 ? 0.5 * Math.pow(t0 * 2, 0.85) : 1 - 0.5 * Math.pow((1 - t0) * 2, 1.5));
+  const TAIL = 0.65; // 꼬리 길이(곡선 진행 비율)
+  const N = 28;
+  const pts = Array.from({ length: N }, () => new pixi.Point(x0, y0));
+  const rope = new pixi.MeshRope({ texture: tex.trail, points: pts, width: cell * 0.2 });
+  root.addChild(rope);
+
+  // 머리: 작고 밝은 반짝이 + 그 색 빛
+  const headGlow = new pixi.Sprite(tex.glow);
+  headGlow.anchor.set(0.5);
+  headGlow.blendMode = 'add';
+  headGlow.tint = hue;
+  sizeTo(headGlow, cell * 0.7);
+  const head = new pixi.Sprite(tex.sparkle);
+  head.anchor.set(0.5);
+  sizeTo(head, cell * 0.42);
+  root.addChild(headGlow);
+  root.addChild(head);
+
+  let age = 0;
+  let landed = false;
+  engine.updaters.push(dt => {
+    age += dt;
+    const tHead = Math.min(1, ease(Math.min(1, age / FLY)));
+    // 닿은 뒤에는 꼬리 끝이 머리(목표)로 빨려 들어간다
+    const after = Math.max(0, age - FLY);
+    const tTail = Math.min(tHead, Math.max(0, tHead - TAIL) + (after > 0 ? Math.min(TAIL, after / 220) : 0));
+    for (let j = 0; j < N; j++) {
+      const p = pos(tTail + ((tHead - tTail) * j) / (N - 1));
+      pts[j].set(p.x, p.y);
+    }
+    // 꼬리가 거의 없을 때(출발 직후·다 빨려 든 뒤)는 점이 겹쳐 리본이 깨지므로 숨긴다
+    rope.visible = tHead - tTail > 0.015;
+    const h = pos(tHead);
+    head.x = headGlow.x = h.x;
+    head.y = headGlow.y = h.y;
+    head.rotation += dt * 0.012;
+
+    if (age >= FLY && !landed) {
+      landed = true;
+      // 채소가 그 색 빛에 감싸인다(한꺼번에 팡 할 때까지)
+      const halo = new pixi.Sprite(tex.glow);
+      halo.anchor.set(0.5);
+      halo.blendMode = 'add';
+      halo.tint = hue;
+      halo.x = x1;
+      halo.y = y1;
+      root.addChild(halo);
+      let hAge = 0;
+      const hold = Math.max(0, popIn - FLY);
+      engine.updaters.push(d2 => {
+        hAge += d2;
+        const k = Math.min(1, hAge / 100);
+        sizeTo(halo, cell * (1.6 - 0.4 * k + 0.06 * Math.sin(hAge * 0.04)));
+        halo.alpha = hAge < hold ? 0.9 - 0.25 * k : Math.max(0, 0.65 * (1 - (hAge - hold) / 160));
+        if (hAge > hold + 160) {
+          halo.destroy();
+          return false;
+        }
+        return true;
+      });
+      if (morph) {
+        // 변신: 채소가 아이템으로 뿅 - 빛이 번쩍하고 반짝이가 튄다
+        sparkleBurst(engine, x1, y1, cell, 5, 0.9);
+        hitStar(engine, x1, y1, cell, 0.4, 0xffffff);
+      } else {
+        petalBloom(engine, x1, y1, cell, hue);
+      }
+    }
+    if (landed) {
+      // 머리는 채소 속으로 쏙, 꼬리는 빨려 들며 옅어진다
+      const k = Math.min(1, after / 220);
+      head.alpha = headGlow.alpha = 1 - Math.min(1, after / 90);
+      rope.alpha = 1 - k;
+      if (k >= 1) {
+        rope.destroy();
+        head.destroy();
+        headGlow.destroy();
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
+function spawnRainbow(engine: Engine, sb: ScheduledBlast, step: TurnStep, cell: number) {
+  if (step.kind !== 'clear') return;
+  const { pixi, tex, root } = engine;
+  const b = sb.blast;
+  const from = centerOf(b.row, b.col, cell);
+  const color = b.targetColor;
+  // 변신 합체(무지개꽃+도토리 등): 바뀌는 칸으로 뿌리고, 닿으면 꽃잎 대신 아이템이 뿅
+  const morph = !!b.combo && !!b.into;
+  // 빛줄기를 뻗을 채소: 이번에 사라지는 칸 중 지목된 색(가까운 것부터)
+  const targets = morph
+    ? transformTargets(step, b).map(k => {
+        const p = parseKey(k);
+        return { p, c: centerOf(p.row, p.col, cell) };
+      })
+    : step.cells
+        .map(k => parseKey(k))
+        .filter(p => !(p.row === b.row && p.col === b.col))
+        .filter(p => {
+          const g = cellAt(step.board, p.row, p.col).gem;
+          return !!g && !g.special && !g.inert && g.color === color;
+        })
+        .map(p => ({ p, c: centerOf(p.row, p.col, cell) }))
+        .sort((u, v) => Math.hypot(u.c.x - from.x, u.c.y - from.y) - Math.hypot(v.c.x - from.x, v.c.y - from.y));
+  const RISE = FX_TIMING.lightRise;
+  // 하나씩 천천히: 간격·시각은 시간표(schedule.ts)와 같은 공식
+  const gap = lightGapFor(targets.length);
+  const POP = lightballPopMs(targets.length);
+  const LIFT = cell * 0.35;
+
+  at(engine, sb.start, () => {
+    // 꽃: 빙글 돌며 떠올라 활짝(넘쳤다 돌아오며) - 터질 때까지 천천히 돈다
+    const glow = new pixi.Sprite(tex.glow);
+    glow.anchor.set(0.5);
+    glow.blendMode = 'add';
+    glow.tint = 0xfff2c0;
+    glow.alpha = 0;
+    root.addChild(glow);
+    const flower = new pixi.Sprite(tex.items.lightball);
+    flower.anchor.set(0.5);
+    flower.x = from.x;
+    flower.y = from.y;
+    sizeTo(flower, cell);
+    root.addChild(flower);
+    let age = 0;
+    engine.updaters.push(dt => {
+      age += dt;
+      const u = Math.min(1, age / RISE);
+      const open = u < 1 ? easeOut(u) : 1;
+      const k = 1 + 0.35 * open + (age < RISE ? 0 : 0.05 * Math.sin((age - RISE) * 0.02));
+      sizeTo(flower, cell * k);
+      flower.y = from.y - LIFT * open;
+      flower.rotation += dt * (0.02 - 0.012 * open);
+      glow.x = flower.x;
+      glow.y = flower.y;
+      glow.alpha = 0.8 * open;
+      sizeTo(glow, cell * (1.6 + 0.3 * Math.sin(age * 0.015)));
+      if (age >= POP) {
+        // 팡! 꽃도 함께 터진다
+        sparkleBurst(engine, flower.x, flower.y, cell, 8, 1.3);
+        hitStar(engine, flower.x, flower.y, cell, 0.8);
+        flower.destroy();
+        glow.destroy();
+        return false;
+      }
+      return true;
+    });
+
+    // 꽃잎: 꽃 가운데서 하나씩 튀어나와 무지개 꼬리를 끌며 포물선으로 목표 채소에 날아간다
+    const FLY = FX_TIMING.lightFly;
+    targets.forEach((t, i) => {
+      const hue = RAINBOW[i % RAINBOW.length];
+      at(engine, RISE + i * gap, () =>
+        petalFlight(engine, from.x, from.y - LIFT, t.c.x, t.c.y, hue, FLY, POP - RISE - i * gap, cell, i, morph),
+      );
+    });
+  });
+}
+
+/** 합체 "뿅": 두 아이템이 감기며 사라진 자리에 빛이 번쩍이고 고리가 퍼지며 반짝이가 튄다 */
+function mergePop(engine: Engine, x: number, y: number, cell: number) {
+  const { pixi, tex, root } = engine;
+  const flash = new pixi.Sprite(tex.glow);
+  flash.anchor.set(0.5);
+  flash.blendMode = 'add';
+  flash.tint = 0xfff1b0;
+  flash.x = x;
+  flash.y = y;
+  sizeTo(flash, cell * 1.4);
+  particle(engine, flash, { vx: 0, vy: 0, life: 260, grow: 1.2, fadeFrom: 0.15 });
+  const ring = new pixi.Graphics();
+  root.addChild(ring);
+  let age = 0;
+  engine.updaters.push(dt => {
+    age += dt;
+    const t = Math.min(1, age / 300);
+    ring.clear();
+    ring
+      .circle(x, y, cell * (0.35 + 0.95 * easeOut(t)))
+      .stroke({ width: Math.max(1.5, cell * 0.1 * (1 - t)), color: 0xfff6d0, alpha: 0.95 * (1 - t) });
+    if (t >= 1) {
+      ring.destroy();
+      return false;
+    }
+    return true;
+  });
+  sparkleBurst(engine, x, y, cell, 6, 1);
+}
+
+// ───────────────────────── 도토리 (프로펠러) ─────────────────────────
+//
+// 웅크렸다가 톡 튀어 오른다(이때 주변 십자가 튕겨 나간다) → 빙글빙글 돌며 포물선으로
+// 날아간다(그림자가 땅을 따라온다) → 목표에 "딱!" 맞고 납작해진다 → 옆으로 통통 튀며
+// 굴러가 사라진다. 그림 한 장을 옮기고·돌리고·늘이기만 한다(날갯짓 같은 장 바꾸기 없음).
+
+function spawnAcorn(engine: Engine, sb: ScheduledBlast, cell: number) {
   const { pixi, tex, root } = engine;
   const b = sb.blast;
   const target = flightTargets(b)[0];
   const from = centerOf(b.row, b.col, cell);
   const to = centerOf(target.row, target.col, cell);
-  const takeoff = FX_TIMING.sparrowTakeoff;
-  const arrive = arrivalMs(b, target);
-  // 비행 = 높이 떠서 수평으로 날기 + 마지막에 내려와 쪼기. 포물선으로 튀면 개구리처럼 보인다.
-  const DIVE = 90;
-  const cruise = Math.max(60, arrive - takeoff - DIVE);
-  const ALT = cell * 0.75; // 나는 높이(땅=칸 가운데 기준)
-  const PECK2 = 110; // 두 번째 콕
-  const LEAVE = 420;
+  const launch = FX_TIMING.acornLaunch;
+  // 도토리 떼(도토리+도토리 합체) = 도토리 꾸러미: 꾸러미가 부르르 떨다 툭 터지며 세 마리가
+  // 부채꼴로 동시에 튀어 나가 각자 목표로 휘어 날아간다. 도착은 순번만큼 시차(같은 돌이면 딱·딱·딱).
+  // 순번(0·1·2) = 왼쪽·가운데·오른쪽. 시간표의 출발 시차(swarmGap)만큼 일찍 만들어 같이 터져 나오게 한다.
+  const popcorn = !!b.combo && !sb.payload && !sb.carried;
+  const order = popcorn ? Math.round(sb.start / FX_TIMING.swarmGap) : 0;
+  const flockIdx = order % 3;
+  const lead = order * FX_TIMING.swarmGap;
+  const arrive = arrivalMs(b, target) + lead;
+  const fly = Math.max(80, arrive - launch);
+  const dist = Math.hypot(to.x - from.x, to.y - from.y);
+  // 포물선 꼭대기: 멀수록 높게 - 짧게 날면 낮게 톡, 멀리 날면 크게 휙
+  const PEAK = Math.max(cell * 0.9, Math.min(cell * 2.6, dist * 0.42));
+  const LIFT = cell * 0.35; // 튀어 오른 높이(여기서 비행이 시작된다)
+  const SQUASH = 130; // 맞고 납작해지는 시간
+  const BOUNCE = 460; // 통통 튀며 떠나는 시간
   const dir = to.x < from.x - 1 ? -1 : to.x > from.x + 1 ? 1 : Math.random() < 0.5 ? -1 : 1;
+  // 한 바퀴 반~세 바퀴: 멀리 갈수록 많이 돈다
+  const SPIN = dir * Math.PI * 2 * Math.min(3, 1.5 + dist / (cell * 4));
+  const POP_X = (flockIdx - 1) * cell * 0.8;
+  const POP_H = cell * (0.9 + 0.2 * (flockIdx % 2));
+  const SPREAD = Math.min(160, fly * 0.35); // 툭 터져 부채꼴로 퍼지는 시간
 
-  at(engine, sb.start, () => {
-    // 땅 그림자: 새가 떠 있다는 걸 알려 준다(높이 = 그림자와 몸 사이 거리)
+  // 꾸러미: 한 번만(첫 순번) 그린다 - 뿅 나타나 부르르 떨다가 툭 터진다
+  if (popcorn && order === 0) {
+    at(engine, sb.start, () => {
+      const bundle = new pixi.Sprite(tex.combo.bundle);
+      bundle.anchor.set(0.5, 0.6);
+      const full = cell * 1.3;
+      sizeTo(bundle, full * 0.2);
+      bundle.x = from.x;
+      bundle.y = from.y + cell * 0.1;
+      root.addChild(bundle);
+      let age = 0;
+      engine.updaters.push(dt => {
+        age += dt;
+        if (age < launch) {
+          // 뿅 나타났다가(넘쳤다 돌아오며) 점점 세게 부르르
+          const k = age < 90 ? easeOut(age / 90) * 1.12 : 1.12 - 0.12 * Math.min(1, (age - 90) / 60);
+          const u = age / launch;
+          sizeTo(bundle, full * k * (1 + 0.06 * u));
+          bundle.rotation = Math.sin(age * (0.06 + 0.12 * u)) * 0.12 * u;
+          bundle.x = from.x + Math.sin(age * 0.5) * cell * 0.03 * u;
+          return true;
+        }
+        // 툭! 터진다
+        bundle.destroy();
+        debrisBurst(engine, from.x, from.y, cell, 6, ['leaf-green', 'leaf-green', 'leaf-orange'], 0.8);
+        sparkleBurst(engine, from.x, from.y, cell, 6, 1.1);
+        dustPuff(engine, from.x, from.y + cell * 0.2, cell, 4, 0.8);
+        return false;
+      });
+    });
+  }
+
+  at(engine, sb.start - lead, () => {
     const shadow = new pixi.Sprite(tex.glow);
     shadow.anchor.set(0.5);
     shadow.tint = 0x2a1a0c;
     shadow.alpha = 0;
     root.addChild(shadow);
 
-    const s = new pixi.Sprite(tex.sparrow);
+    // 합체: 삽·거름포대는 전용 합체 그림(삽을 멘·포대를 안은 도토리) 하나로 난다.
+    // 그 밖의 아이템은 도토리 뒤에 붙여 함께 날린다(도착하면 그 자리에서 터진다)
+    const comboTex =
+      sb.payload === 'rocket-h' || sb.payload === 'rocket-v'
+        ? tex.combo.shovel
+        : sb.payload === 'tnt'
+          ? tex.combo.bag
+          : null;
+    const cargo = sb.payload && !comboTex ? new pixi.Sprite(tex.items[itemFile(sb.payload)]) : null;
+    if (cargo) {
+      cargo.anchor.set(0.5);
+      sizeTo(cargo, cell * 0.85);
+      root.addChild(cargo);
+    }
+    const s = new pixi.Sprite(comboTex ?? tex.acorn);
     s.anchor.set(0.5);
-    sizeTo(s, cell * 1.35);
+    sizeTo(s, cell * (comboTex ? 1.2 : 1.05));
     const base = s.scale.y;
     s.x = from.x;
     s.y = from.y;
-    // 합체: 실어 나르는 아이템을 발밑에 매달고 간다(도착하면 떨어뜨려 터뜨린다)
-    const cargo = sb.payload ? new pixi.Sprite(tex.items[itemFile(sb.payload)]) : null;
-    if (cargo) {
-      cargo.anchor.set(0.5, 0.15);
-      sizeTo(cargo, cell * 0.85);
-      if (sb.payload === 'rocket-v') cargo.rotation = Math.PI / 2;
-      root.addChild(cargo);
-    }
     root.addChild(s);
-    featherPuff(engine, from.x, from.y, cell, 4, [0xc89a6a, 0xf3e3c8]);
-    dustPuff(engine, from.x, from.y + cell * 0.2, cell, 5, 0.9);
 
-    // 날갯바람: 출발 자리에서 퍼지는 바람 고리(주변 십자가 이 바람에 날아간다)
-    const gust = new pixi.Graphics();
-    root.addChildAt(gust, 0);
-    let gAge = 0;
+    // 튀어 오르는 순간 퍼지는 고리(주변 십자가 이 충격에 튕겨 나간다)
+    const ring = new pixi.Graphics();
+    root.addChildAt(ring, 0);
+    let rAge = 0;
+    const ringAt = launch * 0.35;
     engine.updaters.push(dt => {
-      gAge += dt;
-      const t = Math.min(1, gAge / 280);
-      gust.clear();
-      gust
+      rAge += dt;
+      if (rAge < ringAt) return true;
+      const t = Math.min(1, (rAge - ringAt) / 260);
+      ring.clear();
+      ring
         .circle(from.x, from.y, cell * (0.4 + 1.2 * easeOut(t)))
-        .stroke({ width: Math.max(1.5, cell * 0.08 * (1 - t)), color: 0xfffbe8, alpha: 0.9 * (1 - t) });
+        .stroke({ width: Math.max(1.5, cell * 0.08 * (1 - t)), color: 0xfff3c8, alpha: 0.9 * (1 - t) });
       if (t >= 1) {
-        gust.destroy();
+        ring.destroy();
         return false;
       }
       return true;
     });
 
     let age = 0;
-    let flapClock = 0;
-    let down = false;
-    let pecked = 0;
-    let gx = from.x; // 땅 위 위치(그림자 자리)
-    let gy = from.y;
-    let lastGx = gx;
-    let lastGy = gy;
+    let hit = false;
+    let popped = false;
     let trailClock = 0;
+    let lastX = from.x;
+    let lastY = from.y;
     engine.updaters.push(dt => {
       age += dt;
+      let gx = from.x; // 땅 위 위치(그림자 자리)
+      let gy = from.y;
       let alt = 0;
-      let tilt = 0;
-      let flapEvery = 55; // 날갯짓 간격(ms). 뜰 때·내릴 때 더 빠르다
+      let rot = 0;
+      let sx = 1; // 가로 늘이기(납작·길쭉)
+      let sy = 1;
       let alpha = 1;
-      if (age < takeoff) {
-        // 이륙: 살짝 웅크렸다가(예비 동작) 파닥이며 수직으로 솟는다
-        const u = age / takeoff;
-        const t = u < 0.3 ? 0 : easeOut((u - 0.3) / 0.7);
-        alt = ALT * t - (u < 0.3 ? cell * 0.06 * Math.sin((u / 0.3) * Math.PI) : 0);
-        tilt = -0.15 * t;
-        flapEvery = u < 0.3 ? 120 : 34;
-      } else if (age < takeoff + cruise) {
-        // 순항: 같은 높이로 곧게 날아간다. 참새 특유의 작은 오르내림만 얹는다
-        const t = (age - takeoff) / cruise;
-        // 출발은 또렷하게 보이도록 느긋하게, 가운데서 확 속도를 냈다가 목표 앞에서 브레이크
-        const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+      if (popcorn && age < launch) {
+        // 아직 꾸러미 속 - 안 보인다
+        alpha = 0;
+      } else if (popcorn && age < arrive) {
+        const t2 = age - launch;
+        if (t2 < SPREAD) {
+          // 툭 튀어 나가 부채꼴로 퍼진다
+          const e = easeOut(t2 / SPREAD);
+          gx = from.x + POP_X * e;
+          alt = cell * 0.2 + (POP_H - cell * 0.2) * e;
+          rot = Math.sign(POP_X || 1) * 0.5 * e;
+          sx = sy = 0.85 + 0.25 * e;
+        } else {
+          // 각자 목표로 휘어 날아간다
+          const u = (t2 - SPREAD) / Math.max(1, fly - SPREAD);
+          const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+          gx = from.x + POP_X + (to.x - from.x - POP_X) * e;
+          gy = from.y + (to.y - from.y) * e;
+          alt = POP_H * (1 - e) + 4 * cell * 0.7 * e * (1 - e);
+          rot = Math.sign(POP_X || 1) * 0.5 + SPIN * easeOut(u);
+          sx = sy = 1.1 - 0.1 * e;
+        }
+      } else if (age < launch) {
+        // 웅크렸다가(납작) 톡 튀어 오르며 길쭉해진다
+        const u = age / launch;
+        if (u < 0.35) {
+          const k = Math.sin((u / 0.35) * Math.PI * 0.5);
+          sx = 1 + 0.22 * k;
+          sy = 1 - 0.22 * k;
+        } else {
+          const t = easeOut((u - 0.35) / 0.65);
+          alt = LIFT * t;
+          sx = 1 - 0.12 * (1 - t);
+          sy = 1 + 0.16 * (1 - t);
+          rot = -dir * 0.25 * t; // 날아갈 쪽 반대로 살짝 젖힌다(던지기 전 예비 동작)
+          if (!popped) {
+            popped = true;
+            dustPuff(engine, from.x, from.y + cell * 0.25, cell, 6, 0.9);
+            debrisBurst(engine, from.x, from.y + cell * 0.15, cell, 4, ['crumb', 'leaf-orange'], 0.55);
+          }
+        }
+      } else if (age < arrive) {
+        // 비행: 빙글빙글 돌며 포물선. 출발은 또렷하게, 가운데서 빨라지고, 끝은 꽂히듯
+        const t = (age - launch) / fly;
+        const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
         gx = from.x + (to.x - from.x) * e;
         gy = from.y + (to.y - from.y) * e;
-        alt = ALT + Math.sin(t * Math.PI * 3) * cell * 0.06;
-        tilt = 0.18 * Math.sin(Math.PI * t); // 속도가 붙는 가운데쯤 앞으로 숙인다
-      } else if (age < arrive) {
-        // 목표 위에서 내려앉으며 고개를 숙인다
-        const t = (age - takeoff - cruise) / DIVE;
+        // 시작 높이 LIFT에서 꼭대기 PEAK를 지나 목표 위(0)로 떨어진다
+        alt = LIFT * (1 - e) + 4 * PEAK * e * (1 - e);
+        rot = -dir * 0.25 + SPIN * easeOut(t);
+        sx = sy = 1 + 0.12 * Math.sin(Math.PI * e); // 높이 뜰수록 살짝 커져 가까워 보인다
+      } else if (age < arrive + SQUASH) {
+        // 딱! 목표에 맞고 납작해졌다가 돌아온다
         gx = to.x;
         gy = to.y;
-        alt = ALT * (1 - easeInOut(t)) + cell * 0.18 * easeInOut(t);
-        tilt = 0.5 * t;
-        flapEvery = 40;
-      } else if (age < arrive + PECK2 + 120) {
-        // 콕, 콕: 두 번 쪼고 고개를 든다
-        gx = to.x;
-        gy = to.y;
-        const t = age - arrive;
-        const peck = (u: number) => Math.max(0, Math.sin(Math.PI * Math.min(1, u)));
-        const p = t < PECK2 ? peck(t / 70) : peck((t - PECK2) / 70) * 0.7;
-        alt = cell * 0.18 - p * cell * 0.1;
-        tilt = 0.25 + 0.5 * p;
-        flapEvery = 90;
-        if (pecked === 0) {
-          pecked = 1;
-          hitStar(engine, to.x + dir * cell * 0.22, to.y + cell * 0.1, cell, 0.6);
-          featherPuff(engine, to.x, to.y - cell * 0.1, cell, 3, [0xc89a6a, 0xf3e3c8, 0x8a5a3b]);
-          debrisBurst(engine, to.x, to.y + cell * 0.1, cell, 6, ['seed', 'crumb'], 0.6);
-          bubble(engine, to.x - dir * cell * 0.35, to.y - cell * 0.75, cell, '짹!');
-        } else if (pecked === 1 && t >= PECK2) {
-          pecked = 2;
-          hitStar(engine, to.x + dir * cell * 0.22, to.y + cell * 0.12, cell, 0.38);
-          debrisBurst(engine, to.x, to.y + cell * 0.1, cell, 3, ['seed'], 0.45);
+        const u = (age - arrive) / SQUASH;
+        const k = Math.sin(Math.PI * u);
+        sx = 1 + 0.32 * k;
+        sy = 1 - 0.3 * k;
+        rot = dir * 0.15 * (1 - u);
+        if (!hit) {
+          hit = true;
+          hitStar(engine, to.x, to.y - cell * 0.05, cell, 0.75);
+          debrisBurst(engine, to.x, to.y + cell * 0.1, cell, 7, ['crumb', 'leaf-orange', 'dirt'], 0.7);
+          dustPuff(engine, to.x, to.y + cell * 0.3, cell, 5, 0.8);
+          bubble(engine, to.x - dir * cell * 0.4, to.y - cell * 0.75, cell, '딱!');
         }
       } else {
-        // 떠나기: 파닥이며 앞쪽 위로 비스듬히 날아올라 사라진다
-        const t = Math.min(1, (age - arrive - PECK2 - 120) / LEAVE);
-        const e = t * t;
-        gx = to.x + dir * cell * 2.4 * e;
+        // 통통: 진행 방향으로 두 번 튀며 굴러가 사라진다
+        const t = Math.min(1, (age - arrive - SQUASH) / BOUNCE);
+        gx = to.x + dir * cell * 1.3 * t;
         gy = to.y;
-        alt = cell * 0.18 + cell * 2.2 * e + ALT * easeOut(t);
-        tilt = -0.3;
-        flapEvery = 40;
-        alpha = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4;
+        alt =
+          t < 0.6
+            ? Math.sin((t / 0.6) * Math.PI) * cell * 0.55
+            : Math.sin(((t - 0.6) / 0.4) * Math.PI) * cell * 0.22;
+        rot = dir * Math.PI * 2.2 * t;
+        alpha = t < 0.55 ? 1 : 1 - (t - 0.55) / 0.45;
         if (t >= 1) {
           s.destroy();
           shadow.destroy();
@@ -1116,66 +1838,59 @@ function spawnSparrow(engine: Engine, sb: ScheduledBlast, cell: number) {
         }
       }
 
-      // 날갯짓: 위·아래 두 장을 번갈아
-      flapClock += dt;
-      if (flapClock >= flapEvery) {
-        flapClock = 0;
-        down = !down;
-        s.texture = down ? tex.sparrowDown : tex.sparrow;
-        // 아래 그림은 머리가 조금 위에 그려져 있어서 기준점을 맞춰 몸이 튀지 않게 한다
-        s.anchor.set(0.5, down ? 0.445 : 0.5);
-      }
-      // 빠르게 나는 구간에는 바람 줄기를 남겨 속도감을 준다
+      s.x = gx;
+      s.y = gy - alt;
+      s.scale.set(base * sx, base * sy);
+      s.rotation = rot;
+      s.alpha = alpha;
+
+      // 빠르게 나는 구간에는 꼬리 줄기를 남겨 속도감을 준다
       trailClock += dt;
-      if (trailClock > 22 && age > takeoff && age < takeoff + cruise) {
+      const vx = s.x - lastX;
+      const vy = s.y - lastY;
+      if (trailClock > 24 && age > launch && age < arrive) {
         trailClock = 0;
-        const vx = gx - lastGx;
-        const vy = gy - lastGy;
         const sp = Math.hypot(vx, vy);
         if (sp > cell * 0.02) {
           const w = new pixi.Sprite(tex.glow);
           w.anchor.set(0.5);
-          w.alpha = Math.min(0.6, sp / (cell * 0.12));
-          w.x = s.x - (vx / sp) * cell * 0.45;
-          w.y = s.y - (vy / sp) * cell * 0.45;
+          w.tint = 0xffe2a0;
+          w.alpha = Math.min(0.55, sp / (cell * 0.12));
+          w.x = s.x - (vx / sp) * cell * 0.4;
+          w.y = s.y - (vy / sp) * cell * 0.4;
           w.rotation = Math.atan2(vy, vx);
-          w.width = cell * 0.8;
-          w.height = cell * 0.11;
+          w.width = cell * 0.7;
+          w.height = cell * 0.12;
           root.addChildAt(w, Math.max(0, root.getChildIndex(s)));
           particle(engine, w, { vx: 0, vy: 0, life: 200, fadeFrom: 0 });
         }
       }
-      lastGx = gx;
-      lastGy = gy;
-      const bob = down ? -cell * 0.03 : 0; // 내리칠 때 몸이 살짝 뜬다
-      s.x = gx;
-      s.y = gy - alt + bob;
-      s.scale.set(base * dir, base);
-      s.rotation = dir * tilt;
-      s.alpha = alpha;
+      lastX = s.x;
+      lastY = s.y;
+
       if (cargo && !cargo.destroyed) {
         if (age < arrive) {
-          // 대롱대롱: 진행 반대쪽으로 살짝 흔들린다
-          cargo.x = s.x - dir * cell * 0.05;
-          cargo.y = s.y + cell * 0.22;
-          cargo.rotation = (sb.payload === 'rocket-v' ? Math.PI / 2 : 0) + Math.sin(age * 0.012) * 0.25 - dir * tilt * 0.5;
+          // 도토리 뒤에 바짝 붙어 따라온다(돌지는 않고 살짝 흔들린다)
+          cargo.x = s.x - dir * cell * 0.28;
+          cargo.y = s.y + cell * 0.05;
+          cargo.rotation = (sb.payload === 'rocket-v' ? Math.PI / 2 : 0) + Math.sin(age * 0.012) * 0.2;
         } else {
           cargo.destroy(); // 도착: 실린 아이템의 이펙트가 이어받는다
         }
       }
 
-      const lift = Math.min(1, alt / (ALT * 1.6));
+      const lift = Math.min(1, alt / (PEAK * 1.2));
       shadow.x = gx;
       shadow.y = gy + cell * 0.3;
-      shadow.width = cell * (0.75 - 0.3 * lift);
-      shadow.height = cell * (0.22 - 0.08 * lift);
-      shadow.alpha = (0.32 - 0.12 * lift) * alpha * Math.min(1, age / 60);
+      shadow.width = cell * (0.7 - 0.3 * lift);
+      shadow.height = cell * (0.2 - 0.08 * lift);
+      shadow.alpha = (0.32 - 0.14 * lift) * alpha * Math.min(1, age / 60);
       return true;
     });
   });
 }
 
-/** "짹!"·"개굴!" 같은 소리 글자가 톡 튀어나왔다 사라진다 */
+/** "딱!"·"개굴!" 같은 소리 글자가 톡 튀어나왔다 사라진다 */
 function bubble(engine: Engine, x: number, y: number, cell: number, text: string) {
   const { pixi, root } = engine;
   const txt = new pixi.Text({
@@ -1343,8 +2058,7 @@ function spawnSwallows(engine: Engine, sb: ScheduledBlast, cell: number) {
           up = false; // 활공: 날개를 펼친 그림 그대로
         }
         s.texture = up ? tex.swallowUp : tex.swallow;
-        // 위로 친 그림은 몸이 조금 아래·왼쪽에 그려져 있어서 기준점을 맞춘다
-        s.anchor.set(up ? 0.484 : 0.5, up ? 0.523 : 0.5);
+        // 두 장은 같은 캔버스에 몸이 같은 자리로 그려져 있다(위로 친 그림을 펼친 그림에서 고쳐 만듦)
 
         s.x = gx;
         s.y = gy - alt;
@@ -1440,11 +2154,11 @@ function spawnFrog(engine: Engine, sb: ScheduledBlast, cell: number, shakeEl: HT
     root.addChild(shadow);
 
     const s = new pixi.Sprite(tex.frog);
-    s.anchor.set(0.5, 0.85); // 앉은 그림은 발 언저리를 기준으로 눌리고 펴진다
+    s.anchor.set(0.5, 0.93); // 앉은 그림은 발 언저리를 기준으로 눌리고 펴진다(발끝이 높이 97% 지점)
     sizeTo(s, cell * 1.15);
     const sitBase = s.scale.y;
     // 점프 그림은 몸이 길어서 같은 몸 크기로 보이게 조금 더 크게
-    const leapBase = sitBase * 1.18;
+    const leapBase = sitBase * 1.25;
     const footY = cell * 0.35;
     s.x = from.x;
     s.y = from.y + footY;
@@ -1462,7 +2176,7 @@ function spawnFrog(engine: Engine, sb: ScheduledBlast, cell: number, shakeEl: HT
       if (leap === leaping) return;
       leaping = leap;
       s.texture = leap ? tex.frogLeap : tex.frog;
-      s.anchor.set(0.5, leap ? 0.5 : 0.85);
+      s.anchor.set(0.5, leap ? 0.5 : 0.93);
     };
     engine.updaters.push(dt => {
       age += dt;

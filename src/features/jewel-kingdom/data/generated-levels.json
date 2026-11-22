@@ -4,7 +4,7 @@
   {
    "id": 1,
    "layout": ". . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
-   "moves": 10,
+   "moves": 11,
    "colors": 4,
    "goals": [
     {
@@ -13,14 +13,14 @@
      "count": 21
     }
    ],
-   "winRate": 0.87,
+   "winRate": 0.9,
    "target": 0.86,
    "tier": "normal"
   },
   {
    "id": 2,
-   "layout": ". . . . . . .\n. . [box] . . . .\n. . . [box] . . [box]\n. . . . . . .\n. . . . . . .\n. [box] . . . . .\n. . . . . . .",
-   "moves": 7,
+   "layout": ". . . . . . .\n. . . . . . .\n[box] . . . . . [box]\n. . . . . . .\n. . . . . . .\n. [box] . . . [box] .\n. . . . . . .",
+   "moves": 6,
    "colors": 4,
    "goals": [
     {
@@ -35,8 +35,8 @@
   },
   {
    "id": 3,
-   "layout": ". . . . . . .\n. . . . . [box] .\n. . . . . . [box]\n. . . . . . .\n[box] . . . . . [box]\n. . . . . . .\n. . . . . . .",
-   "moves": 7,
+   "layout": ". . . . . . .\n. . . [box] [box] . .\n. . . [box] [box] . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
+   "moves": 5,
    "colors": 4,
    "goals": [
     {
@@ -45,20 +45,20 @@
      "count": 4
     }
    ],
-   "winRate": 0.9,
+   "winRate": 0.97,
    "target": 0.84,
    "tier": "normal"
   },
   {
    "id": 4,
-   "layout": ". . . . . . .\n[grass] [grass] . . . . .\n[grass] . [grass] . . [grass] .\n[grass] . . . [grass] . [grass]\n. . . . [grass] . [grass]\n. . . . . . .\n. . . . . . .",
-   "moves": 13,
+   "layout": ". . . . . . .\n[grass] . . . . . [grass]\n[grass] _ _ . _ _ [grass]\n. _ _ . _ _ .\n. . . . . . .\n[grass] [grass] . . . [grass] [grass]\n. . . . . . .",
+   "moves": 20,
    "colors": 4,
    "goals": [
     {
      "kind": "ground",
      "groundKind": "grass",
-     "count": 10
+     "count": 8
     }
    ],
    "winRate": 0.9,
@@ -67,19 +67,14 @@
   },
   {
    "id": 5,
-   "layout": ". . . . . . .\n[grass] . [grass] . . . .\n[grass] . [grass] [grass] [grass] . .\n. . . . . . .\n. [box] . . [grass] . .\n[box] [grass] [grass] . [grass] . .\n. . . . . . .",
-   "moves": 28,
+   "layout": ". . . . . . .\n[grass] [grass] . . . [grass] [grass]\n[grass] [grass] . . _ [grass] [grass]\n[grass] [grass] _ . _ [grass] [grass]\n. . _ . . . .\n. . . . . . .\n. . . . . . .",
+   "moves": 36,
    "colors": 5,
    "goals": [
     {
      "kind": "ground",
      "groundKind": "grass",
-     "count": 10
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "box",
-     "count": 2
+     "count": 12
     }
    ],
    "winRate": 0.83,
@@ -88,14 +83,30 @@
   },
   {
    "id": 6,
-   "layout": ". . . . . . .\n. [crate:2] [crate:2] . . . .\n. . . . . . .\n[crate:2] . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
-   "moves": 19,
+   "layout": ". . . . . . .\n[grass] . . . . . [grass]\n[grass] . . . . . [grass]\n[grass] . . . . . [grass]\n[grass] . . . . . [grass]\n[grass] . . . . . [grass]\n_ . . . . . _",
+   "moves": 25,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "ground",
+     "groundKind": "grass",
+     "count": 10
+    }
+   ],
+   "winRate": 0.83,
+   "target": 0.81,
+   "tier": "normal"
+  },
+  {
+   "id": 7,
+   "layout": ". . . . . . .\n[crate:2] [crate:2] . . . [crate:2] [crate:2]\n. . . . . . .\n. . . . . . .\n_ . . . . . _\n. . . . . . .\n. . . . . . .",
+   "moves": 12,
    "colors": 5,
    "goals": [
     {
      "kind": "blocker",
      "blockerKind": "crate-heavy",
-     "count": 3
+     "count": 4
     }
    ],
    "winRate": 0.9,
@@ -103,25 +114,41 @@
    "tier": "intro"
   },
   {
-   "id": 7,
-   "layout": ". . . . . . .\n[box] [box] . . . . .\n. . . . . . .\n. . . . . . .\n. [box] [box] . . . .\n. . . . . . .\n. . . . . . .",
-   "moves": 11,
+   "id": 8,
+   "layout": "_ . . . . . _\n[crate:2] [crate:2] . . . [crate:2] [crate:2]\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
+   "moves": 13,
    "colors": 5,
    "goals": [
     {
      "kind": "blocker",
-     "blockerKind": "box",
+     "blockerKind": "crate-heavy",
      "count": 4
     }
    ],
-   "winRate": 0.8,
-   "target": 0.8,
+   "winRate": 0.83,
+   "target": 0.79,
    "tier": "normal"
   },
   {
-   "id": 8,
-   "layout": ". . . . . . .\n. [honey] . . . . [honey]\n[honey] . [honey] . . [honey] .\n. . . . . . .\n[honey] . . . . . .\n. . . . . . .\n. . . . . . .",
-   "moves": 34,
+   "id": 9,
+   "layout": "_ _ . . . _ _\n_ . . . . . _\n. . . . . . .\n. . . . . . .\n. . . . . . .\n_ . . [crate:2] [crate:2] . _\n_ _ . . . _ _",
+   "moves": 9,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "crate-heavy",
+     "count": 2
+    }
+   ],
+   "winRate": 0.83,
+   "target": 0.78,
+   "tier": "normal"
+  },
+  {
+   "id": 10,
+   "layout": ". . . . . . .\n. . [honey] . [honey] . .\n. [honey] . . . [honey] .\n. _ . . . _ .\n. _ . . . _ .\n[honey] . . . . . [honey]\n. . . . . . .",
+   "moves": 33,
    "colors": 5,
    "goals": [
     {
@@ -131,72 +158,19 @@
     }
    ],
    "winRate": 0.9,
-   "target": 0.89,
+   "target": 0.87,
    "tier": "intro"
   },
   {
-   "id": 9,
-   "layout": "_ . . . . . _\n. . . [box] [box] . .\n[box] . . . . . .\n. . . . . . .\n[crate:2] . . . . [crate:2] .\n. . . . . [box] .\n_ . . . . . _",
+   "id": 11,
+   "layout": "_ _ . . . . _\n_ . . . . . .\n. . . . . . .\n. . . . . . .\n[honey] [honey] [honey] [honey] [honey] [honey] [honey]\n. . . . . . _\n_ . . . . _ _",
    "moves": 18,
    "colors": 5,
    "goals": [
     {
-     "kind": "blocker",
-     "blockerKind": "box",
-     "count": 4
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "crate-heavy",
-     "count": 2
-    }
-   ],
-   "winRate": 0.87,
-   "target": 0.78,
-   "tier": "normal"
-  },
-  {
-   "id": 10,
-   "layout": ". . . . . . .\n. . [grass] . [grass] . [grass]\n. . [grass] [grass] . [grass] .\n. [grass] . . . . .\n. . . . . . .\n. [grass] . . . [grass] [grass]\n. . . . . . .",
-   "moves": 23,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "grass",
-     "count": 10
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.77,
-   "tier": "normal"
-  },
-  {
-   "id": 11,
-   "layout": ". . . . . . .\n. . . . . . .\n. [ice:2] . . . . .\n. . . . [ice:2] . .\n. . . . . [ice:2] .\n. . . [ice:2] . . .\n. . . . . . .",
-   "moves": 20,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ice",
-     "count": 4
-    }
-   ],
-   "winRate": 0.9,
-   "target": 0.86,
-   "tier": "intro"
-  },
-  {
-   "id": 12,
-   "layout": "_ _ _ . _ _ _\n_ _ [ice:2] . . _ _\n_ . . . . . _\n. . [ice:2] . [ice:2] . .\n_ . . . [ice:2] . _\n_ _ [ice:2] . . _ _\n_ _ _ . _ _ _",
-   "moves": 10,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ice",
-     "count": 5
+     "kind": "cover",
+     "coverKind": "honey",
+     "count": 7
     }
    ],
    "winRate": 0.8,
@@ -204,14 +178,30 @@
    "tier": "normal"
   },
   {
-   "id": 13,
-   "layout": "[tube:R] [tube:R] . . . [tube:R] [tube:R]\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n[shelf:R2] [shelf:R2] . . . [shelf:R2] [shelf:R2]",
-   "moves": 40,
+   "id": 12,
+   "layout": ". . . . . . .\n. . . . . . .\n. . . . . . .\n[honey] . . . . . [honey]\n_ _ [honey] . [honey] _ _\n_ _ [honey] . [honey] _ _\n_ . . . . . _",
+   "moves": 25,
    "colors": 5,
    "goals": [
     {
-     "kind": "collect",
-     "collectKind": "shelf",
+     "kind": "cover",
+     "coverKind": "honey",
+     "count": 6
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.76,
+   "tier": "normal"
+  },
+  {
+   "id": 13,
+   "layout": ". . . . . . .\n[ice:1] . . . . . [ice:1]\n. . . . . . .\n_ . . . . . .\n_ . . . . . .\n. [ice:1] . . . [ice:1] .\n. . . . . . .",
+   "moves": 30,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ice",
      "count": 4
     }
    ],
@@ -221,31 +211,26 @@
   },
   {
    "id": 14,
-   "layout": ". . . . . . .\n. . [ice:2] . . . .\n_ [ice:2] [ice:2] [ice:2] . . _\n_ _ [ice:2] . . _ _\n_ . . . . . _\n. . . . . . .\n. . . . . . .",
-   "moves": 15,
+   "layout": ". . _ . _ . .\n. . _ . _ . .\n. . . . . . .\n. . . . . . .\n. . [ice:1] [ice:1] [ice:1] . .\n. . . . . . .\n. . . . . . .",
+   "moves": 24,
    "colors": 5,
    "goals": [
     {
      "kind": "blocker",
      "blockerKind": "ice",
-     "count": 5
+     "count": 3
     }
    ],
-   "winRate": 0.8,
+   "winRate": 0.77,
    "target": 0.75,
    "tier": "normal"
   },
   {
    "id": 15,
-   "layout": "[tube:R] . [tube:R] [tube:R] . [tube:R] .\n. . . . . . .\n. . . . . . .\n. . [ice:2] . . . .\n. . . . . [ice:2] .\n. . . . . . [ice:2]\n[shelf:R2] . [shelf:R2] [shelf:R2] . [shelf:R2] .",
-   "moves": 29,
+   "layout": "_ _ . . . . .\n_ . . . . . .\n. [honey] . . . [honey] .\n[honey] [ice:1] . . [honey] [ice:1] [honey]\n_ . . . . . [ice:1]\n_ _ . . . . .\n_ _ _ . . . .",
+   "moves": 22,
    "colors": 5,
    "goals": [
-    {
-     "kind": "collect",
-     "collectKind": "shelf",
-     "count": 4
-    },
     {
      "kind": "blocker",
      "blockerKind": "ice",
@@ -253,41 +238,19 @@
     }
    ],
    "winRate": 0.77,
-   "target": 0.74,
-   "tier": "hard"
+   "target": 0.75,
+   "tier": "normal"
   },
   {
    "id": 16,
-   "layout": "[golem:4] . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
-   "moves": 29,
+   "layout": ". _ . . . _ .\n. [ice:1] . . . [ice:1] .\n. [ice:1] . . . [ice:1] .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
+   "moves": 21,
    "colors": 5,
    "goals": [
     {
-     "kind": "color",
-     "color": 0,
-     "count": 36
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "golem",
-     "spawnCount": 2
-    }
-   ],
-   "winRate": 0.9,
-   "target": 0.85,
-   "tier": "intro"
-  },
-  {
-   "id": 17,
-   "layout": ". . . . . . .\n. [grass] . [grass] [grass] . .\n. [grass] . [grass] . [grass] [grass]\n. . . . . [grass] .\n. . . . [grass] . [grass]\n. . [grass] . . . .\n. . . . . . .",
-   "moves": 22,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "grass",
-     "count": 11
+     "kind": "blocker",
+     "blockerKind": "ice",
+     "count": 4
     }
    ],
    "winRate": 0.77,
@@ -295,1169 +258,73 @@
    "tier": "normal"
   },
   {
-   "id": 18,
-   "layout": ". . . . . . .\n. . . [honey] . . .\n. . [honey] . [honey] . .\n. [honey] . . [honey] . .\n. . . . . [honey] .\n. . . . [honey] . .\n. . . . . . .",
-   "moves": 24,
+   "id": 17,
+   "layout": ". . [tube:R] [tube:R] . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n_ . . . . . _\n_ _ [shelf:R2] [shelf:R2] . _ _",
+   "moves": 34,
    "colors": 5,
    "goals": [
     {
-     "kind": "cover",
-     "coverKind": "honey",
-     "count": 7
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 2
     }
    ],
-   "winRate": 0.83,
-   "target": 0.74,
+   "winRate": 0.87,
+   "target": 0.84,
+   "tier": "intro"
+  },
+  {
+   "id": 18,
+   "layout": ". [tube:R] . _ . . _\n. . . _ . . .\n. . . _ . . .\n. . . _ . . .\n. . . _ . . .\n. . . _ . . .\n_ [shelf:R2] . _ . . .",
+   "moves": 44,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 1
+    }
+   ],
+   "winRate": 0.63,
+   "target": 0.59,
    "tier": "normal"
   },
   {
    "id": 19,
-   "layout": ". . . . . . .\n. . . . . . .\n. . . . . [mushroom] .\n. . . . . . [mushroom]\n. . . . . . [mushroom]\n[mushroom] [mushroom] . . . [mushroom] .\n. . . . . . .",
-   "moves": 14,
+   "layout": "_ _ _ [tube:R] _ _ _\n_ _ . . . _ _\n_ . . . . . _\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . [shelf:R2] . . .",
+   "moves": 15,
    "colors": 5,
    "goals": [
     {
-     "kind": "blocker",
-     "blockerKind": "mushroom",
-     "count": 6
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 1
     }
    ],
-   "turnEnd": [
-    {
-     "kind": "regrow",
-     "blockerKind": "mushroom",
-     "groundKind": "soil"
-    }
-   ],
-   "winRate": 0.87,
-   "target": 0.84,
-   "tier": "intro"
+   "winRate": 0.6,
+   "target": 0.59,
+   "tier": "normal"
   },
   {
    "id": 20,
-   "layout": ". . . . . . .\n. [honey] . . [honey] . .\n. . [crate:2] . . [honey] .\n. . . [crate:2] [crate:2] . .\n. [honey] [crate:2] . [crate:2] . [crate:2]\n. . . . . . [honey]\n. . . . . . .",
-   "moves": 22,
+   "layout": "[tube:R] [tube:R] . . . [tube:R] .\n. . . . . . .\n_ . . . . . _\n. . . . . . .\n. . . . . . .\n. . . . . . .\n[shelf:R2] [shelf:R2] _ . _ [shelf:R2] .",
+   "moves": 34,
    "colors": 5,
    "goals": [
     {
-     "kind": "blocker",
-     "blockerKind": "crate-heavy",
-     "count": 6
-    },
-    {
-     "kind": "cover",
-     "coverKind": "honey",
-     "count": 5
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 3
     }
    ],
-   "winRate": 0.73,
-   "target": 0.69,
-   "tier": "super"
+   "winRate": 0.77,
+   "target": 0.74,
+   "tier": "normal"
   },
   {
    "id": 21,
-   "layout": ". . . . . . .\n[grass] . . . . . .\n_ . [grass] . . . _\n_ _ . [grass] . _ _\n_ [grass] . [grass] . [grass] _\n. . . [grass] . . .\n. . . . . . .",
-   "moves": 28,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "grass",
-     "count": 7
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.79,
-   "tier": "relief"
-  },
-  {
-   "id": 22,
-   "layout": ". . . . . . .\n. . . . . . .\n. . . . . [barrel:3] .\n. . . . . . .\n. . . . . . .\n[barrel:3] . . . [barrel:3] . .\n. . . . . . .",
-   "moves": 29,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 3
-    }
-   ],
-   "winRate": 0.87,
-   "target": 0.84,
-   "tier": "intro"
-  },
-  {
-   "id": 23,
-   "layout": "_ . . . . . _\n. . . . [crate:2] . .\n[crate:2] . . . . . [crate:2]\n. . . . . . .\n. . . . . . .\n. [crate:2] . . . . .\n_ . . . . . _",
-   "moves": 18,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "crate-heavy",
-     "count": 4
-    }
-   ],
-   "winRate": 0.83,
-   "target": 0.75,
-   "tier": "normal"
-  },
-  {
-   "id": 24,
-   "layout": ". . . . . . .\n[ice:2] . . . . . .\n. . . . . . .\n. . . . . . [ice:2]\n. . . [ice:2] . . [ice:2]\n. [ice:2] [ice:2] . . . .\n. . . . . . .",
-   "moves": 23,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ice",
-     "count": 6
-    }
-   ],
-   "winRate": 0.73,
-   "target": 0.73,
-   "tier": "normal"
-  },
-  {
-   "id": 25,
-   "layout": ". . . . . . .\n. [mushroom] [ice:2] . [ice:2] [ice:2] .\n_ . . . [mushroom] [mushroom] _\n_ _ [ice:2] . . _ _\n_ . . . . . _\n. [mushroom] [ice:2] [ice:2] . [ice:2] [ice:2]\n. . . . . . .",
-   "moves": 34,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ice",
-     "count": 8
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "mushroom",
-     "count": 4
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "regrow",
-     "blockerKind": "mushroom",
-     "groundKind": "soil"
-    }
-   ],
-   "winRate": 0.7,
-   "target": 0.69,
-   "tier": "hard"
-  },
-  {
-   "id": 26,
-   "layout": ". . . . . . .\n. . . [jelly] . . .\n. . . . . . .\n. . . [jelly] . . .\n. . [jelly] . . . .\n. . . . . . .\n. . . . . . .",
-   "moves": 14,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "spread",
-     "groundKind": "jelly",
-     "count": 20
-    }
-   ],
-   "winRate": 0.9,
-   "target": 0.83,
-   "tier": "intro"
-  },
-  {
-   "id": 27,
-   "layout": ". [tube:R] . . [tube:R] [tube:R] [tube:R]\n. . . [golem:4] . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. [shelf:R2] . . [shelf:R2] [shelf:R2] [shelf:R2]",
+   "layout": ". . . . . [golem:4] . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n_ _ _ . . _ _ _\n_ _ _ . . _ _ _",
    "moves": 32,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "collect",
-     "collectKind": "shelf",
-     "count": 4
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "golem",
-     "spawnCount": 2
-    }
-   ],
-   "winRate": 0.73,
-   "target": 0.73,
-   "tier": "normal"
-  },
-  {
-   "id": 28,
-   "layout": ". . . . . . .\n. [mailbox] . . [mailbox] . .\n. . . . . . .\n. . . . . . .\n[mailbox] . . . . . [mailbox]\n. . . . . . .\n. . . . . . .",
-   "moves": 10,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "mailbox",
-     "count": 4
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "producer",
-     "color": 0
-    }
-   ],
-   "winRate": 0.83,
-   "target": 0.82,
-   "tier": "intro"
-  },
-  {
-   "id": 29,
-   "layout": ". . . . . . .\n. . . . [box] . .\n_ [box] [box] . . . _\n_ _ . . [box] _ _\n_ . [box] . . . _\n. [box] . [box] . . .\n. . . . . . .",
-   "moves": 10,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "box",
-     "count": 7
-    }
-   ],
-   "winRate": 0.77,
-   "target": 0.69,
-   "tier": "normal"
-  },
-  {
-   "id": 30,
-   "layout": ". . . . . . .\n. . . [honey] . [honey] [honey]\n_ [honey] [honey] [honey] . . _\n_ _ . . . _ _\n_ . . [honey] . [honey] _\n[honey] . . [honey] . [honey] [honey]\n. . . . . . .",
-   "moves": 38,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "cover",
-     "coverKind": "honey",
-     "count": 12
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.62,
-   "tier": "super"
-  },
-  {
-   "id": 31,
-   "layout": ". . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . [honey-pot] .\n. . . . . . [honey-pot]\n[honey-pot] . [honey-pot] . . . .\n. . . . . . .",
-   "moves": 29,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "honey-pot",
-     "count": 4
-    }
-   ],
-   "winRate": 0.83,
-   "target": 0.81,
-   "tier": "intro"
-  },
-  {
-   "id": 32,
-   "layout": ". . . . . . .\n. . . . [mailbox] . .\n_ [mailbox] . [mailbox] . . _\n_ _ [mailbox] . . _ _\n_ . . . . . _\n. . . . . . .\n. . . . . . .",
-   "moves": 10,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "mailbox",
-     "count": 4
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "producer",
-     "color": 0
-    }
-   ],
-   "winRate": 0.93,
-   "target": 0.74,
-   "tier": "normal"
-  },
-  {
-   "id": 33,
-   "layout": ". . . . . . .\n. . . . . . .\n. . . . [crate:2] . .\n[mailbox] . [crate:2] . [crate:2] . .\n. [crate:2] . . . . .\n. [mailbox] . . [crate:2] . .\n. . . . . . .",
-   "moves": 25,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "crate-heavy",
-     "count": 5
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "mailbox",
-     "count": 2
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "producer",
-     "color": 0
-    }
-   ],
-   "winRate": 0.73,
-   "target": 0.71,
-   "tier": "normal"
-  },
-  {
-   "id": 34,
-   "layout": ". . . . . . .\n[ghost] . . . . [ghost] .\n. . [ghost] . . . .\n. . . . [ghost] . .\n. . . . . [ghost] .\n. . . . . . .\n. . . . . . .",
-   "moves": 11,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ghost",
-     "count": 5
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.8,
-   "tier": "intro"
-  },
-  {
-   "id": 35,
-   "layout": ". . . . . . .\n. . . . . . .\n[mailbox] . . [mailbox] . . .\n. . . . . . .\n. . . [mailbox] . . .\n. . . . [mailbox] . .\n. . . . . . .",
-   "moves": 11,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "mailbox",
-     "count": 4
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "producer",
-     "color": 0
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.63,
-   "tier": "hard"
-  },
-  {
-   "id": 36,
-   "layout": "_ . . . . . _\n. . . . . . .\n. [barrel:3] . [barrel:3] . [barrel:3] .\n[barrel:3] . . . . . .\n. . . . . . .\n. . . . . . .\n_ . . . . . _",
-   "moves": 12,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 4
-    }
-   ],
-   "winRate": 0.77,
-   "target": 0.76,
-   "tier": "relief"
-  },
-  {
-   "id": 37,
-   "layout": ". . . . . . .\n. . . . . . .\n[flowerpot:2] [flowerpot:2] . . . . [flowerpot:2]\n[flowerpot:2] . . . . . .\n. . . . . . [flowerpot:2]\n. . . . . . .\n. . . . . . .",
-   "moves": 23,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "flowerpot",
-     "count": 5
-    }
-   ],
-   "winRate": 0.83,
-   "target": 0.79,
-   "tier": "intro"
-  },
-  {
-   "id": 38,
-   "layout": ". . . . . . .\n. . . . . . [jelly]\n_ [jelly] . . . . _\n_ _ . . . _ _\n_ . . . . . _\n. . [jelly] . . . .\n. . . . . . .",
-   "moves": 16,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "spread",
-     "groundKind": "jelly",
-     "count": 20
-    }
-   ],
-   "winRate": 0.7,
-   "target": 0.66,
-   "tier": "normal"
-  },
-  {
-   "id": 39,
-   "layout": ". . [tube:R] . [tube:R] [tube:R] .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . [shelf:R2] . [shelf:R2] [shelf:R2] .",
-   "moves": 44,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "collect",
-     "collectKind": "shelf",
-     "count": 3
-    }
-   ],
-   "winRate": 0.7,
-   "target": 0.64,
-   "tier": "normal"
-  },
-  {
-   "id": 40,
-   "layout": "[tube:R] [tube:R] . [tube:R] . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n[shelf:R2] [shelf:R2] . [shelf:R2] . . .",
-   "moves": 42,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "collect",
-     "collectKind": "shelf",
-     "count": 3
-    }
-   ],
-   "winRate": 0.57,
-   "target": 0.54,
-   "tier": "super"
-  },
-  {
-   "id": 41,
-   "layout": ". . . . . . .\n. . . . [bottle:2] . .\n. [bottle:2] . . . . .\n[bottle:2] . . . . [bottle:2] .\n. . . . [bottle:2] [bottle:2] .\n. . . . . [bottle:2] .\n. . . . . . .",
-   "moves": 31,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "bottle",
-     "count": 7
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.77,
-   "tier": "intro"
-  },
-  {
-   "id": 42,
-   "layout": "_ _ _ . _ _ _\n_ _ . . . _ _\n_ . [barrel:3] . . . _\n. . [barrel:3] . . [barrel:3] [barrel:3]\n_ . . . . [barrel:3] _\n_ _ . . . _ _\n_ _ _ . _ _ _",
-   "moves": 16,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 5
-    }
-   ],
-   "winRate": 0.73,
-   "target": 0.72,
-   "tier": "normal"
-  },
-  {
-   "id": 43,
-   "layout": ". . . . . . .\n. . . . [ghost] . .\n. . [ghost] . [ghost] . .\n. . . . [ghost] . .\n. . . . . . [ghost]\n. . . . . . .\n. . . . . . .",
-   "moves": 11,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ghost",
-     "count": 5
-    }
-   ],
-   "winRate": 0.7,
-   "target": 0.68,
-   "tier": "normal"
-  },
-  {
-   "id": 44,
-   "layout": "[tube:R] . [tube:R] . . [tube:R] .\n. . . . . . [mushroom]\n. . [mushroom] . . . [mushroom]\n. . [mushroom] . . . .\n. . . . . [mushroom] [mushroom]\n[mushroom] . . [mushroom] . . .\n[shelf:R2] . [shelf:R2] . . [shelf:R2] .",
-   "moves": 45,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "mushroom",
-     "count": 8
-    },
-    {
-     "kind": "collect",
-     "collectKind": "shelf",
-     "count": 3
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "regrow",
-     "blockerKind": "mushroom",
-     "groundKind": "soil"
-    }
-   ],
-   "winRate": 0.67,
-   "target": 0.65,
-   "tier": "normal"
-  },
-  {
-   "id": 45,
-   "layout": "[tube:R] [tube:R] [tube:R] . . . [tube:R]\n. . . . [crate:2] . .\n. . . . . . .\n. . . . . . [crate:2]\n. . . . [crate:2] . .\n. [crate:2] . . . . .\n[shelf:R2] [shelf:R2] [shelf:R2] . . . [shelf:R2]",
-   "moves": 44,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "collect",
-     "collectKind": "shelf",
-     "count": 4
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "crate-heavy",
-     "count": 4
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.57,
-   "tier": "hard"
-  },
-  {
-   "id": 46,
-   "layout": ". . . . . . .\n. . [jelly] . . . .\n_ . . . . [jelly] _\n_ _ . . . _ _\n_ . . . . . _\n. . . . . [jelly] .\n. . . . . . .",
-   "moves": 14,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "spread",
-     "groundKind": "jelly",
-     "count": 20
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.75,
-   "tier": "relief"
-  },
-  {
-   "id": 47,
-   "layout": ". . . . . . .\n. . [soil] . . . [soil]\n. . . . [soil] [soil] .\n. . [soil] . [soil] . [soil]\n. . [soil] . . . .\n. . . . [soil] . .\n. . . . . . .",
-   "moves": 32,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "soil",
-     "count": 9
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.75,
-   "tier": "intro"
-  },
-  {
-   "id": 48,
-   "layout": "_ _ _ . _ _ _\n_ _ . . . _ _\n_ [honey-pot] . . . [honey-pot] _\n. . . . . . .\n_ . . . . [honey-pot] _\n_ _ . . . _ _\n_ _ _ . _ _ _",
-   "moves": 10,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "honey-pot",
-     "count": 3
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.62,
-   "tier": "normal"
-  },
-  {
-   "id": 49,
-   "layout": ". . . . . . .\n[soil] . [mushroom] [soil] . [mushroom] .\n[soil] [soil] . . . . [soil]\n. [soil] . . [mushroom] [soil] [soil]\n. . . [soil] [mushroom] [soil] .\n. . [mushroom] . . . [soil]\n. . . . . . .",
-   "moves": 15,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "soil",
-     "count": 11
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "mushroom",
-     "count": 5
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "regrow",
-     "blockerKind": "mushroom",
-     "groundKind": "soil"
-    }
-   ],
-   "winRate": 0.67,
-   "target": 0.59,
-   "tier": "normal"
-  },
-  {
-   "id": 50,
-   "layout": ". . . . . . .\n[grass] [grass] . . . . .\n. . [jelly] [grass] [grass] . .\n[grass] [grass] . . [grass] [grass] [grass]\n. . . . [jelly] . .\n[grass] [grass] . . [grass] . [jelly]\n. . . . . . .",
-   "moves": 28,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "grass",
-     "count": 12
-    },
-    {
-     "kind": "spread",
-     "groundKind": "jelly",
-     "count": 20
-    }
-   ],
-   "winRate": 0.5,
-   "target": 0.46,
-   "tier": "super"
-  },
-  {
-   "id": 51,
-   "layout": ". . . . . . .\n. . . . . . .\n. . . [barrel:3] . . .\n. . . [barrel:3] [barrel:3] . .\n. . . . . . .\n. . . . . . [barrel:3]\n. . . . . . .",
-   "moves": 27,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 4
-    }
-   ],
-   "winRate": 0.87,
-   "target": 0.85,
-   "tier": "relief"
-  },
-  {
-   "id": 52,
-   "layout": ". . . . . . .\n. . . . [honey-pot] [honey-pot] .\n. . . . [honey-pot] [barrel:3] [honey-pot]\n[barrel:3] . . . . . .\n[barrel:3] . . . . . .\n[honey-pot] . . . . . .\n. . . . . . .",
-   "moves": 27,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "honey-pot",
-     "count": 5
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 3
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.77,
-   "tier": "normal"
-  },
-  {
-   "id": 53,
-   "layout": ". . . . . . .\n[honey-pot] . . . . . [honey-pot]\n. . . . . . .\n[honey-pot] . . . [honey-pot] . .\n. . . . . . .\n. . . . . . [honey-pot]\n. . . . . . .",
-   "moves": 39,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "honey-pot",
-     "count": 5
-    }
-   ],
-   "winRate": 0.73,
-   "target": 0.72,
-   "tier": "normal"
-  },
-  {
-   "id": 54,
-   "layout": ". . . . . . .\n. . . . [ghost] . .\n. [ghost] . . . . .\n. . . [ghost] . . .\n. . [ghost] . . . .\n[ghost] [ghost] . [ghost] . . .\n. . . . . . .",
-   "moves": 17,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ghost",
-     "count": 7
-    }
-   ],
-   "winRate": 0.73,
-   "target": 0.68,
-   "tier": "normal"
-  },
-  {
-   "id": 55,
-   "layout": ". . . . . . .\n. . . . [golem:4] . [barrel:3]\n. . . [barrel:3] . . .\n. . . . . [barrel:3] .\n. . . . . . .\n. . . . [barrel:3] . .\n. . . . . . .",
-   "moves": 21,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 4
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "golem",
-     "spawnCount": 2
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.59,
-   "tier": "hard"
-  },
-  {
-   "id": 56,
-   "layout": ". . . . . . .\n[honey-pot] . . . . [honey-pot] .\n_ . . . . . _\n_ _ . . . _ _\n_ . . . [honey-pot] . _\n. [honey-pot] . . . . .\n. . . . . . .",
-   "moves": 15,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "honey-pot",
-     "count": 4
-    }
-   ],
-   "winRate": 0.87,
-   "target": 0.79,
-   "tier": "relief"
-  },
-  {
-   "id": 57,
-   "layout": ". . . . . . .\n. . [golem:4] . . . .\n. [bottle:2] . [bottle:2] . . .\n. . . . . . .\n. . [bottle:2] [bottle:2] . . .\n. . . . . . .\n. . . . . . .",
-   "moves": 22,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "bottle",
-     "count": 4
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "golem",
-     "spawnCount": 2
-    }
-   ],
-   "winRate": 0.77,
-   "target": 0.71,
-   "tier": "normal"
-  },
-  {
-   "id": 58,
-   "layout": ". . . . [golem:4] . .\n. . . . . . .\n. . . . . [honey-pot] .\n. . . [honey-pot] . . .\n. . . [honey-pot] . [honey-pot] [honey-pot]\n. . . [honey-pot] . . .\n. . . . . . .",
-   "moves": 34,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "honey-pot",
-     "count": 6
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "golem",
-     "spawnCount": 2
-    }
-   ],
-   "winRate": 0.67,
-   "target": 0.65,
-   "tier": "normal"
-  },
-  {
-   "id": 59,
-   "layout": "_ _ _ . _ _ _\n_ _ . . . _ _\n_ . . . . . _\n[honey] . . [honey] . . [honey]\n_ [honey] . [honey] . . _\n_ _ . [honey] . _ _\n_ _ _ . _ _ _",
-   "moves": 30,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "cover",
-     "coverKind": "honey",
-     "count": 6
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.62,
-   "tier": "normal"
-  },
-  {
-   "id": 60,
-   "layout": "_ . . . . . _\n. [ghost] . [ghost] . . .\n. [ghost] [ghost] [jelly] [ghost] [ghost] [ghost]\n. . . [jelly] . [ghost] [ghost]\n. . . . . [ghost] [jelly]\n. . . . [ghost] . [ghost]\n_ . . . . . _",
-   "moves": 19,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ghost",
-     "count": 12
-    },
-    {
-     "kind": "spread",
-     "groundKind": "jelly",
-     "count": 20
-    }
-   ],
-   "winRate": 0.5,
-   "target": 0.5,
-   "tier": "super"
-  },
-  {
-   "id": 61,
-   "layout": "_ . . . . . _\n. . . [ghost] . . [ghost]\n. . . [ghost] [ghost] . .\n. . . . . . .\n. . . . . . .\n. [ghost] . . . . .\n_ . . . . . _",
-   "moves": 10,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ghost",
-     "count": 5
-    }
-   ],
-   "winRate": 0.9,
-   "target": 0.81,
-   "tier": "relief"
-  },
-  {
-   "id": 62,
-   "layout": ". . . . . . .\n. [cloud] . [cloud] [cloud] . [cloud]\n. [cloud] . . . . .\n. [cloud] . . [cloud] . .\n[cloud] . . . . . .\n. [cloud] . . . . .\n. . . . . . .",
-   "moves": 37,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "cover",
-     "coverKind": "cloud",
-     "count": 9
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.77,
-   "tier": "intro"
-  },
-  {
-   "id": 63,
-   "layout": ". . . [golem:4] . . .\n[bottle:2] [bottle:2] . [bottle:2] . [bottle:2] .\n_ . [bottle:2] . . [bottle:2] _\n_ _ . . . _ _\n_ . [bottle:2] . [bottle:2] . _\n. . . . . . [bottle:2]\n. . . . . . .",
-   "moves": 28,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "bottle",
-     "count": 9
-    }
-   ],
-   "turnEnd": [
-    {
-     "kind": "golem",
-     "spawnCount": 2
-    }
-   ],
-   "winRate": 0.77,
-   "target": 0.69,
-   "tier": "normal"
-  },
-  {
-   "id": 64,
-   "layout": "_ . . . . . _\n. . . [ghost] . [ghost] [crate:2]\n[ghost] . . . . [ghost] [ghost]\n[ghost] [crate:2] . . . . .\n. . . . . . .\n. [ghost] [crate:2] . [ghost] [crate:2] .\n_ . . . . . _",
-   "moves": 25,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ghost",
-     "count": 8
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "crate-heavy",
-     "count": 4
-    }
-   ],
-   "winRate": 0.67,
-   "target": 0.64,
-   "tier": "normal"
-  },
-  {
-   "id": 65,
-   "layout": "_ _ _ . _ _ _\n_ _ [soil] [barrel:3] . _ _\n_ . . [barrel:3] [barrel:3] . _\n. [barrel:3] [soil] . . [soil] [barrel:3]\n_ [soil] [barrel:3] [barrel:3] [soil] [soil] _\n_ _ [soil] [barrel:3] [barrel:3] _ _\n_ _ _ . _ _ _",
-   "moves": 10,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 9
-    },
-    {
-     "kind": "ground",
-     "groundKind": "soil",
-     "count": 7
-    }
-   ],
-   "winRate": 0.67,
-   "target": 0.56,
-   "tier": "hard"
-  },
-  {
-   "id": 66,
-   "layout": ". . . . . . .\n[flowerpot:2] . . . . . .\n[flowerpot:2] . . [flowerpot:2] . . .\n. . . . . . [flowerpot:2]\n. . . . . . .\n. . [flowerpot:2] . . . .\n. . . . . . .",
-   "moves": 19,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "flowerpot",
-     "count": 5
-    }
-   ],
-   "winRate": 0.77,
-   "target": 0.75,
-   "tier": "relief"
-  },
-  {
-   "id": 67,
-   "layout": ". . . . . . .\n. . . [soil] . . .\n[soil] . . . . [soil] .\n[soil] . . [soil] . . .\n. [soil] [soil] . [soil] . [soil]\n. [soil] . [soil] . . .\n. . . . . . .",
-   "moves": 36,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "soil",
-     "count": 11
-    }
-   ],
-   "winRate": 0.7,
-   "target": 0.67,
-   "tier": "normal"
-  },
-  {
-   "id": 68,
-   "layout": "_ . . . . . _\n. . . . . . .\n. . . [grass] . [grass] [grass]\n[grass] [grass] [grass] [grass] . . .\n. [grass] . [grass] . [grass] .\n. . [grass] [grass] . . .\n_ . . . . . _",
-   "moves": 31,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "grass",
-     "count": 12
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.62,
-   "tier": "normal"
-  },
-  {
-   "id": 69,
-   "layout": ". . . . . . .\n[honey-pot] . . . . . .\n. . . . . . [honey-pot]\n[honey-pot] . . . . [honey-pot] .\n. . . . . . [honey-pot]\n. [honey-pot] . . . . .\n. . . . . . .",
-   "moves": 16,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "honey-pot",
-     "count": 6
-    }
-   ],
-   "winRate": 0.6,
-   "target": 0.58,
-   "tier": "normal"
-  },
-  {
-   "id": 70,
-   "layout": ". . . . . . .\n[soil] [soil] [grass] [soil] [soil] [grass] .\n[grass] . [soil] [grass] . [grass] [grass]\n[soil] . [grass] . [soil] . .\n. [soil] [soil] . [grass] . [soil]\n. . [grass] [soil] [soil] [grass] [grass]\n. . . . . . .",
-   "moves": 31,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "soil",
-     "count": 12
-    },
-    {
-     "kind": "ground",
-     "groundKind": "grass",
-     "count": 11
-    }
-   ],
-   "winRate": 0.5,
-   "target": 0.46,
-   "tier": "super"
-  },
-  {
-   "id": 71,
-   "layout": ". . . . . . .\n. . [rubble] . . . .\n. . . [rubble] [rubble] . .\n[rubble] [rubble] [rubble] [rubble] [rubble] . .\n. . . . . . [rubble]\n. [rubble] . . . . .\n. . . . . . .",
-   "moves": 18,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 10
-    }
-   ],
-   "winRate": 0.8,
-   "target": 0.74,
-   "tier": "intro"
-  },
-  {
-   "id": 72,
-   "layout": ". . . . . . .\n. . . . . [ice:2] .\n_ [ice:2] . [ice:2] [ice:2] [ice:2] _\n_ _ . . . _ _\n_ [ice:2] . [ice:2] . . _\n. [ice:2] . . . . [ice:2]\n. . . . . . .",
-   "moves": 36,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ice",
-     "count": 9
-    }
-   ],
-   "winRate": 0.7,
-   "target": 0.69,
-   "tier": "normal"
-  },
-  {
-   "id": 73,
-   "layout": "_ . . . . . _\n. [rubble] [rubble] . . . [rubble]\n. . . . . . .\n. . [rubble] . . . [rubble]\n. [rubble] . [rubble] . . [rubble]\n. . . [rubble] [rubble] . [rubble]\n_ . . . . . _",
-   "moves": 18,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 11
-    }
-   ],
-   "winRate": 0.7,
-   "target": 0.65,
-   "tier": "normal"
-  },
-  {
-   "id": 74,
-   "layout": "_ . . . . . _\n[bottle:2] . . . . . [bottle:2]\n. . [bottle:2] . [bottle:2] . .\n. . [bottle:2] . [bottle:2] . .\n. [bottle:2] . . . [bottle:2] .\n[bottle:2] [bottle:2] . . . . .\n_ . . . . . _",
-   "moves": 30,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "bottle",
-     "count": 10
-    }
-   ],
-   "winRate": 0.6,
-   "target": 0.6,
-   "tier": "normal"
-  },
-  {
-   "id": 75,
-   "layout": ". . . . . . .\n[barrel:3] [flowerpot:2] [barrel:3] [flowerpot:2] . [barrel:3] [flowerpot:2]\n_ [barrel:3] [flowerpot:2] [flowerpot:2] . . _\n_ _ . [barrel:3] [flowerpot:2] _ _\n_ [flowerpot:2] . . . . _\n[flowerpot:2] . . . [flowerpot:2] [flowerpot:2] .\n. . . . . . .",
-   "moves": 28,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "flowerpot",
-     "count": 10
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 5
-    }
-   ],
-   "winRate": 0.53,
-   "target": 0.52,
-   "tier": "hard"
-  },
-  {
-   "id": 76,
-   "layout": "_ . . . . . _\n[soil] . . . [soil] . .\n[soil] . [soil] . . [soil] .\n. . [soil] . . . .\n. [soil] . . . . .\n[soil] . . . . . .\n_ . . . . . _",
-   "moves": 22,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "ground",
-     "groundKind": "soil",
-     "count": 8
-    }
-   ],
-   "winRate": 0.77,
-   "target": 0.72,
-   "tier": "relief"
-  },
-  {
-   "id": 77,
-   "layout": ". . . . . . .\n. [rubble] . [rubble] [rubble] . .\n_ . [rubble] . . . _\n_ _ [rubble] . . _ _\n_ [rubble] . . [rubble] . _\n[rubble] . [rubble] [rubble] [rubble] . .\n. . . . . . .",
-   "moves": 20,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 11
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.63,
-   "tier": "normal"
-  },
-  {
-   "id": 78,
-   "layout": ". . . . . . .\n. . . . . [crate:2] .\n. [crate:2] . [crate:2] . . .\n. . . . . [crate:2] [crate:2]\n. . [crate:2] [crate:2] . . .\n[crate:2] . [crate:2] . . . .\n. . . . . . .",
-   "moves": 27,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "crate-heavy",
-     "count": 9
-    }
-   ],
-   "winRate": 0.63,
-   "target": 0.58,
-   "tier": "normal"
-  },
-  {
-   "id": 79,
-   "layout": ". . . . . . .\n. . . [barrel:3] . . .\n[barrel:3] [barrel:3] . . [barrel:3] [barrel:3] .\n. . . . . . .\n. . . . . . .\n. [barrel:3] [barrel:3] . . [barrel:3] [barrel:3]\n. . . . . . .",
-   "moves": 28,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 9
-    }
-   ],
-   "winRate": 0.57,
-   "target": 0.55,
-   "tier": "normal"
-  },
-  {
-   "id": 80,
-   "layout": "_ . . . . . _\n. . . . [soil] . [soil]\n[bottle:2] [bottle:2] [bottle:2] . [bottle:2] . [bottle:2]\n. . [soil] [soil] . [bottle:2] [bottle:2]\n[bottle:2] [bottle:2] [bottle:2] [bottle:2] [bottle:2] [soil] [soil]\n. . [soil] . . [soil] [soil]\n_ . . . . . _",
-   "moves": 32,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "bottle",
-     "count": 12
-    },
-    {
-     "kind": "ground",
-     "groundKind": "soil",
-     "count": 9
-    }
-   ],
-   "winRate": 0.43,
-   "target": 0.42,
-   "tier": "super"
-  },
-  {
-   "id": 81,
-   "layout": ". . . . . . .\n. . . . . [golem:4] .\n_ . . . . . _\n_ _ . . . _ _\n_ . . . . . _\n. . . . . . .\n. . . . . . .",
-   "moves": 36,
    "colors": 5,
    "goals": [
     {
@@ -1472,100 +339,1240 @@
      "spawnCount": 2
     }
    ],
-   "winRate": 0.83,
-   "target": 0.74,
-   "tier": "relief"
+   "winRate": 0.87,
+   "target": 0.85,
+   "tier": "intro"
   },
   {
-   "id": 82,
-   "layout": "_ . . . . . _\n. [rubble] [rubble] . . . .\n. . [rubble] . . . .\n. . . . . . [rubble]\n[rubble] . [rubble] . . [rubble] .\n[rubble] . . [rubble] . . [rubble]\n_ . . . . . _",
-   "moves": 20,
-   "colors": 6,
+   "id": 22,
+   "layout": ". . . . . . .\n. . . . . . [golem:4]\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. _ . . . _ .\n. _ . . . _ .",
+   "moves": 31,
+   "colors": 5,
    "goals": [
     {
-     "kind": "blocker",
-     "blockerKind": "rubble",
+     "kind": "color",
+     "color": 0,
+     "count": 40
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "golem",
+     "spawnCount": 2
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.74,
+   "tier": "normal"
+  },
+  {
+   "id": 23,
+   "layout": ". . . . . [golem:4] . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n_ . . . . . . _\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .",
+   "moves": 27,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "color",
+     "color": 0,
+     "count": 40
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "golem",
+     "spawnCount": 2
+    }
+   ],
+   "winRate": 0.8,
+   "target": 0.74,
+   "tier": "normal"
+  },
+  {
+   "id": 24,
+   "layout": ". . . . . . . .\n. . . . . [golem:4] . .\n. . . . . . . .\n. . . _ _ . . .\n[grass] . . _ _ . . [grass]\n. [grass] . . . . [grass] .\n. [grass] [grass] [grass] [grass] [grass] [grass] .\n. . . . . . . .",
+   "moves": 23,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "ground",
+     "groundKind": "grass",
      "count": 10
     }
    ],
-   "winRate": 0.67,
-   "target": 0.66,
+   "turnEnd": [
+    {
+     "kind": "golem",
+     "spawnCount": 2
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.73,
    "tier": "normal"
   },
   {
-   "id": 83,
-   "layout": ". . . . . . .\n. . . [rubble] [rubble] [rubble] .\n[rubble] . . . . . .\n. . [rubble] . . . .\n. [rubble] . . [rubble] . .\n[rubble] [rubble] [rubble] [rubble] . . .\n. . . . . . .",
-   "moves": 18,
+   "id": 25,
+   "layout": ". . . . _ _ _\n[honey] [box] [honey] . [honey] _ _\n[box] [box] [box] [honey] [box] [box] _\n[honey] . . . . . .\n_ . . . . . .\n_ _ . . . . .\n_ _ _ . . . .",
+   "moves": 10,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "box",
+     "count": 6
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.73,
+   "tier": "normal"
+  },
+  {
+   "id": 26,
+   "layout": "_ _ . [golem:4] . . _ _\n_ . . . . . . _\n. . . . . . . .\n. . [box] . . [box] . .\n. . [box] . . [box] . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .",
+   "moves": 25,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "color",
+     "color": 0,
+     "count": 40
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "golem",
+     "spawnCount": 2
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.73,
+   "tier": "normal"
+  },
+  {
+   "id": 27,
+   "layout": ". . . . . . . .\n. . [mushroom] . . [mushroom] . .\n. . . [mushroom] [mushroom] . . .\n. . . . . . . .\n. . [mushroom] . . [mushroom] . .\n[mushroom] . . . . . . [mushroom]\n. . . [mushroom] [mushroom] . . .\n. . . . . . . .",
+   "moves": 10,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mushroom",
+     "count": 10
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "regrow",
+     "blockerKind": "mushroom",
+     "groundKind": "soil"
+    }
+   ],
+   "winRate": 1,
+   "target": 0.83,
+   "tier": "intro"
+  },
+  {
+   "id": 28,
+   "layout": ". . . . . . _\n. . . . . . .\n. . . . . . .\n. . . [honey] [honey] . .\n. . [honey] [crate:2] [crate:2] [honey] .\n. . [honey] [crate:2] [crate:2] [honey] .\n_ . . . . . .",
+   "moves": 20,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "crate-heavy",
+     "count": 4
+    }
+   ],
+   "winRate": 0.8,
+   "target": 0.71,
+   "tier": "normal"
+  },
+  {
+   "id": 29,
+   "layout": "_ . . . . . .\n. [golem:4] . . . . .\n. . . . . . .\n. . . . . . .\n[mushroom] [mushroom] . . . [mushroom] [mushroom]\n_ [mushroom] . . . [mushroom] [mushroom]\n_ _ . . . . .",
+   "moves": 10,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mushroom",
+     "count": 7
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "regrow",
+     "blockerKind": "mushroom",
+     "groundKind": "soil"
+    },
+    {
+     "kind": "golem",
+     "spawnCount": 2
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.72,
+   "tier": "normal"
+  },
+  {
+   "id": 30,
+   "layout": ". . . . . . . .\n. [mushroom] . . . . [mushroom] .\n. [mushroom] [box] [box] [box] [box] [mushroom] .\n. [mushroom] . . . . [mushroom] .\n. [mushroom] . . . . [mushroom] .\n. [mushroom] . . . . [mushroom] .\n. . . . . . . .\n_ . . . . . . _",
+   "moves": 10,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mushroom",
+     "count": 10
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "regrow",
+     "blockerKind": "mushroom",
+     "groundKind": "soil"
+    }
+   ],
+   "winRate": 0.9,
+   "target": 0.71,
+   "tier": "normal"
+  },
+  {
+   "id": 31,
+   "layout": ". . . . . . .\n. _ _ . . . .\n. . . . . . .\n. . . . . . .\n[honey] [honey] [honey] [mushroom] [mushroom] [honey] [honey]\n. . . [mushroom] _ _ .\n. . . . . . .",
+   "moves": 10,
    "colors": 6,
    "goals": [
     {
      "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 11
+     "blockerKind": "mushroom",
+     "count": 3
     }
    ],
-   "winRate": 0.7,
-   "target": 0.61,
+   "turnEnd": [
+    {
+     "kind": "regrow",
+     "blockerKind": "mushroom",
+     "groundKind": "soil"
+    }
+   ],
+   "winRate": 0.9,
+   "target": 0.73,
    "tier": "normal"
   },
   {
-   "id": 84,
-   "layout": "_ _ _ . _ _ _\n_ _ . . [rubble] _ _\n_ [rubble] . [rubble] . . _\n[rubble] . . [rubble] . . [rubble]\n_ . . [rubble] . [rubble] _\n_ _ . [rubble] . _ _\n_ _ _ . _ _ _",
+   "id": 32,
+   "layout": ". _ _ . . _ _ .\n. . . . . . . .\n[barrel] . . . . . . [barrel]\n[barrel] . [barrel] . . [barrel] . [barrel]\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .",
+   "moves": 15,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "barrel",
+     "count": 6
+    }
+   ],
+   "winRate": 0.87,
+   "target": 0.81,
+   "tier": "intro"
+  },
+  {
+   "id": 33,
+   "layout": ". . . . . . . .\n. . . . . . . .\n_ . . . . . . .\n. . . [box] [box] . . .\n. . [box] [barrel] [barrel] [box] . .\n. . [box] [barrel] [barrel] [box] . .\n. . . [barrel] [barrel] . . .\n. . . . . . . .",
    "moves": 13,
    "colors": 6,
    "goals": [
     {
      "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 9
+     "blockerKind": "barrel",
+     "count": 6
     }
    ],
    "winRate": 0.7,
-   "target": 0.57,
+   "target": 0.7,
    "tier": "normal"
   },
   {
-   "id": 85,
-   "layout": "_ _ _ . _ _ _\n_ _ . . . _ _\n_ . [honey] . . . _\n. [honey] . . . [honey] [honey]\n_ [honey] [honey] . . . _\n_ _ [honey] . . _ _\n_ _ _ . _ _ _",
+   "id": 34,
+   "layout": "_ _ . . . _ _\n_ . . _ . . _\n. [honey] [honey] _ [honey] [honey] .\n. . . _ . . .\n. . . _ . . .\n. . . _ . . .\n. . . . . . .",
    "moves": 27,
    "colors": 6,
    "goals": [
     {
      "kind": "cover",
      "coverKind": "honey",
-     "count": 7
+     "count": 4
     }
    ],
-   "winRate": 0.5,
-   "target": 0.48,
+   "winRate": 0.7,
+   "target": 0.69,
+   "tier": "normal"
+  },
+  {
+   "id": 35,
+   "layout": "_ . . . . . . _\n[ice:1] . . . . . . [ice:1]\n. . . . . . . .\n. . . . . . . .\n. . [barrel] [barrel] [barrel] [barrel] . .\n. . . . . . . .\n. . . [ice:1] [ice:1] . . .\n_ . . . . . . _",
+   "moves": 23,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ice",
+     "count": 4
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.7,
+   "tier": "normal"
+  },
+  {
+   "id": 36,
+   "layout": ". . . . . . . .\n. . . . . . . .\n. . . [honey] [honey] . . .\n. . [honey] [barrel] [barrel] [honey] . .\n. . [honey] [barrel] [barrel] [honey] . .\n. . . [honey] [honey] . . .\n_ . . . . . . _\n_ _ . . . . _ _",
+   "moves": 13,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "barrel",
+     "count": 4
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.69,
+   "tier": "normal"
+  },
+  {
+   "id": 37,
+   "layout": ". . . . . . . .\n[honey] . . . . . . [honey]\n[honey] . [crate:2] [crate:2] [crate:2] [crate:2] . [honey]\n. . _ [honey] [honey] _ . .\n. . _ . . _ . .\n. . [crate:2] [crate:2] [crate:2] [crate:2] . .\n. . . . . . . .\n. . . . . . . .",
+   "moves": 34,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "crate-heavy",
+     "count": 8
+    }
+   ],
+   "winRate": 0.7,
+   "target": 0.7,
+   "tier": "normal"
+  },
+  {
+   "id": 38,
+   "layout": "_ . . . . . . _\n. . . . . . . .\n. . [jelly] . . [jelly] . .\n. . . . . . . .\n. . . . . . . .\n[jelly] . . . . . . [jelly]\n. . . . . . . .\n. . . . . . . .",
+   "moves": 19,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "spread",
+     "groundKind": "jelly",
+     "count": 25
+    }
+   ],
+   "winRate": 0.83,
+   "target": 0.78,
+   "tier": "intro"
+  },
+  {
+   "id": 39,
+   "layout": ". . . . . . . .\n. [honey] [box] [crate:2] [crate:2] [box] [honey] .\n. . _ _ [crate:2] [box] . .\n[honey] . [box] [crate:2] [crate:2] [box] . [honey]\n. . [honey] [box] [box] [honey] . .\n. . . . _ _ . .\n. . . [honey] [honey] . . .\n. . . . . . . .",
+   "moves": 39,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "crate-heavy",
+     "count": 5
+    }
+   ],
+   "winRate": 0.63,
+   "target": 0.61,
    "tier": "hard"
   },
   {
-   "id": 86,
-   "layout": "_ _ _ . _ _ _\n_ _ . . [rubble] _ _\n_ . . . . . _\n. . . . [rubble] [rubble] [rubble]\n_ [rubble] . . [rubble] . _\n_ _ . [rubble] [rubble] _ _\n_ _ _ . _ _ _",
+   "id": 40,
+   "layout": "_ _ . . . _ _\n_ . . . . . _\n. . . . . . .\n. . . _ . . .\n. . [jelly] _ [jelly] . .\n. . . _ . . .\n. . . . . . .",
+   "moves": 12,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "spread",
+     "groundKind": "jelly",
+     "count": 16
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.75,
+   "tier": "relief"
+  },
+  {
+   "id": 41,
+   "layout": "_ . . . . . _\n. . . _ . . .\n. . . _ . . .\n. . [jelly] _ [jelly] . .\n. . . _ . . .\n. . . _ . . .\n_ . . . . . _",
+   "moves": 15,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "spread",
+     "groundKind": "jelly",
+     "count": 16
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.71,
+   "tier": "normal"
+  },
+  {
+   "id": 42,
+   "layout": ". . . . . . .\n. . . . . . .\n. . . . . . .\n. . [jelly] [jelly] [jelly] . .\n_ [honey] . . . [honey] .\n_ _ [honey] . [honey] . .\n_ _ _ . . . .",
+   "moves": 14,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "spread",
+     "groundKind": "jelly",
+     "count": 17
+    }
+   ],
+   "winRate": 0.8,
+   "target": 0.68,
+   "tier": "normal"
+  },
+  {
+   "id": 43,
+   "layout": ". . . . . . .\n. . [mailbox] . [mailbox] . .\n. . . . . . .\n. _ _ . _ _ .\n[mailbox] _ _ . _ _ [mailbox]\n. . . . . . .\n. . . . . . .",
+   "moves": 19,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mailbox",
+     "count": 4
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "producer",
+     "color": 0
+    }
+   ],
+   "winRate": 0.8,
+   "target": 0.77,
+   "tier": "intro"
+  },
+  {
+   "id": 44,
+   "layout": ". . [tube:R] [tube:R] . . [tube:R]\n. . . . . . .\n. . . . . . .\n. [mailbox] [mailbox] [mailbox] [mailbox] [mailbox] .\n. . . . . . .\n. . . . . . .\n. . [shelf:R2] [shelf:R2] . . [shelf:R2]",
+   "moves": 44,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mailbox",
+     "count": 5
+    },
+    {
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 3
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "producer",
+     "color": 0
+    }
+   ],
+   "winRate": 0.67,
+   "target": 0.64,
+   "tier": "normal"
+  },
+  {
+   "id": 45,
+   "layout": "_ _ . . . _ _\n_ [jelly] . [crate:2] [crate:2] [jelly] _\n. . . [crate:2] [crate:2] . .\n. _ _ . _ _ .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
+   "moves": 26,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "crate-heavy",
+     "count": 4
+    },
+    {
+     "kind": "spread",
+     "groundKind": "jelly",
+     "count": 16
+    }
+   ],
+   "winRate": 0.6,
+   "target": 0.57,
+   "tier": "hard"
+  },
+  {
+   "id": 46,
+   "layout": ". . . . . . .\n. [mailbox] . . . [mailbox] .\n. [mailbox] _ . _ [mailbox] .\n. . _ . _ . .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
+   "moves": 10,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mailbox",
+     "count": 4
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "producer",
+     "color": 0
+    }
+   ],
+   "winRate": 0.93,
+   "target": 0.75,
+   "tier": "relief"
+  },
+  {
+   "id": 47,
+   "layout": ". . . . . . . .\n. . . . . . . .\n. . . [crate:2] [crate:2] . . .\n. . [crate:2] [ice:1] [ice:1] [crate:2] . .\n. . . [ice:1] [ice:1] [crate:2] . .\n. . . . . . . .\n. _ _ _ _ _ _ .\n_ _ _ _ _ _ _ _",
+   "moves": 30,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ice",
+     "count": 4
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.67,
+   "tier": "normal"
+  },
+  {
+   "id": 48,
+   "layout": "_ . . . . . . _\n. . . . . . . .\n. . . . . . . .\n. [crate:2] . . . . [crate:2] .\n. [crate:2] [mailbox] _ _ . [crate:2] .\n. . . _ _ [mailbox] . .\n. . [mailbox] _ _ . . .\n_ . . _ _ . . _",
+   "moves": 14,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mailbox",
+     "count": 3
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "producer",
+     "color": 0
+    }
+   ],
+   "winRate": 0.63,
+   "target": 0.61,
+   "tier": "normal"
+  },
+  {
+   "id": 49,
+   "layout": ". . _ . . . . .\n. [box] . [crate:2] [crate:2] . [box] .\n[crate:2] . . [box] [box] . . [crate:2]\n. . [grass] [box] [box] [grass] . .\n. . [grass] [box] [box] [grass] . .\n. . [grass] [grass] [grass] [grass] . .\n[box] . . . . . . [box]\n. . . . . . . .",
+   "moves": 20,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "box",
+     "count": 10
+    },
+    {
+     "kind": "ground",
+     "groundKind": "grass",
+     "count": 8
+    }
+   ],
+   "winRate": 0.57,
+   "target": 0.54,
+   "tier": "hard"
+  },
+  {
+   "id": 50,
+   "layout": ". . . . . . . .\n. . . . . . . .\n[honey-pot] . . . . . . [honey-pot]\n. . . . . . . .\n. . . . . . . .\n[honey-pot] [honey-pot] . . . . [honey-pot] [honey-pot]\n_ . [honey-pot] . . [honey-pot] . _\n_ _ _ _ _ _ _ _",
+   "moves": 26,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 8
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.74,
+   "tier": "intro"
+  },
+  {
+   "id": 51,
+   "layout": "_ _ _ . . _ _\n_ _ . . . . _\n_ . . . . . .\n. . . . . . .\n. . . [honey-pot] [honey-pot] . _\n_ . . . . _ _\n_ _ . . _ _ _",
+   "moves": 10,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 2
+    }
+   ],
+   "winRate": 0.83,
+   "target": 0.76,
+   "tier": "normal"
+  },
+  {
+   "id": 52,
+   "layout": "_ _ . . . . _ _\n_ . . . . . . _\n. . . [honey-pot] [honey-pot] . . .\n. . . [honey-pot] [honey-pot] . . .\n. . . [honey-pot] [honey-pot] . . .\n. . . . . . . .\n_ . . . . . . _\n_ _ . . . . _ _",
+   "moves": 11,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 6
+    }
+   ],
+   "winRate": 0.8,
+   "target": 0.73,
+   "tier": "normal"
+  },
+  {
+   "id": 53,
+   "layout": ". . _ . . _ . .\n. . . [honey-pot] [honey-pot] . . .\n. . . [honey-pot] [honey-pot] . . .\n. . . . . . . .\n. . . . . . . .\n_ . . . . . . _\n_ _ . . . . _ _\n_ _ _ . . _ _ _",
+   "moves": 10,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 4
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.69,
+   "tier": "normal"
+  },
+  {
+   "id": 54,
+   "layout": ". . . . . _ _\n_ [honey-pot] . . . [honey-pot] _\n_ [honey-pot] . . . [honey-pot] .\n_ . . . . . _\n. . . . . . _\n_ [grass] [grass] [grass] [grass] [grass] _\n_ _ . . . . .",
+   "moves": 34,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 4
+    },
+    {
+     "kind": "ground",
+     "groundKind": "grass",
+     "count": 5
+    }
+   ],
+   "winRate": 0.7,
+   "target": 0.67,
+   "tier": "normal"
+  },
+  {
+   "id": 55,
+   "layout": ". . . . . . .\n. . . [barrel] [barrel] . .\n. . . . . . .\n_ . . . . . _\n_ . [honey-pot] . [honey-pot] . _\n. . [honey-pot] . [honey-pot] . .\n. . . . . . .",
+   "moves": 17,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 4
+    },
+    {
+     "kind": "blocker",
+     "blockerKind": "barrel",
+     "count": 2
+    }
+   ],
+   "winRate": 0.6,
+   "target": 0.58,
+   "tier": "hard"
+  },
+  {
+   "id": 56,
+   "layout": ". . . . . . . .\n. . . [crate:2] [crate:2] . . .\n. . . [crate:2] [crate:2] . . .\n. . [barrel] [crate:2] [crate:2] [barrel] . .\n. . . . . . . .\n_ . . . . . . _\n_ _ . . . . _ _\n_ _ _ . . _ _ _",
+   "moves": 10,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "crate-heavy",
+     "count": 6
+    }
+   ],
+   "winRate": 0.93,
+   "target": 0.8,
+   "tier": "relief"
+  },
+  {
+   "id": 57,
+   "layout": "_ _ . . . . _ _\n_ . . . . . . _\n. . [ghost] . . [ghost] . .\n. _ . . . . _ .\n. _ . . . . _ .\n. [ghost] [ghost] [ghost] [ghost] [ghost] [ghost] .\n. . . . . . . .\n. . . . . . . .",
+   "moves": 13,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ghost",
+     "count": 8
+    }
+   ],
+   "winRate": 0.8,
+   "target": 0.79,
+   "tier": "intro"
+  },
+  {
+   "id": 58,
+   "layout": ". . . . . . . .\n. . . . . . . .\n. . [box] [barrel] [box] [barrel] . .\n. . [barrel] [box] . [box] . .\n. . [box] . [box] [barrel] . .\n[ghost] [ghost] [ghost] [ghost] [ghost] [ghost] [ghost] [ghost]\n. . . . . . . .\n. . _ _ _ _ . .",
+   "moves": 11,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ghost",
+     "count": 8
+    },
+    {
+     "kind": "blocker",
+     "blockerKind": "box",
+     "count": 6
+    }
+   ],
+   "winRate": 0.7,
+   "target": 0.64,
+   "tier": "normal"
+  },
+  {
+   "id": 59,
+   "layout": "_ _ . . . . _ _\n_ . . . . . . _\n. [crate:2] . [crate:2] [crate:2] . [crate:2] .\n_ . . . . . . _\n_ . . . . . . _\n_ [honey] [honey] [honey] [honey] [honey] [honey] _\n_ [ghost] [ghost] [ghost] [ghost] [ghost] [ghost] _\n_ _ . . . . _ _",
+   "moves": 15,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ghost",
+     "count": 6
+    }
+   ],
+   "winRate": 0.5,
+   "target": 0.5,
+   "tier": "super"
+  },
+  {
+   "id": 60,
+   "layout": "_ _ _ . . . _ _ _\n_ _ . . . . . _ _\n_ . . . . . . . _\n[ghost] _ [ghost] [ghost] [ghost] [ghost] [ghost] _ [ghost]\n. . . . . . . . .\n. . . . . . . . .\n. . . . . . . . .\n. . . . . . . . .\n. . . . . . . . .",
+   "moves": 17,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ghost",
+     "count": 7
+    }
+   ],
+   "winRate": 0.8,
+   "target": 0.79,
+   "tier": "relief"
+  },
+  {
+   "id": 61,
+   "layout": ". . . _ _ . . .\n[ghost] [ghost] [ghost] [ghost] [ghost] [ghost] [ghost] [ghost]\n. [crate:2] . . . . [crate:2] .\n. . [crate:2] . . [crate:2] . .\n. . . . . . . .\n_ . . . . . . _\n_ [crate:2] . . . . [crate:2] _\n. . . . . . . .",
+   "moves": 19,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ghost",
+     "count": 8
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.72,
+   "tier": "normal"
+  },
+  {
+   "id": 62,
+   "layout": ". . _ . . . . . .\n_ . . . . . . . .\n_ . . . . . _ . .\n_ . . . . . . . .\n. . . . . . . . .\n[barrel] [barrel] [barrel] . [barrel] . [barrel] [barrel] _\n[box] [box] _ [box] [box] [box] [box] [box] _\n[box] [box] [box] [box] [box] [box] [box] [box] _\n. . . . . . _ . .",
+   "moves": 27,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "box",
+     "count": 15
+    },
+    {
+     "kind": "blocker",
+     "blockerKind": "barrel",
+     "count": 6
+    }
+   ],
+   "winRate": 0.7,
+   "target": 0.69,
+   "tier": "normal"
+  },
+  {
+   "id": 63,
+   "layout": "_ _ _ . . . _ _ _\n_ _ . . . . . _ _\n_ . . [honey] [honey] [honey] . . _\n_ . [honey] [box] [box] [box] [honey] . _\n[barrel] [barrel] [honey] [box] [honey] [box] [honey] [barrel] [barrel]\n. . [honey] [box] [box] [box] [honey] . .\n. . . [honey] . . . . .\n. _ _ . . . _ _ .\n. _ _ . . . _ _ .",
+   "moves": 13,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "box",
+     "count": 8
+    }
+   ],
+   "winRate": 0.7,
+   "target": 0.66,
+   "tier": "normal"
+  },
+  {
+   "id": 64,
+   "layout": ". . . . . . . . .\n[flowerpot] . . [flowerpot] . [flowerpot] . . [flowerpot]\n. . . . [flowerpot] . . . .\n. . . [flowerpot] [flowerpot] [flowerpot] . . .\n. . . . . . . . .\n. . . . . . . . .\n[flowerpot] _ _ . . . _ _ [flowerpot]\n. . . . [flowerpot] . . . .\n. . . . . . . . .",
+   "moves": 41,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "flowerpot",
+     "count": 11
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.76,
+   "tier": "intro"
+  },
+  {
+   "id": 65,
+   "layout": ". . . [tube:R] . . [tube:R] . .\n. . . . . . . . .\n. . . . . . . . .\n. . . [flowerpot] . [flowerpot] . . .\n. . . . [flowerpot] . . . .\n. . [honey] [honey] . [honey] [honey] . .\n. . [honey] [honey] . [honey] [honey] . .\n. . . . . . . . .\n. . . [shelf:R2] . . [shelf:R2] . .",
+   "moves": 44,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 2
+    },
+    {
+     "kind": "cover",
+     "coverKind": "honey",
+     "count": 8
+    }
+   ],
+   "winRate": 0.53,
+   "target": 0.47,
+   "tier": "hard"
+  },
+  {
+   "id": 66,
+   "layout": ". . . _ . . .\n[crate:2] . . _ . . [crate:2]\n[flowerpot] [crate:2] . _ . [crate:2] [flowerpot]\n[crate:2] . . _ . . .\n. . . _ . . .\n. . [flowerpot] _ [flowerpot] . .\n. . . _ . . .",
+   "moves": 24,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "flowerpot",
+     "count": 4
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.76,
+   "tier": "relief"
+  },
+  {
+   "id": 67,
+   "layout": ". . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . _ _ . . .\n. . . _ _ . . .\n[flowerpot] [flowerpot] [flowerpot] _ _ [flowerpot] [flowerpot] [flowerpot]\n. . . _ _ . . .\n_ _ _ . . _ _ _",
+   "moves": 42,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "flowerpot",
+     "count": 6
+    }
+   ],
+   "winRate": 0.7,
+   "target": 0.67,
+   "tier": "normal"
+  },
+  {
+   "id": 68,
+   "layout": "_ . . . . . . _\n. . . . . . . .\n. . . . . . . .\n. . . [box] [box] . . .\n. . . [box] [box] . . .\n. . [flowerpot] [flowerpot] [flowerpot] [flowerpot] . .\n. . [flowerpot] [flowerpot] [flowerpot] [flowerpot] . .\n. _ _ _ _ _ _ .",
+   "moves": 27,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "flowerpot",
+     "count": 8
+    }
+   ],
+   "winRate": 0.67,
+   "target": 0.61,
+   "tier": "normal"
+  },
+  {
+   "id": 69,
+   "layout": "_ _ _ _ . _ _ _ _\n_ _ _ . . . _ _ _\n_ _ [mailbox] . . . [mailbox] _ _\n_ . . . . . . . _\n. . . . . . . . .\n. [mushroom] . . . . . [mushroom] .\n. [mushroom] . . . . . [mushroom] .\n_ [mushroom] . . . . . [mushroom] _\n_ _ . . . . . _ _",
+   "moves": 10,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mushroom",
+     "count": 6
+    },
+    {
+     "kind": "blocker",
+     "blockerKind": "mailbox",
+     "count": 2
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "regrow",
+     "blockerKind": "mushroom",
+     "groundKind": "soil"
+    },
+    {
+     "kind": "producer",
+     "color": 0
+    }
+   ],
+   "winRate": 0.63,
+   "target": 0.46,
+   "tier": "super"
+  },
+  {
+   "id": 70,
+   "layout": ". . . . . . .\n. . [golem:4] [ice:1] [ice:1] . .\n. . . [ice:1] [ice:1] . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .",
+   "moves": 24,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ice",
+     "count": 4
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "golem",
+     "spawnCount": 2
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.75,
+   "tier": "relief"
+  },
+  {
+   "id": 71,
+   "layout": ". . . . . . .\n[ice:1] _ _ . _ _ [ice:1]\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. . . . . . .\n_ . . . . . _",
+   "moves": 28,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "ice",
+     "count": 2
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.69,
+   "tier": "normal"
+  },
+  {
+   "id": 72,
+   "layout": ". . . . . . . . .\n. . _ . . . _ . .\n[bottle] . [bottle] [bottle] . [bottle] [bottle] . [bottle]\n. . . [bottle] . [bottle] . . .\n. [bottle] _ _ . _ _ [bottle] .\n. . _ _ . _ _ . .\n[bottle] . . [bottle] . [bottle] . . [bottle]\n. . . . . . . . .\n. . . . . . . . .",
+   "moves": 43,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "bottle",
+     "count": 14
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.73,
+   "tier": "intro"
+  },
+  {
+   "id": 73,
+   "layout": ". . . . . . .\n. . . . . . .\n[bottle] . [bottle] _ [bottle] . [bottle]\n[bottle] . . _ . . [bottle]\n[bottle] . . _ . . [bottle]\n. . . _ . . .\n_ . . . . . _",
+   "moves": 25,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "bottle",
+     "count": 8
+    }
+   ],
+   "winRate": 0.63,
+   "target": 0.62,
+   "tier": "normal"
+  },
+  {
+   "id": 74,
+   "layout": ". . . . . . . .\n. . . _ _ . . .\n. . . . . . . .\n. . . . . . . .\n. [bottle] [bottle] . . [bottle] [bottle] .\n. [bottle] [bottle] . . [bottle] [bottle] .\n. . [bottle] . . [bottle] . .\n. . . . . . . .",
+   "moves": 18,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "bottle",
+     "count": 10
+    }
+   ],
+   "winRate": 0.6,
+   "target": 0.59,
+   "tier": "normal"
+  },
+  {
+   "id": 75,
+   "layout": ". . . . [tube:R] . [tube:R] [tube:R] .\n. . . . . . . . .\n. . . . . . . . .\n[jelly] [crate:2] [crate:2] [crate:2] [crate:2] [crate:2] [crate:2] [crate:2] [jelly]\n. . . . . . . . .\n. . . . . . . . .\n. . . . . . . . .\n. . . . . . . . .\n. . . . [shelf:R2] . [shelf:R2] [shelf:R2] .",
+   "moves": 37,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "spread",
+     "groundKind": "jelly",
+     "count": 32
+    },
+    {
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 3
+    }
+   ],
+   "winRate": 0.53,
+   "target": 0.51,
+   "tier": "hard"
+  },
+  {
+   "id": 76,
+   "layout": ". . . . . . . . .\n. . . . . . . . .\n[bottle] [bottle] . . . . . [bottle] [bottle]\n[bottle] [bottle] . . . . . [bottle] [bottle]\n[bottle] [bottle] . . . . . [bottle] [bottle]\n. . . . . . . . .\n. . . . . . . . .\n_ . . . . . . . _\n_ _ . . . . . _ _",
+   "moves": 22,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "bottle",
+     "count": 12
+    }
+   ],
+   "winRate": 0.77,
+   "target": 0.73,
+   "tier": "relief"
+  },
+  {
+   "id": 77,
+   "layout": ". . . . . . . .\n. . . . . . . .\n. . . . . . . .\n[honey-pot] [honey-pot] [honey-pot] [honey-pot] [honey-pot] [honey-pot] [honey-pot] [honey-pot]\n. . . . . . . .\n_ . . . . . . _\n_ . . . . . . _\n_ . _ _ _ _ . _",
+   "moves": 21,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 8
+    }
+   ],
+   "winRate": 0.63,
+   "target": 0.63,
+   "tier": "normal"
+  },
+  {
+   "id": 78,
+   "layout": "_ . _ . _ . _\n_ . . . . . _\n. . . . . . .\n[barrel] [barrel] . . . [barrel] [barrel]\n[honey-pot] [honey-pot] [barrel] . . [honey-pot] [honey-pot]\n_ [jelly] [jelly] [jelly] [jelly] [jelly] _\n_ _ . . . _ _",
+   "moves": 11,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "spread",
+     "groundKind": "jelly",
+     "count": 15
+    },
+    {
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 4
+    }
+   ],
+   "winRate": 0.6,
+   "target": 0.57,
+   "tier": "normal"
+  },
+  {
+   "id": 79,
+   "layout": "_ . . . . . . . _\n. . . . . . . . .\n. [barrel] . . . . . [barrel] .\n. . _ _ . _ _ . .\n. . _ _ . _ _ . .\n. [barrel] . . . . . [barrel] .\n[jelly] _ _ . . . _ _ [jelly]\n. . . . . . . . .\n. . . . . . . . .",
+   "moves": 43,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "spread",
+     "groundKind": "jelly",
+     "count": 27
+    },
+    {
+     "kind": "blocker",
+     "blockerKind": "barrel",
+     "count": 4
+    }
+   ],
+   "winRate": 0.43,
+   "target": 0.43,
+   "tier": "super"
+  },
+  {
+   "id": 80,
+   "layout": "_ . . . . . . _\n. . . . . . . .\n. [mailbox] . . . . [mailbox] .\n. [honey] [mailbox] . . [mailbox] [honey] .\n. [honey] . . . . [honey] .\n. [honey] . . . . [honey] .\n_ . . . . . . _\n_ _ . . . . _ _",
    "moves": 14,
    "colors": 5,
    "goals": [
     {
      "kind": "blocker",
-     "blockerKind": "rubble",
+     "blockerKind": "mailbox",
+     "count": 4
+    },
+    {
+     "kind": "cover",
+     "coverKind": "honey",
+     "count": 6
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "producer",
+     "color": 0
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.71,
+   "tier": "relief"
+  },
+  {
+   "id": 81,
+   "layout": "_ _ . . . _ _\n_ . [soil] . [soil] . _\n. . . . . . .\n[soil] . [soil] . [soil] . [soil]\n. . . [soil] . . .\n_ . [soil] . [soil] . _\n_ _ . . . _ _",
+   "moves": 22,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "ground",
+     "groundKind": "soil",
+     "count": 9
+    }
+   ],
+   "winRate": 0.73,
+   "target": 0.7,
+   "tier": "intro"
+  },
+  {
+   "id": 82,
+   "layout": "_ . . . . . _\n[soil] [soil] [box] . [box] [soil] [soil]\n[soil] _ _ . _ _ [soil]\n[soil] _ _ . _ _ [soil]\n[box] . . . . . [box]\n. . . . . . .\n_ . . . . . _",
+   "moves": 36,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "ground",
+     "groundKind": "soil",
      "count": 8
     }
    ],
-   "winRate": 0.7,
-   "target": 0.68,
+   "winRate": 0.67,
+   "target": 0.62,
+   "tier": "normal"
+  },
+  {
+   "id": 83,
+   "layout": ". . . . . . .\n. _ _ . _ _ .\n. _ _ . _ _ .\n[crate:2] [crate:2] . . . [crate:2] [crate:2]\n[soil] [soil] [crate:2] . [box] [soil] [soil]\n[soil] [soil] [box] . [box] [soil] [soil]\n. . . . . . .",
+   "moves": 22,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "ground",
+     "groundKind": "soil",
+     "count": 8
+    }
+   ],
+   "winRate": 0.6,
+   "target": 0.58,
+   "tier": "normal"
+  },
+  {
+   "id": 84,
+   "layout": ". . . . . . . . .\n[soil] . [crate:2] . . . [crate:2] . [soil]\n[soil] . . . . . . . [soil]\n[soil] _ [crate:2] [barrel] . [barrel] [crate:2] _ [soil]\n[soil] _ . . _ . . _ [soil]\n[soil] _ . [crate:2] _ [crate:2] . _ [soil]\n[soil] [barrel] . [barrel] _ [barrel] . [barrel] [soil]\n[soil] . . [crate:2] _ [crate:2] . . [soil]\n. . . . . . . . .",
+   "moves": 43,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "ground",
+     "groundKind": "soil",
+     "count": 14
+    }
+   ],
+   "winRate": 0.57,
+   "target": 0.56,
+   "tier": "normal"
+  },
+  {
+   "id": 85,
+   "layout": ". _ . . . . . _ .\n. _ . . . . . _ .\n. . . . . . . . .\n. . . . . . . . .\n[box] [box] [box] [box] [box] [box] [box] [box] [box]\n[honey] [honey] [honey] [honey] [honey] [honey] [honey] [honey] [honey]\n[crate:2] [crate:2] [crate:2] [crate:2] [crate:2] [crate:2] [crate:2] [crate:2] [crate:2]\n[honey] [honey] [honey] [barrel] [barrel] [barrel] [barrel] [barrel] [barrel]\n. . . . . . . . .",
+   "moves": 33,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "crate-heavy",
+     "count": 9
+    }
+   ],
+   "winRate": 0.5,
+   "target": 0.47,
+   "tier": "hard"
+  },
+  {
+   "id": 86,
+   "layout": "_ _ . . . _ _\n_ [mushroom] . [mushroom] . [mushroom] _\n. . [mushroom] . [mushroom] . .\n[soil] [soil] . . . [soil] [soil]\n[soil] [soil] . . . [soil] [soil]\n. . . . . . .\n. . . . . . .",
+   "moves": 10,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "ground",
+     "groundKind": "soil",
+     "count": 8
+    },
+    {
+     "kind": "blocker",
+     "blockerKind": "mushroom",
+     "count": 5
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "regrow",
+     "blockerKind": "mushroom",
+     "groundKind": "soil"
+    }
+   ],
+   "winRate": 0.87,
+   "target": 0.69,
    "tier": "relief"
   },
   {
    "id": 87,
-   "layout": ". . . . . . .\n[cloud] [cloud] [cloud] . . [cloud] [cloud]\n. . . [cloud] . . .\n. . . [cloud] . . .\n[cloud] . . . . [cloud] .\n[cloud] . . . . [cloud] .\n. . . . . . .",
-   "moves": 42,
+   "layout": "_ . [tube:R] . [tube:R] . [tube:R] .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . [barrel] . [barrel] . [barrel] .\n. . [shelf:R2] . [shelf:R2] . [shelf:R2] _",
+   "moves": 38,
    "colors": 6,
    "goals": [
     {
-     "kind": "cover",
-     "coverKind": "cloud",
-     "count": 11
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 3
     }
    ],
    "winRate": 0.6,
@@ -1574,173 +1581,175 @@
   },
   {
    "id": 88,
-   "layout": ". . . . . . .\n[ghost] . . [rubble] [ghost] [ghost] [rubble]\n_ [ghost] [ghost] . [ghost] . _\n_ _ . . [ghost] _ _\n_ [ghost] [ghost] . [ghost] [rubble] _\n[rubble] . . [rubble] [ghost] . [rubble]\n. . . . . . .",
-   "moves": 23,
+   "layout": ". . . . . . . .\n. [ghost] . [ghost] . [ghost] . .\n. . [ghost] . [ghost] [box] [ghost] .\n. [ghost] [box] [ghost] . [ghost] . .\n. . [ghost] . [ghost] [box] [ghost] .\n. [ghost] . [ghost] . [ghost] . .\n. . [ghost] . [ghost] . [ghost] .\n. . . . . . . .",
+   "moves": 13,
    "colors": 6,
    "goals": [
     {
      "kind": "blocker",
      "blockerKind": "ghost",
-     "count": 11
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 6
+     "count": 18
     }
    ],
-   "winRate": 0.63,
-   "target": 0.54,
+   "winRate": 0.57,
+   "target": 0.53,
    "tier": "normal"
   },
   {
    "id": 89,
-   "layout": ". . . . . . .\n[rubble] . . . . . .\n[rubble] . . [rubble] . [rubble] .\n. [rubble] [rubble] . [rubble] . .\n. [rubble] [rubble] . . . [rubble]\n. . . [rubble] . [rubble] .\n. . . . . . .",
-   "moves": 15,
+   "layout": "_ . . . . . . _\n. . . . . . . .\n[barrel] . . . . . . [barrel]\n_ [flowerpot] [flowerpot] [bottle] [bottle] [flowerpot] [flowerpot] _\n_ [barrel] [bottle] [honey] [honey] [bottle] [barrel] _\n. . [bottle] [honey] [honey] [bottle] . .\n. . [bottle] [honey] [honey] [bottle] . .\n. . . . . . . .",
+   "moves": 20,
    "colors": 6,
    "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 12
-    }
-   ],
-   "winRate": 0.57,
-   "target": 0.51,
-   "tier": "normal"
-  },
-  {
-   "id": 90,
-   "layout": "_ . . . . . _\n. [box] [barrel:3] [box] . [barrel:3] [ghost]\n[box] [barrel:3] [ghost] [ghost] [ghost] [box] [barrel:3]\n. [ghost] [ghost] [box] [ghost] . .\n[ghost] [box] . [barrel:3] [ghost] [ghost] [barrel:3]\n[ghost] . [ghost] [barrel:3] . [box] [box]\n_ . . . . . _",
-   "moves": 19,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "ghost",
-     "count": 12
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 7
-    }
-   ],
-   "winRate": 0.47,
-   "target": 0.39,
-   "tier": "super"
-  },
-  {
-   "id": 91,
-   "layout": "_ _ _ . _ _ _\n_ _ . [barrel:3] . _ _\n_ . . . . . _\n[barrel:3] [barrel:3] . . . . [barrel:3]\n_ . . . . . _\n_ _ . . [barrel:3] _ _\n_ _ _ . _ _ _",
-   "moves": 27,
-   "colors": 5,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 5
-    }
-   ],
-   "winRate": 0.7,
-   "target": 0.7,
-   "tier": "relief"
-  },
-  {
-   "id": 92,
-   "layout": ". . . . . . .\n[cloud] . [cloud] [honey] [honey] [honey] [cloud]\n_ . [honey] [cloud] . [cloud] _\n_ _ [honey] [cloud] . _ _\n_ . [cloud] [honey] . . _\n. . [cloud] [cloud] [cloud] . .\n. . . . . . .",
-   "moves": 45,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "cover",
-     "coverKind": "cloud",
-     "count": 10
-    },
     {
      "kind": "cover",
      "coverKind": "honey",
      "count": 6
     }
    ],
-   "winRate": 0.63,
-   "target": 0.62,
-   "tier": "normal"
+   "winRate": 0.43,
+   "target": 0.39,
+   "tier": "super"
   },
   {
-   "id": 93,
-   "layout": "_ . . . . . _\n. [jelly] . . . . .\n. . . . . . .\n. . . . [jelly] . .\n. . . . . . [jelly]\n. . . . . . .\n_ . . . . . _",
-   "moves": 13,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "spread",
-     "groundKind": "jelly",
-     "count": 20
-    }
-   ],
-   "winRate": 0.67,
-   "target": 0.58,
-   "tier": "normal"
-  },
-  {
-   "id": 94,
-   "layout": ". . . . . . .\n. . . . [rubble] . .\n. . [rubble] [rubble] . [rubble] .\n. . . . . [rubble] .\n. . [rubble] . . [rubble] [rubble]\n[rubble] [rubble] . . . [rubble] [rubble]\n. . . . . . .",
-   "moves": 24,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 12
-    }
-   ],
-   "winRate": 0.53,
-   "target": 0.53,
-   "tier": "normal"
-  },
-  {
-   "id": 95,
-   "layout": "_ _ _ . _ _ _\n_ _ [barrel:3] . . _ _\n_ [barrel:3] . [barrel:3] [barrel:3] . _\n[barrel:3] . . [barrel:3] . . [barrel:3]\n_ . . . . . _\n_ _ . [barrel:3] . _ _\n_ _ _ . _ _ _",
-   "moves": 16,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "barrel",
-     "count": 8
-    }
-   ],
-   "winRate": 0.47,
-   "target": 0.45,
-   "tier": "hard"
-  },
-  {
-   "id": 96,
-   "layout": ". . . . . . .\n. . . . . . .\n. . . . . . .\n[jelly] . . . . . .\n. . . . [jelly] . [jelly]\n. . . . . . .\n. . . . . . .",
-   "moves": 12,
+   "id": 90,
+   "layout": ". . . . . . _\n[honey-pot] . . . . . [honey-pot]\n[honey-pot] . . . . . [honey-pot]\n[honey-pot] [crate:2] [crate:2] [crate:2] [crate:2] [crate:2] [honey-pot]\n[honey-pot] . . . . . [honey-pot]\n[honey-pot] . . . . . [honey-pot]\n_ . . . . . .",
+   "moves": 18,
    "colors": 5,
    "goals": [
     {
-     "kind": "spread",
-     "groundKind": "jelly",
-     "count": 20
+     "kind": "blocker",
+     "blockerKind": "honey-pot",
+     "count": 10
     }
    ],
    "winRate": 0.7,
-   "target": 0.64,
+   "target": 0.68,
    "tier": "relief"
   },
   {
-   "id": 97,
-   "layout": ". . . . . . .\n[rubble] . . [rubble] [rubble] [rubble] [rubble]\n_ [rubble] . . [rubble] . _\n_ _ . [rubble] . _ _\n_ . . . . [rubble] _\n[rubble] [rubble] . . . [rubble] .\n. . . . . . .",
+   "id": 91,
+   "layout": ". . [tube:R] . [tube:R] . . [tube:R] .\n. . . . . . . . .\n. . . . . . . . .\n[mushroom] . [mushroom] . . . [mushroom] . [mushroom]\n. [mushroom] . . . . . [mushroom] .\n_ . . [mushroom] . [mushroom] . . _\n_ . . . . . . . _\n[mushroom] . [mushroom] . . . [mushroom] . [mushroom]\n_ . [shelf:R2] . [shelf:R2] . . [shelf:R2] _",
+   "moves": 34,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mushroom",
+     "count": 12
+    },
+    {
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 3
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "regrow",
+     "blockerKind": "mushroom",
+     "groundKind": "soil"
+    }
+   ],
+   "winRate": 0.63,
+   "target": 0.61,
+   "tier": "normal"
+  },
+  {
+   "id": 92,
+   "layout": ". . . . . . .\n_ _ [cloud] . [cloud] _ _\n_ _ . . . _ _\n_ [cloud] [cloud] . [cloud] [cloud] _\n. . [cloud] . [cloud] . .\n. [cloud] . . . [cloud] .\n. . . . . . .",
    "moves": 23,
    "colors": 6,
    "goals": [
     {
+     "kind": "cover",
+     "coverKind": "cloud",
+     "count": 10
+    }
+   ],
+   "winRate": 0.7,
+   "target": 0.66,
+   "tier": "intro"
+  },
+  {
+   "id": 93,
+   "layout": ". . . . . . .\n[barrel] _ . . . . [barrel]\n[barrel] _ . . . . [barrel]\n[barrel] . . . . . [barrel]\n[cloud] [cloud] . . . _ [cloud]\n[cloud] [cloud] . . . _ [cloud]\n. . . . . . .",
+   "moves": 22,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "cover",
+     "coverKind": "cloud",
+     "count": 6
+    }
+   ],
+   "winRate": 0.57,
+   "target": 0.55,
+   "tier": "normal"
+  },
+  {
+   "id": 94,
+   "layout": ". . _ . . . . .\n[cloud] [cloud] [cloud] [cloud] [cloud] [cloud] [cloud] [cloud]\n. [barrel] . . . . [barrel] .\n[cloud] [cloud] [cloud] [cloud] [cloud] [cloud] [cloud] [cloud]\n. [barrel] . [crate:2] [crate:2] . [barrel] .\n. . . . . . . .\n. [crate:2] . [crate:2] [crate:2] . [crate:2] .\n. . . . . _ . .",
+   "moves": 12,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "cover",
+     "coverKind": "cloud",
+     "count": 16
+    }
+   ],
+   "winRate": 0.57,
+   "target": 0.52,
+   "tier": "normal"
+  },
+  {
+   "id": 95,
+   "layout": "_ _ _ . . _ _ _\n_ _ [cloud] [barrel] [barrel] [cloud] _ _\n_ [crate:2] [crate:2] [cloud] [cloud] [crate:2] [crate:2] _\n. [barrel] . [barrel] [barrel] . . .\n. [cloud] . . . . [cloud] .\n_ . . [cloud] [cloud] . . _\n_ _ . . . . _ _\n_ _ _ . . _ _ _",
+   "moves": 12,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "cover",
+     "coverKind": "cloud",
+     "count": 8
+    },
+    {
      "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 12
+     "blockerKind": "crate-heavy",
+     "count": 4
+    }
+   ],
+   "winRate": 0.53,
+   "target": 0.44,
+   "tier": "hard"
+  },
+  {
+   "id": 96,
+   "layout": "_ . . . . . _\n. . . . . . .\n. . . . . . .\n. . . . . . .\n. [cloud] [cloud] . [cloud] [cloud] .\n. [cloud] [cloud] . [cloud] [cloud] .\n. . . . . . .",
+   "moves": 15,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "cover",
+     "coverKind": "cloud",
+     "count": 8
+    }
+   ],
+   "winRate": 0.67,
+   "target": 0.65,
+   "tier": "relief"
+  },
+  {
+   "id": 97,
+   "layout": ". . . . . . .\n. . . . . . .\n. . [bottle] . [bottle] . .\n. . . [bottle] . . .\n[cloud] [cloud] [cloud] [cloud] [cloud] [cloud] [cloud]\n. . . . . . .\n. . . . . . .",
+   "moves": 21,
+   "colors": 6,
+   "goals": [
+    {
+     "kind": "cover",
+     "coverKind": "cloud",
+     "count": 7
     }
    ],
    "winRate": 0.57,
@@ -1749,56 +1758,62 @@
   },
   {
    "id": 98,
-   "layout": ". . . . . . .\n[rubble] . . . . . [rubble]\n_ . [rubble] . [rubble] . _\n_ _ [rubble] [rubble] . _ _\n_ [rubble] . [rubble] [rubble] . _\n. [rubble] [rubble] . . . [rubble]\n. . . . . . .",
-   "moves": 21,
+   "layout": "_ _ [tube:R] . . [tube:R] _ _\n_ . _ . . _ . _\n. . _ . . _ . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n_ . . . . . . _\n_ _ [shelf:R2] . . [shelf:R2] _ _",
+   "moves": 20,
    "colors": 6,
    "goals": [
     {
-     "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 12
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 2
     }
    ],
-   "winRate": 0.57,
-   "target": 0.51,
+   "winRate": 0.5,
+   "target": 0.5,
    "tier": "normal"
   },
   {
    "id": 99,
-   "layout": "_ _ _ . _ _ _\n_ _ [rubble] [rubble] [rubble] _ _\n_ . [rubble] . [rubble] [rubble] _\n. . [rubble] [rubble] [rubble] . [rubble]\n_ . . . [rubble] [rubble] _\n_ _ . . . _ _\n_ _ _ . _ _ _",
-   "moves": 13,
+   "layout": ". . [tube:R] [tube:R] [tube:R] . . .\n[cloud] . . . . . . [cloud]\n[cloud] . [box] . . [box] . [cloud]\n[cloud] _ . [box] [box] . _ [cloud]\n[cloud] _ . . . . _ [cloud]\n[cloud] [box] . . . . [box] [cloud]\n_ [box] . . . . [box] _\n_ _ [shelf:R2] [shelf:R2] [shelf:R2] . _ _",
+   "moves": 38,
    "colors": 6,
    "goals": [
     {
-     "kind": "blocker",
-     "blockerKind": "rubble",
-     "count": 12
-    }
-   ],
-   "winRate": 0.5,
-   "target": 0.47,
-   "tier": "normal"
-  },
-  {
-   "id": 100,
-   "layout": ". . . . . . .\n. . . [honey-pot] [honey-pot] [honey-pot] [honey-pot]\n. [flowerpot:2] . [flowerpot:2] [honey-pot] [flowerpot:2] .\n. . . . . . [flowerpot:2]\n. . . . [honey-pot] . [honey-pot]\n. . [flowerpot:2] . [honey-pot] [honey-pot] .\n. . . . . . .",
-   "moves": 31,
-   "colors": 6,
-   "goals": [
-    {
-     "kind": "blocker",
-     "blockerKind": "honey-pot",
-     "count": 9
-    },
-    {
-     "kind": "blocker",
-     "blockerKind": "flowerpot",
-     "count": 5
+     "kind": "collect",
+     "collectKind": "shelf",
+     "count": 3
     }
    ],
    "winRate": 0.37,
    "target": 0.35,
    "tier": "super"
+  },
+  {
+   "id": 100,
+   "layout": ". . . . . . .\n. . [mailbox] . [mailbox] . .\n. [mailbox] . . . [mailbox] _\n. . . . . . .\n_ . . [mailbox] . . .\n. . [ice:1] [ice:1] [ice:1] . .\n. . . . . . .",
+   "moves": 14,
+   "colors": 5,
+   "goals": [
+    {
+     "kind": "blocker",
+     "blockerKind": "mailbox",
+     "count": 5
+    },
+    {
+     "kind": "blocker",
+     "blockerKind": "ice",
+     "count": 3
+    }
+   ],
+   "turnEnd": [
+    {
+     "kind": "producer",
+     "color": 0
+    }
+   ],
+   "winRate": 0.67,
+   "target": 0.64,
+   "tier": "relief"
   },
   {
    "id": 101,

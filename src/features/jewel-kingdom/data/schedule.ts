@@ -57,7 +57,8 @@ const INTRODUCTIONS: Introduction[] = [
   { at: 4, id: 'grass', count: 10 },
   { at: 7, id: 'crate', count: 3, layers: 2 },
   { at: 10, id: 'honey', count: 6 },
-  { at: 13, id: 'ice', count: 3 }, // 돌: 아이템으로만 깨지므로 처음엔 한 겹
+  // 돌: 아이템으로만 깨지므로 처음엔 한 겹, 많아도 3개(6~7개면 45수로도 봇 승률 0~15%, 4개도 13~18%)
+  { at: 13, id: 'ice', count: 2, max: 3, layers: 1 },
   { at: 17, id: 'shelf', count: 3, max: 4, layers: 2 },
   { at: 21, id: 'golem', count: 1, max: 1, layers: 4 },
   { at: 27, id: 'mushroom', count: 5 },
@@ -412,7 +413,9 @@ export function heavierRecipe(recipe: Recipe, step: number, levelNo: number): Re
       count: Math.max(1, Math.round(scaled(it, levelNo) * 0.6)),
       layers: it.layers,
       pattern: obstaclePattern(rng),
-      goal: false,
+      // 두 번째 단계부터는 목표로도 건다 - 개수 상한이 낮은 요소(닭장 최대 4개)뿐인 판은
+      // 길막이만 늘려선 최소 수에서도 봇 승률 100%라 목표 승률을 못 맞춘다(80판)
+      goal: step >= 2,
     });
   }
   return { ...recipe, elements };

@@ -15,6 +15,14 @@ export interface FallMove {
   spawned: boolean;
   /** 보석이 아니라 굴러떨어지는 장애물인가 */
   blocker?: boolean;
+  /**
+   * 실제로 지나간 칸들(출발 → 도착, 한 칸씩). 화면은 이 경로를 그대로 따라간다.
+   *
+   * 출발·도착만 넘기면 "세 칸 내려와서 대각선으로 한 칸 비켜 들어간" 보석이 처음부터
+   * 비스듬한 직선으로 미끄러져 보인다(대각선이 먼저 일어난 것처럼). 새 보석은 판 위
+   * 가상 행에서 시작한다.
+   */
+  path?: Position[];
 }
 
 /** 판 아래로 빠져나가 사라진 장애물 */
@@ -155,6 +163,15 @@ export function applyGravity(
 
   const exits: ExitEvent[] = [];
   const spawnedIds = new Set<number>();
+  // 보석마다 지나간 칸. 한 패스에 한 칸씩만 움직이므로 순서대로 쌓으면 그게 경로다.
+  const paths = new Map<number, Position[]>();
+  gemOrigin.forEach((pos, id) => paths.set(id, [pos]));
+  /** 같은 자리에서 몇 번째로 생긴 보석인가 - 먼저 생긴 것이 판에 가장 가깝게 선다 */
+  const spawnCount = new Map<string, number>();
+  const step = (from: Cell, to: Cell, row: number, col: number) => {
+    moveContents(from, to);
+    if (to.gem) paths.get(to.gem.id)?.push({ row, col });
+  };
 
   const limit = next.width * next.height * 2;
   for (let pass = 0; pass < limit; pass++) {
@@ -182,7 +199,7 @@ export function applyGravity(
 
         // 1) 바로 위에서 내려온다
         if (above && isMovable(above)) {
-          moveContents(above, cell);
+          step(above, cell, r, c);
           changed = true;
           continue;
         }
@@ -207,7 +224,7 @@ export function applyGravity(
             // 대각선 위의 보석은 자기 아래가 막혀 있을 때만 옆으로 흘러온다.
             const belowDiag = at(next, r, dcol);
             if (!diag.gem || (isEmpty(belowDiag) && canHold(belowDiag))) continue;
-            moveContents(diag, cell);
+            step(diag, cell, r, c);
             changed = true;
             pulled = true;
             break;
@@ -256,6 +273,15 @@ export function applyGravity(
           }
           cell.gem = gem;
           spawnedIds.add(gem.id);
+          // 판 위(벽 아래 방이면 벽 위) 가상 행에서 줄지어 들어온다
+          const n = spawnCount.get(key(r, c)) ?? 0;
+          spawnCount.set(key(r, c), n + 1);
+          // 판 위 구간도 한 칸씩 기록한다 - 한 걸음으로 두면 n칸을 한 칸 시간에 내려와
+          // 앞서 들어온 보석을 추월해 겹쳐 보인다
+          paths.set(
+            gem.id,
+            Array.from({ length: n + 2 }, (_, i) => ({ row: r - 1 - n + i, col: c })),
+          );
           changed = true;
         }
       }
@@ -264,29 +290,23 @@ export function applyGravity(
     if (!changed) break;
   }
 
-  // 시작 자리와 끝난 자리를 비교해 이동 목록을 만든다.
+  // 지나간 경로로 이동 목록을 만든다.
   const moves: FallMove[] = [];
-  const spawnedByCol = new Map<number, { id: number; toRow: number }[]>();
   for (let r = 0; r < next.height; r++) {
     for (let c = 0; c < next.width; c++) {
       const cell = at(next, r, c);
       if (cell.gem) {
-        const origin = gemOrigin.get(cell.gem.id);
-        if (origin) {
-          if (origin.row !== r || origin.col !== c) {
-            moves.push({
-              id: cell.gem.id,
-              col: c,
-              fromRow: origin.row,
-              fromCol: origin.col,
-              toRow: r,
-              spawned: false,
-            });
-          }
-        } else if (spawnedIds.has(cell.gem.id)) {
-          const list = spawnedByCol.get(c) ?? [];
-          list.push({ id: cell.gem.id, toRow: r });
-          spawnedByCol.set(c, list);
+        const path = paths.get(cell.gem.id);
+        if (path && path.length > 1) {
+          moves.push({
+            id: cell.gem.id,
+            col: c,
+            fromRow: path[0].row,
+            fromCol: path[0].col,
+            toRow: r,
+            spawned: spawnedIds.has(cell.gem.id),
+            path,
+          });
         }
       }
       if (cell.blocker?.fallsOut) {
@@ -306,30 +326,16 @@ export function applyGravity(
     }
   }
 
-  // 새 보석은 판 위쪽 가상 행에서 출발한다. 같은 열에 여러 개가 들어오면
-  // 아래에 놓일 것이 판에 가장 가깝게(-1) 서야 한 줄로 늘어선 채 내려온다.
-  // 위에 놓일 것에 -1을 주면 서로를 통과하는 것처럼 보인다.
-  spawnedByCol.forEach((list, col) => {
-    list.sort((a, b) => b.toRow - a.toRow);
-    list.forEach((entry, i) => {
-      moves.push({
-        id: entry.id,
-        col,
-        fromRow: -1 - i,
-        fromCol: col,
-        toRow: entry.toRow,
-        spawned: true,
-      });
-    });
-  });
-
   moves.sort((a, b) => a.col - b.col || a.toRow - b.toRow);
   return { board: next, moves, exits };
 }
 
-/** 낙하 거리(칸). 새 보석은 음수 행에서 출발하므로 그만큼 더 멀리 떨어진다. */
+/**
+ * 낙하 거리(칸). 새 보석은 음수 행에서 출발하므로 그만큼 더 멀리 떨어진다.
+ * 경로가 있으면 지나간 칸 수(대각선 한 칸도 한 줄 내려간 것이라 1로 센다).
+ */
 export function fallDistance(move: FallMove): number {
-  return move.toRow - move.fromRow;
+  return move.path ? move.path.length - 1 : move.toRow - move.fromRow;
 }
 
 export function positionsOf(moves: FallMove[]): Position[] {

@@ -1,5 +1,5 @@
 import type { Board, GemColor } from './types';
-import { at, parseKey } from './board';
+import { at, matchColorOf, parseKey } from './board';
 import type { TurnResult } from './resolve';
 import type { TargetScorer } from './specials';
 
@@ -182,7 +182,8 @@ export function goalTargetScorer(goals: Goal[]): TargetScorer {
           ) {
             score += 3;
           }
-          if (goal.kind === 'color' && cell.gem?.color === goal.color) score += 1;
+          // 아이템·수집물도 색을 갖고 있지만 그 색 채소로 세지 않는다(빨간 도토리 ≠ 토마토)
+          if (goal.kind === 'color' && matchColorOf(cell.gem) === goal.color) score += 1;
         });
       }
     }
