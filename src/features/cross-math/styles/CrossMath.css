@@ -432,6 +432,7 @@
   padding: 10px;
   box-shadow: 0 4px 0 var(--cm-panel-border);
   display: flex;
+  flex-wrap: wrap; /* 함정 타일 안내가 위쪽 한 줄을 통째로 쓰도록 */
   align-items: flex-start;
   justify-content: center;
 }
@@ -1203,4 +1204,50 @@
 @keyframes cm-unfog {
   0% { opacity: 0; filter: blur(4px); transform: scale(1.15); }
   100% { opacity: 1; filter: none; transform: none; }
+}
+
+/* ── 함정 타일 안내 ──────────────────────────────────────────────────────── */
+
+.cm-pool-note {
+  flex: 0 0 100%;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cm-text-muted, #8a7356);
+  margin: -0.1rem 0 0.45rem;
+}
+.cm-pool-note strong { color: var(--cm-accent); }
+
+/* 클리어 후 풀에 남은 타일 = 함정 — 회색으로 죽이고 위에 '함정' 표시 */
+.cm-tile.cm-tile-trap {
+  position: relative;
+  background: #e4e1dc;
+  border-color: #b9b3aa;
+  color: #a39c92;
+  box-shadow: 0 3px 0 #b9b3aa;
+  text-decoration: line-through;
+  pointer-events: none;
+  transition: background 0.3s, color 0.3s;
+}
+.cm-tile.cm-tile-trap::after {
+  content: '함정';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  padding: 0.1em 0.35em;
+  border-radius: 999px;
+  background: #8a8178;
+  color: #fff;
+  font-size: 0.42em;
+  font-weight: 800;
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.cm-clear-trap {
+  margin: 0.2rem 0 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--cm-text-muted, #8a7356);
 }

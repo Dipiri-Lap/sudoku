@@ -312,6 +312,9 @@ const CrossMathGame: React.FC = () => {
     [blankCells, placements]
   );
 
+  /** 풀에 섞인 함정 타일 수 — 빈칸을 다 채워도 이만큼은 풀에 남는다 */
+  const trapCount = Math.max(0, poolOrder.length - blankCells.length);
+
   const placedIds = useMemo(
     () => new Set(Object.values(placements).map(t => t.id)),
     [placements]
@@ -1090,6 +1093,10 @@ const CrossMathGame: React.FC = () => {
               <h2>{stars === 3 ? '완벽해요!' : '클리어!'}</h2>
               <p>스테이지 {stage} · Lv.{cfg?.level} {cfg?.label}</p>
 
+              {trapCount > 0 && (
+                <p className="cm-clear-trap">남은 {trapCount}장은 함정 타일이었어요</p>
+              )}
+
               <div className="cm-reward-row">
                 <span className="cm-reward cm-reward-coin">🪙 +{STAGE_CLEAR_COIN}</span>
                 <span className="cm-reward cm-reward-power">⚡ 퍼즐력 +{STAGE_CLEAR_PUZZLE_POWER}</span>
@@ -1113,6 +1120,15 @@ const CrossMathGame: React.FC = () => {
       </section>
 
       <section className="cm-pool-panel">
+        {/*
+          함정 타일이 있다는 걸 플레이 화면에서 늘 보여준다. 안내가 없으면 클리어 순간 풀에 타일이
+          남아 있는 걸 보고 "다 풀지도 않았는데 넘어갔다"고 느낀다 (실제 문의가 있었다).
+        */}
+        {trapCount > 0 && (
+          <div className="cm-pool-note">
+            함정 타일 <strong>{trapCount}장</strong> 포함 · 모두 쓰지 않아도 돼요
+          </div>
+        )}
         {/* 보드에 놓인 타일도 빈 자리로 남겨둔다 — 풀 높이가 변하지 않으므로 보드 크기가 흔들리지 않는다 */}
         <div className="cm-pool" style={{ gridTemplateColumns: `repeat(${poolCols(poolOrder.length)}, minmax(0, 1fr))` }}>
           {poolOrder.map(tile => {
@@ -1120,7 +1136,7 @@ const CrossMathGame: React.FC = () => {
             return (
               <button
                 key={tile.id}
-                className={`cm-tile ${isOpTile(tile) ? 'cm-tile-op' : ''} ${digitClass(tile.value)} ${selectedTileId === tile.id ? 'cm-tile-selected' : ''} ${drag?.tile.id === tile.id ? 'cm-tile-dragging' : ''}`}
+                className={`cm-tile ${isOpTile(tile) ? 'cm-tile-op' : ''} ${isWinner ? 'cm-tile-trap' : ''} ${digitClass(tile.value)} ${selectedTileId === tile.id ? 'cm-tile-selected' : ''} ${drag?.tile.id === tile.id ? 'cm-tile-dragging' : ''}`}
                 onPointerDown={e => handleTilePointerDown(e, tile)}
                 onPointerMove={handleTilePointerMove}
                 onPointerUp={handleTilePointerUp}
