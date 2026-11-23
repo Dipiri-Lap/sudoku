@@ -37,7 +37,8 @@
     "sharedSaved": "Imagen guardada · el texto también se ha copiado",
     "shareFail": "No se pudo compartir",
     "saved": "Imagen guardada",
-    "saveFail": "No se pudo guardar"
+    "saveFail": "No se pudo guardar",
+    "rotateHint": "¡Toca una pieza para girarla!"
   },
   "play": {
     "exitAria": "Salir",
@@ -661,7 +662,27 @@
     "496": "Tira y afloja del pueblo",
     "497": "Club de la risa de las hienas",
     "498": "Mundo en la caja de herramientas",
-    "499": "Estudio de fotos de carnet"
+    "499": "Estudio de fotos de carnet",
+    "501": "Noche de pollo y aliento",
+    "502": "Pueblo en la cesta de lana",
+    "503": "Rescate en helicóptero de los mapaches",
+    "504": "Pueblo de tinajas de barro",
+    "505": "Ciudad del tren en miniatura",
+    "506": "Taller de bordado del zorro",
+    "507": "Limpiacristales del rascacielos",
+    "508": "Pueblo de nubes de algodón de azúcar",
+    "509": "Carrera de avestruces",
+    "511": "Fiesta de fideos del pueblo",
+    "510": "Mujeres tahitianas en la playa",
+    "520": "El carro de heno",
+    "530": "Los jugadores de cartas",
+    "540": "Ofelia",
+    "550": "Calle de París, día de lluvia",
+    "560": "La herrería",
+    "570": "Niña con regadera",
+    "580": "La boda campesina",
+    "590": "Un chapuzón más grande",
+    "600": "El Ángelus"
   },
   "seo": {
     "title": "Rompecabezas online gratis - Puzzle Tiny Pieces | Puzzle Garden",

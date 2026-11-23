@@ -433,6 +433,52 @@ const BASE_STAGES: JigsawStage[] = [
     { id: 457, title: '지구본 여행 마을', subtitle: '캐리어 들고 한 바퀴', image: '/images/jigsaw/globe-travel-town.webp', rows: 6, cols: 6, tint: '#58a8e0' },
     { id: 458, title: '염소 절벽 카페', subtitle: '구름 아래 한 잔', image: '/images/jigsaw/goat-cliff-cafe.webp', rows: 5, cols: 6, tint: '#78c0f0' },
     { id: 459, title: '눈 오는 날 하교길', subtitle: '하교 종이 울리면', image: '/images/jigsaw/snow-school-gate.webp', rows: 6, cols: 7, tint: '#c8d4e4' },
+    { id: 461, title: '양털 깎는 날', subtitle: '폭신한 털이 수북', image: '/images/jigsaw/sheep-shearing-day.webp', rows: 5, cols: 6, tint: '#8ac868' },
+    { id: 462, title: '재봉 바구니 속 마을', subtitle: '실패 탑과 단추 징검다리', image: '/images/jigsaw/sewing-basket-town.webp', rows: 5, cols: 6, tint: '#ead9b8' },
+    { id: 463, title: '비 오는 날 서점', subtitle: '젖은 우산과 책 한 권', image: '/images/jigsaw/rainy-bookstore.webp', rows: 5, cols: 6, tint: '#f0c060' },
+    { id: 464, title: '여우 가족 단풍 소풍', subtitle: '도시락 열면 가을 냄새', image: '/images/jigsaw/fox-maple-picnic.webp', rows: 6, cols: 6, tint: '#e88a30' },
+    { id: 465, title: '군고구마 트럭', subtitle: '눈 오는 밤 한 봉지', image: '/images/jigsaw/sweet-potato-truck.webp', rows: 6, cols: 7, tint: '#1f2f5f' },
+    { id: 466, title: '여우 불꽃놀이 공장', subtitle: '펑! 하고 별이 터져요', image: '/images/jigsaw/fox-fireworks-workshop.webp', rows: 5, cols: 5, tint: '#1f2a5a' },
+    { id: 467, title: '수박 속 마을', subtitle: '씨앗 집과 껍질 미끄럼틀', image: '/images/jigsaw/watermelon-village.webp', rows: 6, cols: 6, tint: '#e83030' },
+    { id: 468, title: '모내기 체험', subtitle: '진흙 속에서 첨벙', image: '/images/jigsaw/rice-planting-day.webp', rows: 5, cols: 6, tint: '#78b858' },
+    { id: 469, title: '동물 패션쇼', subtitle: '런웨이를 걷는 표범', image: '/images/jigsaw/animal-fashion-show.webp', rows: 6, cols: 7, tint: '#f8b8d0' },
+    { id: 471, title: '학교 급식 조리실', subtitle: '새벽부터 보글보글', image: '/images/jigsaw/school-kitchen-dawn.webp', rows: 5, cols: 5, tint: '#f0d878' },
+    { id: 472, title: '두꺼비 연못 합창단', subtitle: '연잎 위 지휘자 선생님', image: '/images/jigsaw/toad-pond-choir.webp', rows: 5, cols: 6, tint: '#48b8a0' },
+    { id: 473, title: '빨래집게 마을', subtitle: '빨랫줄 위의 골목', image: '/images/jigsaw/clothespin-village.webp', rows: 6, cols: 6, tint: '#78c878' },
+    { id: 474, title: '떡국 끓이는 아침', subtitle: '새해 첫 상차림', image: '/images/jigsaw/rice-cake-soup-morning.webp', rows: 6, cols: 6, tint: '#f4d878' },
+    { id: 475, title: '양떼 미용실', subtitle: '뽀글뽀글 새 털 스타일', image: '/images/jigsaw/sheep-perm-salon.webp', rows: 6, cols: 7, tint: '#f8b8c8' },
+    { id: 476, title: '달걀판 도시', subtitle: '계란 한 판의 마을', image: '/images/jigsaw/egg-carton-city.webp', rows: 5, cols: 5, tint: '#e8d8a8' },
+    { id: 477, title: '어린이집 산책', subtitle: '줄줄이 노란 모자', image: '/images/jigsaw/kindergarten-walk.webp', rows: 6, cols: 6, tint: '#a8d878' },
+    { id: 478, title: '코뿔소 항구 짐꾼', subtitle: '뿔로 척척 상자 나르기', image: '/images/jigsaw/rhino-harbor-porters.webp', rows: 6, cols: 6, tint: '#58b0e8' },
+    { id: 479, title: '자전거 바퀴 도시', subtitle: '바퀴살 사이의 마을', image: '/images/jigsaw/bicycle-wheel-city.webp', rows: 6, cols: 6, tint: '#78d070' },
+    { id: 481, title: '밤낚시 좌대', subtitle: '달빛 아래 찌 하나', image: '/images/jigsaw/night-fishing-platform.webp', rows: 5, cols: 6, tint: '#1a4a78' },
+    { id: 482, title: '침팬지 미술관', subtitle: '바나나 그림도 걸렸어요', image: '/images/jigsaw/chimp-gallery.webp', rows: 5, cols: 6, tint: '#f4ecd8' },
+    { id: 483, title: '공원 인형극', subtitle: '토끼와 늑대가 나왔어요', image: '/images/jigsaw/puppet-show-park.webp', rows: 6, cols: 6, tint: '#f8c878' },
+    { id: 484, title: '가방 속 세계', subtitle: '지퍼를 열면 모험', image: '/images/jigsaw/backpack-world.webp', rows: 5, cols: 6, tint: '#78d070' },
+    { id: 485, title: '고릴라 한식당', subtitle: '불꽃 튀는 불고기', image: '/images/jigsaw/gorilla-korean-restaurant.webp', rows: 6, cols: 7, tint: '#c8683a' },
+    { id: 486, title: '도장 가게', subtitle: '한 자 한 자 새겨요', image: '/images/jigsaw/seal-carving-shop.webp', rows: 5, cols: 6, tint: '#b85a38' },
+    { id: 487, title: '장화 마을', subtitle: '물웅덩이 첨벙첨벙', image: '/images/jigsaw/rain-boot-village.webp', rows: 6, cols: 6, tint: '#78d0f0' },
+    { id: 488, title: '독수리 관제탑', subtitle: '이륙 허가 나갑니다', image: '/images/jigsaw/eagle-control-tower.webp', rows: 6, cols: 6, tint: '#58b8f0' },
+    { id: 489, title: '오케스트라 리허설', subtitle: '지휘봉이 올라가요', image: '/images/jigsaw/orchestra-rehearsal.webp', rows: 6, cols: 6, tint: '#e8a850' },
+    { id: 491, title: '냉장고 속 세계', subtitle: '치즈 동굴과 잼 수영장', image: '/images/jigsaw/fridge-world.webp', rows: 5, cols: 6, tint: '#c8e4f4' },
+    { id: 492, title: '고양이 카센터', subtitle: '타이어 펑크 났어요', image: '/images/jigsaw/cat-auto-garage.webp', rows: 5, cols: 5, tint: '#78b8e8' },
+    { id: 493, title: '참기름 방앗간', subtitle: '고소한 향이 한가득', image: '/images/jigsaw/sesame-oil-mill.webp', rows: 6, cols: 6, tint: '#e8c050' },
+    { id: 494, title: '문어 안마원', subtitle: '여덟 손으로 시원하게', image: '/images/jigsaw/octopus-massage.webp', rows: 6, cols: 6, tint: '#7fd0a0' },
+    { id: 495, title: '장바구니 속 마을', subtitle: '식빵 집과 당근 등대', image: '/images/jigsaw/grocery-basket-town.webp', rows: 6, cols: 7, tint: '#e84a40' },
+    { id: 496, title: '마을 줄다리기', subtitle: '영차 영차 힘을 모아', image: '/images/jigsaw/village-tug-of-war.webp', rows: 5, cols: 6, tint: '#78c860' },
+    { id: 497, title: '하이에나 웃음 클럽', subtitle: '무대 위 개그 한 판', image: '/images/jigsaw/hyena-laughing-club.webp', rows: 5, cols: 6, tint: '#8a4a98' },
+    { id: 498, title: '공구함 속 세계', subtitle: '망치 탑과 줄자 길', image: '/images/jigsaw/toolbox-world.webp', rows: 6, cols: 6, tint: '#e04038' },
+    { id: 499, title: '증명사진관', subtitle: '자, 웃지 말고 정면!', image: '/images/jigsaw/id-photo-studio.webp', rows: 6, cols: 7, tint: '#f0d8b0' },
+    { id: 501, title: '치킨집 응원 야식', subtitle: '골~! 치킨 한 입', image: '/images/jigsaw/chicken-night-cheer.webp', rows: 6, cols: 6, tint: '#e8a060' },
+    { id: 502, title: '털실 바구니 속 마을', subtitle: '목도리 길을 따라서', image: '/images/jigsaw/yarn-basket-town.webp', rows: 5, cols: 6, tint: '#f0a8c0' },
+    { id: 503, title: '라쿤 헬기 구조대', subtitle: '눈산에 로프를 내려요', image: '/images/jigsaw/raccoon-rescue-heli.webp', rows: 6, cols: 6, tint: '#78b8f0' },
+    { id: 504, title: '옹기 굽는 마을', subtitle: '항아리가 줄지어', image: '/images/jigsaw/onggi-village.webp', rows: 6, cols: 6, tint: '#a87850' },
+    { id: 505, title: '미니 철도 모형 도시', subtitle: '탁자 위 달리는 기차', image: '/images/jigsaw/model-railway-city.webp', rows: 6, cols: 6, tint: '#d8b078' },
+    { id: 506, title: '여우 자수 공방', subtitle: '한 땀 한 땀 꽃이 피어요', image: '/images/jigsaw/fox-embroidery-studio.webp', rows: 5, cols: 6, tint: '#f0c898' },
+    { id: 507, title: '빌딩 유리창 청소부', subtitle: '높이높이 쓱싹쓱싹', image: '/images/jigsaw/window-cleaner-tower.webp', rows: 6, cols: 6, tint: '#78b8e8' },
+    { id: 508, title: '솜사탕 구름 마을', subtitle: '폭신폭신 달콤한 하늘', image: '/images/jigsaw/cotton-candy-cloud-town.webp', rows: 6, cols: 6, tint: '#f4b8d8' },
+    { id: 509, title: '타조 달리기 대회', subtitle: '결승선을 향해 쌩쌩', image: '/images/jigsaw/ostrich-race-day.webp', rows: 6, cols: 7, tint: '#a8d878' },
+    { id: 511, title: '마을 국수 잔치', subtitle: '후루룩 한 그릇씩', image: '/images/jigsaw/noodle-sharing-festival.webp', rows: 6, cols: 6, tint: '#80c870' },
 ];
 
 /** DEV only: `/jigsaw?fake=1000` pads the list with copies of the real stages to test large stage counts. */
@@ -490,51 +536,26 @@ const RESERVED_MASTERPIECES: JigsawStage[] = [
     { id: 440, title: '무동', subtitle: '명화 컬렉션', image: '/images/jigsaw/mudong.webp', rows: 7, cols: 7, tint: '#f4e0c0' },
     { id: 450, title: '파적도', subtitle: '명화 컬렉션', image: '/images/jigsaw/pajeokdo.webp', rows: 7, cols: 7, tint: '#f0d8a0' },
     { id: 460, title: '흰 소', subtitle: '명화 컬렉션', image: '/images/jigsaw/white-ox.webp', rows: 6, cols: 7, tint: '#e8a050' },
-    { id: 461, title: '양털 깎는 날', subtitle: '폭신한 털이 수북', image: '/images/jigsaw/sheep-shearing-day.webp', rows: 5, cols: 6, tint: '#8ac868' },
-    { id: 462, title: '재봉 바구니 속 마을', subtitle: '실패 탑과 단추 징검다리', image: '/images/jigsaw/sewing-basket-town.webp', rows: 5, cols: 6, tint: '#ead9b8' },
-    { id: 463, title: '비 오는 날 서점', subtitle: '젖은 우산과 책 한 권', image: '/images/jigsaw/rainy-bookstore.webp', rows: 5, cols: 6, tint: '#f0c060' },
-    { id: 464, title: '여우 가족 단풍 소풍', subtitle: '도시락 열면 가을 냄새', image: '/images/jigsaw/fox-maple-picnic.webp', rows: 6, cols: 6, tint: '#e88a30' },
-    { id: 465, title: '군고구마 트럭', subtitle: '눈 오는 밤 한 봉지', image: '/images/jigsaw/sweet-potato-truck.webp', rows: 6, cols: 7, tint: '#1f2f5f' },
-    { id: 466, title: '여우 불꽃놀이 공장', subtitle: '펑! 하고 별이 터져요', image: '/images/jigsaw/fox-fireworks-workshop.webp', rows: 5, cols: 5, tint: '#1f2a5a' },
-    { id: 467, title: '수박 속 마을', subtitle: '씨앗 집과 껍질 미끄럼틀', image: '/images/jigsaw/watermelon-village.webp', rows: 6, cols: 6, tint: '#e83030' },
-    { id: 468, title: '모내기 체험', subtitle: '진흙 속에서 첨벙', image: '/images/jigsaw/rice-planting-day.webp', rows: 5, cols: 6, tint: '#78b858' },
-    { id: 469, title: '동물 패션쇼', subtitle: '런웨이를 걷는 표범', image: '/images/jigsaw/animal-fashion-show.webp', rows: 6, cols: 7, tint: '#f8b8d0' },
-    { id: 471, title: '학교 급식 조리실', subtitle: '새벽부터 보글보글', image: '/images/jigsaw/school-kitchen-dawn.webp', rows: 5, cols: 5, tint: '#f0d878' },
-    { id: 472, title: '두꺼비 연못 합창단', subtitle: '연잎 위 지휘자 선생님', image: '/images/jigsaw/toad-pond-choir.webp', rows: 5, cols: 6, tint: '#48b8a0' },
-    { id: 473, title: '빨래집게 마을', subtitle: '빨랫줄 위의 골목', image: '/images/jigsaw/clothespin-village.webp', rows: 6, cols: 6, tint: '#78c878' },
-    { id: 474, title: '떡국 끓이는 아침', subtitle: '새해 첫 상차림', image: '/images/jigsaw/rice-cake-soup-morning.webp', rows: 6, cols: 6, tint: '#f4d878' },
-    { id: 475, title: '양떼 미용실', subtitle: '뽀글뽀글 새 털 스타일', image: '/images/jigsaw/sheep-perm-salon.webp', rows: 6, cols: 7, tint: '#f8b8c8' },
-    { id: 476, title: '달걀판 도시', subtitle: '계란 한 판의 마을', image: '/images/jigsaw/egg-carton-city.webp', rows: 5, cols: 5, tint: '#e8d8a8' },
-    { id: 477, title: '어린이집 산책', subtitle: '줄줄이 노란 모자', image: '/images/jigsaw/kindergarten-walk.webp', rows: 6, cols: 6, tint: '#a8d878' },
-    { id: 478, title: '코뿔소 항구 짐꾼', subtitle: '뿔로 척척 상자 나르기', image: '/images/jigsaw/rhino-harbor-porters.webp', rows: 6, cols: 6, tint: '#58b0e8' },
-    { id: 479, title: '자전거 바퀴 도시', subtitle: '바퀴살 사이의 마을', image: '/images/jigsaw/bicycle-wheel-city.webp', rows: 6, cols: 6, tint: '#78d070' },
-    { id: 481, title: '밤낚시 좌대', subtitle: '달빛 아래 찌 하나', image: '/images/jigsaw/night-fishing-platform.webp', rows: 5, cols: 6, tint: '#1a4a78' },
-    { id: 482, title: '침팬지 미술관', subtitle: '바나나 그림도 걸렸어요', image: '/images/jigsaw/chimp-gallery.webp', rows: 5, cols: 6, tint: '#f4ecd8' },
-    { id: 483, title: '공원 인형극', subtitle: '토끼와 늑대가 나왔어요', image: '/images/jigsaw/puppet-show-park.webp', rows: 6, cols: 6, tint: '#f8c878' },
-    { id: 484, title: '가방 속 세계', subtitle: '지퍼를 열면 모험', image: '/images/jigsaw/backpack-world.webp', rows: 5, cols: 6, tint: '#78d070' },
-    { id: 485, title: '고릴라 한식당', subtitle: '불꽃 튀는 불고기', image: '/images/jigsaw/gorilla-korean-restaurant.webp', rows: 6, cols: 7, tint: '#c8683a' },
-    { id: 486, title: '도장 가게', subtitle: '한 자 한 자 새겨요', image: '/images/jigsaw/seal-carving-shop.webp', rows: 5, cols: 6, tint: '#b85a38' },
-    { id: 487, title: '장화 마을', subtitle: '물웅덩이 첨벙첨벙', image: '/images/jigsaw/rain-boot-village.webp', rows: 6, cols: 6, tint: '#78d0f0' },
-    { id: 488, title: '독수리 관제탑', subtitle: '이륙 허가 나갑니다', image: '/images/jigsaw/eagle-control-tower.webp', rows: 6, cols: 6, tint: '#58b8f0' },
-    { id: 489, title: '오케스트라 리허설', subtitle: '지휘봉이 올라가요', image: '/images/jigsaw/orchestra-rehearsal.webp', rows: 6, cols: 6, tint: '#e8a850' },
-    { id: 491, title: '냉장고 속 세계', subtitle: '치즈 동굴과 잼 수영장', image: '/images/jigsaw/fridge-world.webp', rows: 5, cols: 6, tint: '#c8e4f4' },
-    { id: 492, title: '고양이 카센터', subtitle: '타이어 펑크 났어요', image: '/images/jigsaw/cat-auto-garage.webp', rows: 5, cols: 5, tint: '#78b8e8' },
-    { id: 493, title: '참기름 방앗간', subtitle: '고소한 향이 한가득', image: '/images/jigsaw/sesame-oil-mill.webp', rows: 6, cols: 6, tint: '#e8c050' },
-    { id: 494, title: '문어 안마원', subtitle: '여덟 손으로 시원하게', image: '/images/jigsaw/octopus-massage.webp', rows: 6, cols: 6, tint: '#7fd0a0' },
-    { id: 495, title: '장바구니 속 마을', subtitle: '식빵 집과 당근 등대', image: '/images/jigsaw/grocery-basket-town.webp', rows: 6, cols: 7, tint: '#e84a40' },
-    { id: 496, title: '마을 줄다리기', subtitle: '영차 영차 힘을 모아', image: '/images/jigsaw/village-tug-of-war.webp', rows: 5, cols: 6, tint: '#78c860' },
-    { id: 497, title: '하이에나 웃음 클럽', subtitle: '무대 위 개그 한 판', image: '/images/jigsaw/hyena-laughing-club.webp', rows: 5, cols: 6, tint: '#8a4a98' },
-    { id: 498, title: '공구함 속 세계', subtitle: '망치 탑과 줄자 길', image: '/images/jigsaw/toolbox-world.webp', rows: 6, cols: 6, tint: '#e04038' },
-    { id: 499, title: '증명사진관', subtitle: '자, 웃지 말고 정면!', image: '/images/jigsaw/id-photo-studio.webp', rows: 6, cols: 7, tint: '#f0d8b0' },
     { id: 470, title: '세 악사', subtitle: '명화 컬렉션', image: '/images/jigsaw/three-musicians.webp', rows: 7, cols: 7, tint: '#2a50b0' },
     { id: 480, title: '발레 수업', subtitle: '명화 컬렉션', image: '/images/jigsaw/dance-class.webp', rows: 7, cols: 7, tint: '#88b890' },
     { id: 490, title: '소나기 내리는 다리', subtitle: '명화 컬렉션', image: '/images/jigsaw/ohashi-rain.webp', rows: 7, cols: 7, tint: '#587890' },
     { id: 500, title: '사과 정물', subtitle: '명화 컬렉션', image: '/images/jigsaw/cezanne-apples.webp', rows: 7, cols: 7, tint: '#7890c0' },
+    { id: 510, title: '타히티의 여인들', subtitle: '명화 컬렉션', image: '/images/jigsaw/tahiti-women.webp', rows: 7, cols: 7, tint: '#e8806a' },
+    { id: 520, title: '건초 마차', subtitle: '명화 컬렉션', image: '/images/jigsaw/hay-wain.webp', rows: 7, cols: 7, tint: '#5aa8d8' },
+    { id: 530, title: '카드놀이 하는 사람들', subtitle: '명화 컬렉션', image: '/images/jigsaw/card-players.webp', rows: 7, cols: 7, tint: '#8a5a38' },
+    { id: 540, title: '오필리아', subtitle: '명화 컬렉션', image: '/images/jigsaw/ophelia-river.webp', rows: 7, cols: 7, tint: '#3f7a4a' },
+    { id: 550, title: '파리 거리, 비 오는 날', subtitle: '명화 컬렉션', image: '/images/jigsaw/paris-rainy-day.webp', rows: 7, cols: 7, tint: '#8890a8' },
+    { id: 560, title: '대장간', subtitle: '명화 컬렉션', image: '/images/jigsaw/danwon-blacksmith.webp', rows: 7, cols: 7, tint: '#e8c8a0' },
+    { id: 570, title: '물뿌리개를 든 소녀', subtitle: '명화 컬렉션', image: '/images/jigsaw/girl-watering-can.webp', rows: 7, cols: 7, tint: '#78b860' },
+    { id: 580, title: '농부의 결혼식', subtitle: '명화 컬렉션', image: '/images/jigsaw/peasant-wedding.webp', rows: 7, cols: 7, tint: '#b05a40' },
+    { id: 590, title: '더 큰 첨벙', subtitle: '명화 컬렉션', image: '/images/jigsaw/bigger-splash.webp', rows: 7, cols: 7, tint: '#20b0e0' },
+    { id: 600, title: '만종', subtitle: '명화 컬렉션', image: '/images/jigsaw/angelus-field.webp', rows: 7, cols: 7, tint: '#f09840' },
 ];
 
 function withMasterpieces(list: JigsawStage[]): JigsawStage[] {
     const out = [...list];
-    for (const m of RESERVED_MASTERPIECES) {
+    // ascending id order, so a masterpiece that unlocks the next one is already in place
+    for (const m of [...RESERVED_MASTERPIECES].sort((a, b) => a.id - b.id)) {
         // only when the stage right before it exists, and nothing already uses its id
         if (out.some((s) => s.id === m.id - 1) && !out.some((s) => s.id === m.id)) out.push(m);
     }
@@ -560,6 +581,23 @@ export function lastUnlockedIdx(stars: Record<number, number>): number {
     if (DEV_UNLOCK_ALL) return JIGSAW_STAGES.length - 1;
     const i = JIGSAW_STAGES.findIndex((s) => !(stars[s.id] > 0));
     return i === -1 ? JIGSAW_STAGES.length - 1 : i;
+}
+
+/**
+ * Rotation gimmick (from stage 501): some pieces start turned, tap a loose piece to turn it.
+ * Only 3 of every 10 stages (ids ending in 1, 4, 7 — evenly spaced, never a masterpiece),
+ * and only on square grids (rows = cols) — give those stages a square size when registering,
+ * and the share of turned pieces grows slowly: 501 is a 3-piece intro, then 20% → 30% → 40%.
+ */
+export const ROTATION_FROM = 501;
+export function rotatedPieceCount(stage: JigsawStage): number {
+    const { id } = stage;
+    if (id < ROTATION_FROM || stage.subtitle === '명화 컬렉션' || ![1, 4, 7].includes(id % 10)) return 0;
+    // only square grids: a non-square cell can't sit at 90°, and 180°-only flips felt half-baked
+    if (stage.rows !== stage.cols) return 0;
+    if (id === ROTATION_FROM) return 3;
+    const ratio = id <= 550 ? 0.2 : id <= 600 ? 0.3 : 0.4;
+    return Math.max(3, Math.round(stage.rows * stage.cols * ratio));
 }
 
 /** 3★: moves ≤ pieces, 2★: ≤ pieces × 1.6, otherwise 1★ */

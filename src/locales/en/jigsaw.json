@@ -37,7 +37,8 @@
     "sharedSaved": "Image saved · caption copied too",
     "shareFail": "Couldn't share",
     "saved": "Image saved",
-    "saveFail": "Couldn't save"
+    "saveFail": "Couldn't save",
+    "rotateHint": "Tap a piece to turn it!"
   },
   "play": {
     "exitAria": "Exit",
@@ -657,7 +658,27 @@
     "496": "Village Tug of War",
     "497": "Hyena Laughing Club",
     "498": "Toolbox World",
-    "499": "ID Photo Studio"
+    "499": "ID Photo Studio",
+    "501": "Chicken Place Cheer Night",
+    "502": "Yarn Basket Town",
+    "503": "Raccoon Helicopter Rescue",
+    "504": "Earthenware Jar Village",
+    "505": "Model Railway City",
+    "506": "Fox Embroidery Studio",
+    "507": "Skyscraper Window Cleaners",
+    "508": "Cotton Candy Cloud Town",
+    "509": "Ostrich Race Day",
+    "511": "Village Noodle Feast",
+    "510": "Tahitian Women on the Beach",
+    "520": "The Hay Wain",
+    "530": "The Card Players",
+    "540": "Ophelia",
+    "550": "Paris Street, Rainy Day",
+    "560": "The Blacksmith Shop",
+    "570": "Girl with a Watering Can",
+    "580": "The Peasant Wedding",
+    "590": "A Bigger Splash",
+    "600": "The Angelus"
   },
   "seo": {
     "title": "Jigsaw Puzzle Online Free - Tiny Pieces | Puzzle Garden",

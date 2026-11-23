@@ -267,6 +267,7 @@
     left: calc(var(--l) * -1);
     right: calc(var(--r) * -1);
     background-repeat: no-repeat;
+    transition: transform 0.18s ease;
 }
 .jg-piece.is-drag .jg-piece-img {
     translate: 0 -8px;

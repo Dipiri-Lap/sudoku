@@ -6,12 +6,13 @@ import { ChevronLeft, ChevronRight, Eye, Shuffle, Home, Play, RotateCcw, LayoutG
 import { useCoins } from '../../../context/CoinContext';
 import { logEvent } from '../../../firebase';
 import { bgm, BGM_TRACKS, loadBgmPref, saveBgmPref, loadVolumes, saveVolumes } from '../utils/bgm';
-import { JIGSAW_STAGES, CHAPTER_SIZE, RANGE_SIZE, isStageUnlocked, lastUnlockedIdx, loadStars, saveStars, starsFor, type JigsawStage } from '../data/stages';
+import { JIGSAW_STAGES, CHAPTER_SIZE, RANGE_SIZE, isStageUnlocked, lastUnlockedIdx, loadStars, saveStars, starsFor, rotatedPieceCount, ROTATION_FROM, type JigsawStage } from '../data/stages';
 import {
     computeGroups,
     isConnectedDown,
     isConnectedRight,
     isSolved,
+    randomRotation,
     moveGroup,
     shuffleBoard,
     type Board,
@@ -604,6 +605,10 @@ function PlayView({
     const { rows, cols } = stage;
     const n = rows * cols;
     const [board, setBoard] = useState<Board>(() => identity(n));
+    /** rotation gimmick: quarter turns per piece id (all 0 on stages without it) */
+    const rotCount = rotatedPieceCount(stage);
+    const square = rows === cols;
+    const [rot, setRot] = useState<number[]>(() => new Array<number>(n).fill(0));
     const [phase, setPhase] = useState<'ready' | 'go' | 'play'>('ready');
     const [bgmId, setBgmId] = useState<string>(loadBgmPref);
     const [bgmMenu, setBgmMenu] = useState(false);
@@ -621,10 +626,10 @@ function PlayView({
     const [busy, setBusy] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
     const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const showToast = (msg: string) => {
+    const showToast = (msg: string, ms = 1800) => {
         setToast(msg);
         if (toastTimer.current) clearTimeout(toastTimer.current);
-        toastTimer.current = setTimeout(() => setToast(null), 1800);
+        toastTimer.current = setTimeout(() => setToast(null), ms);
     };
     const [jitter, setJitter] = useState<number[] | null>(null);
     const [introKey, setIntroKey] = useState(0);
@@ -640,7 +645,7 @@ function PlayView({
     const [splashes, setSplashes] = useState<{ id: number; x: number; y: number }[]>([]);
     const boardRef = useRef<HTMLDivElement>(null);
 
-    const groups = useMemo(() => computeGroups(board, rows, cols), [board, rows, cols]);
+    const groups = useMemo(() => computeGroups(board, rows, cols, rot), [board, rows, cols, rot]);
     const slotOf = useMemo(() => {
         const m = new Array<number>(n);
         board.forEach((p, s) => (m[p] = s));
@@ -666,8 +671,10 @@ function PlayView({
         const STEP_MS = 140;
         setPhase('ready');
         setBoard(identity(n));
+        setRot(new Array<number>(n).fill(0));
         setJitter(null);
         const final = shuffleBoard(rows, cols);
+        const finalRot = randomRotation(n, rotCount, square);
         const timers: ReturnType<typeof setTimeout>[] = [];
         timers.push(setTimeout(() => sfx.tick(), 150));
         timers.push(
@@ -681,13 +688,21 @@ function PlayView({
                 setTimeout(() => {
                     const last = i === STEPS - 1;
                     setBoard(last ? final : randomPerm(n));
+                    if (last) setRot(finalRot);
                     setJitter(last ? null : Array.from({ length: n }, () => (Math.random() - 0.5) * 50));
                     sfx.whoosh(i);
                 }, READY_MS + 120 + i * STEP_MS),
             );
         }
-        timers.push(setTimeout(() => setPhase('play'), READY_MS + 120 + STEPS * STEP_MS + 380));
+        timers.push(
+            setTimeout(() => {
+                setPhase('play');
+                // rotation stages: remind how to turn a piece (longer on the very first one)
+                if (rotCount) showToast(t('toast.rotateHint'), stage.id === ROTATION_FROM ? 4000 : 2500);
+            }, READY_MS + 120 + STEPS * STEP_MS + 380),
+        );
         return () => timers.forEach(clearTimeout);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [introKey, n, rows, cols]);
 
     useEffect(() => {
@@ -744,6 +759,15 @@ function PlayView({
             const dc = Math.round((e.clientX - d.startX) / d.cellW);
             const dr = Math.round((e.clientY - d.startY) / d.cellH);
             setDrag(null);
+            // rotation stages: a tap (barely moved) on a loose piece turns it — free, not a move
+            const tap = Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 8;
+            if (rotCount && tap && d.slots.length === 1) {
+                const piece = board[d.slots[0]];
+                const nextRot = rot.slice();
+                nextRot[piece] = (rot[piece] + (square ? 1 : 2)) % 4;
+                commit(board, board, false, undefined, nextRot);
+                return;
+            }
             const next = moveGroup(board, rows, cols, d.slots, dr, dc);
             if (!next) return;
             historyRef.current.push({ board, moves });
@@ -760,33 +784,34 @@ function PlayView({
             window.removeEventListener('pointercancel', up);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [drag?.startX, drag?.startY, board]);
+    }, [drag?.startX, drag?.startY, board, rot]);
 
     /** apply a new board: count the move, detect fresh joins (glow + splash) and the win */
-    function commit(prev: Board, next: Board, countMove: boolean, focusPiece?: number) {
+    function commit(prev: Board, next: Board, countMove: boolean, focusPiece?: number, nextRot: number[] = rot) {
         const before = new Set<string>();
         for (let s = 0; s < n; s++) {
-            if (isConnectedRight(prev, s, cols)) before.add(`${prev[s]}r`);
-            if (isConnectedDown(prev, s, rows, cols)) before.add(`${prev[s]}d`);
+            if (isConnectedRight(prev, s, cols, rot)) before.add(`${prev[s]}r`);
+            if (isConnectedDown(prev, s, rows, cols, rot)) before.add(`${prev[s]}d`);
         }
         const fresh = new Set<number>();
         for (let s = 0; s < n; s++) {
-            if (isConnectedRight(next, s, cols) && !before.has(`${next[s]}r`)) {
+            if (isConnectedRight(next, s, cols, nextRot) && !before.has(`${next[s]}r`)) {
                 fresh.add(next[s]);
                 fresh.add(next[s + 1]);
             }
-            if (isConnectedDown(next, s, rows, cols) && !before.has(`${next[s]}d`)) {
+            if (isConnectedDown(next, s, rows, cols, nextRot) && !before.has(`${next[s]}d`)) {
                 fresh.add(next[s]);
                 fresh.add(next[s + cols]);
             }
         }
         if (focusPiece !== undefined) fresh.add(focusPiece);
         setBoard(next);
+        if (nextRot !== rot) setRot(nextRot);
         if (countMove) {
             setMoves((m) => m + 1);
             setBump((b) => b + 1);
         }
-        if (isSolved(next)) {
+        if (isSolved(next, nextRot)) {
             setWon(true);
         } else if (fresh.size) {
             sfx.pop();
@@ -817,14 +842,15 @@ function PlayView({
     /** Magnet: snap one misplaced piece into its correct slot (prefers a piece that joins an already-placed one). */
     const applyMagnet = async () => {
         if (!canHelp) return;
-        const misplaced = board.map((p, sl) => (p !== sl ? p : -1)).filter((p) => p >= 0);
+        // a turned piece counts as misplaced even in its own slot
+        const misplaced = board.map((p, sl) => (p !== sl || rot[p] ? p : -1)).filter((p) => p >= 0);
         if (!misplaced.length) return;
         if (coins < MAGNET_COST) return showToast(t('toast.needCoinsN', { cost: MAGNET_COST }));
         setBusy(true);
         const ok = await spendCoins(MAGNET_COST);
         setBusy(false);
         if (!ok) return showToast(t('toast.needCoins'));
-        const placed = (p: number) => board[p] === p;
+        const placed = (p: number) => board[p] === p && !rot[p];
         const touchesPlaced = (p: number) => {
             const r = Math.floor(p / cols), c = p % cols;
             return (c > 0 && placed(p - 1)) || (c < cols - 1 && placed(p + 1)) || (r > 0 && placed(p - cols)) || (r < rows - 1 && placed(p + cols));
@@ -834,10 +860,12 @@ function PlayView({
         const next = board.slice();
         next[piece] = piece;
         next[from] = board[piece];
+        const nextRot = rot.slice();
+        nextRot[piece] = 0;
         historyRef.current = []; // undo would otherwise rewind past the magnet
         setHistoryLen(0);
         // a magnet snap is still a piece move — count it so the result never reads "0 moves"
-        commit(board, next, true, piece);
+        commit(board, next, true, piece, nextRot);
     };
 
     /** Undo: restore the board and move count from before the last drag. */
@@ -1049,10 +1077,10 @@ function PlayView({
                         const c = slot % cols;
                         const pr = Math.floor(piece / cols);
                         const pc = piece % cols;
-                        const right = isConnectedRight(board, slot, cols);
-                        const down = isConnectedDown(board, slot, rows, cols);
-                        const left = c > 0 && isConnectedRight(board, slot - 1, cols);
-                        const up = r > 0 && isConnectedDown(board, slot - cols, rows, cols);
+                        const right = isConnectedRight(board, slot, cols, rot);
+                        const down = isConnectedDown(board, slot, rows, cols, rot);
+                        const left = c > 0 && isConnectedRight(board, slot - 1, cols, rot);
+                        const up = r > 0 && isConnectedDown(board, slot - cols, rows, cols, rot);
                         const dragging = dragSet.has(slot);
                         const rad = 'var(--rad)';
                         const CR = 'var(--corner-rad)';
@@ -1098,6 +1126,8 @@ function PlayView({
                             backgroundPosition: `${cols > 1 ? (pc / (cols - 1)) * 100 : 0}% ${
                                 rows > 1 ? (pr / (rows - 1)) * 100 : 0
                             }%`,
+                            // rotation gimmick: a turned piece is never joined, so its art is centred and turns in place
+                            transform: rot[piece] ? `rotate(${rot[piece] * 90}deg)` : undefined,
                         };
                         const side = !down;
                         return (
@@ -1273,9 +1303,19 @@ function frontierIdx(): number {
     return i === -1 ? JIGSAW_STAGES.length - 1 : i;
 }
 
+/** DEV only: `/jigsaw?stage=501` opens that stage straight away (for testing). */
+function devStartStage(): JigsawStage | null {
+    if (!import.meta.env.DEV || typeof window === 'undefined') return null;
+    const id = Number(new URLSearchParams(window.location.search).get('stage'));
+    return (id && JIGSAW_STAGES.find((s) => s.id === id)) || null;
+}
+
 export default function JigsawGame() {
-    const [stage, setStage] = useState<JigsawStage | null>(null);
-    const [homeIdx, setHomeIdx] = useState(frontierIdx);
+    const [stage, setStage] = useState<JigsawStage | null>(devStartStage);
+    const [homeIdx, setHomeIdx] = useState(() => {
+        const s = devStartStage();
+        return s ? JIGSAW_STAGES.indexOf(s) : frontierIdx();
+    });
     const [color, setColor] = useState(JIGSAW_STAGES[homeIdx].tint);
     const [listOpen, setListOpen] = useState(false);
     const [shopOpen, setShopOpen] = useState(false);

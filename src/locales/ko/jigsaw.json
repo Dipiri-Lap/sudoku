@@ -37,7 +37,8 @@
     "sharedSaved": "이미지를 저장했어요 · 공유 문구도 복사됐어요",
     "shareFail": "공유하지 못했어요",
     "saved": "이미지를 저장했어요",
-    "saveFail": "저장하지 못했어요"
+    "saveFail": "저장하지 못했어요",
+    "rotateHint": "조각을 톡 누르면 빙글 돌아가요!"
   },
   "play": {
     "exitAria": "나가기",

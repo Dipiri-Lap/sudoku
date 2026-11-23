@@ -37,7 +37,8 @@
     "sharedSaved": "Bild gespeichert · Text ebenfalls kopiert",
     "shareFail": "Teilen hat nicht geklappt",
     "saved": "Bild gespeichert",
-    "saveFail": "Speichern hat nicht geklappt"
+    "saveFail": "Speichern hat nicht geklappt",
+    "rotateHint": "Tippe ein Teil an, um es zu drehen!"
   },
   "play": {
     "exitAria": "Beenden",
@@ -657,7 +658,27 @@
     "496": "Dorf-Tauziehen",
     "497": "Hyänen-Lachclub",
     "498": "Welt im Werkzeugkasten",
-    "499": "Passbildstudio"
+    "499": "Passbildstudio",
+    "501": "Hähnchen-Anfeuerungsabend",
+    "502": "Stadt im Wollkorb",
+    "503": "Waschbär-Hubschrauberrettung",
+    "504": "Dorf der Tongefäße",
+    "505": "Modelleisenbahn-Stadt",
+    "506": "Stickatelier der Füchse",
+    "507": "Fensterputzer am Hochhaus",
+    "508": "Zuckerwatte-Wolkenstadt",
+    "509": "Straußenrennen",
+    "511": "Dorf-Nudelfest",
+    "510": "Tahitianische Frauen am Strand",
+    "520": "Der Heuwagen",
+    "530": "Die Kartenspieler",
+    "540": "Ophelia",
+    "550": "Straße in Paris, Regentag",
+    "560": "Die Schmiede",
+    "570": "Mädchen mit Gießkanne",
+    "580": "Die Bauernhochzeit",
+    "590": "Ein größerer Splash",
+    "600": "Das Angelusläuten"
   },
   "seo": {
     "title": "Puzzle online kostenlos - Tiny Pieces Jigsaw | Puzzle Garden",

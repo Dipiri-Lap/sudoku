@@ -37,7 +37,8 @@
     "sharedSaved": "Image enregistrée · texte copié aussi",
     "shareFail": "Partage impossible",
     "saved": "Image enregistrée",
-    "saveFail": "Enregistrement impossible"
+    "saveFail": "Enregistrement impossible",
+    "rotateHint": "Touche une pièce pour la tourner !"
   },
   "play": {
     "exitAria": "Quitter",
@@ -665,6 +666,26 @@
     "496": "Tir à la corde du village",
     "497": "Club de rire des hyènes",
     "498": "Monde dans la boîte à outils",
-    "499": "Studio de photos d'identité"
+    "499": "Studio de photos d'identité",
+    "501": "Soirée poulet et supporters",
+    "502": "Ville dans le panier de laine",
+    "503": "Sauvetage en hélico des ratons laveurs",
+    "504": "Village des jarres en terre",
+    "505": "Ville du train miniature",
+    "506": "Atelier de broderie du renard",
+    "507": "Laveurs de vitres du gratte-ciel",
+    "508": "Ville des nuages de barbe à papa",
+    "509": "Course d'autruches",
+    "511": "Fête des nouilles du village",
+    "510": "Femmes de Tahiti sur la plage",
+    "520": "La Charrette de foin",
+    "530": "Les Joueurs de cartes",
+    "540": "Ophélie",
+    "550": "Rue de Paris, temps de pluie",
+    "560": "La Forge",
+    "570": "Fillette à l'arrosoir",
+    "580": "Le Repas de noce",
+    "590": "Un plus grand plouf",
+    "600": "L'Angélus"
   }
 }

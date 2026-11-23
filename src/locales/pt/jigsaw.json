@@ -37,7 +37,8 @@
     "sharedSaved": "Imagem salva · texto de compartilhamento copiado",
     "shareFail": "Não foi possível compartilhar",
     "saved": "Imagem salva",
-    "saveFail": "Não foi possível salvar"
+    "saveFail": "Não foi possível salvar",
+    "rotateHint": "Toque em uma peça para girá-la!"
   },
   "play": {
     "exitAria": "Sair",
@@ -661,7 +662,27 @@
     "496": "Cabo de guerra da vila",
     "497": "Clube do riso das hienas",
     "498": "Mundo na caixa de ferramentas",
-    "499": "Estúdio de fotos 3x4"
+    "499": "Estúdio de fotos 3x4",
+    "501": "Noite de frango e torcida",
+    "502": "Cidade na cesta de lã",
+    "503": "Resgate de helicóptero dos guaxinins",
+    "504": "Vila das talhas de barro",
+    "505": "Cidade da ferrovia em miniatura",
+    "506": "Ateliê de bordado da raposa",
+    "507": "Limpadores de janelas do arranha-céu",
+    "508": "Cidade das nuvens de algodão-doce",
+    "509": "Corrida de avestruzes",
+    "511": "Festa de macarrão da vila",
+    "510": "Mulheres taitianas na praia",
+    "520": "A carroça de feno",
+    "530": "Os jogadores de cartas",
+    "540": "Ofélia",
+    "550": "Rua de Paris, dia de chuva",
+    "560": "A ferraria",
+    "570": "Menina com regador",
+    "580": "O casamento camponês",
+    "590": "Um mergulho maior",
+    "600": "O Angelus"
   },
   "seo": {
     "title": "Quebra-Cabeça Online Grátis - Tiny Pieces | Puzzle Garden",
