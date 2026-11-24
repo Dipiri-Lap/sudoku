@@ -625,16 +625,34 @@ export function lastUnlockedIdx(stars: Record<number, number>): number {
 
 /**
  * Rotation gimmick (from stage 501): some pieces start turned, tap a loose piece to turn it.
- * Only 3 of every 10 stages (ids ending in 1, 4, 7 — evenly spaced, never a masterpiece),
- * and only on square grids (rows = cols) — give those stages a square size when registering,
- * and the share of turned pieces grows slowly: 501 is a 3-piece intro, then 20% → 30% → 40%.
+ * Rotation stages are scattered irregularly instead of on a fixed rhythm:
+ *  - only square grids (a non-square cell can't sit at 90°), never a masterpiece
+ *  - at least 2 other stages between two rotation stages, at most 4 (then the next square one is forced)
+ *  - otherwise a stable per-id coin flip (~45%) decides, so adding later stages never reshuffles earlier ones
+ * The share of turned pieces grows slowly: 501 is a 3-piece intro, then 20% → 30% → 40%.
  */
 export const ROTATION_FROM = 501;
+let rotationIds: Set<number> | null = null;
+function rotationStageIds(): Set<number> {
+    if (rotationIds) return rotationIds;
+    const ids = new Set<number>();
+    let gap = Infinity;
+    for (const st of JIGSAW_STAGES) {
+        if (st.id < ROTATION_FROM) continue;
+        gap++;
+        const eligible = st.subtitle !== '명화 컬렉션' && st.rows === st.cols;
+        const coin = (st.id * 0.7548776662) % 1 < 0.45;
+        if (st.id === ROTATION_FROM || (eligible && gap >= 3 && (coin || gap >= 5))) {
+            ids.add(st.id);
+            gap = 0;
+        }
+    }
+    rotationIds = ids;
+    return ids;
+}
 export function rotatedPieceCount(stage: JigsawStage): number {
     const { id } = stage;
-    if (id < ROTATION_FROM || stage.subtitle === '명화 컬렉션' || ![1, 4, 7].includes(id % 10)) return 0;
-    // only square grids: a non-square cell can't sit at 90°, and 180°-only flips felt half-baked
-    if (stage.rows !== stage.cols) return 0;
+    if (!rotationStageIds().has(id) || stage.rows !== stage.cols) return 0;
     if (id === ROTATION_FROM) return 3;
     const ratio = id <= 550 ? 0.2 : id <= 600 ? 0.3 : 0.4;
     return Math.max(3, Math.round(stage.rows * stage.cols * ratio));
