@@ -3,8 +3,8 @@ import type { Board } from '../engine/types';
 import type { TurnStep } from '../engine/resolve';
 import type { FallMove } from '../engine/gravity';
 import { key } from '../engine/board';
-import { CLEAR_HOLD_MS, CLEAR_MS, COLLECT_MS, EFFECT_MS, MERGE_MS, SWAP_MS, fallStepMs } from './constants';
-import { arrivalMs, clearStepMs, flightTargets, scheduleClear } from './fx/schedule';
+import { CLEAR_HOLD_MS, CLEAR_MS, COLLECT_MS, EFFECT_MS, MERGE_MS, REGROW_MS, SWAP_MS, fallStepMs } from './constants';
+import { clearStepMs, hitTimes, scheduleClear } from './fx/schedule';
 
 /**
  * 단계 목록 재생기.
@@ -45,6 +45,8 @@ export interface PlaybackView {
   hitAt: Map<string, number>;
   /** 무지개꽃 변신 합체: 채소가 아이템으로 바뀌는 시각(꽃잎이 닿는 순간) */
   morphAt: Map<string, number>;
+  /** 버섯 등이 다시 자라난 칸 - 그 자리의 채소(before)가 톡 터지고 장애물이 솟는다 */
+  regrown: Set<string>;
   /** 재생 위치. 같은 칸이 연속으로 터져도 애니메이션이 다시 시작되게 하는 key */
   tick: number;
   playing: boolean;
@@ -63,6 +65,7 @@ const NONE = {
   before: null as Board | null,
   hitAt: new Map<string, number>(),
   morphAt: new Map<string, number>(),
+  regrown: new Set<string>(),
 };
 
 /** 그 단계를 보여주는 데 필요한 시간 */
@@ -82,27 +85,16 @@ export function stepDurationMs(step: TurnStep): number {
     case 'collect':
       return COLLECT_MS;
     case 'board-effect':
-      return EFFECT_MS;
+      return step.effects.some(e => e.kind === 'regrow') ? REGROW_MS : EFFECT_MS;
   }
 }
 
 /** 장애물 칸마다 마지막으로 맞는 시각: 기본은 그 칸의 시각, 여러 마리가 날아오면 가장 늦은 도착 */
-function hitTimes(step: TurnStep): Map<string, number> {
-  const out = new Map<string, number>();
-  if (step.kind !== 'clear') return out;
-  const sched = scheduleClear(step);
-  step.damage.forEach(d => out.set(d.key, sched.delays.get(d.key) ?? 0));
-  sched.blasts.forEach(sb => {
-    flightTargets(sb.blast).forEach(t => {
-      const k = key(t.row, t.col);
-      if (!out.has(k)) return;
-      out.set(k, Math.max(out.get(k)!, sb.start + arrivalMs(sb.blast, t)));
-    });
-  });
-  return out;
-}
-
 function viewOf(step: TurnStep, tick: number, before: Board | null): PlaybackView {
+  const regrown =
+    step.kind === 'board-effect'
+      ? new Set(step.effects.filter(e => e.kind === 'regrow').flatMap(e => e.cells))
+      : NONE.regrown;
   return {
     board: step.board,
     clearing: step.kind === 'clear' ? new Set(step.cells) : NONE.clearing,
@@ -123,9 +115,10 @@ function viewOf(step: TurnStep, tick: number, before: Board | null): PlaybackVie
       step.kind === 'clear' && step.merged
         ? new Set(step.merged.map(p => key(p.row, p.col)))
         : NONE.merged,
-    before: step.kind === 'clear' ? before : null,
+    before: step.kind === 'clear' || regrown.size > 0 ? before : null,
     hitAt: step.kind === 'clear' ? hitTimes(step) : NONE.hitAt,
     morphAt: step.kind === 'clear' ? scheduleClear(step).morphAt : NONE.morphAt,
+    regrown,
     tick,
     playing: true,
   };

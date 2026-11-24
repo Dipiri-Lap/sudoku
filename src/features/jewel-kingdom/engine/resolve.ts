@@ -302,7 +302,9 @@ function cascade(
       if (combo === 1) revert?.comboHits?.forEach(k => directHits.add(k));
       const reborn = new Set(spawned.map(s => s.key));
       const extraHits = combo === 1 ? revert?.comboExtraHits : undefined;
-      const damage = applyDamage(current, cells, blastCells, directHits, reborn, extraHits);
+      // 옆 장애물은 매치로 터진 칸만 친다. 아이템이 쓸고 간 칸은 범위 안 장애물만 직접 친다.
+      const matched = new Set(groups.flatMap(g => g.cells));
+      const damage = applyDamage(current, cells, blastCells, directHits, reborn, extraHits, matched);
       current = damage.board;
       damage.shielded.forEach(k => cells.delete(k));
       turnDamage.push(...damage.events);

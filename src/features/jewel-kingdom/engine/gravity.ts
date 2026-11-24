@@ -173,7 +173,12 @@ export function applyGravity(
     if (to.gem) paths.get(to.gem.id)?.push({ row, col });
   };
 
-  const limit = next.width * next.height * 2;
+  const limit = next.width * next.height * 4;
+  // 곧게 내려올 게 다 내려온 뒤에도 남는 빈칸은 "위가 비었지만 영영 안 채워지는" 칸이다
+  // (예: 돌 세 개가 나란히 있으면 가운데 돌 바로 밑 칸은 위·대각선 위가 다 막혀 비어 있다).
+  // 그 아래 칸들이 "위가 비었으니 기다린다"에 걸려 기둥째 비어 있었다. 아무것도 안 움직인
+  // 패스 다음에는 한 번 "느슨한 패스"를 돌려, 위가 비어 있어도 대각선에서 끌어오게 한다.
+  let relaxed = false;
   for (let pass = 0; pass < limit; pass++) {
     let changed = false;
 
@@ -208,7 +213,7 @@ export function applyGravity(
         // "받을 수 있는 칸인가(canHold)"로 보면 안 된다. 사슬에 붙잡힌 보석이
         // 든 칸은 받을 수는 있지만 그 보석이 내려오지 않는다 - 기다리면
         // 아래가 영영 빈 채로 남는다. 그건 아래 대각선 흐름으로 메워야 한다.
-        if (above && isEmpty(above)) continue;
+        if (above && isEmpty(above) && !relaxed) continue;
 
         // 2) 위가 막혔다. 대각선 위에서 끌어온다.
         //    장애물을 돌아 흘러드는 경로가 이것뿐이다.
@@ -259,14 +264,17 @@ export function applyGravity(
             // 수집물은 매치가 안 되므로 스스로는 절대 못 없어진다. 계속 쏟아내면
             // 열이 짐으로 막혀 아무것도 못 하게 된다. 실제로 그렇게 막혀서
             // 레벨이 한 번도 안 깨졌다. 한 열에 하나씩만 흘려보낸다.
+            //
+            // 그 열의 그릇이 이미 다 찼으면 더 내보내지 않는다 - 담길 곳 없는 짐이 그릇 위에
+            // 영영 남아 칸을 막았다(짐은 매치로도 안 지워진다).
             let inFlight = false;
+            let full = false;
             for (let rr = 0; rr < next.height; rr++) {
-              if (at(next, rr, c).gem?.inert) {
-                inFlight = true;
-                break;
-              }
+              const here = at(next, rr, c);
+              if (here.gem?.inert) inFlight = true;
+              if (here.collector && here.collector.got >= here.collector.need) full = true;
             }
-            if (!inFlight) {
+            if (!inFlight && !full) {
               gem.color = spawner.color;
               gem.inert = true;
             }
@@ -287,7 +295,10 @@ export function applyGravity(
       }
     }
 
-    if (!changed) break;
+    if (!changed) {
+      if (relaxed) break;
+      relaxed = true;
+    } else relaxed = false;
   }
 
   // 지나간 경로로 이동 목록을 만든다.

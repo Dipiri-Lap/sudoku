@@ -299,3 +299,20 @@ describe('낙하 경로', () => {
     });
   });
 });
+
+describe('그릇이 다 차면 그 열 투입구는 짐을 그만 내보낸다', () => {
+  it('다 찬 그릇 열의 투입구에서는 평범한 보석만 나온다', () => {
+    // 그릇(2,0)이 이미 2/2. 맨 윗칸을 비우면 투입구가 새 보석을 넣는데 짐이면 안 된다
+    const board = parseBoard(`
+      [tube:R] G B
+      Y R G
+      [shelf:R2] B Y
+    `);
+    const shelf = at(board, 2, 0).collector!;
+    at(board, 2, 0).collector = { ...shelf, got: shelf.need };
+    for (let seed = 1; seed <= 10; seed++) {
+      const { board: after } = applyGravity(board, new Set(['0,0']), makeRng(seed), 4);
+      expect(at(after, 0, 0).gem?.inert ?? false, `seed ${seed}`).toBe(false);
+    }
+  });
+});

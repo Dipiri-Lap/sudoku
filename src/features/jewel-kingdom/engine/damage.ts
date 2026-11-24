@@ -172,6 +172,12 @@ export function applyDamage(
   reborn: Set<string> = new Set(),
   /** 같은 장애물을 여러 번 직접 친 경우 첫 타격 뒤에 더 맞는 횟수(도토리 떼가 한 돌에 몰릴 때) */
   extraDirectHits: Map<string, number> = new Map(),
+  /**
+   * 옆 장애물을 치는 칸. 기본은 터지는 칸 전부지만, 실제 턴에서는 **매치로 터진 칸만** 넘긴다.
+   * 아이템(삽·폭탄 등)이 쓸고 간 칸은 옆을 치지 않고, 범위 안의 장애물만 직접 친다(directHits).
+   * 로얄매치와 같은 규칙 - 삽이 버섯 옆 줄을 지나갔는데 버섯이 사라지면 어색했다.
+   */
+  adjacentFrom: Set<string> = cleared,
 ): DamageResult {
   const next = cloneBoard(board);
   /** 바닥이 반응하는 칸: 터진 칸 + 아이템으로 다시 태어난 칸 */
@@ -284,6 +290,7 @@ export function applyDamage(
   };
 
   cleared.forEach(k => {
+    if (!adjacentFrom.has(k)) return;
     const { row, col } = parseKey(k);
     const sourceColor = at(board, row, col).gem?.color ?? null;
     const fromBlast = blastCells.has(k);

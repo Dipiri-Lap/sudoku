@@ -66,6 +66,8 @@ export interface Blast {
   band?: number;
   /** 무지개꽃 변신 합체: 지목한 색 채소를 이 아이템으로 바꾼다(연출용 표시) */
   into?: SpecialKind;
+  /** 무지개꽃+무지개꽃: 판 전체를 쓸어 낸다(연출용 표시) */
+  wipe?: boolean;
 }
 
 /**
@@ -784,7 +786,7 @@ export function applyCombo(
       for (let r = 0; r < board.height; r++) {
         for (let c = 0; c < board.width; c++) push(r, c);
       }
-      blasts.push({ row: origin.row, col: origin.col, kind: 'lightball' });
+      blasts.push({ row: origin.row, col: origin.col, kind: 'lightball', wipe: true });
       return { board, cells, blasts, hits };
     }
   }

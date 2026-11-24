@@ -184,6 +184,18 @@ export function goalTargetScorer(goals: Goal[]): TargetScorer {
           }
           // 아이템·수집물도 색을 갖고 있지만 그 색 채소로 세지 않는다(빨간 도토리 ≠ 토마토)
           if (goal.kind === 'color' && matchColorOf(cell.gem) === goal.color) score += 1;
+          // 담기 목표(계란): 계란 아래를 비워 줘야 그릇으로 떨어진다. 계란보다 아래에 있는
+          // 같은 열의 채소를 노린다 - 바로 아래 칸이 가장 값지다.
+          if (goal.kind === 'collect' && cell.gem && !cell.gem.inert && !cell.gem.special) {
+            for (let rr = r - 1; rr >= 0; rr--) {
+              const up = at(board, rr, c);
+              if (!up.exists) break;
+              if (up.gem?.inert) {
+                score += rr === r - 1 ? 5 : 3;
+                break;
+              }
+            }
+          }
         });
       }
     }

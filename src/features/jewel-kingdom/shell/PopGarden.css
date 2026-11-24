@@ -1,0 +1,1812 @@
+/* Pop Garden 타이틀·로비. 색·글꼴·배경은 .jk-page(JewelKingdomGame.css)를 그대로 물려받는다. */
+
+/* ===== 공통 로고 ===== */
+.pg-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.9;
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  transform: rotate(-4deg);
+  filter: drop-shadow(0 6px 0 rgba(60, 30, 10, 0.35));
+}
+
+.pg-logo-pop {
+  font-size: 5.2rem;
+  color: #ff8a3d;
+  -webkit-text-stroke: 6px #4a2a12;
+  paint-order: stroke fill;
+  text-shadow: 0 6px 0 #4a2a12;
+  animation: pg-bob 2.4s ease-in-out infinite;
+}
+
+.pg-logo-garden {
+  font-size: 3.6rem;
+  color: #9fe06a;
+  -webkit-text-stroke: 6px #2c4a14;
+  paint-order: stroke fill;
+  text-shadow: 0 5px 0 #2c4a14;
+}
+
+.pg-logo.small {
+  margin-top: 4px;
+}
+.pg-logo.small .pg-logo-pop {
+  font-size: 3.2rem;
+  -webkit-text-stroke-width: 5px;
+}
+.pg-logo.small .pg-logo-garden {
+  font-size: 2.3rem;
+  -webkit-text-stroke-width: 5px;
+}
+
+@keyframes pg-bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.04, 0.97); }
+}
+
+/* ===== 타이틀 ===== */
+.pg-title {
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+}
+
+.pg-title-floaters img {
+  position: absolute;
+  width: 64px;
+  left: calc(8% + var(--i) * 15%);
+  top: calc(14% + var(--row) * 58%);
+  animation: pg-float 3.2s ease-in-out calc(var(--i) * -0.5s) infinite;
+  filter: drop-shadow(0 4px 2px rgba(40, 20, 5, 0.4));
+  pointer-events: none;
+}
+
+@keyframes pg-float {
+  0%, 100% { transform: translateY(0) rotate(-8deg); }
+  50% { transform: translateY(-14px) rotate(8deg); }
+}
+
+.pg-title .pg-logo {
+  margin-top: -8vh;
+}
+
+.pg-title-char {
+  width: min(46vw, 220px);
+  filter: drop-shadow(0 8px 6px rgba(40, 20, 5, 0.45));
+  animation: pg-bob 1.8s ease-in-out infinite;
+}
+
+.pg-title-foot {
+  position: absolute;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pg-tap {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #fff;
+  text-shadow: var(--jk-num-shadow);
+  animation: pg-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes pg-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.96); }
+}
+
+.pg-loadbar {
+  width: min(70vw, 280px);
+  height: 18px;
+  border: 3px solid var(--jk-outline);
+  border-radius: 999px;
+  background: #fff6e4;
+  overflow: hidden;
+}
+
+.pg-loadbar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(#a8e46f, #6fb93a);
+  transition: width 0.2s;
+}
+
+.pg-version {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+.jk-modal .pg-version {
+  display: block;
+  margin-top: 12px;
+  color: var(--jk-ink-soft);
+  text-shadow: none;
+}
+
+/* ===== 로비 ===== */
+.pg-lobby {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 8px 8px calc(96px + env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+/* 맨 위: 프로필 원 + 막대(재화 줄·시즌 줄) */
+.pg-hud {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+}
+
+.pg-avatar {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  width: 70px;
+  height: 70px;
+  margin-right: -14px;
+  padding: 0;
+  border-radius: 50%;
+  border: 5px solid #f5a623;
+  outline: 3px solid var(--jk-outline);
+  background: radial-gradient(circle at 50% 35%, #ffe7a3, #f3a94a);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--jk-outline);
+}
+
+.pg-avatar img {
+  width: 118%;
+  margin: 4px 0 0 -9%;
+}
+
+.pg-hud-bar {
+  flex: 1;
+  min-width: 0;
+  margin-top: 4px;
+  padding: 0 0 0 10px;
+  /* 플레이 화면 정보판과 같은 나무 명판 */
+  border-style: solid;
+  border-width: 18px 22px;
+  border-image: url('/assets/3match/ui/sign.webp') 30% 10% fill / 18px 22px stretch;
+  filter: drop-shadow(0 4px 4px rgba(40, 20, 5, 0.4));
+}
+
+.pg-hud-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pg-chip {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 32px;
+  padding: 0 6px 0 2px;
+  border: 2.5px solid var(--jk-outline);
+  border-radius: 999px;
+  background: #fff3dc;
+  color: var(--jk-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pg-chip b {
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-weight: 400;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.pg-chip .pg-coin,
+.pg-chip-ico,
+.pg-chip-img {
+  margin-left: -8px;
+  flex-shrink: 0;
+}
+
+.pg-chip-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.pg-chip-plus {
+  position: absolute;
+  left: 8px;
+  bottom: -6px;
+  background: #7cc243;
+  color: #fff;
+  border: 2px solid var(--jk-outline);
+  border-radius: 50%;
+  padding: 1px;
+}
+
+/* 하트 개수(충전 중일 때 하트 위에 작게) */
+.pg-chip-count {
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  text-align: center;
+  font-style: normal;
+  font-family: 'Lilita One', sans-serif;
+  font-size: 0.75rem;
+  color: #fff;
+}
+
+.heart {
+  color: #ff4d6a;
+}
+.heart.empty {
+  color: #d9cbb2;
+}
+
+/* 코인: 그림 파일 없이 CSS로 그린 금화 */
+.pg-coin {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background: url('/assets/3match/lobby/coin.webp') center / contain no-repeat;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.pg-coin.small {
+  width: 20px;
+  height: 20px;
+}
+
+.pg-gear {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: url('/assets/3match/ui/disc.webp') center / contain no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 2px rgba(40, 20, 5, 0.45));
+}
+
+.pg-gear img {
+  width: 74%;
+}
+
+/* 시즌 진행 막대 */
+.pg-season {
+  width: 100%;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pg-season-ico {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  margin-right: -10px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 0 var(--jk-outline));
+}
+
+.pg-season-track {
+  position: relative;
+  flex: 1;
+  height: 22px;
+  border: 2.5px solid var(--jk-outline);
+  border-radius: 999px;
+  background: #3a2314;
+  overflow: hidden;
+}
+
+.pg-season-track i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(#ffe16b, #f5a623);
+  border-radius: 999px;
+}
+
+.pg-season-track b {
+  position: relative;
+  display: block;
+  font-family: 'Lilita One', sans-serif;
+  font-weight: 400;
+  font-size: 0.9rem;
+  line-height: 18px;
+  color: #fff;
+  text-shadow: 0 1.5px 0 var(--jk-outline);
+}
+
+.pg-season-chest img {
+  width: 100%;
+  filter: drop-shadow(0 2px 1px rgba(40, 20, 5, 0.5));
+}
+
+.pg-season-chest {
+  width: 40px;
+  height: 40px;
+  margin-left: -12px;
+  position: relative;
+}
+
+.pg-season-left {
+  position: relative;
+  z-index: 3;
+  margin-top: -2px;
+  padding: 1px 10px;
+  border: 2px solid var(--jk-outline);
+  border-radius: 999px;
+  background: #fff3dc;
+  font-size: 0.8rem;
+}
+
+/* 양옆 이벤트 아이콘 */
+.pg-events {
+  position: absolute;
+  top: 132px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pg-events.left {
+  left: max(6px, calc(50% - 274px));
+}
+.pg-events.right {
+  right: max(6px, calc(50% - 274px));
+}
+
+.pg-event {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pg-event-ico {
+  width: 70px;
+  height: 70px;
+  /* 플레이 화면 부스터와 같은 금테 나무 원판 */
+  background: url('/assets/3match/ui/disc.webp') center / contain no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 3px rgba(40, 20, 5, 0.45));
+}
+
+.pg-event-ico img {
+  width: 66%;
+  height: 66%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 1px rgba(40, 20, 5, 0.4));
+}
+
+
+.pg-event-label {
+  /* 플레이 화면 "목표" 탭과 같은 초록 탭 */
+  margin-top: -8px;
+  min-width: 56px;
+  font-size: 0.8rem;
+  padding: 1px 8px 2px;
+  border-radius: 9px;
+  background: linear-gradient(#97d65c, #5c9a2c);
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(40, 70, 10, 0.6);
+  box-shadow: 0 0 0 2px #3f6b1d, 0 2px 0 2px #3f6b1d, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.pg-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ff3b3b;
+  border: 2.5px solid #fff;
+  animation: pg-blink 1s ease-in-out infinite;
+}
+
+.pg-count {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 2.5px solid #fff;
+  color: #fff;
+  font-style: normal;
+  font-family: 'Lilita One', sans-serif;
+  font-size: 0.85rem;
+  line-height: 17px;
+  box-sizing: border-box;
+}
+.pg-count.green {
+  background: #3fae3a;
+}
+.pg-count.red {
+  left: auto;
+  right: -6px;
+  top: -8px;
+  background: #ff3b3b;
+}
+
+/* 아래 줄: 수집 · 레벨 · 미션 */
+.pg-actions {
+  position: absolute;
+  left: 50%;
+  bottom: calc(110px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(100%, 560px);
+  padding: 0 8px;
+  box-sizing: border-box;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.pg-pedestal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pg-pedestal-ico {
+  position: relative;
+  width: 78px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 나무 명판 받침 */
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: 12px 14px;
+  border-image: url('/assets/3match/ui/sign.webp') 30% 10% fill / 12px 14px stretch;
+  filter: drop-shadow(0 4px 3px rgba(40, 20, 5, 0.45));
+}
+
+
+
+.pg-pedestal-ico img {
+  width: 120%;
+  height: 120%;
+  object-fit: contain;
+  margin: -14px 0 -4px;
+  filter: drop-shadow(0 2px 1px rgba(40, 20, 5, 0.4));
+}
+
+.pg-pedestal-label {
+  position: relative;
+  margin-top: -6px;
+  min-width: 70px;
+  font-size: 1rem;
+  padding: 1px 8px 2px;
+  border-radius: 9px;
+  background: linear-gradient(#97d65c, #5c9a2c);
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(40, 70, 10, 0.6);
+  box-shadow: 0 0 0 2px #3f6b1d, 0 2px 0 2px #3f6b1d, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.pg-play {
+  position: relative;
+  flex: 1;
+  max-width: 250px;
+  margin-bottom: 4px;
+  padding: 14px 8px 18px;
+  border: 4px solid var(--jk-outline);
+  border-radius: 24px;
+  background: linear-gradient(#b4ee6f, #6fb93a 55%, #4f9a1f);
+  box-shadow: 0 0 0 4px #ffd75a, 0 0 0 7px var(--jk-outline), 0 9px 0 4px var(--jk-outline),
+    inset 0 -6px 0 rgba(30, 70, 10, 0.25), inset 0 4px 0 rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font: inherit;
+  animation: pg-breathe 1.6s ease-in-out infinite;
+}
+
+.pg-play.tier-hard {
+  background: linear-gradient(#ffc27a, #f0822b 55%, #d0601a);
+}
+.pg-play.tier-super {
+  background: linear-gradient(#e9b0ff, #b05ae6 55%, #8a36c4);
+}
+
+.pg-play-label {
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-size: 2rem;
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: var(--jk-num-shadow);
+}
+
+.pg-play-badge {
+  position: absolute;
+  top: -16px;
+  right: -14px;
+  transform: rotate(10deg);
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 2.5px solid var(--jk-outline);
+  background: #ffd75a;
+  font-size: 0.8rem;
+}
+
+.pg-play:active {
+  transform: translateY(4px);
+}
+
+@keyframes pg-breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.04; }
+}
+
+/* 탭 내용(상점 등) */
+.pg-panel {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-top: 14px;
+  background: rgba(255, 246, 228, 0.96);
+  border: 4px solid var(--jk-outline);
+  border-radius: 22px;
+  padding: 16px;
+  box-sizing: border-box;
+  box-shadow: 0 6px 0 var(--jk-outline);
+}
+
+.pg-panel h2 {
+  margin: 0 0 12px;
+  font-weight: 400;
+  font-size: 1.6rem;
+  text-align: center;
+}
+
+.pg-panel p {
+  text-align: center;
+  color: var(--jk-ink-soft);
+}
+
+.pg-shop-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  border-bottom: 2px dashed #e2cfa9;
+}
+
+.pg-shop-row > span:nth-child(2) {
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+.pg-shop-row small {
+  color: var(--jk-ink-soft);
+}
+
+.pg-shop-row button {
+  min-width: 92px;
+  padding: 8px 12px;
+  border: 3px solid var(--jk-outline);
+  border-radius: 12px;
+  background: #7cc243;
+  color: #fff;
+  font: inherit;
+  text-shadow: 0 2px 0 rgba(30, 60, 10, 0.6);
+  box-shadow: 0 3px 0 var(--jk-outline);
+  cursor: pointer;
+}
+
+.pg-shop-row button:disabled {
+  background: #d9cbb2;
+  color: #7a6a55;
+  text-shadow: none;
+  cursor: default;
+}
+
+.pg-collection {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.pg-card {
+  aspect-ratio: 3 / 4;
+  border: 3px solid var(--jk-outline);
+  border-radius: 14px;
+  background: linear-gradient(#fffdf6, #f3e3c3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pg-card img {
+  width: 70%;
+  filter: grayscale(1) opacity(0.45);
+}
+
+/* 맨 아래 탭 5개(가운데 홈이 크게 솟는다) */
+.pg-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(100%, 560px);
+  height: calc(84px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
+  /* 나무 명판을 길게 늘인 탭 막대 */
+  border-style: solid;
+  border-width: 14px 18px 6px;
+  border-image: url('/assets/3match/ui/sign.webp') 30% 10% fill / 14px 18px 6px stretch;
+  filter: drop-shadow(0 -3px 4px rgba(40, 20, 5, 0.35));
+  z-index: 5;
+}
+
+.pg-navbtn {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border: none;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  text-shadow: 0 2px 0 var(--jk-outline);
+  cursor: pointer;
+  margin-top: -12px;
+}
+
+.pg-navbtn img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 1px rgba(40, 20, 5, 0.45)) saturate(0.75) brightness(0.92);
+  transition: transform 0.15s;
+}
+
+.pg-navbtn.active img {
+  filter: drop-shadow(0 3px 2px rgba(40, 20, 5, 0.5));
+  transform: scale(1.15) translateY(-3px);
+}
+
+.pg-navbtn.active {
+  color: #fff;
+}
+
+.pg-navbtn.big {
+  flex: 1.3;
+  margin-top: -36px;
+}
+
+/* 가운데 홈: 금테 나무 원판 위에 크게 */
+.pg-navbtn.big img {
+  width: 76px;
+  height: 76px;
+  padding: 10px;
+  box-sizing: border-box;
+  background: url('/assets/3match/ui/disc.webp') center / contain no-repeat;
+}
+
+/* ===== 창 내용 ===== */
+.pg-tier-note {
+  margin-top: -8px !important;
+  color: #e0701f !important;
+}
+
+.pg-goals {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.pg-goal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px;
+  min-width: 64px;
+  border: 3px solid var(--jk-outline);
+  border-radius: 14px;
+  background: #f3e3c3;
+}
+
+.pg-goal b {
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-weight: 400;
+  font-size: 1.3rem;
+  color: #fff;
+  text-shadow: var(--jk-num-shadow);
+}
+
+.pg-goal-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  position: relative;
+}
+
+.pg-moves {
+  font-size: 0.95rem;
+}
+
+.pg-preboost {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.pg-preboost-slot {
+  width: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 3px dashed #c9b28a;
+  border-radius: 14px;
+  background: #fffaf0;
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--jk-ink-soft);
+  cursor: pointer;
+}
+
+.pg-preboost-slot img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: grayscale(0.7) opacity(0.6);
+}
+
+.pg-hearts {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.pg-daily {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.pg-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px;
+  border: 3px solid var(--jk-outline);
+  border-radius: 12px;
+  background: #f3e3c3;
+}
+
+.pg-day.big {
+  grid-column: span 2;
+  background: #ffe9a8;
+}
+
+.pg-day small {
+  font-size: 0.75rem;
+  color: var(--jk-ink-soft);
+}
+
+.pg-day b {
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-weight: 400;
+}
+
+.pg-day.got {
+  opacity: 0.5;
+}
+
+.pg-day.got::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #4f9a1f;
+}
+
+.pg-day.now {
+  background: #c9f29b;
+  animation: pg-breathe 1.2s ease-in-out infinite;
+}
+
+.pg-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.pg-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 2.5px solid #d8c29c;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: var(--jk-ink);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pg-settings-note {
+  font-size: 0.9rem;
+}
+
+.pg-shop-ico {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.pg-heart-big {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+.pg-heart-big.empty {
+  filter: grayscale(1) opacity(0.4);
+}
+
+/* 이름표는 원판·받침 그림보다 앞에 와야 글자가 안 가린다 */
+.pg-event-label,
+.pg-pedestal-label {
+  position: relative;
+  z-index: 1;
+}
+
+.pg-navbtn span {
+  position: relative;
+  z-index: 1;
+  margin-top: -4px;
+}
+
+/* ===== 다듬기(2026-11-24): 색으로 위계 나누기 ===== */
+
+/* 1) 아래 탭은 다홍색 막대 + 금테 - 위쪽 나무 막대와 확실히 나뉜다 */
+.pg-nav {
+  border: none;
+  border-image: none;
+  border-top: 4px solid #ffd75a;
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(#c4503c, #8e2f22);
+  box-shadow: 0 -3px 0 var(--jk-outline), inset 0 3px 0 rgba(255, 255, 255, 0.18);
+  filter: none;
+  padding-top: 4px;
+}
+
+.pg-navbtn {
+  margin-top: 0;
+  border-right: 2px solid rgba(60, 10, 5, 0.35);
+}
+.pg-navbtn:last-child {
+  border-right: none;
+}
+.pg-navbtn.big {
+  border-right: 2px solid rgba(60, 10, 5, 0.35);
+}
+
+/* 4) 가운데 홈은 레벨 버튼과 다투지 않게 작고 낮게 */
+.pg-navbtn.big {
+  flex: 1.15;
+  margin-top: -16px;
+}
+.pg-navbtn.big img {
+  width: 62px;
+  height: 62px;
+  padding: 8px;
+}
+
+/* 2) 이벤트 원판 안쪽 색: 금테는 그대로 두고 나무 부분만 덮는다 */
+.pg-event .pg-event-ico {
+  background:
+    radial-gradient(circle closest-side, var(--tone-a) 0, var(--tone-b) 74%, transparent 76%),
+    url('/assets/3match/ui/disc.webp') center / contain no-repeat;
+}
+.pg-event.tone-green { --tone-a: #b6ef7d; --tone-b: #4f9a1f; }
+.pg-event.tone-teal { --tone-a: #9af0e0; --tone-b: #1f8f7d; }
+.pg-event.tone-red { --tone-a: #ffb39a; --tone-b: #c8402a; }
+.pg-event.tone-blue { --tone-a: #a9d6ff; --tone-b: #2f6fc8; }
+.pg-event.tone-purple { --tone-a: #ecc0ff; --tone-b: #8a3fc8; }
+
+/* 3) 지금 받을 보상: 빨간 이름표가 통통 */
+.pg-event.hot .pg-event-label {
+  background: linear-gradient(#ff7a5c, #e0402a);
+  box-shadow: 0 0 0 2px #8a2414, 0 2px 0 2px #8a2414, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  animation: pg-hop 0.9s ease-in-out infinite;
+}
+.pg-event.hot .pg-event-ico {
+  animation: pg-hop 0.9s ease-in-out infinite;
+}
+
+@keyframes pg-hop {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -4px; }
+}
+
+/* 5) 재화 칸: 아이콘은 칸 왼쪽 밖으로 걸치고, 숫자 자리를 넓게 */
+.pg-hud-row {
+  gap: 10px;
+  padding-left: 8px;
+}
+.pg-chip {
+  justify-content: flex-end;
+  padding: 0 10px 0 24px;
+}
+.pg-chip > .pg-coin,
+.pg-chip > .pg-chip-img {
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+}
+.pg-chip:first-child {
+  flex: 1.35;
+}
+.pg-chip-plus {
+  left: -6px;
+  bottom: -8px;
+}
+.pg-chip-count {
+  left: -12px;
+  width: 34px;
+}
+
+/* 7) 시즌 남은 시간: 나무 막대 아래에 매달린 이름표 */
+.pg-hud-bar {
+  position: relative;
+}
+.pg-season-left {
+  position: absolute;
+  left: 50%;
+  bottom: -32px;
+  translate: -50% 0;
+  margin: 0;
+  white-space: nowrap;
+  padding: 1px 12px 2px;
+  border: 2.5px solid var(--jk-outline);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  background: #fff3dc;
+  font-size: 0.8rem;
+}
+
+/* 좁은 폰(360px 안팎)에서도 재화 숫자가 아이콘 밑으로 숨지 않게:
+   막대 옆 테두리·프로필·설정을 줄이고, 칸은 숫자 폭만큼은 꼭 지킨다 */
+.pg-avatar {
+  width: 62px;
+  height: 62px;
+  margin-right: -12px;
+}
+.pg-hud-bar {
+  border-width: 16px 14px;
+  border-image: url('/assets/3match/ui/sign.webp') 30% 10% fill / 16px 14px stretch;
+  padding-left: 8px;
+}
+.pg-hud-row {
+  gap: 14px;
+  padding-left: 10px;
+}
+.pg-chip {
+  justify-content: center;
+  padding: 0 6px 0 18px;
+}
+.pg-chip b {
+  font-size: 1rem;
+  min-width: 1ch;
+}
+.pg-chip > .pg-coin,
+.pg-chip > .pg-chip-img {
+  left: -13px;
+  width: 30px;
+  height: 30px;
+}
+.pg-chip-count {
+  left: -13px;
+  width: 30px;
+}
+.pg-gear {
+  width: 34px;
+  height: 34px;
+}
+
+/* 칸 폭은 숫자 길이대로: 코인(최대 다섯 자리+쉼표) > 하트(충전 시간 mm:ss) > 씨앗 */
+.pg-hud-row .pg-chip:nth-child(1) { flex: 1.45; }
+.pg-hud-row .pg-chip:nth-child(2) { flex: 1.2; }
+.pg-hud-row .pg-chip:nth-child(3) { flex: 0.95; }
+.pg-chip b {
+  font-size: clamp(0.82rem, 3.7vw, 1.05rem);
+  letter-spacing: -0.02em;
+}
+
+/* ===== 화면 배율 무대(ScaledStage) ===== */
+.pg-viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #7fb35a;
+}
+
+.jk-page.pg-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* 무대가 넓을 때(태블릿·PC) 내용은 가운데 560 안에 */
+.pg-lobby .pg-hud {
+  max-width: 544px;
+}
+
+/* ===== 아래 탭 다시(로얄매치식): 움푹한 칸 5개 + 고른 칸만 금테로 솟는다 ===== */
+.pg-nav {
+  gap: 5px;
+  padding: 7px 6px calc(6px + env(safe-area-inset-bottom));
+  height: calc(84px + env(safe-area-inset-bottom));
+  border: none;
+  border-radius: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.14), transparent 40%),
+    linear-gradient(#a8382a, #6e1f17);
+  /* 위쪽 금테: 밝은 금선 + 진한 금 그림자 + 갈색 윤곽 */
+  box-shadow:
+    0 -3px 0 #ffd75a,
+    0 -5px 0 #b07a1a,
+    0 -7px 0 var(--jk-outline);
+}
+
+.pg-navbtn,
+.pg-navbtn.big {
+  flex: 1;
+  margin-top: 0;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(#7e2419, #5c150e);
+  box-shadow: inset 0 4px 7px rgba(0, 0, 0, 0.45), inset 0 -2px 0 rgba(255, 170, 140, 0.18);
+  transition: flex 0.2s, margin 0.2s;
+}
+
+.pg-navbtn img,
+.pg-navbtn.big img {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: none;
+  filter: drop-shadow(0 2px 1px rgba(30, 5, 0, 0.55)) saturate(0.8) brightness(0.9);
+  transform: none;
+}
+
+/* 고른 탭: 칸이 넓어지며 위로 솟고, 금테 + 밝은 다홍 + 아이콘 크게 + 이름 */
+.pg-navbtn.active {
+  flex: 1.45;
+  margin-top: -22px;
+  border: 3px solid #ffd75a;
+  border-radius: 20px 20px 12px 12px;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255, 220, 160, 0.45), transparent 70%),
+    linear-gradient(#e86a4f, #b2392a 70%, #962c20);
+  box-shadow:
+    0 0 0 2.5px var(--jk-outline),
+    0 5px 0 2.5px #4a1a0c,
+    inset 0 3px 0 rgba(255, 255, 255, 0.4);
+}
+
+.pg-navbtn.active img {
+  width: 62px;
+  height: 62px;
+  margin-top: -18px;
+  filter: drop-shadow(0 4px 2px rgba(40, 10, 0, 0.5));
+  transform: none;
+}
+
+.pg-navbtn.active span {
+  margin-top: -2px;
+  font-size: 1rem;
+  color: #fff;
+  text-shadow: var(--jk-num-shadow);
+}
+
+/* 솟은 탭이 레벨 버튼에 닿지 않게 아래 줄을 조금 올린다 */
+.pg-actions {
+  bottom: calc(124px + env(safe-area-inset-bottom));
+}
+
+/* ===== 아래 탭: 고급 나무(Codex 그림, generated-images/lobby-nav) ===== */
+.pg-nav {
+  gap: 6px;
+  padding: 0 4px env(safe-area-inset-bottom);
+  height: calc(92px + env(safe-area-inset-bottom));
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  /* 금테·나무틀·리벳은 늘어나지 않게 가장자리를 고정하고 가운데 나무판만 늘인다 */
+  border-style: solid;
+  border-width: 18px 14px 12px;
+  border-image: url('/assets/3match/lobby/nav-bar.webp') 20% 4% 14% 4% fill / 18px 14px 12px stretch;
+  filter: drop-shadow(0 -3px 4px rgba(40, 15, 5, 0.4));
+  align-items: stretch;
+}
+
+.pg-navbtn,
+.pg-navbtn.big {
+  flex: 1;
+  margin: 2px 0 4px;
+  border-radius: 14px;
+  overflow: visible;
+  background: url('/assets/3match/lobby/nav-slot.webp') center / cover no-repeat;
+  box-shadow: 0 1px 0 rgba(255, 200, 140, 0.25);
+}
+
+.pg-navbtn img,
+.pg-navbtn.big img {
+  width: 46px;
+  height: 46px;
+  filter: drop-shadow(0 2px 1px rgba(20, 5, 0, 0.6)) saturate(0.85) brightness(0.92);
+}
+
+/* 고른 탭: 금테 아치 명판이 막대 위로 솟는다 */
+.pg-navbtn.active {
+  flex: 1.4;
+  margin: -30px 0 2px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-style: solid;
+  border-width: 26px 10px 10px;
+  border-image: url('/assets/3match/lobby/nav-active.webp') 24% 10% 9% 10% fill / 26px 10px 10px stretch;
+  filter: drop-shadow(0 4px 3px rgba(40, 15, 5, 0.5));
+  justify-content: flex-start;
+}
+
+.pg-navbtn.active img {
+  width: 64px;
+  height: 64px;
+  margin-top: -30px;
+  filter: drop-shadow(0 4px 2px rgba(60, 25, 0, 0.45));
+}
+
+.pg-navbtn.active span {
+  margin-top: 0;
+  font-size: 1rem;
+  color: #fff;
+  text-shadow: var(--jk-num-shadow);
+}
+
+/* 막대가 조금 높아졌으니 레벨 버튼 줄도 맞춰 올린다 */
+.pg-actions {
+  bottom: calc(132px + env(safe-area-inset-bottom));
+}
+
+/* ===== 맨 위 가로 줄(얇게) + 가운데 캐릭터 초상화 ===== */
+.pg-topstrip {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  max-width: 560px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  margin-top: -2px;
+  padding: 0 4px;
+  border-style: solid;
+  border-width: 8px 10px 6px;
+  border-image: url('/assets/3match/lobby/nav-bar.webp') 20% 4% 14% 4% fill / 8px 10px 6px stretch;
+  filter: drop-shadow(0 3px 3px rgba(40, 15, 5, 0.45));
+}
+
+.pg-topside {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: 12px;
+}
+.pg-topside.right {
+  padding-left: 14px;
+}
+.pg-topside .pg-chip {
+  height: 28px;
+  flex: 1;
+}
+.pg-topside.left .pg-chip:first-child {
+  flex: 1.2;
+}
+.pg-topside .pg-gear {
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+/* 가운데 초상화: 줄 위아래로 걸쳐 늘어진다 */
+.pg-hero {
+  position: relative;
+  flex: none;
+  width: 92px;
+  height: 100%;
+}
+
+.pg-hero-frame {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  translate: -50% 0;
+  width: 92px;
+  aspect-ratio: var(--frame-ratio, 0.78);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 3px rgba(40, 15, 5, 0.5));
+}
+
+/* 액자 안쪽 창(하늘 + 캐릭터). 위치는 액자 그림의 빈 창에 맞춘다 */
+.pg-hero-window {
+  position: absolute;
+  left: var(--win-l, 17%);
+  right: var(--win-r, 17%);
+  top: var(--win-t, 15%);
+  bottom: var(--win-b, 28%);
+  border-radius: 50% 50% 42% 42% / 38% 38% 30% 30%;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 30%, #d8f3ff, #8fd0f2 60%, #6fb3dc);
+}
+
+.pg-hero-pic {
+  position: absolute;
+  left: 50%;
+  bottom: -6%;
+  width: 118%;
+  translate: -50% 0;
+}
+
+.pg-hero-border {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.pg-hero-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--name-b, 7%);
+  text-align: center;
+  font-size: 0.82rem;
+  color: #fff;
+  text-shadow: 0 1.5px 0 #6b1a10, 1px 0 0 #6b1a10, -1px 0 0 #6b1a10, 0 -1px 0 #6b1a10;
+  pointer-events: none;
+}
+
+/* 시즌 진행: 초상화 바로 아래 작게 */
+.pg-hero .pg-season {
+  position: absolute;
+  left: 50%;
+  top: calc(-14px + 92px / var(--frame-ratio, 0.78) + 2px);
+  translate: -50% 0;
+  width: 168px;
+  margin: 0;
+}
+.pg-hero .pg-season-ico {
+  width: 26px;
+  height: 26px;
+  margin-right: -8px;
+}
+.pg-hero .pg-season-track {
+  height: 17px;
+  border-width: 2px;
+}
+.pg-hero .pg-season-track b {
+  font-size: 0.72rem;
+  line-height: 13px;
+}
+.pg-hero .pg-season-chest {
+  width: 30px;
+  height: 30px;
+  margin-left: -8px;
+}
+.pg-hero .pg-season-left {
+  position: absolute;
+  left: 50%;
+  top: calc(-14px + 92px / var(--frame-ratio, 0.78) + 30px);
+  bottom: auto;
+  translate: -50% 0;
+  border-top: 2px solid var(--jk-outline);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  padding: 0 8px;
+}
+
+/* 위 줄이 얇아졌으니 양옆 이벤트를 위로 */
+.pg-events {
+  top: 66px;
+}
+
+/* 액자 그림(hero-frame.webp) 실측: 가로/세로 0.746, 타원 창 좌 8.6% 우 10.1% 위 15.8% 아래 20.9% */
+.pg-hero {
+  --frame-ratio: 0.746;
+  --win-l: 9.5%;
+  --win-r: 10.5%;
+  --win-t: 16.5%;
+  --win-b: 20%;
+  --name-b: 9.5%;
+}
+.pg-hero-window {
+  border-radius: 50%;
+}
+
+/* 칸이 한쪽에 하나(코인) / 하트+설정 */
+.pg-topside .pg-chip {
+  flex: 1;
+}
+.pg-topside.left .pg-chip:first-child {
+  flex: 1;
+}
+
+/* 시즌 숫자가 왼쪽 별에 가리지 않게 */
+.pg-hero .pg-season-track b {
+  padding: 0 10px 0 16px;
+}
+
+/* ===== 가운데 정원 장면(로얄매치식) ===== */
+/* 장면 그림 아래로는 장면 맨 아래 잔디색을 이어 칠한다 */
+.pg-lobby.jk-page::before {
+  background: linear-gradient(transparent 40%, var(--lawn, #6c8106)), var(--lawn, #6c8106);
+}
+
+/* 장면: 무대 폭보다 살짝 넓게(양옆 화단 끝만 조금 잘림) 맨 위부터 깐다.
+   꾸밈 조각은 이 상자 안 %로 놓여 장면과 딱 겹친다 */
+.pg-scene {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  translate: -50% 0;
+  width: max(112%, 400px);
+  z-index: 0;
+}
+
+.pg-scene-bg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* 아래 끝은 잔디색으로 스며들게 */
+  -webkit-mask-image: linear-gradient(#000 88%, transparent);
+  mask-image: linear-gradient(#000 88%, transparent);
+}
+
+/* 단계가 바뀔 때: 새 그림이 옛 그림 위로 살짝 커졌다 제자리로 오며 서서히 나타난다 */
+.pg-scene-bg {
+  position: absolute;
+  inset: 0;
+}
+.pg-scene-bg.reveal {
+  animation: pg-reveal 1.4s ease-out both;
+}
+@keyframes pg-reveal {
+  from { opacity: 0; scale: 1.04; filter: brightness(1.6); }
+  to { opacity: 1; scale: 1; filter: brightness(1); }
+}
+
+.pg-scene-sparkles i {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: url('/assets/3match/fx/sparkle.png') center / contain no-repeat;
+  animation: pg-sparkle 1.3s ease-out calc(var(--i) * 0.06s) both;
+  pointer-events: none;
+}
+@keyframes pg-sparkle {
+  0% { opacity: 0; scale: 0.2; }
+  30% { opacity: 1; scale: 1.2; }
+  100% { opacity: 0; scale: 0.6; translate: 0 -30px; }
+}
+
+/* 농장 다음 단계 버튼: 레벨 버튼 바로 위 가운데 */
+.pg-farm-next {
+  position: absolute;
+  /* 가운데 맞춤은 margin으로 - translate는 통통 튀는 애니메이션(pg-hop)이 쓴다 */
+  left: 0;
+  right: 0;
+  width: max-content;
+  margin: 0 auto;
+  bottom: calc(240px + env(safe-area-inset-bottom));
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 14px;
+  border: 3px solid var(--jk-outline);
+  border-radius: 999px;
+  background: linear-gradient(#fff6e4, #f0dcb4);
+  box-shadow: 0 4px 0 var(--jk-outline);
+  font: inherit;
+  font-size: 1rem;
+  color: var(--jk-ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pg-farm-next.ready {
+  background: linear-gradient(#b4ee6f, #6fb93a);
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(30, 60, 10, 0.6);
+  animation: pg-hop 1s ease-in-out infinite;
+}
+.pg-farm-next-cost {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 8px 1px 3px;
+  border-radius: 999px;
+  background: rgba(60, 30, 10, 0.25);
+  font-family: 'Lilita One', sans-serif;
+  color: #fff;
+  text-shadow: 0 1.5px 0 var(--jk-outline);
+}
+.pg-farm-next-cost img {
+  width: 20px;
+  height: 20px;
+}
+
+/* 단계 미리보기(지금 ▶ 다음) */
+.pg-farm-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.pg-farm-preview img {
+  width: 42%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  object-position: 50% 45%;
+  border: 3px solid var(--jk-outline);
+  border-radius: 12px;
+}
+.pg-farm-preview span {
+  font-size: 1.2rem;
+  color: var(--jk-ink-soft);
+}
+
+/* 짓기 창 */
+.pg-build-area {
+  margin-top: -10px !important;
+}
+.pg-build-img {
+  width: 150px;
+  margin: 0 auto 8px;
+  display: block;
+  filter: drop-shadow(0 6px 4px rgba(40, 25, 5, 0.3));
+}
+.pg-build-have {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.pg-build-have img {
+  width: 22px;
+}
+.pg-build-need {
+  margin: 0 !important;
+  font-size: 0.85rem;
+}
+
+/* ===== 밭 수확 ===== */
+.pg-plot {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+}
+/* 새로 심거나 다 익는 순간 살짝 커졌다 돌아온다 */
+.pg-plot.grow,
+.pg-plot.ripe {
+  animation: pg-plot-in 0.5s cubic-bezier(0.2, 1.5, 0.5, 1) both;
+  transform-origin: 50% 80%;
+}
+@keyframes pg-plot-in {
+  from { scale: 0.92; filter: brightness(1.4); }
+  to { scale: 1; filter: brightness(1); }
+}
+
+.pg-plot-tag {
+  position: absolute;
+  translate: -50% -50%;
+  z-index: 1;
+  padding: 3px 10px;
+  border: 2.5px solid var(--jk-outline);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--jk-outline);
+}
+.pg-plot-tag.empty {
+  background: #fff3dc;
+  color: var(--jk-ink);
+}
+.pg-plot-tag.growing {
+  background: rgba(60, 35, 15, 0.78);
+  color: #fff;
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-size: 0.8rem;
+}
+.pg-plot-tag.ripe {
+  background: linear-gradient(#ffd75a, #f5a623);
+  color: #fff;
+  font-size: 1rem;
+  text-shadow: 0 2px 0 #8a4a10;
+  animation: pg-hop 0.8s ease-in-out infinite;
+}
+
+/* 수확한 코인이 떠오르며 사라진다 */
+.pg-plot-gain {
+  position: absolute;
+  translate: -50% -50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: 'Lilita One', sans-serif;
+  font-size: 1.4rem;
+  color: #ffe16b;
+  text-shadow: var(--jk-num-shadow);
+  pointer-events: none;
+  animation: pg-gain 1.2s ease-out both;
+}
+@keyframes pg-gain {
+  0% { opacity: 0; translate: -50% -30%; scale: 0.6; }
+  20% { opacity: 1; scale: 1.15; }
+  100% { opacity: 0; translate: -50% -160%; scale: 1; }
+}
+
+.pg-crop-img {
+  display: block;
+  width: 110px;
+  margin: 0 auto 12px;
+  filter: drop-shadow(0 6px 4px rgba(40, 25, 5, 0.3));
+  animation: pg-hop 1.4s ease-in-out infinite;
+}
+
+/* ===== 짓는 순간 연출 ===== */
+.pg-build-fx {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* 먼지: 바뀌는 자리 둘레에서 뭉게뭉게 피어오른다 */
+.pg-dust {
+  position: absolute;
+  width: 90px;
+  translate: calc(-50% + (var(--i) - 2) * 26px) calc(-50% + var(--odd) * 14px);
+  opacity: 0;
+  filter: sepia(0.6) brightness(1.05);
+  animation: pg-dust 1.2s ease-out calc(var(--i) * 0.08s) both;
+}
+@keyframes pg-dust {
+  0% { opacity: 0; scale: 0.3; }
+  25% { opacity: 0.95; }
+  100% { opacity: 0; scale: 1.5; translate: calc(-50% + (var(--i) - 2) * 40px) -90%; }
+}
+
+/* 밤톨이가 망치를 두드린다 */
+.pg-builder {
+  position: absolute;
+  left: -70px;
+  top: -86px;
+  width: 64px;
+  animation: pg-builder-in 0.25s ease-out both;
+}
+.pg-builder-hog {
+  width: 100%;
+  animation: pg-hop 0.3s ease-in-out infinite;
+}
+.pg-builder-hammer {
+  position: absolute;
+  right: -30px;
+  top: 6px;
+  width: 42px;
+  transform-origin: 20% 80%;
+  animation: pg-hammer 0.3s ease-in-out infinite;
+}
+@keyframes pg-builder-in {
+  from { opacity: 0; translate: -20px 0; }
+  to { opacity: 1; translate: 0 0; }
+}
+@keyframes pg-hammer {
+  0%, 100% { rotate: -40deg; }
+  50% { rotate: 25deg; }
+}
+
+/* 쾅: 망치 끝에서 별이 튄다 */
+.pg-bonk {
+  position: absolute;
+  left: -8px;
+  top: -30px;
+  width: 22px;
+  opacity: 0;
+  animation: pg-bonk 0.6s ease-out calc(var(--i) * 0.3s) 2 both;
+}
+@keyframes pg-bonk {
+  0% { opacity: 0; scale: 0.3; translate: 0 0; }
+  30% { opacity: 1; scale: 1.2; }
+  100% { opacity: 0; scale: 0.6; translate: calc((var(--i) - 1) * 26px) -26px; }
+}
+
+/* 새 그림이 나타날 때 반짝이가 사방으로 터진다 */
+.pg-burst {
+  position: absolute;
+  width: 30px;
+  translate: -50% -50%;
+  opacity: 0;
+  animation: pg-burst 0.9s ease-out calc(var(--i) * 0.02s) both;
+}
+@keyframes pg-burst {
+  0% { opacity: 0; transform: rotate(var(--a)) translateY(0) scale(0.3); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--a)) translateY(-90px) scale(1); }
+}
+
+/* ===== 걸음마다 늘어나는 생물 ===== */
+.pg-life {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+.pg-life img {
+  position: absolute;
+  filter: drop-shadow(0 3px 2px rgba(40, 25, 5, 0.3));
+}
+
+/* 나비 두 마리: 밭 위를 8자로 팔랑 */
+.pg-life-butterfly {
+  width: 7%;
+  animation: pg-flutter 0.35s ease-in-out infinite alternate, pg-fly-a 11s ease-in-out infinite;
+}
+.pg-life-butterfly.b {
+  width: 6%;
+  animation: pg-flutter 0.3s ease-in-out infinite alternate, pg-fly-b 13s ease-in-out infinite;
+}
+@keyframes pg-flutter {
+  from { scale: 1 1; }
+  to { scale: 0.55 1; }
+}
+@keyframes pg-fly-a {
+  0% { left: 30%; top: 40%; }
+  25% { left: 55%; top: 30%; }
+  50% { left: 68%; top: 48%; }
+  75% { left: 45%; top: 58%; }
+  100% { left: 30%; top: 40%; }
+}
+@keyframes pg-fly-b {
+  0% { left: 66%; top: 62%; }
+  30% { left: 40%; top: 70%; }
+  60% { left: 30%; top: 52%; }
+  100% { left: 66%; top: 62%; }
+}
+
+/* 무당벌레: 위쪽 밭 테두리를 따라 기어간다 */
+.pg-life-ladybug {
+  width: 3.4%;
+  top: 50.5%;
+  animation: pg-crawl 14s ease-in-out infinite;
+}
+@keyframes pg-crawl {
+  0% { left: 25%; scale: 1 1; }
+  48% { left: 42%; scale: 1 1; }
+  50% { left: 42%; scale: -1 1; }
+  98% { left: 25%; scale: -1 1; }
+  100% { left: 25%; scale: 1 1; }
+}
+
+/* 개구리: 길가에 앉아 있다가 가끔 폴짝 */
+.pg-life-frog {
+  width: 7%;
+  left: 59%;
+  top: 76%;
+  animation: pg-frog 5s ease-in-out infinite;
+}
+@keyframes pg-frog {
+  0%, 80%, 100% { translate: 0 0; }
+  86% { translate: 6px -18px; }
+  92% { translate: 12px 0; }
+}
+
+/* 꽃잎: 천천히 비스듬히 날린다 */
+.pg-life-petal {
+  width: 3%;
+  top: -4%;
+  opacity: 0;
+  animation: pg-petal 8s linear calc(var(--i) * 1.3s) infinite;
+}
+@keyframes pg-petal {
+  0% { top: 15%; opacity: 0; rotate: 0deg; translate: 0 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.9; }
+  100% { top: 85%; opacity: 0; rotate: 360deg; translate: 60px 0; }
+}

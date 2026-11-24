@@ -152,6 +152,19 @@ function place(recipe: Recipe, rng: Rng): { grid: string[][]; placed: Placement[
           if (grid[r]?.[c] !== '.' || taken.has(`${r},${c}`)) continue;
           // 그릇은 같은 열 맨 위에 관이 붙어야 한다 - 맨 윗칸이 판 밖이면 못 놓는다
           if (layer === 'collector' && (grid[0][c] !== '.' || taken.has(`0,${c}`))) continue;
+          // 투입구에서 그릇까지 같은 열이 끊김 없이 이어져야 한다. 중간에 판 밖(구멍)이 있으면
+          // 짐이 그 위에서 영영 못 내려온다(20판: 왼쪽 열 셋째 칸이 구멍이라 계란이 갇혔다)
+          if (layer === 'collector') {
+            let open = true;
+            // 판 밖(구멍)만 막힌 길이다 - 장애물은 깨면 길이 열린다
+            for (let rr = 1; rr < r; rr++) {
+              if (grid[rr][c] === '_') {
+                open = false;
+                break;
+              }
+            }
+            if (!open) continue;
+          }
           out.push([r, c]);
         }
       }
@@ -233,7 +246,11 @@ function goalsFrom(placed: Placement[], recipe: Recipe): Goal[] {
           ? { kind: 'spread', groundKind: kind, count: Math.round(playableCells(recipe) * 0.4) }
           : { kind: 'ground', groundKind: kind, count: n * p.layers },
       );
-    } else if (layer === 'collector') goals.push({ kind: 'collect', collectKind: kind, count: n });
+    } else if (layer === 'collector') {
+      // 목표는 담아야 할 짐의 총수(그릇 수 × 그릇마다 담을 개수). 그릇 수만 적으면
+      // 그릇이 덜 찼는데 클리어됐다(20판: 그릇 3개 × 2 = 6인데 목표가 3)
+      goals.push({ kind: 'collect', collectKind: kind, count: n * p.layers });
+    }
   }
 
   // 목표가 셋 넘으면 무엇을 하는 판인지 읽히지 않는다. 레퍼런스도 보통 한둘이다.

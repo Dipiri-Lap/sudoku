@@ -13,6 +13,10 @@ export const CLEAR_MS = 240;
 /** 터진 뒤 빈칸을 보여주는 정지 구간. 없으면 "터지자마자 이미 내려와 있는" 느낌이 난다. */
 export const CLEAR_HOLD_MS = 120;
 export const EFFECT_MS = 260;
+/** 버섯이 다시 자라는 단계: 채소가 톡 터지고(~250ms) 버섯이 띠옹 솟는다 */
+export const REGROW_MS = 820;
+/** 버섯에 밀려 채소가 쩍 갈라지는 순간(CSS jk-regrow-split 시작과 같다) */
+export const REGROW_CRACK_MS = 220;
 /** 수집물이 그릇으로 빨려 들어가는 시간 */
 export const COLLECT_MS = 300;
 

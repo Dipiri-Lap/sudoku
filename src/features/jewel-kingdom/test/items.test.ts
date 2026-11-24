@@ -228,3 +228,56 @@ describe('도토리는 다른 아이템을 목표로 삼지 않는다', () => {
     }
   });
 });
+
+describe('계란 판의 도토리', () => {
+  it('계란 바로 아래 채소를 노려 계란이 떨어질 길을 터 준다', () => {
+    const board = parseBoard(`
+      R@ G B Y R G B
+      G B Y R G B Y
+      B Y R G B Y R
+      Y R G B Y R G
+      R G B Y R G B
+      G B Y R G B Y
+      B Y R G B Y R
+    `);
+    // (2,5)에 계란(수집물)을 놓는다
+    const egg = at(board, 2, 5).gem!;
+    at(board, 2, 5).gem = { ...egg, inert: true };
+    const scorer = goalTargetScorer([{ kind: 'collect', collectKind: 'shelf', count: 2 }]);
+    for (let seed = 1; seed <= 10; seed++) {
+      const res = activateAt(board, { row: 0, col: 0 }, makeRng(seed), { targetScorer: scorer });
+      const clear = res.steps.find(s => s.kind === 'clear');
+      const fly = clear && clear.kind === 'clear' ? clear.blasts.find(b => b.kind === 'propeller') : undefined;
+      expect(fly?.destination, `seed ${seed}`).toEqual({ row: 3, col: 5 });
+    }
+  });
+});
+
+describe('아이템이 지나간 줄 옆 장애물', () => {
+  // 1열에 세로 삽, 2열에 버섯 기둥
+  const setup = () => {
+    const board = parseBoard(FILLER);
+    for (const r of [1, 2, 3, 4]) {
+      at(board, r, 2).blocker = { kind: 'mushroom', layers: 1 };
+      at(board, r, 2).gem = null;
+    }
+    const gem = at(board, 3, 1).gem!;
+    at(board, 3, 1).gem = { ...gem, special: 'rocket-v' };
+    return board;
+  };
+
+  it('옆 줄을 쓸고 지나가도 장애물은 안 깎인다(범위 안만 친다)', () => {
+    const result = activateAt(setup(), { row: 3, col: 1 }, makeRng(1));
+    const clear = result.steps.find(s => s.kind === 'clear');
+    expect(clear && clear.kind === 'clear' && clear.damage.filter(e => e.target === 'blocker')).toEqual([]);
+  });
+
+  it('범위 안에 든 장애물은 맞는다', () => {
+    const board = setup();
+    const gem = at(board, 2, 0).gem!;
+    at(board, 3, 1).gem = { ...gem, special: 'rocket-h' };
+    const result = activateAt(board, { row: 3, col: 1 }, makeRng(1));
+    const clear = result.steps.find(s => s.kind === 'clear');
+    expect(clear && clear.kind === 'clear' && clear.damage.some(e => e.key === '3,2' && e.destroyed)).toBe(true);
+  });
+});

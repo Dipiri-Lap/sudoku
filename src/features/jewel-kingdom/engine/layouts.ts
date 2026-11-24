@@ -140,20 +140,21 @@ function pickCut(rng: Rng): Cut {
  * 조각은 왼쪽 절반 기준으로 한 뒤 대칭을 입힌다: 좌우 대칭(대부분) / 180도 회전 대칭 /
  * 비대칭(가끔). 채울 수 없거나 너무 깎인 판이 되면 그 조각은 되돌린다.
  */
-export function sculptMask(size: number, cuts: number, rng: Rng): Mask {
-  let m: Mask = Array.from({ length: size }, () => Array.from({ length: size }, () => true));
+export function sculptMask(width: number, cuts: number, rng: Rng, height = width): Mask {
+  // 가로는 휴대폰 폭에 맞춰 9칸까지, 세로는 더 길 수 있다(다른 3매치의 세로로 긴 판)
+  let m: Mask = Array.from({ length: height }, () => Array.from({ length: width }, () => true));
   const sym = rng.next();
   const mode = sym < 0.72 ? 'mirror' : sym < 0.9 ? 'rotate' : 'none';
   for (let i = 0; i < cuts; i++) {
     const trial = m.map(row => row.slice());
     const half = m.map(row => row.map(() => true));
     pickCut(rng)(half, rng);
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
+    for (let r = 0; r < height; r++) {
+      for (let c = 0; c < width; c++) {
         if (half[r][c]) continue;
         trial[r][c] = false;
-        if (mode === 'mirror') trial[r][size - 1 - c] = false;
-        if (mode === 'rotate') trial[size - 1 - r][size - 1 - c] = false;
+        if (mode === 'mirror') trial[r][width - 1 - c] = false;
+        if (mode === 'rotate') trial[height - 1 - r][width - 1 - c] = false;
       }
     }
     if (isFillable(trial)) m = trial;

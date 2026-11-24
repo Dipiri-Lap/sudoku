@@ -9,6 +9,7 @@ import {
   arrivalMs,
   blastHasFx,
   flightTargets,
+  hitTimes,
   lightGapFor,
   lightballPopMs,
   scheduleClear,
@@ -31,6 +32,14 @@ export function playStepSounds(step: TurnStep): void {
       return;
     case 'clear':
       clearSounds(step);
+      return;
+    case 'board-effect':
+      // 버섯이 자라남: 채소가 톡 터지고 버섯이 띠옹
+      if (step.effects.some(e => e.kind === 'regrow')) {
+        playSfxAt('dig', 0, 1.25); // 밑에서 밀고 올라오는 흙 소리
+        playSfxAt('pop', 220, 0.9); // 쩍 갈라짐
+        playSfxAt('spawn', 300, 0.8); // 띠옹
+      }
       return;
     default:
       return;
@@ -55,21 +64,39 @@ function clearSounds(step: Extract<TurnStep, { kind: 'clear' }>) {
     .slice(0, 10)
     .forEach((b, i) => playSfxAt('pop', b * 60 + POP_AT, comboPitch * (1 + i * 0.015)));
 
+  // 짚단 바스락: 같은 순간(60ms 단위)에 맞는 짚단은 한 번만, 많아도 네 번.
+  // 하나라도 통째로 깨지면 크게, 겹만 털리면 작게
+  const hits = hitTimes(step);
+  const straw = new Map<number, boolean>();
+  step.damage.forEach(d => {
+    if (d.kind !== 'box' || d.target !== 'blocker') return;
+    const b = Math.round((hits.get(d.key) ?? 0) / 60);
+    straw.set(b, (straw.get(b) ?? false) || d.destroyed);
+  });
+  [...straw]
+    .sort((x, y) => x[0] - y[0])
+    .slice(0, 4)
+    .forEach(([b, broken], i) => playSfxAt('straw', b * 60, (broken ? 1 : 0.8) * (1 + i * 0.03)));
+
   // 2) 새 아이템이 생기는 순간
   if (step.spawned.length > 0) playSfxAt('spawn', 120);
 
   // 3) 아이템마다
   const { width, height } = step.board;
+  /** 거름포대가 터지는 시각 → 크게(합체·여럿 동시) 낼지 */
+  const tntAt = new Map<number, boolean>();
   sch.blasts.forEach(sb => {
     const b = sb.blast;
     if (!blastHasFx(b)) return;
     const t = sb.start;
     switch (b.kind) {
-      case 'tnt':
-        playSfxAt('fuse', t);
-        // 큰 거름포대(포대+포대 합체)는 더 묵직하게
-        playSfxAt('boom', t + FX_TIMING.tntCharge + FX_TIMING.tntHitstop, b.combo && !sb.carried ? 0.8 : 1);
+      case 'tnt': {
+        // 같은 순간에 여러 포대가 터지면(무지개꽃+포대) 소리는 한 번만, 대신 더 묵직하게
+        const at = Math.round(t);
+        const big = (b.combo && !sb.carried) || tntAt.has(at);
+        tntAt.set(at, big);
         return;
+      }
       case 'rocket-h':
       case 'rocket-v': {
         if (sb.clash && b.kind === 'rocket-h') {
@@ -106,6 +133,14 @@ function clearSounds(step: Extract<TurnStep, { kind: 'clear' }>) {
         playSfxAt('swap', t);
         return;
       case 'lightball': {
+        if (b.wipe) {
+          // 판 쓸기: 차임이 점점 높아지다(빛 모으기) 큰 펑
+          playSfxAt('chime', t);
+          playSfxAt('chime', t + 180, 1.25);
+          playSfxAt('chime', t + 360, 1.5);
+          playSfxAt('boom', t + FX_TIMING.wipeCharge, 0.8);
+          return;
+        }
         playSfxAt('chime', t);
         if (b.combo && b.into) {
           // 변신: 꽃잎이 닿을 때마다 뿅(음이 차례로 올라간다)
@@ -130,5 +165,9 @@ function clearSounds(step: Extract<TurnStep, { kind: 'clear' }>) {
       default:
         return;
     }
+  });
+  tntAt.forEach((big, at) => {
+    playSfxAt('fuse', at);
+    playSfxAt('boom', at + FX_TIMING.tntCharge + FX_TIMING.tntHitstop, big ? 0.8 : 1);
   });
 }

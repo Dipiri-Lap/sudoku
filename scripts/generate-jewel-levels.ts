@@ -63,6 +63,10 @@ function main() {
       { recipe: { ...base, shape: 'full' as const, mask: undefined }, shift: 0 },
       { recipe: { ...lighterRecipe(base, 1), shape: 'full' as const, mask: undefined }, shift: -0.08 },
       { recipe: { ...lighterRecipe(base, 3), shape: 'full' as const, mask: undefined }, shift: -0.15 },
+      // 마지막: 재료는 그대로 두고 목표 승률만 낮춘다 - 재료를 덜면 너무 쉽고(최소 수에서도
+      // 승률 100%) 그대로면 조금 모자란 판(44판: 계란 6개 + 닭장)이 끝내 빠지지 않게
+      { recipe: base, shift: -0.2 },
+      { recipe: { ...base, shape: 'full' as const, mask: undefined }, shift: -0.25 },
     ];
     let g: Generated | null = null;
     let target = targetWinRate(n);

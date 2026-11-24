@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://puzzles.tmhub.co.kr/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/"/>
@@ -95,7 +95,7 @@
   </url>
   <url>
     <loc>https://puzzles.tmhub.co.kr/daily</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -149,7 +149,7 @@
   </url>
   <url>
     <loc>https://puzzles.tmhub.co.kr/en/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/"/>
@@ -224,7 +224,7 @@
   </url>
   <url>
     <loc>https://puzzles.tmhub.co.kr/ja/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/"/>
@@ -299,7 +299,7 @@
   </url>
   <url>
     <loc>https://puzzles.tmhub.co.kr/de/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/"/>
@@ -374,7 +374,7 @@
   </url>
   <url>
     <loc>https://puzzles.tmhub.co.kr/es/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/"/>
@@ -449,7 +449,7 @@
   </url>
   <url>
     <loc>https://puzzles.tmhub.co.kr/fr/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/"/>
@@ -524,7 +524,7 @@
   </url>
   <url>
     <loc>https://puzzles.tmhub.co.kr/pt/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/"/>
@@ -599,7 +599,7 @@
   </url>
   <url>
     <loc>https://puzzles.tmhub.co.kr/zh/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://puzzles.tmhub.co.kr/"/>

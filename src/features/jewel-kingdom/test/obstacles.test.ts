@@ -227,3 +227,22 @@ describe('훅 여러 개', () => {
     expect(kinds).toContain('produced');
   });
 });
+
+describe('나란히 놓인 장애물 밑', () => {
+  it('가운데 바로 밑 한 칸만 비고, 그 아래는 대각선으로 채워진다', () => {
+    let board = parseBoard(`
+      R G B Y R
+      Y B G R G
+      G Y R B Y
+      B R Y G B
+      R G B Y R
+    `);
+    for (const c of [1, 2, 3]) board = withBlocker(board, 1, c, { kind: 'rock', layers: 1 });
+    // 가운데 돌 밑 기둥 세 칸을 비운다
+    const { board: after } = applyGravity(board, new Set(['2,2', '3,2', '4,2']), rng());
+    // 위·대각선 위가 다 돌이라 바로 밑은 비어도 되지만, 그 아래 두 칸은 채워져야 한다
+    expect(at(after, 2, 2).gem).toBeNull();
+    expect(at(after, 3, 2).gem).not.toBeNull();
+    expect(at(after, 4, 2).gem).not.toBeNull();
+  });
+});

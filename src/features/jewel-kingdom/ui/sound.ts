@@ -27,17 +27,32 @@ export type SfxName =
   | 'morph'
   | 'chirp'
   | 'ribbit'
+  | 'straw'
   | 'win'
   | 'lose';
 
 const MUTE_KEY = 'jk-sound-muted';
-let muted = (() => {
+const MUSIC_KEY = 'jk-music-muted';
+
+function readFlag(k: string): boolean {
   try {
-    return localStorage.getItem(MUTE_KEY) === '1';
+    return localStorage.getItem(k) === '1';
   } catch {
     return false;
   }
-})();
+}
+function writeFlag(k: string, v: boolean) {
+  try {
+    localStorage.setItem(k, v ? '1' : '0');
+  } catch {
+    /* 저장 못 해도 이번 세션에서는 따른다 */
+  }
+}
+
+/** 효과음 끔 */
+let muted = readFlag(MUTE_KEY);
+/** 배경음악 끔(효과음과 따로) */
+let musicMuted = readFlag(MUSIC_KEY);
 
 export function isMuted(): boolean {
   return muted;
@@ -45,11 +60,17 @@ export function isMuted(): boolean {
 
 export function setMuted(m: boolean): void {
   muted = m;
-  try {
-    localStorage.setItem(MUTE_KEY, m ? '1' : '0');
-  } catch {
-    /* 저장 못 해도 이번 세션에서는 따른다 */
-  }
+  writeFlag(MUTE_KEY, m);
+}
+
+export function isMusicMuted(): boolean {
+  return musicMuted;
+}
+
+export function setMusicMuted(m: boolean): void {
+  musicMuted = m;
+  applyBgmGain();
+  writeFlag(MUSIC_KEY, m);
 }
 
 let ctx: AudioContext | null = null;
@@ -76,6 +97,119 @@ function audio(): AudioContext | null {
 export function unlockAudio(): void {
   const a = audio();
   if (a && a.state === 'suspended') void a.resume();
+}
+
+// ── 배경음악 ──
+// 효과음과 따로 간다: 압축기를 거치면 큰 폭발 때마다 음악이 눌려 꿀렁인다.
+// 반복 이음매가 끊기지 않게 <audio loop> 대신 디코딩한 버퍼를 loop로 돌린다.
+// 곡이 바뀌면(로비 ↔ 플레이) 옛 곡은 줄이며 끄고 새 곡을 키우며 켠다.
+export type BgmTrack = 'lobby' | 'play';
+const BGM_URL: Record<BgmTrack, string> = {
+  lobby: '/assets/3match/bgm-lobby.mp3',
+  play: '/assets/3match/bgm.mp3',
+};
+/** 효과음 밑에 은은하게 깔리는 정도. 효과음(마스터 0.55)보다 확실히 작게 */
+const BGM_VOLUME = 0.18;
+const BGM_FADE = 0.6;
+let wantedTrack: BgmTrack | null = null;
+let current: { track: BgmTrack; src: AudioBufferSourceNode; gain: GainNode } | null = null;
+const bgmBufs = new Map<BgmTrack, Promise<AudioBuffer | null>>();
+let bgmHidden = false;
+let starting = false;
+
+function bgmTarget(): number {
+  return wantedTrack && !musicMuted && !bgmHidden ? BGM_VOLUME : 0;
+}
+
+function rampTo(g: GainNode, v: number) {
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  g.gain.cancelScheduledValues(now);
+  g.gain.setValueAtTime(g.gain.value, now);
+  g.gain.linearRampToValueAtTime(v, now + BGM_FADE);
+}
+
+function applyBgmGain(): void {
+  if (current) rampTo(current.gain, current.track === wantedTrack ? bgmTarget() : 0);
+}
+
+function loadBgm(a: AudioContext, track: BgmTrack): Promise<AudioBuffer | null> {
+  let p = bgmBufs.get(track);
+  if (!p) {
+    p = fetch(BGM_URL[track])
+      .then(r => (r.ok && (r.headers.get('content-type') ?? '').includes('audio') ? r.arrayBuffer() : null))
+      .then(buf => (buf ? a.decodeAudioData(buf) : null))
+      .catch(() => null);
+    bgmBufs.set(track, p);
+  }
+  return p;
+}
+
+/** 지금 흐르는 곡을 줄이며 끈다 */
+function fadeOutCurrent() {
+  if (!current || !ctx) return;
+  const old = current;
+  current = null;
+  rampTo(old.gain, 0);
+  old.src.stop(ctx.currentTime + BGM_FADE + 0.05);
+}
+
+async function syncBgm(): Promise<void> {
+  if (starting) return;
+  const a = audio();
+  if (!a) return;
+  if (current && current.track !== wantedTrack) fadeOutCurrent();
+  if (!wantedTrack || current) {
+    applyBgmGain();
+    return;
+  }
+  starting = true;
+  try {
+    if (a.state === 'suspended') await a.resume().catch(() => {});
+    if (a.state !== 'running') return; // 아직 사용자가 안 눌렀다 - 첫 터치에서 다시 온다
+    const track = wantedTrack;
+    const buf = await loadBgm(a, track);
+    if (!buf || wantedTrack !== track || current) return;
+    const gain = a.createGain();
+    gain.gain.value = 0;
+    gain.connect(a.destination);
+    const src = a.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    src.connect(gain);
+    src.start();
+    current = { track, src, gain };
+    applyBgmGain();
+  } finally {
+    starting = false;
+  }
+  // 기다리는 동안 원하는 곡이 바뀌었으면 한 번 더 맞춘다
+  if ((current?.track ?? null) !== wantedTrack) void syncBgm();
+}
+
+function onFirstTouch() {
+  void syncBgm();
+}
+
+function onVisibility() {
+  bgmHidden = document.visibilityState === 'hidden';
+  applyBgmGain();
+}
+
+/** 이 곡을 틀어 둔다(이미 흐르면 그대로). 브라우저가 소리를 막고 있으면 첫 터치에서 시작한다 */
+export function startBgm(track: BgmTrack = 'play'): void {
+  if (typeof window === 'undefined') return;
+  wantedTrack = track;
+  window.addEventListener('pointerdown', onFirstTouch);
+  document.addEventListener('visibilitychange', onVisibility);
+  void syncBgm();
+}
+
+/** 배경음악을 멈춘다(클리어·화면 나감) */
+export function stopBgm(): void {
+  if (typeof window === 'undefined') return;
+  wantedTrack = null;
+  fadeOutCurrent();
 }
 
 // ── 일레븐랩스 등으로 만든 파일이 있으면 그걸 쓴다 ──
@@ -345,6 +479,26 @@ export function playSfx(name: SfxName, pitch = 1): void {
       tone(a, { type: 'square', from: 180, to: 140, dur: 0.12, gain: 0.12 });
       tone(a, { type: 'square', from: 200, to: 150, dur: 0.14, gain: 0.12, at: 0.14 });
       break;
+    case 'straw': {
+      // 짚단이 터짐: 퍽(낮은 몸통) + 마른 짚이 바스락바스락 부서지는 잔소리.
+      // pitch가 1보다 작으면(겹만 털림) 짧고 가볍게
+      const big = p >= 1;
+      tone(a, { type: 'triangle', from: 190, to: 85, dur: 0.12, gain: big ? 0.42 : 0.22 });
+      hiss(a, { dur: 0.09, gain: big ? 0.38 : 0.2, type: 'lowpass', from: 2600, to: 900 });
+      const n = big ? 9 : 4;
+      for (let i = 0; i < n; i++) {
+        hiss(a, {
+          dur: 0.018 + Math.random() * 0.03,
+          gain: (big ? 0.3 : 0.18) * (1 - i / (n + 2)),
+          from: 2800 + Math.random() * 3600,
+          q: 2.5,
+          at: 0.012 + i * (big ? 0.022 : 0.026) + Math.random() * 0.012,
+        });
+      }
+      // 짚 먼지가 쓸려 퍼지는 꼬리
+      hiss(a, { dur: big ? 0.32 : 0.16, gain: big ? 0.1 : 0.06, type: 'highpass', from: 4200, at: 0.03, attack: 0.03 });
+      break;
+    }
     case 'win':
       [523, 659, 784, 1047, 1319].forEach((f, i) => tone(a, { type: 'triangle', from: f, dur: 0.35, gain: 0.28, at: i * 0.09 }));
       [1568, 2093].forEach((f, i) => tone(a, { from: f, dur: 0.6, gain: 0.14, at: 0.5 + i * 0.05 }));

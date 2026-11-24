@@ -99,8 +99,9 @@ body.jk-body #root {
 
 .jk-board-outer {
   position: relative;
-  width: var(--jk-col);
-  aspect-ratio: 1 / 1;
+  /* 세로로 긴 판은 화면 높이에 맞춰 줄인다(위 상단판·아래 부스터 자리를 남기고) */
+  width: min(var(--jk-col), calc((100dvh - 330px) * var(--jk-ratio, 1)));
+  align-self: center;
   /* 두꺼운 액자 없이 밭 모양을 따라가는 얇은 테두리(.jk-outline)만 둔다(다른 3매치처럼).
      여백은 그 테두리가 잘리지 않을 만큼만. % 여백은 부모 폭 기준이라 판 폭(--jk-col)으로 계산한다 */
   padding: calc(var(--jk-col) * 0.014);
@@ -116,7 +117,7 @@ body.jk-body #root {
 .jk-board {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: auto;
 }
 
 /* 판 칸 모양을 따라가는 얇은 나무 테두리 - 칸 밑에 깐다 */
@@ -139,8 +140,11 @@ body.jk-body #root {
   justify-content: center;
 }
 
-/* 칸 바닥. 보석과 분리해야 보석이 떨어질 때 바닥이 같이 움직이지 않는다. */
+/* 칸 바닥. 보석과 분리해야 보석이 떨어질 때 바닥이 같이 움직이지 않는다.
+   z-index 0: 칸 바닥마다 쌓임 맥락을 만들어, 그 안에서만 잔디(z 1)가 흙 위에 오게 한다 -
+   바깥으로 새면 잔디가 채소 위로 올라와 채소를 가린다 */
 .jk-plate {
+  z-index: 0;
   padding: 1px;
 }
 
@@ -159,8 +163,11 @@ body.jk-body #root {
   filter: brightness(1.2) saturate(0.95);
 }
 
-/* 하단 레이어는 보석 아래 깔린다 - 칸 바닥을 통째로 덮는다 */
+/* 하단 레이어는 보석 아래 깔린다 - 칸 바닥을 통째로 덮는다.
+   z-index: 체크무늬 밝은 칸의 흙(::after)은 필터 때문에 따로 쌓여서, 이게 없으면
+   흙이 잔디 위에 그려져 밝은 칸의 잔디가 안 보였다(4판: 잔디 8칸 중 4칸만 보임) */
 .jk-ground-sprite {
+  z-index: 1;
   position: absolute;
   inset: 1px;
   width: auto;
@@ -235,9 +242,9 @@ body.jk-body #root {
 }
 
 .jk-gem img {
-  /* 그림 파일에 이미 여백이 조금 있어서(116/128) 칸을 다 쓰게 둔다 */
-  width: 100%;
-  height: 100%;
+  /* 그림 파일에 이미 여백이 조금 있다(116/128). 칸보다 7.5% 작게 둬서 칸 사이에 숨 쉴 틈을 준다 */
+  width: 92.5%;
+  height: 92.5%;
   object-fit: contain;
   /* 없으면 img가 드래그 대상이 되어 pointerdown이 씹힌다 */
   pointer-events: none;
@@ -251,6 +258,103 @@ body.jk-body #root {
 
 .jk-gem.grabbed img {
   filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 4px rgba(255, 138, 61, 0.9));
+}
+
+/* 버섯이 다시 자람: 밑에서 버섯이 밀고 올라와 채소가 들썩이며 떨리다가(0~0.22s)
+   두 쪽으로 쩍 갈라져 양옆으로 튀어 나가고(즙·조각은 FxLayer), 버섯이 띠옹 솟는다 */
+.jk-regrow-old {
+  z-index: 2;
+  padding: 1px;
+  pointer-events: none;
+  animation: jk-regrow-lift 0.22s ease-in both;
+}
+.jk-regrow-half {
+  position: absolute;
+  inset: 1px;
+  animation: 0.46s cubic-bezier(0.2, 0.7, 0.4, 1) 0.22s both;
+}
+.jk-regrow-half img {
+  /* 판 위 채소(.jk-gem img)와 같은 크기 - 갈라질 때 크기가 튀지 않게 */
+  display: block;
+  width: 92.5%;
+  height: 92.5%;
+  /* 칸 가운데에 오게(칸은 정사각형이라 위아래 여백도 가로 기준 %로 같다) */
+  margin: 3.75%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 1px rgba(30, 15, 4, 0.45));
+}
+.jk-regrow-half.l { clip-path: polygon(0 0, 54% 0, 44% 35%, 56% 60%, 46% 100%, 0 100%); animation-name: jk-regrow-split-l; }
+.jk-regrow-half.r { clip-path: polygon(54% 0, 100% 0, 100% 100%, 46% 100%, 56% 60%, 44% 35%); animation-name: jk-regrow-split-r; }
+/* 갈라질 때 흙먼지 고리 */
+.jk-regrow-old::after {
+  content: '';
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  border: 3px solid rgba(214, 170, 110, 0.9);
+  opacity: 0;
+  animation: jk-regrow-ring 0.35s ease-out 0.22s forwards;
+}
+@keyframes jk-regrow-lift {
+  0% { transform: translate(0, 0) rotate(0); }
+  20% { transform: translate(-2%, -3%) rotate(-4deg); }
+  40% { transform: translate(2%, -5%) rotate(4deg); }
+  60% { transform: translate(-2%, -8%) rotate(-5deg) scale(1.04, 0.97); }
+  80% { transform: translate(2%, -11%) rotate(5deg) scale(1.06, 0.95); }
+  100% { transform: translate(0, -13%) rotate(0) scale(1.08, 0.94); }
+}
+@keyframes jk-regrow-split-l {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  35% { transform: translate(-38%, -22%) rotate(-28deg); opacity: 1; }
+  100% { transform: translate(-70%, 30%) rotate(-62deg) scale(0.8); opacity: 0; }
+}
+@keyframes jk-regrow-split-r {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  35% { transform: translate(38%, -22%) rotate(28deg); opacity: 1; }
+  100% { transform: translate(70%, 30%) rotate(62deg) scale(0.8); opacity: 0; }
+}
+@keyframes jk-regrow-ring {
+  0% { opacity: 0.95; transform: scale(0.6); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+/* 버섯: 채소 밑에서 납작하게 밀고 올라오다(채소에 가려 있음) 갈라지는 순간 띠옹 */
+.jk-blocker.regrowing > * {
+  transform-origin: 50% 90%;
+  animation: jk-regrow-up 0.66s linear 0.04s both;
+}
+@keyframes jk-regrow-up {
+  0% { transform: scale(0.3, 0); animation-timing-function: ease-in; }
+  27% { transform: scale(0.8, 0.45); animation-timing-function: cubic-bezier(0.2, 1.4, 0.5, 1); }
+  44% { transform: scale(0.84, 1.36); animation-timing-function: ease-in-out; }
+  62% { transform: scale(1.16, 0.86); }
+  80% { transform: scale(0.96, 1.06); }
+  100% { transform: scale(1); }
+}
+
+/* 힌트: 함께 맞춰질 칸들이 통통 튀고, 옮길 칸은 갈 방향으로 두 번 툭툭 민다.
+   transform은 떨어지기·바꾸기 연출이 쓰므로 따로 노는 translate/scale 속성만 건드린다. */
+.jk-gem.hinted {
+  z-index: 2;
+  animation: jk-hint-pulse 1.6s ease-in-out infinite;
+}
+.jk-gem.hinted img {
+  filter: drop-shadow(0 2px 1px rgba(30, 15, 4, 0.45)) drop-shadow(0 0 5px rgba(255, 246, 200, 0.95));
+}
+.jk-gem.hinted[style*='--hx'] {
+  animation: jk-hint-nudge 1.6s ease-in-out infinite;
+}
+@keyframes jk-hint-pulse {
+  0%, 55%, 100% { scale: 1; }
+  15% { scale: 1.12; }
+  30% { scale: 0.97; }
+  42% { scale: 1.06; }
+}
+@keyframes jk-hint-nudge {
+  0%, 55%, 100% { translate: 0 0; scale: 1; }
+  12% { translate: calc(var(--hx) * 16%) calc(var(--hy) * 16%); scale: 1.08; }
+  24% { translate: 0 0; scale: 1; }
+  36% { translate: calc(var(--hx) * 12%) calc(var(--hy) * 12%); scale: 1.05; }
+  48% { translate: 0 0; scale: 1; }
 }
 
 .jk-cover {
@@ -294,7 +398,17 @@ body.jk-body #root {
   transform: rotate(90deg);
 }
 
-/* 깎이거나 깨지는 장애물: 맞는 시각(--h)까지는 옛 모습, 그 순간 번쩍하며 사라지고 새 모습이 나타난다 */
+/* 바닥(잔디 등)을 감싸는 틀 - 칸 바닥 안에서 흙 위에 놓인다 */
+.jk-ground-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 깎이거나 깨지는 장애물·바닥·덮개: 맞는 시각(--h)까지는 옛 모습, 그 순간 번쩍하며 사라지고 새 모습이 나타난다 */
+.jk-ground-wrap.pending-old,
+.jk-cover.pending-old,
 .jk-blocker.pending-old {
   animation: jk-old-out 0.24s ease-out var(--h, 0ms) both;
 }
@@ -305,6 +419,8 @@ body.jk-body #root {
   100% { opacity: 0; transform: scale(0.6); filter: brightness(1); }
 }
 
+.jk-ground-wrap.pending-new,
+.jk-cover.pending-new,
 .jk-blocker.pending-new {
   animation: jk-new-in 0.12s ease-out var(--h, 0ms) both;
 }
@@ -2006,4 +2122,185 @@ body.jk-body #root {
   .jk-hud-moves.low {
     animation: none !important;
   }
+}
+
+/* ===== Pop Garden 껍데기와 함께 쓰는 부품: 창(모달)·토글·일시정지 ===== */
+/* 일시정지는 왼쪽 끝, 레벨 표시·개발 버튼은 오른쪽으로 민다 */
+.jk-topbar .jk-pause-btn {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.jk-overlay-actions.column {
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 220px;
+}
+
+.jk-overlay-actions small,
+.jk-modal-actions small {
+  font-size: 0.8em;
+  opacity: 0.85;
+  margin-left: 6px;
+}
+
+.jk-overlay-sub {
+  margin: -8px 0 0;
+  color: #fff;
+  font-size: 1.05rem;
+  text-shadow: 0 2px 0 var(--jk-outline);
+}
+
+.jk-overlay-sub.warn {
+  margin: 0;
+  color: #ffd2c2;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.jk-reward {
+  margin: -6px 0 0;
+  font-family: 'Lilita One', 'Jua', sans-serif;
+  font-size: 1.8rem;
+  color: #ffe16b;
+  text-shadow: var(--jk-num-shadow);
+}
+
+.jk-modal-back {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(40, 22, 8, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: jk-fade-in 0.15s ease-out both;
+}
+
+.jk-modal {
+  position: relative;
+  width: min(340px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: var(--jk-card, #fff6e4);
+  border: 4px solid var(--jk-outline, #4a2a12);
+  border-radius: 22px;
+  box-shadow: 0 6px 0 var(--jk-outline, #4a2a12);
+  padding: 22px 18px 18px;
+  color: var(--jk-ink, #4a2e1a);
+  font-family: 'Jua', 'Pretendard', system-ui, sans-serif;
+  text-align: center;
+  animation: jk-pop-in 0.22s cubic-bezier(0.2, 1.4, 0.5, 1) both;
+}
+
+.jk-modal h2 {
+  margin: 0 0 14px;
+  font-weight: 400;
+  font-size: 1.7rem;
+}
+
+.jk-modal p {
+  margin: 0 0 12px;
+  color: var(--jk-ink-soft, #7a5638);
+}
+
+.jk-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--jk-outline, #4a2a12);
+  background: #ff7b5c;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.jk-modal-toggles {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.jk-toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 3px solid var(--jk-outline, #4a2a12);
+  border-radius: 14px;
+  background: #d9cbb2;
+  color: #6b5a45;
+  font: inherit;
+  font-size: 1rem;
+  padding: 10px 8px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--jk-outline, #4a2a12);
+}
+
+.jk-toggle.on {
+  background: #7cc243;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(30, 60, 10, 0.6);
+}
+
+.jk-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jk-modal-actions button {
+  background: var(--jk-card, #fff6e4);
+  border: 3px solid var(--jk-outline, #4a2a12);
+  color: var(--jk-ink, #4a2e1a);
+  border-radius: 16px;
+  padding: 12px 18px;
+  font: inherit;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 0 var(--jk-outline, #4a2a12);
+  cursor: pointer;
+}
+
+.jk-modal-actions button.primary {
+  background: #7cc243;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(30, 60, 10, 0.6);
+}
+
+.jk-modal-actions button.danger {
+  background: #ff8a6b;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(90, 30, 10, 0.5);
+}
+
+.jk-modal-actions button:disabled {
+  filter: grayscale(0.8);
+  opacity: 0.6;
+  cursor: default;
+}
+
+@keyframes jk-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes jk-pop-in {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* 긴 화면에서 판이 위에 붙지 않게: 정보판과 부스터 사이 남는 높이를 판 위아래로 똑같이 나눈다
+   (부스터는 이미 margin-top:auto로 아래에 붙어 있다) */
+.jk-board-outer {
+  margin-top: auto;
 }

@@ -59,8 +59,12 @@ export const FX_TIMING = {
   lightSpreadMax: 1300,
   /** 무지개꽃: 한 줄기가 날아가 닿는 시간 */
   lightFly: 380,
-  /** 무지개꽃 변신 합체: 다 바뀐 뒤 바뀐 아이템이 하나씩 터지는 간격 */
-  transformGap: 200,
+  /** 무지개꽃 변신 합체: 다 바뀐 뒤 바뀐 아이템(도토리·삽)이 하나씩 터지는 간격. 포대는 한꺼번에 */
+  transformGap: 100,
+  /** 무지개꽃+무지개꽃: 큰 꽃이 빙글 돌며 빛을 모으는 시간 - 그 뒤 팡 */
+  wipeCharge: 520,
+  /** 무지개꽃+무지개꽃: 무지개 고리가 한 칸 퍼지는 시간 */
+  wipeRing: 45,
   /** 무지개꽃: 다 뻗은 뒤 한꺼번에 팡 터지기 전 잠깐 */
   lightHold: 110,
   /** 마지막 칸이 사라진 뒤 낙하 전까지 아주 잠깐 숨 고르기 */
@@ -101,7 +105,7 @@ export function blastHasFx(b: Blast): boolean {
   if (!hasFx(b.kind)) return false;
   // 무지개꽃은 색을 지목했을 때만(빛줄기를 뻗을 대상이 있어야 한다). 합체는 변신 합체만
   if (b.kind === 'lightball') {
-    if (b.combo) return !!b.into;
+    if (b.combo) return !!b.into || !!b.wipe;
     return b.targetColor !== null && b.targetColor !== undefined;
   }
   if (!FLYERS.has(b.kind)) return true;
@@ -200,6 +204,8 @@ export function localDelay(blast: Blast, row: number, col: number): number {
     case 'tnt':
       return FX_TIMING.tntCharge + FX_TIMING.tntHitstop + Math.max(Math.abs(dr), Math.abs(dc)) * FX_TIMING.tntRing;
     case 'lightball':
+      // 판 쓸기: 큰 꽃이 빛을 모은 뒤 무지개 고리가 가운데서 바깥으로 퍼지며 닿는 칸부터
+      if (blast.wipe) return FX_TIMING.wipeCharge + Math.hypot(dr, dc) * FX_TIMING.wipeRing;
       // 대상 수를 모를 때의 기본(한 줄기). 실제 시각은 scheduleClear가 대상 수로 다시 잰다
       return lightballPopMs(1);
     case 'rocket-h':
@@ -325,7 +331,9 @@ export function scheduleClear(step: TurnStep): ClearSchedule {
     order.forEach((k, idx) => {
       const i = blasts.findIndex(b2 => !b2.combo && key(b2.row, b2.col) === k);
       if (i < 0) return;
-      start[i] = placed + idx * FX_TIMING.transformGap;
+      // 폭탄(거름포대)은 다 놓인 뒤 한꺼번에 펑, 나머지(도토리·삽)는 차례로
+      const gapEach = tb.into === 'tnt' ? 0 : FX_TIMING.transformGap;
+      start[i] = placed + idx * gapEach;
       fixed.add(i);
     });
   });
@@ -375,7 +383,11 @@ export function scheduleClear(step: TurnStep): ClearSchedule {
       if (!blastHasFx(blasts[i])) continue;
       if (blasts[i].kind === 'lightball') {
         // 변신 합체는 칸을 직접 지우지 않는다 - 바뀐 아이템이 제 차례에 터진다
-        if (blasts[i].combo) continue;
+        if (blasts[i].combo && !blasts[i].wipe) continue;
+        if (blasts[i].wipe) {
+          best = Math.min(best, start[i] + localDelay(blasts[i], row, col));
+          continue;
+        }
         best = Math.min(best, start[i] + lightballPopMs(lightCount(i)));
         continue;
       }
@@ -449,4 +461,23 @@ export function clearStepMs(step: TurnStep, popMs: number): number {
   const s = scheduleClear(step);
   if (!s.blasts.some(b => blastHasFx(b.blast))) return 0;
   return s.lastHit + popMs + FX_TIMING.settle;
+}
+
+/**
+ * 장애물·덮개가 맞는 시각(ms). 날아가서 맞히는 아이템(도토리 등)은 도착 시각까지 늦춘다.
+ * 화면(옛 모습이 사라지는 순간)·이펙트·효과음이 모두 이 값을 쓴다.
+ */
+export function hitTimes(step: TurnStep): Map<string, number> {
+  const out = new Map<string, number>();
+  if (step.kind !== 'clear') return out;
+  const sched = scheduleClear(step);
+  step.damage.forEach(d => out.set(d.key, sched.delays.get(d.key) ?? 0));
+  sched.blasts.forEach(sb => {
+    flightTargets(sb.blast).forEach(t => {
+      const k = key(t.row, t.col);
+      if (!out.has(k)) return;
+      out.set(k, Math.max(out.get(k)!, sb.start + arrivalMs(sb.blast, t)));
+    });
+  });
+  return out;
 }

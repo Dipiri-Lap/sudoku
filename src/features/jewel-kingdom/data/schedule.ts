@@ -193,12 +193,24 @@ function scaled(intro: Introduction, levelNo: number, amount = 1, area = 49): nu
 
 // ── 판 모양 ──────────────────────────────────────────────────────────
 
-function sizeFor(levelNo: number, rng: Rng): number {
-  if (levelNo <= 20) return 7;
-  const r = rng.next();
-  if (levelNo < 60) return r < 0.6 ? 7 : 8;
-  if (levelNo < 150) return r < 0.35 ? 7 : r < 0.75 ? 8 : 9;
-  return r < 0.25 ? 7 : r < 0.6 ? 8 : 9;
+/**
+ * 판 크기(가로×세로). 가로는 휴대폰 폭에 맞춰 9칸까지, 세로는 더 길게(다른 3매치처럼
+ * 가로 9칸에 세로로 긴 판). 뒤로 갈수록 크고 길다.
+ */
+function sizeFor(levelNo: number, rng: Rng): { w: number; h: number } {
+  const pickOf = (table: [number, number, number][]) => {
+    const total = table.reduce((s2, t) => s2 + t[2], 0);
+    let r = rng.next() * total;
+    for (const [w, h, wt] of table) {
+      r -= wt;
+      if (r < 0) return { w, h };
+    }
+    return { w: table[0][0], h: table[0][1] };
+  };
+  if (levelNo <= 20) return pickOf([[7, 7, 7], [7, 8, 3]]);
+  if (levelNo < 60) return pickOf([[7, 7, 3], [7, 8, 2.5], [8, 8, 2], [8, 9, 2.5]]);
+  if (levelNo < 150) return pickOf([[7, 8, 1], [8, 8, 1.5], [8, 10, 2], [9, 9, 2], [9, 10, 2.5], [9, 11, 1.5]]);
+  return pickOf([[7, 9, 1], [8, 10, 2], [9, 9, 1.5], [9, 10, 2.5], [9, 11, 3]]);
 }
 
 function cutsFor(levelNo: number, rng: Rng): number {
@@ -221,9 +233,9 @@ export function maskFor(levelNo: number): Mask {
     const recent = new Set(maskCache.slice(-MASK_MEMORY).map(maskKey));
     let mask: Mask | null = null;
     for (let tryNo = 0; tryNo < 30; tryNo++) {
-      const size = sizeFor(n, rng);
+      const { w, h } = sizeFor(n, rng);
       const cuts = Math.max(cutsFor(n, rng), tryNo > 10 ? 1 : 0);
-      const m = sculptMask(size, cuts, rng);
+      const m = sculptMask(w, cuts, rng, h);
       mask = m;
       // 처음 몇 판(깎지 않는 판)은 겹쳐도 된다
       if (!recent.has(maskKey(m)) || n <= 3) break;
@@ -313,7 +325,8 @@ export function recipeFor(levelNo: number): Recipe {
   const known = INTRODUCTIONS.filter(i => i.at < levelNo);
   const tune = TIER_TUNING[tier];
   const mask = maskFor(levelNo);
-  const size = mask.length;
+  const height = mask.length;
+  const width = mask[0].length;
   const area = mask.reduce((s, row) => s + row.filter(Boolean).length, 0);
 
   const elements: RecipeElement[] = [];
@@ -384,8 +397,8 @@ export function recipeFor(levelNo: number): Recipe {
   }
 
   return {
-    width: size,
-    height: size,
+    width,
+    height,
     colors: colorsFor(levelNo, tier),
     shape: 'full',
     mask,

@@ -82,9 +82,13 @@ async function run(chunkList) {
 
 let failed = await run(chunks);
 if (failed.length > 0) {
-  console.log(`\n죽은 묶음 ${failed.length}개를 한 번 더 굽는다`);
+  // 여러 판을 한 프로세스에서 이어 구우면 가끔 비정상 종료(접근 위반)된다 - 같은 판도 하나씩
+  // 따로 돌리면 멀쩡하다. 죽은 묶음은 한 판씩 나눠서 다시 굽는다(합칠 때도 이 조각들을 읽는다).
+  const singles = failed.flatMap(c => c.map(id => [id]));
+  console.log(`\n죽은 묶음 ${failed.length}개를 한 판씩(${singles.length}판) 다시 굽는다`);
   done = 0;
-  failed = await run(failed);
+  failed = await run(singles);
+  chunks.push(...singles);
 }
 
 // 합치기: 이번에 구운 판만 바꾸고 나머지는 그대로 둔다

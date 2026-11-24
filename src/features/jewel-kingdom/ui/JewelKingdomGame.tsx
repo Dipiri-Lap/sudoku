@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
-import { isMuted, playSfx, setMuted, unlockAudio } from './sound';
+import { Music, Pause, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { isMusicMuted, isMuted, playSfx, setMusicMuted, setMuted, startBgm, stopBgm, unlockAudio } from './sound';
 import { playStepSounds } from './stepSounds';
-import { at, cloneBoard, isCellSwappable, emptyCell, isAdjacent, key, makeGem } from '../engine/board';
+import { at, cloneBoard, isCellSwappable, emptyCell, isAdjacent, key, makeGem, parseKey } from '../engine/board';
 import { activateAt, hasAnyMove, listMoves, resolveTurn, activateBooster, activateSkill } from '../engine/resolve';
 import { makeRng } from '../engine/rng';
+import { findHint, type Hint } from '../engine/hint';
 import { applyBooster, applyTurn, resolveOptionsFor, startLevel } from '../engine/level';
 import { applyGravity } from '../engine/gravity';
 import { elementById } from '../data/elements';
@@ -29,6 +30,16 @@ import { GENERATED_LEVELS } from '../data/generated';
  * "다시 시작"이 두 벌로 갈라지지 않는다. 목록에서만 줄이 나뉜다.
  */
 const ALL_LEVELS = [...GENERATED_LEVELS, ...LEVELS, ...TEST_LEVELS];
+/** 스테이지 번호(1부터) → ALL_LEVELS 자리. 없는 번호면 마지막 스테이지 */
+export function stageIndexOf(stage: number): number {
+  const i = GENERATED_LEVELS.findIndex(l => Number(l.label) === stage);
+  return i >= 0 ? i : GENERATED_LEVELS.length - 1;
+}
+export const STAGE_COUNT = GENERATED_LEVELS.length;
+/** 로비의 시작 전 창에서 목표를 미리 보여 줄 때 쓴다 */
+export function stageLevel(stage: number) {
+  return GENERATED_LEVELS[stageIndexOf(stage)];
+}
 const HAND_OFFSET = GENERATED_LEVELS.length;
 const TEST_OFFSET = GENERATED_LEVELS.length + LEVELS.length;
 
@@ -90,13 +101,47 @@ interface DragState {
   cellSize: number;
 }
 
-const JewelKingdomGame: React.FC = () => {
+/**
+ * 로비(Pop Garden 껍데기)에서 띄울 때 넘기는 것들. 하나도 안 넘기면 예전처럼 혼자 도는
+ * 개발용 화면이다(다음 레벨로 바로 넘어감).
+ */
+export interface GameHostProps {
+  /** 시작할 판(ALL_LEVELS 자리) */
+  startIndex?: number;
+  /** 클리어 창에서 "계속"을 누름 */
+  onWin?: () => void;
+  /** 실패 후 "로비로" */
+  onLose?: () => void;
+  /** 판 도중 일시정지 메뉴에서 "로비로" */
+  onQuit?: () => void;
+  /** 다시 하기(하트를 하나 쓴다). false면 하트가 없어 못 한다 */
+  onRetry?: () => boolean;
+  /** 클리어 보상 코인(클리어 창에 보여 준다) */
+  winCoins?: number;
+  /** 실패 후 "N수 더" - 코인을 쓴다. false면 코인이 모자라다 */
+  onBuyMoves?: () => boolean;
+  buyMovesCost?: number;
+  buyMovesCount?: number;
+}
+
+const JewelKingdomGame: React.FC<GameHostProps> = ({
+  startIndex = 0,
+  onWin,
+  onLose,
+  onQuit,
+  onRetry,
+  winCoins,
+  onBuyMoves,
+  buyMovesCost,
+  buyMovesCount = 5,
+}) => {
+  const hosted = !!onWin;
   // 난수원과 레벨 상태를 한 번에 만든다. useState의 지연 초기화라 렌더마다
   // 다시 실행되지 않는다 - 렌더 중에 Date.now()를 부르면 리렌더할 때마다
   // 다른 값이 나와 화면이 예측 불가능해진다.
   const [game, setGame] = useState(() => {
     const rng = makeRng(Date.now() >>> 0);
-    return { rng, level: startLevel(ALL_LEVELS[0], rng) };
+    return { rng, level: startLevel(ALL_LEVELS[startIndex] ?? ALL_LEVELS[0], rng) };
   });
   const [inventory, setInventory] = useState<Inventory>(startingInventory);
   /** 샌드박스에서 지금 들고 있는 도구. null이면 평소처럼 플레이한다. */
@@ -115,7 +160,20 @@ const JewelKingdomGame: React.FC = () => {
   const [devOpen, setDevOpen] = useState(false);
   /** 소리 끔(기기에 기억) */
   const [soundOff, setSoundOff] = useState(isMuted);
+  const [musicOff, setMusicOff] = useState(isMusicMuted);
+  /** 일시정지 메뉴(로비에서 띄운 경우) */
+  const [paused, setPaused] = useState(false);
+  /** "N수 더"를 눌렀는데 코인이 모자람 */
+  const [noCoins, setNoCoins] = useState(false);
   const { view, play, reset } = usePlayback(game.level.board);
+
+  // 배경음악: 플레이 곡. 로비에서 띄웠으면 떠날 때 끄지 않는다 - 로비가 이어서 자기 곡으로 바꾼다
+  useEffect(() => {
+    startBgm('play');
+    if (!hosted) return stopBgm;
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const boardRef = useRef<HTMLDivElement>(null);
   const cellElsRef = useRef<Map<number, HTMLElement>>(new Map());
@@ -132,8 +190,11 @@ const JewelKingdomGame: React.FC = () => {
     return () => document.body.classList.remove('jk-body');
   }, []);
 
+  // 판은 가로 W칸 × 세로 H칸(세로로 길 수 있다). 칸은 정사각형이라 위치 비율만 다르다
   const size = view.board.width;
+  const rowsN = view.board.height;
   const cellPct = 100 / size;
+  const cellPctY = 100 / rowsN;
   const level = game.level;
   /** 화면에 보이는 스테이지 번호. 생성 레벨은 내부 번호(1000+n)와 다르다 */
   const stageNo = Number(level.level.label ?? level.level.id);
@@ -331,6 +392,32 @@ const JewelKingdomGame: React.FC = () => {
 
   const canPlay = !view.playing && level.status === 'playing';
 
+  // 힌트: 손을 놓고 몇 초 지나면 둘 수 있는 한 수를 살짝 흔들어 보여준다.
+  // 판을 만지거나 판이 바뀌면 지우고 다시 센다.
+  const [hintMove, setHintMove] = useState<Hint | null>(null);
+  const [idleNonce, setIdleNonce] = useState(0);
+  const poke = () => {
+    setHintMove(null);
+    setIdleNonce(n => n + 1);
+  };
+  useEffect(() => {
+    setHintMove(null);
+    if (!canPlay || armed || armedSkill || tool) return;
+    const t = window.setTimeout(() => setHintMove(findHint(level.board)), HINT_IDLE_MS);
+    return () => window.clearTimeout(t);
+  }, [canPlay, level.board, armed, armedSkill, tool, idleNonce]);
+  // 버섯이 채소를 부수고 나오는 칸: 갈라지는 순간 즙·조각을 튀긴다(FxLayer)
+  const regrowFx = useMemo(
+    () =>
+      [...view.regrown].flatMap(k => {
+        const { row, col } = parseKey(k);
+        const g = view.before ? at(view.before, row, col).gem : null;
+        return g && g.color !== null && !g.special ? [{ row, col, color: g.color }] : [];
+      }),
+    [view.regrown, view.before],
+  );
+  const hintCells = useMemo(() => new Set(hintMove?.cells ?? []), [hintMove]);
+
   // 효과음: 단계가 바뀔 때마다 그 단계의 소리를 연출 시간표에 맞춰 건다
   useEffect(() => {
     if (view.step) playStepSounds(view.step);
@@ -343,10 +430,14 @@ const JewelKingdomGame: React.FC = () => {
     const key = `${level.level.id}:${level.status}`;
     if (level.status === 'playing') {
       endedRef.current = null;
+      // 새 판·다시 하기: 클리어로 멈췄던 배경음악을 다시 튼다(이미 흐르고 있으면 그대로)
+      startBgm('play');
       return;
     }
     if (endedRef.current === key) return;
     endedRef.current = key;
+    // 클리어: 배경음악을 걷어 내고 축하 소리만 들리게 한다
+    if (level.status === 'won') stopBgm();
     playSfx(level.status === 'won' ? 'win' : 'lose');
   }, [view.playing, level.status, level.level.id]);
 
@@ -427,6 +518,7 @@ const JewelKingdomGame: React.FC = () => {
   };
 
   const onPointerDown = (pos: Position) => (e: React.PointerEvent) => {
+    poke();
     // 브라우저는 첫 터치 전에는 소리를 막는다 - 여기서 깨운다
     unlockAudio();
     // 샌드박스에서 도구를 들고 있으면 스왑이 아니라 찍기다.
@@ -467,7 +559,7 @@ const JewelKingdomGame: React.FC = () => {
       Math.abs(dx) > Math.abs(dy)
         ? { row: drag.pos.row, col: drag.pos.col + (dx > 0 ? 1 : -1) }
         : { row: drag.pos.row + (dy > 0 ? 1 : -1), col: drag.pos.col };
-    if (target.row < 0 || target.col < 0 || target.row >= size || target.col >= size) return;
+    if (target.row < 0 || target.col < 0 || target.row >= rowsN || target.col >= size) return;
     if (!isAdjacent(drag.pos, target)) return;
     if (!at(view.board, target.row, target.col).gem) return;
     applyMove(drag.pos, target);
@@ -492,9 +584,9 @@ const JewelKingdomGame: React.FC = () => {
       const k = key(r, c);
       const style: React.CSSProperties = {
         left: `${c * cellPct}%`,
-        top: `${r * cellPct}%`,
+        top: `${r * cellPctY}%`,
         width: `${cellPct}%`,
-        height: `${cellPct}%`,
+        height: `${cellPctY}%`,
       };
 
       if (!cell.exists) {
@@ -502,9 +594,32 @@ const JewelKingdomGame: React.FC = () => {
         continue;
       }
 
+      // 바닥(잔디 등)·덮개(꿀 등)도 장애물처럼: 이번에 벗겨지거나 번지는 칸은 맞는 시각까지
+      // 피해 직전 모습을 두고, 그 순간 바뀐다 - 안 그러면 도토리를 쓰자마자 잔디가 먼저 사라졌다
+      const hitStyle = { ['--h' as string]: `${Math.round(view.hitAt.get(k) ?? 0)}ms` } as React.CSSProperties;
+      const beforeCell = view.before && view.damaged.has(k) ? at(view.before, r, c) : null;
+      const oldGround = beforeCell?.ground ?? null;
+      const groundChanged =
+        !!beforeCell &&
+        (oldGround?.kind !== cell.ground?.kind || (oldGround?.layers ?? 0) !== (cell.ground?.layers ?? 0));
       cells.push(
         <div key={`p-${k}`} className={`jk-cell jk-plate${(r + c) % 2 ? ' alt' : ''}`} style={style}>
-          {cell.ground && <GroundSprite kind={cell.ground.kind} layers={cell.ground.layers} />}
+          {groundChanged ? (
+            <>
+              {oldGround && (
+                <span className="jk-ground-wrap pending-old" style={hitStyle}>
+                  <GroundSprite kind={oldGround.kind} layers={oldGround.layers} />
+                </span>
+              )}
+              {cell.ground && (
+                <span className="jk-ground-wrap pending-new" style={hitStyle}>
+                  <GroundSprite kind={cell.ground.kind} layers={cell.ground.layers} />
+                </span>
+              )}
+            </>
+          ) : (
+            cell.ground && <GroundSprite kind={cell.ground.kind} layers={cell.ground.layers} />
+          )}
         </div>,
       );
 
@@ -557,12 +672,26 @@ const JewelKingdomGame: React.FC = () => {
         }
       } else if (cell.blocker) {
         const b = cell.blocker;
+        // 다시 자라난 장애물(버섯): 그 자리 채소가 톡 터진 뒤 장애물이 띠옹 솟는다
+        const regrowFrom = view.regrown.has(k) && view.before ? at(view.before, r, c).gem : null;
+        if (regrowFrom) {
+          cells.push(
+            <div key={`rg-${k}-${view.tick}`} className="jk-cell jk-regrow-old" style={style}>
+              {/* 같은 그림을 들쭉날쭉한 금으로 반씩 잘라 두 쪽으로 갈라지게 한다 */}
+              {(['l', 'r'] as const).map(side => (
+                <span key={side} className={`jk-regrow-half ${side}`}>
+                  <img src={spriteFor(regrowFrom.color, regrowFrom.special)} alt="" draggable={false} />
+                </span>
+              ))}
+            </div>,
+          );
+        }
         cells.push(
           <div
-            key={`b-${k}`}
+            key={regrowFrom ? `b-${k}-${view.tick}` : `b-${k}`}
             className={`jk-cell jk-blocker${view.damaged.has(k) ? ' damaged' : ''}${
               b.hidden ? ' unrevealed' : ''
-            }`}
+            }${regrowFrom ? ' regrowing' : ''}`}
             style={withDelay(style, view.damaged.has(k) ? view.delays.get(k) : undefined)}
           >
             <BlockerSprite kind={b.kind} layers={b.layers} hidden={b.hidden} />
@@ -586,6 +715,7 @@ const JewelKingdomGame: React.FC = () => {
         view.collecting.has(k) ? 'collecting' : '',
         view.merged.has(k) ? 'merged' : '',
         view.morphAt.has(k) ? 'morphing' : '',
+        hintCells.has(k) ? 'hinted' : '',
         (armed && canUseAt(view.board, { row: r, col: c }, armed)) ||
         (armedSkill && canUseSkillAt(view.board, { row: r, col: c }))
           ? 'targetable'
@@ -603,8 +733,13 @@ const JewelKingdomGame: React.FC = () => {
           }}
           className={classes}
           style={withDelay(
-            // 아이템마다 대기 동작의 박자를 어긋나게 - 판의 아이템이 한꺼번에 같이 깜빡이지 않게
-            gem.special ? { ...style, ['--ph' as string]: `${-((gem.id * 0.37) % 1.7).toFixed(2)}s` } : style,
+            withHint(
+              hintMove,
+              r,
+              c,
+              // 아이템마다 대기 동작의 박자를 어긋나게 - 판의 아이템이 한꺼번에 같이 깜빡이지 않게
+              gem.special ? { ...style, ['--ph' as string]: `${-((gem.id * 0.37) % 1.7).toFixed(2)}s` } : style,
+            ),
             view.clearing.has(k) ? view.delays.get(k) : undefined,
           )}
           onPointerDown={onPointerDown({ row: r, col: c })}
@@ -635,29 +770,68 @@ const JewelKingdomGame: React.FC = () => {
               <img src={spriteFor(gem.color, gem.special)} alt="" draggable={false} />
             )
           )}
-          {cell.cover && (
-            <span className="jk-cover">
-              <CoverSprite
-                kind={cell.cover.kind}
-                layers={cell.cover.layers}
-                hides={cell.cover.hides}
-                locks={cell.cover.locks}
-              />
-              {cell.cover.layers > 1 && <span className="jk-layers">{cell.cover.layers}</span>}
-            </span>
-          )}
+          {(() => {
+            const before = view.before && view.damaged.has(k) ? at(view.before, r, c).cover : null;
+            const now = cell.cover;
+            const changed =
+              !!view.before && view.damaged.has(k) && (before?.kind !== now?.kind || (before?.layers ?? 0) !== (now?.layers ?? 0));
+            const hitStyle = { ['--h' as string]: `${Math.round(view.hitAt.get(k) ?? 0)}ms` } as React.CSSProperties;
+            const draw = (cv: NonNullable<typeof now>, cls: string) => (
+              <span className={`jk-cover${cls}`} style={cls ? hitStyle : undefined}>
+                <CoverSprite kind={cv.kind} layers={cv.layers} hides={cv.hides} locks={cv.locks} />
+                {cv.layers > 1 && <span className="jk-layers">{cv.layers}</span>}
+              </span>
+            );
+            if (!changed) return now ? draw(now, '') : null;
+            // 덮개도 맞는 시각까지는 옛 모습(겹 수 포함), 그 순간 벗겨지거나 줄어든다
+            return (
+              <>
+                {before && draw(before, ' pending-old')}
+                {now && draw(now, ' pending-new')}
+              </>
+            );
+          })()}
         </div>,
       );
     }
   }
 
   const levelIndex = ALL_LEVELS.findIndex(l => l.id === level.level.id);
+
+  function toggleSound() {
+    unlockAudio();
+    setSoundOff(m => {
+      setMuted(!m);
+      return !m;
+    });
+  }
+
+  function toggleMusic() {
+    unlockAudio();
+    setMusicOff(m => {
+      setMusicMuted(!m);
+      return !m;
+    });
+  }
   const testOf = testLevelElement(level.level.id);
 
   return (
     <div className="jk-page">
       {/* 플레이어가 보는 맨 위: 다시 시작(오른쪽)과, 개발 중에만 보이는 개발 서랍 버튼 */}
       <div className="jk-topbar">
+        {hosted && (
+          <button
+            className="jk-round-btn jk-pause-btn"
+            onClick={() => {
+              unlockAudio();
+              setPaused(true);
+            }}
+            title="일시정지"
+            aria-label="일시정지"
+          >
+            <Pause size={22} strokeWidth={3} />
+          </button>
+        )}
         {import.meta.env.DEV && (
           <button className="jk-dev-toggle" onClick={() => setDevOpen(o => !o)} aria-expanded={devOpen}>
             개발
@@ -671,29 +845,66 @@ const JewelKingdomGame: React.FC = () => {
             )}
           </div>
         )}
-        <button
-          className="jk-round-btn"
-          onClick={() => {
-            unlockAudio();
-            setSoundOff(m => {
-              setMuted(!m);
-              return !m;
-            });
-          }}
-          title={soundOff ? '소리 켜기' : '소리 끄기'}
-          aria-label={soundOff ? '소리 켜기' : '소리 끄기'}
-        >
-          {soundOff ? <VolumeX size={22} strokeWidth={3} /> : <Volume2 size={22} strokeWidth={3} />}
-        </button>
-        <button
-          className="jk-round-btn"
-          onClick={() => (sandbox ? openSandbox() : loadLevel(levelIndex))}
-          title="다시 시작"
-          aria-label="다시 시작"
-        >
-          <RotateCcw size={22} strokeWidth={3} />
-        </button>
+        {!hosted && (
+          <>
+            <button
+              className="jk-round-btn"
+              onClick={toggleSound}
+              title={soundOff ? '소리 켜기' : '소리 끄기'}
+              aria-label={soundOff ? '소리 켜기' : '소리 끄기'}
+            >
+              {soundOff ? <VolumeX size={22} strokeWidth={3} /> : <Volume2 size={22} strokeWidth={3} />}
+            </button>
+            <button
+              className="jk-round-btn"
+              onClick={() => (sandbox ? openSandbox() : loadLevel(levelIndex))}
+              title="다시 시작"
+              aria-label="다시 시작"
+            >
+              <RotateCcw size={22} strokeWidth={3} />
+            </button>
+          </>
+        )}
       </div>
+
+      {/* 일시정지 메뉴: 계속 / 다시 하기 / 소리 / 로비로(하트 하나를 잃는다) */}
+      {hosted && paused && (
+        <div className="jk-modal-back" onClick={() => setPaused(false)}>
+          <div className="jk-modal" onClick={e => e.stopPropagation()}>
+            <h2>일시정지</h2>
+            <div className="jk-modal-toggles">
+              <button className={`jk-toggle${soundOff ? '' : ' on'}`} onClick={toggleSound}>
+                {soundOff ? <VolumeX size={20} /> : <Volume2 size={20} />} 효과음
+              </button>
+              <button className={`jk-toggle${musicOff ? '' : ' on'}`} onClick={toggleMusic}>
+                <Music size={20} /> 배경음악
+              </button>
+            </div>
+            <div className="jk-modal-actions">
+              <button className="primary" onClick={() => setPaused(false)}>
+                계속하기
+              </button>
+              <button
+                onClick={() => {
+                  setPaused(false);
+                  if (onRetry?.()) loadLevel(levelIndex);
+                }}
+              >
+                다시 하기 <small>♥ -1</small>
+              </button>
+              <button
+                className="danger"
+                onClick={() => {
+                  setPaused(false);
+                  onQuit?.();
+                }}
+              >
+                로비로 나가기 <small>♥ -1</small>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 개발 서랍: 레벨 고르기·시험 레벨·힌트·실험. 플레이 화면을 가리지 않게 접어 둔다. */}
       {import.meta.env.DEV && devOpen && (
@@ -854,10 +1065,15 @@ const JewelKingdomGame: React.FC = () => {
         </div>
       </div>
 
-      <div className="jk-board-outer" ref={boardOuterRef}>
+      <div
+        className="jk-board-outer"
+        ref={boardOuterRef}
+        style={{ ['--jk-ratio' as string]: size / rowsN }}
+      >
         <div
           ref={boardRef}
           className="jk-board"
+          style={{ aspectRatio: `${size} / ${rowsN}` }}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
@@ -867,6 +1083,7 @@ const JewelKingdomGame: React.FC = () => {
           <FxLayer
             step={view.step}
             tick={view.tick}
+            regrowFrom={regrowFx}
             cols={view.board.width}
             rows={view.board.height}
             shakeTarget={boardOuterRef}
@@ -875,7 +1092,57 @@ const JewelKingdomGame: React.FC = () => {
 
         {(armed || armedSkill) && <div className="jk-aim">쓸 칸을 고르세요</div>}
 
-        {level.status !== 'playing' && !view.playing && (
+        {hosted && level.status !== 'playing' && !view.playing && (
+          <div className="jk-overlay">
+            {level.status === 'won' ? (
+              <>
+                <h2>클리어!</h2>
+                {winCoins ? <p className="jk-reward">🪙 +{winCoins}</p> : null}
+                <div className="jk-overlay-actions">
+                  <button className="primary" onClick={onWin}>
+                    계속
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2>수가 다 떨어졌어요</h2>
+                <p className="jk-overlay-sub">조금만 더 하면 깰 수 있어요!</p>
+                <div className="jk-overlay-actions column">
+                  {onBuyMoves && (
+                    <button
+                      className="primary"
+                      onClick={() => {
+                        if (!onBuyMoves()) {
+                          setNoCoins(true);
+                          return;
+                        }
+                        setNoCoins(false);
+                        setGame(g => ({
+                          ...g,
+                          level: { ...g.level, movesLeft: g.level.movesLeft + buyMovesCount, status: 'playing' },
+                        }));
+                      }}
+                    >
+                      +{buyMovesCount}수 더 <small>🪙 {buyMovesCost}</small>
+                    </button>
+                  )}
+                  {noCoins && <p className="jk-overlay-sub warn">코인이 모자라요</p>}
+                  <button
+                    onClick={() => {
+                      setNoCoins(false);
+                      if (onRetry?.()) loadLevel(levelIndex);
+                    }}
+                  >
+                    다시 하기 <small>♥ -1</small>
+                  </button>
+                  <button onClick={onLose}>로비로</button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        {!hosted && level.status !== 'playing' && !view.playing && (
           <div className="jk-overlay">
             <h2>{level.status === 'won' ? '클리어!' : '수가 다 떨어졌어요'}</h2>
             <div className="jk-overlay-actions">
@@ -935,7 +1202,6 @@ function BoardOutline({ board }: { board: Board }) {
   const shape = board.cells.map(c => (c.exists ? '1' : '0')).join('');
   const w = board.width;
   return useMemo(() => {
-    const n = w;
     const live: [number, number][] = [];
     [...shape].forEach((ch, i) => ch === '1' && live.push([Math.floor(i / w), i % w]));
     // 테 두께(칸 크기 대비). 바깥 진한 선 + 안쪽 밝은 나무결
@@ -945,7 +1211,7 @@ function BoardOutline({ board }: { board: Board }) {
       <rect key={k} x={c - o} y={r - o} width={1 + o * 2} height={1 + o * 2} rx={o} fill={fill} />
     );
     return (
-      <svg className="jk-outline" viewBox={`0 0 ${n} ${n}`} preserveAspectRatio="none" aria-hidden>
+      <svg className="jk-outline" viewBox={`0 0 ${w} ${shape.length / w}`} preserveAspectRatio="none" aria-hidden>
         {live.map(([r, c]) => rect(r, c, outer, '#5b3514', `o${r},${c}`))}
         {live.map(([r, c]) => rect(r, c, inner, '#c98a4a', `i${r},${c}`))}
         {live.map(([r, c]) => rect(r, c, 0, '#3a2314', `b${r},${c}`))}
@@ -979,4 +1245,14 @@ function ItemIdleFx({ kind, src }: { kind: string; src: string }) {
       <span className="jk-twinkle" />
     </span>
   );
+}
+
+/** 가만히 있다가 힌트가 뜨기까지 */
+const HINT_IDLE_MS = 5000;
+
+/** 힌트로 움직일 칸이면 그 방향을 CSS 변수로 넘긴다 */
+function withHint(hint: Hint | null, r: number, c: number, style: React.CSSProperties): React.CSSProperties {
+  const m = hint?.movers.find(v => v.pos.row === r && v.pos.col === c);
+  if (!m) return style;
+  return { ...style, ['--hx' as string]: m.dc, ['--hy' as string]: m.dr };
 }
