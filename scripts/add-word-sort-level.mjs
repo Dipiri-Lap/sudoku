@@ -103,6 +103,8 @@ function findWordOverlaps(draftCat) {
 // ── 미리보기 ─────────────────────────────────────────────────────────
 const nextId = Math.max(...levels.map((l) => l.id)) + 1;
 const newLevel = { id: nextId, maxMoves: draft.maxMoves, slots: draft.slots, categories: draft.categories };
+// 배치 설계(catDepth)가 초안에 있으면 그대로 옮긴다 (src/features/word-sort/context/WordSortContext.tsx 참고)
+if (typeof draft.catDepth === 'number' && draft.catDepth > 0) newLevel.catDepth = draft.catDepth;
 
 const wordCardTotal = newLevel.categories.reduce((s, c) => s + c.words.length, 0);
 const totalCards = wordCardTotal + newLevel.categories.length; // 카테고리 카드 1장 + 단어 카드 n장
