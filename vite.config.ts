@@ -11,6 +11,8 @@ export default defineConfig({
         // 애로우웨이 스테이지 데이터(약 1.2MB)를 메인 번들에서 떼어 내 PWA 프리캐시 한도(5MB) 안에 둔다
         manualChunks(id) {
           if (id.includes('arrow-puzzle/data/stages.json')) return 'arrow-stages'
+          // 스도쿠 스테이지(2000판, 약 1MB)도 같은 이유로 분리
+          if (id.replace(/\\/g, '/').endsWith('src/data/stages.json')) return 'sudoku-stages'
         },
       },
     },
