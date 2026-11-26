@@ -20,6 +20,21 @@ const Board: React.FC = () => {
 
     const boardSize = state.board.length;
 
+    // 풀이 진행도(0~1) — 전설 테마 '새벽'이 배경 하늘색을 여기에 맞춰 바꾼다. 다른 테마는 쓰지 않는다.
+    const total = boardSize * boardSize;
+    let givens = 0, correct = 0;
+    for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
+            if (state.initialBoard[r]?.[c] !== null) givens++;
+            else if (state.board[r][c] !== null && state.board[r][c] === state.solution[r]?.[c]) correct++;
+        }
+    }
+    const progress = total > givens ? correct / (total - givens) : 0;
+    useEffect(() => {
+        document.documentElement.style.setProperty('--sd-progress', progress.toFixed(3));
+    }, [progress]);
+    useEffect(() => () => { document.documentElement.style.removeProperty('--sd-progress'); }, []);
+
     return (
         <div className={`sudoku-board ${boardSize === 6 ? 'sudoku-board-6' : boardSize === 16 ? 'sudoku-board-16' : ''} ${isEntering ? 'is-entering' : ''}`} key={boardKey}>
             {Array(boardSize).fill(0).map((_, r) =>

@@ -9,6 +9,7 @@ import type { Difficulty } from '../../../engine/generator';
 import { Play, Pause, ChevronLeft, ArrowRight, Trophy, Heart, House, Palette } from 'lucide-react';
 import { useSudokuTheme, ALL_THEME_CLASSES } from '../context/SudokuThemeContext';
 import SudokuThemeModal from './SudokuThemeModal';
+import '../styles/themes-extra.css';
 import { auth, logEvent } from '../../../firebase';
 import { getUserProfile, saveRecord, updateProfileInfo } from '../../../services/rankingService';
 import { useCoins } from '../../../context/CoinContext';
@@ -33,16 +34,46 @@ const SudokuGame: React.FC = () => {
     const { stageProgress, saveBeginnerProgress, bigProgress } = useSudokuProgress();
     const { clearDaily, clearedDates, unlockedDates, monthReward, clearMonthReward } = useDailyPuzzle();
     const hasAwardedCoins = useRef(false);
-    const { selectedTheme } = useSudokuTheme();
+    const { activeTheme, previewThemeId, previewEndsAt, stopPreview } = useSudokuTheme();
     const [showThemeModal, setShowThemeModal] = useState(false);
 
     useEffect(() => {
         ALL_THEME_CLASSES.forEach(cls => document.documentElement.classList.remove(cls));
-        if (selectedTheme.cssClass) document.documentElement.classList.add(selectedTheme.cssClass);
+        if (activeTheme.cssClass) document.documentElement.classList.add(activeTheme.cssClass);
         return () => {
             ALL_THEME_CLASSES.forEach(cls => document.documentElement.classList.remove(cls));
         };
-    }, [selectedTheme.cssClass]);
+    }, [activeTheme.cssClass]);
+
+    // 게임 화면을 떠나면 미리 써보기도 끝낸다
+    useEffect(() => () => stopPreview(), [stopPreview]);
+
+    // 미리 써보기 남은 시간(초)
+    const [previewLeft, setPreviewLeft] = useState(0);
+    useEffect(() => {
+        if (!previewEndsAt) return;
+        const tick = () => setPreviewLeft(Math.max(0, Math.ceil((previewEndsAt - Date.now()) / 1000)));
+        tick();
+        const id = setInterval(tick, 250);
+        return () => clearInterval(id);
+    }, [previewEndsAt]);
+
+    // ── 전설 테마 클리어 연출: 결과 창을 잠깐 미루고 그 사이에 테마 전용 연출을 보여 준다 ──
+    const LEGEND_FX_MS = 2200;
+    const isLegendary = activeTheme.grade === 'legendary';
+    const [clearFxDone, setClearFxDone] = useState(true);
+    const boardDone = state.isWinner
+        && state.animatingRows.length === 0
+        && state.animatingCols.length === 0
+        && state.animatingSectors.length === 0;
+    useEffect(() => {
+        if (!state.isWinner) { setClearFxDone(true); document.documentElement.classList.remove('sd-clear'); }
+    }, [state.isWinner]);
+    const clearFxTimer = useRef<number | null>(null);
+    useEffect(() => () => {
+        document.documentElement.classList.remove('sd-clear');
+        if (clearFxTimer.current) clearTimeout(clearFxTimer.current);
+    }, []);
 
     const handleNextWithAd = (url: string) => {
         if (import.meta.env.DEV || !window.adBreak) { navigate(url); return; }
@@ -87,6 +118,28 @@ const SudokuGame: React.FC = () => {
             && state.animatingSectors.length === 0;
         if (!modalVisible || hasPlayedConfetti.current) return;
         hasPlayedConfetti.current = true;
+
+        if (isLegendary) {
+            setClearFxDone(false);
+            document.documentElement.classList.add('sd-clear');
+            if (activeTheme.id === 'gold') {
+                // 판이 금괴로 굳는 동안 양쪽 아래에서 금화가 솟구친다
+                const coin = confetti.shapeFromText({ text: '🪙', scalar: 2.2 });
+                const shot = (x: number, angle: number) => confetti({
+                    particleCount: 26, angle, spread: 50, origin: { x, y: 1 }, startVelocity: 62, gravity: 1.4,
+                    shapes: [coin], scalar: 2.2, ticks: 240, flat: true,
+                });
+                setTimeout(() => { shot(0.08, 65); shot(0.92, 115); }, 500);
+                setTimeout(() => { shot(0.2, 75); shot(0.8, 105); }, 950);
+                setTimeout(() => confetti({ particleCount: 90, spread: 120, origin: { x: 0.5, y: 0.35 }, colors: ['#f5c542', '#ffe9a8', '#d4ad3b', '#fff6d8'], scalar: 0.8, gravity: 0.6, ticks: 260, shapes: ['circle'] }), 1400);
+            } else {
+                // 새벽: 해가 완전히 떠오르고(햇살은 CSS), 따뜻한 빛 알갱이가 천천히 내려앉는다
+                setTimeout(() => confetti({ particleCount: 70, spread: 160, origin: { x: 0.5, y: 0.3 }, colors: ['#fff1dc', '#ffd889', '#ffb38a'], scalar: 0.7, gravity: 0.35, drift: 0.2, ticks: 320, shapes: ['circle'] }), 900);
+            }
+            // 의존값이 바뀌어도 취소되지 않게 ref 로 들고 간다(취소되면 결과 창이 영영 안 뜸)
+            clearFxTimer.current = window.setTimeout(() => setClearFxDone(true), LEGEND_FX_MS);
+            return;
+        }
 
         const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#f9a825', '#ab47bc'];
         confetti({ particleCount: 220, spread: 100, origin: { x: 0.5, y: 0.05 }, colors, gravity: 2.0, scalar: 1.1, startVelocity: 45 });
@@ -474,7 +527,15 @@ const SudokuGame: React.FC = () => {
                 </div>
             )}
 
-            {state.isWinner && state.animatingRows.length === 0 && state.animatingCols.length === 0 && state.animatingSectors.length === 0 && (
+            {previewThemeId && !boardDone && (
+                <div className="st-try-banner">
+                    <span>{t('themeModal.tryBanner', { name: activeTheme.name, sec: previewLeft })}</span>
+                    <button className="buy" onClick={() => setShowThemeModal(true)}>{t('themeModal.tryBuy')}</button>
+                    <button className="end" onClick={stopPreview}>{t('themeModal.tryEnd')}</button>
+                </div>
+            )}
+
+            {boardDone && clearFxDone && (
                 <div className="modal-overlay">
                     <div className="modal-content animate-fade-in">
                         {/* Header */}

@@ -41,13 +41,25 @@
       "hanji": "한지",
       "space": "우주",
       "notepad": "메모장",
-      "highlighter": "형광펜"
+      "highlighter": "형광펜",
+      "contrast": "고대비",
+      "lavender": "라벤더",
+      "apricot": "살구",
+      "forest": "숲",
+      "manuscript": "원고지",
+      "picnic": "피크닉",
+      "neon": "네온사인",
+      "aquarium": "수족관",
+      "winter": "겨울밤",
+      "gold": "황금",
+      "dawn": "새벽"
     },
     "grades": {
       "free": "무료",
       "common": "일반",
       "rare": "희귀",
-      "epic": "영웅"
+      "epic": "영웅",
+      "legendary": "전설"
     }
   },
   "themeModal": {
@@ -59,7 +71,12 @@
     "unlockTitle": "테마 잠금 해제",
     "confirmSpend": "{{cost}} 코인을 사용하시겠습니까?",
     "cancel": "취소",
-    "ok": "확인"
+    "ok": "확인",
+    "try": "미리 써보기",
+    "notEnough": "코인 부족",
+    "tryBanner": "{{name}} 미리보기 · {{sec}}초",
+    "tryBuy": "구매",
+    "tryEnd": "끝내기"
   },
   "difficulty": {
     "title": "난이도 선택",

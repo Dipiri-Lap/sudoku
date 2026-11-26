@@ -1,21 +1,41 @@
 import React, { useState } from 'react';
 import { useSudokuTheme, SUDOKU_THEMES, THEME_GRADE_CONFIG, type SudokuTheme, type ThemeGrade } from '../context/SudokuThemeContext';
 import { useCoins } from '../../../context/CoinContext';
-import { X, Lock, Check } from 'lucide-react';
+import { X, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import './SudokuThemeModal.css';
 
-const CoinImg = ({ size = 16 }: { size?: number }) => (
-    <img src="/coin_Icon.png" alt="coin" style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />
-);
+const GRADE_ORDER: ThemeGrade[] = ['free', 'common', 'rare', 'epic', 'legendary'];
 
-const GRADE_ORDER: ThemeGrade[] = ['free', 'common', 'rare', 'epic'];
+/** 전설 테마: 정지 그림 대신 실제 배경 이펙트가 움직이는 작은 장면 위에 미니 판을 띄운다 */
+const LivePreview: React.FC<{ theme: SudokuTheme; size: number }> = ({ theme, size }) => {
+    const p = theme.preview;
+    const inner = Math.round(size * 0.62);
+    const cell = (inner - 6) / 3;
+    return (
+        <div className={`st-prev st-live st-live-${theme.id}`} style={{ width: size, height: size }}>
+            <div className="st-live-board" style={{
+                width: inner, height: inner, background: p.line,
+                gridTemplateColumns: `repeat(3, ${cell}px)`, gridTemplateRows: `repeat(3, ${cell}px)`,
+            }}>
+                {Array.from({ length: 9 }, (_, i) => (
+                    <div key={i} style={{
+                        background: i === 4 ? p.accent : p.cell, color: p.text, fontSize: size * 0.12,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700,
+                    }}>{i === 4 ? '5' : ''}</div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 const ThemePreview: React.FC<{ theme: SudokuTheme; size?: number }> = ({ theme, size = 58 }) => {
+    if (theme.grade === 'legendary') return <LivePreview theme={theme} size={size} />;
     const p = theme.preview;
     const cellSize = (size - 8) / 3;
     return (
-        <div style={{
-            width: size, height: size, borderRadius: 8, overflow: 'hidden',
+        <div className="st-prev" style={{
+            width: size, height: size, overflow: 'hidden',
             background: p.bg, border: `2px solid ${p.line}`, position: 'relative',
             display: 'grid', gridTemplateColumns: `repeat(3, ${cellSize}px)`,
             gridTemplateRows: `repeat(3, ${cellSize}px)`,
@@ -26,7 +46,7 @@ const ThemePreview: React.FC<{ theme: SudokuTheme; size?: number }> = ({ theme, 
                     background: i === 4 ? p.accent : p.cell,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: size * 0.13, fontWeight: 700, color: p.text,
-                    fontFamily: theme.id === 'gameboy' ? 'monogram' : theme.id === 'chalkboard' ? 'monogram' : undefined,
+                    fontFamily: theme.id === 'gameboy' || theme.id === 'chalkboard' ? 'monogram' : 'system-ui, sans-serif',
                 }}>
                     {i === 4 ? '5' : ''}
                 </div>
@@ -39,7 +59,7 @@ interface Props { onClose: () => void; }
 
 const SudokuThemeModal: React.FC<Props> = ({ onClose }) => {
     const { t: tr } = useTranslation('sudoku');
-    const { selectedThemeId, hasUnlocked, unlockTheme, selectTheme } = useSudokuTheme();
+    const { selectedThemeId, hasUnlocked, unlockTheme, selectTheme, startPreview, previewThemeId } = useSudokuTheme();
     const { coins } = useCoins();
     const [confirmTheme, setConfirmTheme] = useState<SudokuTheme | null>(null);
 
@@ -47,9 +67,16 @@ const SudokuThemeModal: React.FC<Props> = ({ onClose }) => {
         if (hasUnlocked(theme.id)) {
             selectTheme(theme.id);
         } else {
-            const cost = THEME_GRADE_CONFIG[theme.grade].cost;
-            if (cost === 0 || coins >= cost) setConfirmTheme(theme);
+            // 코인이 모자라도 열어 준다 — 미리 써보기는 누구나 할 수 있다
+            setConfirmTheme(theme);
         }
+    };
+
+    const handleTry = () => {
+        if (!confirmTheme) return;
+        startPreview(confirmTheme.id);
+        setConfirmTheme(null);
+        onClose();
     };
 
     const handleConfirm = async () => {
@@ -59,170 +86,92 @@ const SudokuThemeModal: React.FC<Props> = ({ onClose }) => {
     };
 
     return (
-        <div style={{
-            position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 10000, padding: '1rem',
-        }}>
-            <div style={{
-                backgroundColor: '#1e293b', borderRadius: '20px',
-                width: '100%', maxWidth: '400px', maxHeight: '90vh',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-                display: 'flex', flexDirection: 'column', overflow: 'hidden',
-            }}>
-                {/* Header */}
-                <div style={{
-                    padding: '1rem 1.25rem', textAlign: 'center',
-                    borderBottom: '1px solid rgba(255,255,255,0.08)',
-                    position: 'relative', flexShrink: 0,
-                    background: 'linear-gradient(135deg, rgba(59,107,145,0.2), rgba(168,85,247,0.15))',
-                }}>
-                    <h2 style={{ margin: 0, color: 'white', fontSize: '1.15rem', fontWeight: 800 }}>
-                        {tr('themeModal.title')}
-                    </h2>
-                    <button onClick={onClose} style={{
-                        position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)',
-                        background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer',
-                    }}>
-                        <X size={22} />
+        <div className="st-shop" onClick={onClose}>
+            <div className="st-panel" onClick={e => e.stopPropagation()}>
+                <div className="st-head">
+                    <h2>{tr('themeModal.title')}</h2>
+                    <span className="st-coins" title={tr('themeModal.coins')}>
+                        <img src="/coin_Icon.png" alt="" />
+                        {coins.toLocaleString()}
+                    </span>
+                    <button className="st-x" onClick={onClose} aria-label="close">
+                        <X size={22} strokeWidth={3} />
                     </button>
                 </div>
 
-                {/* Coin row */}
-                <div style={{ padding: '0.75rem 1.25rem', flexShrink: 0 }}>
-                    <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '0.6rem 1rem', backgroundColor: 'rgba(255,255,255,0.05)',
-                        borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
-                    }}>
-                        <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{tr('themeModal.coins')}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <CoinImg size={16} />
-                            <span style={{ color: '#fde047', fontWeight: 800, fontSize: '1rem' }}>{coins.toLocaleString()}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Grade sections */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '0 1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div className="st-scroll">
                     {GRADE_ORDER.map(grade => {
                         const cfg = THEME_GRADE_CONFIG[grade];
                         const items = SUDOKU_THEMES.filter(t => t.grade === grade);
                         if (items.length === 0) return null;
                         return (
-                            <div key={grade}>
-                                {/* Grade divider */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
-                                    <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${cfg.color}60, transparent)` }} />
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: cfg.color, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                        {cfg.cost === 0
-                                            ? <span style={{ color: '#4ade80' }}>FREE</span>
-                                            : <><CoinImg size={12} />{cfg.cost}</>
-                                        }
-                                    </span>
-                                    <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, ${cfg.color}60, transparent)` }} />
+                            <section key={grade}>
+                                <div className="st-grade">
+                                    <i style={{ background: cfg.color }} />
+                                    {cfg.label}
+                                    {cfg.cost > 0 && (
+                                        <small><img src="/coin_Icon.png" alt="" />{cfg.cost}</small>
+                                    )}
                                 </div>
-
-                                {/* Theme cards */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
+                                <div className="st-grid">
                                     {items.map(theme => {
                                         const unlocked = hasUnlocked(theme.id);
-                                        const isSelected = selectedThemeId === theme.id;
+                                        const using = selectedThemeId === theme.id;
                                         const canAfford = cfg.cost === 0 || coins >= cfg.cost;
-
+                                        const tagClass = using ? 'using' : unlocked ? 'owned' : cfg.cost === 0 ? 'free' : canAfford ? 'price' : 'short';
                                         return (
-                                            <div
+                                            <button
                                                 key={theme.id}
+                                                className={`st-card g-${grade} ${using ? 'using' : ''} ${unlocked ? '' : 'locked'}`}
                                                 onClick={() => handleAction(theme)}
-                                                style={{
-                                                    backgroundColor: isSelected ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.04)',
-                                                    border: isSelected
-                                                        ? '2px solid #4ade80'
-                                                        : '1px solid rgba(255,255,255,0.07)',
-                                                    borderRadius: '12px',
-                                                    padding: '0.65rem 0.5rem',
-                                                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem',
-                                                    cursor: unlocked || canAfford ? 'pointer' : 'not-allowed',
-                                                    position: 'relative',
-                                                }}
                                             >
-                                                {/* Preview swatch */}
-                                                <div style={{ position: 'relative' }}>
-                                                    <div style={{ opacity: unlocked ? 1 : 0.4 }}>
-                                                        <ThemePreview theme={theme} size={58} />
-                                                    </div>
+                                                <div className="st-prev-wrap">
+                                                    <ThemePreview theme={theme} size={64} />
                                                     {!unlocked && (
-                                                        <div style={{
-                                                            position: 'absolute', inset: 0,
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        }}>
-                                                            <Lock size={16} color="white" strokeWidth={2.5} />
-                                                        </div>
-                                                    )}
-                                                    {isSelected && (
-                                                        <div style={{
-                                                            position: 'absolute', top: -4, right: -4,
-                                                            width: 16, height: 16, borderRadius: '50%',
-                                                            background: '#4ade80', border: '2px solid #1e293b',
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        }}>
-                                                            <Check size={9} color="#fff" strokeWidth={3} />
-                                                        </div>
+                                                        <div className="st-lock"><Lock size={18} strokeWidth={3} /></div>
                                                     )}
                                                 </div>
-
-                                                {/* Action label */}
-                                                <div style={{
-                                                    fontSize: '0.68rem', fontWeight: 700,
-                                                    color: isSelected ? '#4ade80' : unlocked ? '#94a3b8' : canAfford ? '#fde047' : '#475569',
-                                                    display: 'flex', alignItems: 'center', gap: '2px',
-                                                }}>
-                                                    {isSelected ? tr('themeModal.applied') : unlocked ? tr('themeModal.select') : cfg.cost === 0 ? tr('themeModal.free') : <><CoinImg size={11} />{cfg.cost}</>}
-                                                </div>
-                                            </div>
+                                                <span className="nm">{theme.name}</span>
+                                                <span className={`tag ${tagClass}`}>
+                                                    {using ? tr('themeModal.applied')
+                                                        : unlocked ? tr('themeModal.select')
+                                                            : cfg.cost === 0 ? tr('themeModal.free')
+                                                                : <><img src="/coin_Icon.png" alt="" />{cfg.cost}</>}
+                                                </span>
+                                            </button>
                                         );
                                     })}
                                 </div>
-                            </div>
+                            </section>
                         );
                     })}
                 </div>
             </div>
 
-            {/* Confirm unlock modal */}
-            {confirmTheme && (
-                <div style={{
-                    position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1,
-                }}>
-                    <div style={{
-                        backgroundColor: '#1e293b', borderRadius: '20px', padding: '1.75rem 1.5rem',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
-                        width: '240px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                    }}>
-                        <span style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>{tr('themeModal.unlockTitle')}</span>
-                        <ThemePreview theme={confirmTheme} size={80} />
-                        <span style={{ color: 'white', fontWeight: 700, fontSize: '1.05rem' }}>{confirmTheme.name}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'white', fontSize: '0.88rem', textAlign: 'center' }}>
-                            <CoinImg size={16} />
-                            <span>{tr('themeModal.confirmSpend', { cost: THEME_GRADE_CONFIG[confirmTheme.grade].cost })}</span>
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.6rem', width: '100%' }}>
-                            <button onClick={() => setConfirmTheme(null)} style={{
-                                flex: 1, padding: '0.6rem', borderRadius: '10px', border: 'none',
-                                backgroundColor: 'rgba(255,255,255,0.08)', color: '#94a3b8',
-                                fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem',
-                            }}>{tr('themeModal.cancel')}</button>
-                            <button onClick={handleConfirm} style={{
-                                flex: 1, padding: '0.6rem', borderRadius: '10px', border: 'none',
-                                background: 'linear-gradient(135deg, #f6d365, #fda085)',
-                                color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem',
-                            }}>{tr('themeModal.ok')}</button>
+            {confirmTheme && (() => {
+                const cost = THEME_GRADE_CONFIG[confirmTheme.grade].cost;
+                const affordable = coins >= cost;
+                return (
+                    <div className="st-confirm" onClick={e => { e.stopPropagation(); setConfirmTheme(null); }}>
+                        <div className={`box ${confirmTheme.grade === 'legendary' ? 'legendary' : ''}`} onClick={e => e.stopPropagation()}>
+                            <ThemePreview theme={confirmTheme} size={120} />
+                            <p>
+                                <b>{confirmTheme.name}</b>
+                                <br />
+                                <img src="/coin_Icon.png" alt="" /> {tr('themeModal.confirmSpend', { cost })}
+                            </p>
+                            <div className="row">
+                                <button className="try" onClick={handleTry} disabled={previewThemeId === confirmTheme.id}>
+                                    {tr('themeModal.try')}
+                                </button>
+                                <button className="yes" onClick={handleConfirm} disabled={!affordable}>
+                                    {affordable ? tr('themeModal.ok') : tr('themeModal.notEnough')}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
         </div>
     );
 };

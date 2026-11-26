@@ -725,6 +725,14 @@ const LandingPage: React.FC = () => {
                     onMouseEnter={cardHoverIn}
                     onMouseLeave={cardHoverOut}
                 >
+                    <div style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        backgroundColor: '#7b6cf0', color: 'white',
+                        fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.05em',
+                        padding: '2px 7px', borderRadius: '999px',
+                        boxShadow: '0 2px 6px rgba(123,108,240,0.5)',
+                        zIndex: 1,
+                    }}>UPDATE</div>
                     <img src="/images/sudoku/title.webp" alt={tc('games.sudoku.name')} style={{ width: '100%', display: 'block' }} />
                 </a>
                 )}

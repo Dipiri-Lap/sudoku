@@ -41,13 +41,25 @@
       "hanji": "韓紙",
       "space": "太空",
       "notepad": "記事本",
-      "highlighter": "螢光筆"
+      "highlighter": "螢光筆",
+      "contrast": "高對比",
+      "lavender": "薰衣草",
+      "apricot": "杏桃",
+      "forest": "森林",
+      "manuscript": "稿紙",
+      "picnic": "野餐",
+      "neon": "霓虹燈",
+      "aquarium": "水族館",
+      "winter": "冬夜",
+      "gold": "黃金",
+      "dawn": "黎明"
     },
     "grades": {
       "free": "免費",
       "common": "普通",
       "rare": "稀有",
-      "epic": "史詩"
+      "epic": "史詩",
+      "legendary": "傳說"
     }
   },
   "themeModal": {
@@ -59,7 +71,12 @@
     "unlockTitle": "解鎖佈景",
     "confirmSpend": "要花費 {{cost}} 金幣嗎？",
     "cancel": "取消",
-    "ok": "確定"
+    "ok": "確定",
+    "try": "試用",
+    "notEnough": "金幣不足",
+    "tryBanner": "試用 {{name}} · {{sec}} 秒",
+    "tryBuy": "購買",
+    "tryEnd": "結束"
   },
   "difficulty": {
     "title": "選擇難度",

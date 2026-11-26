@@ -41,13 +41,25 @@
       "hanji": "Hanji",
       "space": "Espacio",
       "notepad": "Bloc de notas",
-      "highlighter": "Resaltador"
+      "highlighter": "Resaltador",
+      "contrast": "Alto contraste",
+      "lavender": "Lavanda",
+      "apricot": "Albaricoque",
+      "forest": "Bosque",
+      "manuscript": "Manuscrito",
+      "picnic": "Pícnic",
+      "neon": "Neón",
+      "aquarium": "Acuario",
+      "winter": "Noche de invierno",
+      "gold": "Oro",
+      "dawn": "Amanecer"
     },
     "grades": {
       "free": "Gratis",
       "common": "Común",
       "rare": "Raro",
-      "epic": "Épico"
+      "epic": "Épico",
+      "legendary": "Legendario"
     }
   },
   "themeModal": {
@@ -59,7 +71,12 @@
     "unlockTitle": "Desbloquear tema",
     "confirmSpend": "¿Gastar {{cost}} monedas?",
     "cancel": "Cancelar",
-    "ok": "OK"
+    "ok": "OK",
+    "try": "Probar",
+    "notEnough": "Monedas insuficientes",
+    "tryBanner": "Probando {{name}} · {{sec}} s",
+    "tryBuy": "Comprar",
+    "tryEnd": "Terminar"
   },
   "difficulty": {
     "title": "Elige la dificultad",

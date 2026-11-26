@@ -41,13 +41,25 @@
       "hanji": "Hanji",
       "space": "Space",
       "notepad": "Notepad",
-      "highlighter": "Highlighter"
+      "highlighter": "Highlighter",
+      "contrast": "High Contrast",
+      "lavender": "Lavender",
+      "apricot": "Apricot",
+      "forest": "Forest",
+      "manuscript": "Manuscript",
+      "picnic": "Picnic",
+      "neon": "Neon Sign",
+      "aquarium": "Aquarium",
+      "winter": "Winter Night",
+      "gold": "Gold",
+      "dawn": "Dawn"
     },
     "grades": {
       "free": "Free",
       "common": "Common",
       "rare": "Rare",
-      "epic": "Epic"
+      "epic": "Epic",
+      "legendary": "Legendary"
     }
   },
   "themeModal": {
@@ -59,7 +71,12 @@
     "unlockTitle": "Unlock Theme",
     "confirmSpend": "Spend {{cost}} coins?",
     "cancel": "Cancel",
-    "ok": "OK"
+    "ok": "OK",
+    "try": "Try it",
+    "notEnough": "Not enough coins",
+    "tryBanner": "Trying {{name}} · {{sec}}s",
+    "tryBuy": "Buy",
+    "tryEnd": "End"
   },
   "difficulty": {
     "title": "Select Difficulty",

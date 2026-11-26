@@ -41,13 +41,25 @@
       "hanji": "和紙",
       "space": "宇宙",
       "notepad": "メモ帳",
-      "highlighter": "蛍光ペン"
+      "highlighter": "蛍光ペン",
+      "contrast": "ハイコントラスト",
+      "lavender": "ラベンダー",
+      "apricot": "アプリコット",
+      "forest": "森",
+      "manuscript": "原稿用紙",
+      "picnic": "ピクニック",
+      "neon": "ネオンサイン",
+      "aquarium": "水族館",
+      "winter": "冬の夜",
+      "gold": "黄金",
+      "dawn": "夜明け"
     },
     "grades": {
       "free": "無料",
       "common": "ノーマル",
       "rare": "レア",
-      "epic": "エピック"
+      "epic": "エピック",
+      "legendary": "伝説"
     }
   },
   "themeModal": {
@@ -59,7 +71,12 @@
     "unlockTitle": "テーマを解放",
     "confirmSpend": "{{cost}}コインを使いますか？",
     "cancel": "キャンセル",
-    "ok": "OK"
+    "ok": "OK",
+    "try": "お試し",
+    "notEnough": "コイン不足",
+    "tryBanner": "{{name}} お試し中 · {{sec}}秒",
+    "tryBuy": "購入",
+    "tryEnd": "終了"
   },
   "difficulty": {
     "title": "難易度を選ぶ",
