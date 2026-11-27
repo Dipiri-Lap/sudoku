@@ -630,6 +630,16 @@ const RESERVED_MASTERPIECES: JigsawStage[] = [
     { id: 580, title: '농부의 결혼식', subtitle: '명화 컬렉션', image: '/images/jigsaw/peasant-wedding.webp', rows: 7, cols: 7, tint: '#b05a40' },
     { id: 590, title: '더 큰 첨벙', subtitle: '명화 컬렉션', image: '/images/jigsaw/bigger-splash.webp', rows: 7, cols: 7, tint: '#20b0e0' },
     { id: 600, title: '만종', subtitle: '명화 컬렉션', image: '/images/jigsaw/angelus-field.webp', rows: 7, cols: 7, tint: '#f09840' },
+    { id: 610, title: '까마귀 나는 밀밭', subtitle: '명화 컬렉션', image: '/images/jigsaw/wheatfield-crows.webp', rows: 7, cols: 7, tint: '#e0b838' },
+    { id: 620, title: '가메이도 매화정원', subtitle: '명화 컬렉션', image: '/images/jigsaw/kameido-plum.webp', rows: 7, cols: 7, tint: '#d85848' },
+    { id: 630, title: '피아노 치는 소녀들', subtitle: '명화 컬렉션', image: '/images/jigsaw/girls-piano.webp', rows: 7, cols: 7, tint: '#6a9a58' },
+    { id: 640, title: '생라자르 역', subtitle: '명화 컬렉션', image: '/images/jigsaw/saint-lazare.webp', rows: 7, cols: 7, tint: '#8898c0' },
+    { id: 650, title: '아를의 랑글루아 다리', subtitle: '명화 컬렉션', image: '/images/jigsaw/langlois-bridge.webp', rows: 7, cols: 7, tint: '#40b0d8' },
+    { id: 660, title: '타작', subtitle: '명화 컬렉션', image: '/images/jigsaw/danwon-threshing.webp', rows: 7, cols: 7, tint: '#e0c890' },
+    { id: 670, title: '아이들의 놀이', subtitle: '명화 컬렉션', image: '/images/jigsaw/childrens-games.webp', rows: 7, cols: 7, tint: '#b86a40' },
+    { id: 680, title: '델프트의 작은 거리', subtitle: '명화 컬렉션', image: '/images/jigsaw/little-street.webp', rows: 7, cols: 7, tint: '#b85a40' },
+    { id: 690, title: '잠자는 집시', subtitle: '명화 컬렉션', image: '/images/jigsaw/sleeping-gypsy.webp', rows: 7, cols: 7, tint: '#2c3c70' },
+    { id: 700, title: '씨 뿌리는 사람', subtitle: '명화 컬렉션', image: '/images/jigsaw/the-sower.webp', rows: 7, cols: 7, tint: '#e8c030' },
 ];
 
 function withMasterpieces(list: JigsawStage[]): JigsawStage[] {
