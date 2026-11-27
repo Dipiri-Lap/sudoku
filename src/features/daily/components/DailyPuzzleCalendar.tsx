@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation, Trans } from 'react-i18next';
@@ -8,6 +8,7 @@ import { loadMonth, hasMonth, getDailyPuzzle, todayKey, toDateKey, dailyGameOf, 
 import { isDailyGameAvailable, localeHref, intlLocale } from '../../../i18n/locale';
 import { challengeTitle, challengeCondition } from '../../../common/utils/localizedData';
 import CoinDisplay from '../../../common/components/CoinDisplay';
+import { useBlockTopAutoAds } from '../../../common/hooks/useBlockTopAutoAds';
 import { useCoins } from '../../../context/CoinContext';
 import { frameStyle, frameClass } from '../../../common/data/avatarFrames';
 import { useChallenges } from '../../../context/ChallengeContext';
@@ -47,6 +48,9 @@ const DailyPuzzleCalendar: React.FC = () => {
     const [unlockError, setUnlockError] = useState<string | null>(null);
     const [unlocking, setUnlocking] = useState(false);
     const [showReward, setShowReward] = useState(false);
+    // 자동 광고가 패널 위(헤더 앞)에 끼어들지 않게 한다.
+    const pageRef = useRef<HTMLDivElement>(null);
+    useBlockTopAutoAds(pageRef);
 
     // 다른 게임 화면과 같은 셸을 쓴다 - 퍼즐 타일 배경 위에 밝은 패널.
     useEffect(() => {
@@ -158,7 +162,7 @@ const DailyPuzzleCalendar: React.FC = () => {
     const todayHasPuzzle = puzzleDates.has(today);
 
     return (
-        <div className="mode-select-page" style={{ maxWidth: 520 }}>
+        <div ref={pageRef} className="mode-select-page" style={{ maxWidth: 520 }}>
             <Helmet>
                 <title>{t('seo.title')}</title>
                 <meta name="description" content={t('seo.description')} />
